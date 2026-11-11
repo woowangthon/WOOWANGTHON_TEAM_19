@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app import config, errors
 from app.api import health_router, router
@@ -65,6 +66,11 @@ def create_app() -> FastAPI:
     app.include_router(demo_router, prefix="/api/v1")
     app.include_router(guardian_router, prefix="/api/v1")
     app.include_router(compat_router, prefix="/api/v1")  # 프론트 v0.5 호환(11-15까지 임시)
+    # 프론트 빌드를 같은 주소에서 서빙(배포만, FRONTEND_DIST). 라우터 뒤에 마운트해 API가 먼저.
+    # 앱은 해시 라우팅이라 index.html 폴백은 두지 않는다. 폴더가 없으면 아무것도 안 한다.
+    dist = config.frontend_dist()
+    if dist is not None and dist.is_dir():
+        app.mount("/", StaticFiles(directory=dist, html=True), name="frontend")
     return app
 
 

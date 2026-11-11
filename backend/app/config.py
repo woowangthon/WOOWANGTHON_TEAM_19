@@ -2,6 +2,7 @@
 
 import math
 import os
+from pathlib import Path
 
 
 def database_url() -> str:
@@ -34,6 +35,18 @@ def cors_origins() -> list[str]:
     """localhost 말고 더 허용할 프론트 주소. 쉼표로 구분(예: 배포 프론트 URL)."""
     raw = os.environ.get("CORS_ORIGINS", "")
     return [o.strip() for o in raw.split(",") if o.strip()]
+
+
+def frontend_dist() -> Path | None:
+    """같은 주소로 서빙할 프론트 빌드 폴더(FRONTEND_DIST). 없으면 None(서빙 안 함).
+    상대 경로는 실행 위치가 아니라 backend/ 기준으로 푼다(render.yaml: ../frontend/dist)."""
+    raw = os.environ.get("FRONTEND_DIST", "").strip()
+    if not raw:
+        return None
+    path = Path(raw)
+    if not path.is_absolute():
+        path = Path(__file__).resolve().parents[1] / path
+    return path.resolve()
 
 
 def demo_token() -> str | None:

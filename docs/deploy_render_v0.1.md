@@ -1,23 +1,35 @@
-# Render 배포 안내 v0.1 (TK-56, 백엔드)
+# Render 배포 안내 v0.1 (TK-56, 화면+API 한 주소)
 
 성호가 Render 대시보드에서 직접 하는 일만 적었다. 설정은 저장소 루트 `render.yaml`에 있다.
 
+웹 서비스 **하나**가 화면(재하 프론트 `frontend/` 빌드)과 API를 같은 주소에서 낸다. 심사위원은 `https://<서비스주소>/` 하나로 들어온다. 화면은 같은 주소의 `/api/v1/compat/...`를 부르므로 CORS 설정이 필요 없다.
+
+- 빌드: `backend`에서 `uv sync` → `../frontend`에서 `npm ci` → `VITE_API_MODE=http VITE_API_BASE=/api/v1/compat npm run build`(결과 `frontend/dist`).
+- 실행: FastAPI가 `/api/*`·`/healthz`를 먼저 받고, 나머지 경로는 `FRONTEND_DIST`(= `../frontend/dist`)의 정적 파일. 앱은 해시 라우팅(`/#/...`)이라 새로고침해도 404가 없다.
+- `FRONTEND_DIST`가 없거나 폴더가 없으면 정적 서빙을 안 한다(로컬 개발·테스트는 예전 그대로).
+
 ## 1. 처음 한 번
 
-1. Render 대시보드 → **New → Blueprint** → GitHub 저장소 `chingu1`을 고른다. Render가 `render.yaml`을 읽어 웹 서비스 `chingu1-backend`(무료 플랜, 폴더 `backend`)를 보여 준다.
-2. 값을 물어보는 환경 변수 3개를 채운다(`sync: false`라 Render가 처음 만들 때만 묻는다).
+1. Render 대시보드 → **New → Blueprint** → GitHub 저장소 `chingu1`을 고른다. Render가 `render.yaml`을 읽어 웹 서비스 `chingu1-backend`(무료 플랜, 폴더 `backend`)를 보여 준다. 이미 만들어 둔 서비스가 있으면 **Blueprint → Manual Sync**로 바뀐 빌드 명령·`FRONTEND_DIST`를 반영한다.
+2. 값을 물어보는 환경 변수를 채운다(`sync: false`라 Render가 처음 만들 때만 묻는다).
    - `LLM_API_KEY` — LLM 키. 다른 곳(코드·노션·채팅)에는 적지 않는다.
    - `DEMO_TOKEN` — 리셋용 비밀 문자열. 길게 아무렇게나 정하고 시연자만 안다.
-   - `CORS_ORIGINS` — 배포된 프론트 주소(예: `https://프론트주소`). 여러 개면 쉼표로.
-3. **Apply**를 누르면 빌드(`uv sync`)와 실행이 시작된다. 몇 분 걸린다.
-4. 끝나면 서비스 주소(예: `https://chingu1-backend.onrender.com`)를 재하에게 준다.
+   - `CORS_ORIGINS` — **비워 둔다.** 다른 주소의 프론트가 붙을 때만 그 주소를 쉼표로.
+3. **Apply**를 누르면 빌드(파이썬 + 프론트, 몇 분)와 실행이 시작된다.
+4. 끝나면 서비스 주소(예: `https://chingu1-backend.onrender.com`)가 곧 심사용 URL이다.
+
+환경 변수 전체: `PYTHON_VERSION`·`LLM_MODE`·`DATABASE_URL`·`FRONTEND_DIST`는 `render.yaml`에 값이 있다. `LLM_API_KEY`·`DEMO_TOKEN`·`CORS_ORIGINS`는 대시보드에서 넣는다. 키·토큰은 `VITE_*`에 절대 넣지 않는다(`VITE_*` 값은 화면 번들에 그대로 박혀 누구나 본다).
 
 ## 2. 잘 떴는지 확인
 
 ```bash
 curl https://<서비스주소>/healthz
 # {"db":"ok","llm_key":true,"llm_mode":"live","tz":"Asia/Seoul"} 이면 정상
+curl -s https://<서비스주소>/ | head -5
+# <!doctype html> ... 이면 화면도 정상
 ```
+
+브라우저로 `https://<서비스주소>/`를 열어 화면이 뜨는지 본다. 빌드 로그에 `npm` 오류가 있으면 화면만 빠진 채 API는 뜰 수 있다(이때 `/`는 404).
 
 `llm_key`가 `false`면 `LLM_API_KEY`가 비었다 → 대시보드 **Environment**에서 넣고 다시 배포.
 
