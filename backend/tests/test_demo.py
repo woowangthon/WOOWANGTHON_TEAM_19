@@ -108,8 +108,8 @@ async def test_reset_response_shape(client):
     assert body == {
         "ok": True,
         "actors": [
-            {"role": "child", "id": "demo-child-minsu", "label": "민수"},
-            {"role": "guardian", "id": "demo-guardian-minsu", "label": "민수 보호자"},
+            {"role": "child", "id": "demo-child-minsu", "label": "지우"},
+            {"role": "guardian", "id": "demo-guardian-minsu", "label": "지우 보호자"},
             {"role": "instructor", "id": "demo-instructor", "label": "강사"},
         ],
         "date": "2026-11-10",
@@ -126,7 +126,7 @@ async def test_reset_builds_day3_state(client, db_session):
     await client.post(URL, json={}, headers=OK)
     snap = await _snapshot(db_session)
     st = snap["student"]
-    assert st["nickname"] == "민수"
+    assert st["nickname"] == "지우"
     assert (st["style"], st["honorific"], st["polite"]) == ("EBSP", "hyung", False)
     assert st["streak_days"] == 3
     assert st["last_streak_date"] == date(2026, 11, 9)  # 어제(서울)

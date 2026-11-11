@@ -32,8 +32,8 @@ Db = Annotated[AsyncSession, Depends(get_db)]
 Now = Annotated[datetime, Depends(get_now)]
 
 ACTORS = [
-    {"role": "child", "id": DEMO_CHILD_ID, "label": "민수"},
-    {"role": "guardian", "id": DEMO_GUARDIAN_ID, "label": "민수 보호자"},
+    {"role": "child", "id": DEMO_CHILD_ID, "label": "지우"},
+    {"role": "guardian", "id": DEMO_GUARDIAN_ID, "label": "지우 보호자"},
     {"role": "instructor", "id": DEMO_INSTRUCTOR_ID, "label": "강사"},
 ]
 
@@ -85,7 +85,7 @@ async def _today_task_problem(db: AsyncSession) -> str | None:
 
 async def _write_day3_student(db: AsyncSession, body: ResetBody, today: date) -> None:
     values: dict[str, Any] = {
-        "nickname": "민수",  # 합성 배우
+        "nickname": "지우",  # 합성 배우(프론트 체험 계정 jiwoo와 같은 이름, 11-11)
         "grade_band": "초5-6",
         "style": body.style,
         "honorific": body.honorific,

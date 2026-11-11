@@ -23,7 +23,7 @@ EMPTY = {"alert": None, "child_line": None, "quiz": None, "instructor_comment": 
 @pytest_asyncio.fixture
 async def client(db_session, make_student):
     await load_seed(db_session)
-    db_session.add(make_student(id=DEMO_CHILD_ID, nickname="민수"))
+    db_session.add(make_student(id=DEMO_CHILD_ID, nickname="지우"))
     await db_session.flush()
     app = create_app()
 

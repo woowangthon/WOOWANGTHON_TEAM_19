@@ -38,7 +38,7 @@ VITE_API_BASE=<백엔드 주소>/api/v1/compat
 | 보호자 | `guardian` | `demo-guardian-minsu` |
 | 학습지도자 | `instructor` | `demo-instructor` |
 
-- 서버의 데모 아이 이름이 「민수」입니다. 체험 계정 `jiwoo`로 들어가도 홈에는 「민수」가 나옵니다. 체험 계정 표시 이름을 맞추거나, 원하시는 이름을 알려 주시면 서버 쪽을 바꾸겠습니다.
+- 서버의 데모 아이 이름은 체험 계정과 같은 「지우」입니다(11-11 통일). 내부 id는 그대로 `demo-child-minsu` 등입니다. 학습지도자 결과 mock의 「김지우」만 다르게 남아 있습니다.
 - 오류 문구: 서버는 `{code, message, request_id}`로 답합니다(compat 경로는 `detail`도 같이 줍니다). `j.message ?? j.detail`로 읽어 주세요.
 
 ### 1-4. 일부 함수만 서버로 보내기
