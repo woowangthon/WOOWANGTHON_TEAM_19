@@ -385,7 +385,7 @@
 | getAlerts | GET /guardian/alerts | Alert 행 목록. **발췌 ±2턴·300자 그대로** `excerpt`로 실음 |
 | acceptPromise | POST /student/promise | `Student.consent = true`, 204. `getStudentHome.needsOnboarding = not consent`(11-11). 데모 리셋은 consent true라 리셋 뒤에는 약속 화면이 안 나온다 |
 
-**강사 경로 (11-11, review_dev_plan F5).** 헤더 `X-Demo-Role: instructor`·`X-Demo-Actor: demo-instructor`. 아이·보호자 헤더면 403 `forbidden`. 내부는 #8·#9·#10 그대로(초안 1회·재생성 없음).
+**강사 경로 (11-11).** 헤더 `X-Demo-Role: instructor`·`X-Demo-Actor: demo-instructor`. 아이·보호자 헤더면 403 `forbidden`. 내부는 #8·#9·#10 그대로(초안 1회·재생성 없음).
 
 | 프론트 함수 | 경로 (`/api/v1/compat` 아래) | 내부 |
 | --- | --- | --- |

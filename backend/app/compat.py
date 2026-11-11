@@ -239,7 +239,7 @@ async def accept_promise(db: Db, student: Child) -> None:
 
 @router.get("/student/mentor")
 async def get_mentor(student: Child) -> dict[str, Any]:
-    # 그림(띠)은 저장 칸이 없어 null — 스타일 코드와 분리(CLAUDE.md)
+    # 그림(띠)은 저장 칸이 없어 null — 스타일 코드와 분리(팀 결정 11-09)
     return {
         "style": STYLE_LABEL[student.style],
         "title": TITLE_LABEL[student.honorific],

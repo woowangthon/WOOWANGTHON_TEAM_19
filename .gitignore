@@ -30,8 +30,11 @@ npm-debug.log*
 logs/
 *.log
 
-# Claude Code 개인 설정 (공유 설정은 .claude/settings.json)
-.claude/settings.local.json
+# 각자 로컬에서 다르게 쓰는 도구 설정 — 저장소에 올리지 않는다(11-11 성호)
+.claude/
+.githooks/
+CLAUDE.md
+NOTE.md
 
 # OS·편집기
 .DS_Store
