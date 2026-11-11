@@ -1,6 +1,7 @@
 // 가짜 서버(2) — 계정(로그인·가입·설정·알림)·학원·강의실·씨앗·상점. (BRIEF "v0.4 회의 확정"·"v0.5", docs/DEV-RULES.md)
 // · 학습(문제·수다)은 mock.ts, 사람·조직·재화는 이 파일. 둘 다 "서버가 판단할 규칙"을 그대로 담고 있다.
 // · 백엔드(성호님)는 이 파일의 규칙(throw 하는 곳)을 그대로 서버 검증으로 옮기면 된다.
+// · 한계: User.academyId가 하나라 보호자는 학원 1곳에만 속한다(아이 둘이 서로 다른 학원이면 보호자는 먼저 들어간 곳). 자세한 건 enrollLinked 위 주석.
 import type {
   AcademyApplication, AcademyForm, AccountRole, AppNotice, Classroom, Cosmetic, EntryCode, Me, NotifySettings, Order, OrgType, OwnerDashboard, PersonRow,
   SeedBoard, SeedEntry, SeedSource, ShopItem, SignupBody, StampState, StudentClasses, StudentShop, TeacherClasses, Wallet,
@@ -200,17 +201,44 @@ function meView(u: User): Me {
   };
 }
 
-/** 연결된 학생·보호자 묶음 전체에 학원을 함께 등록 ("둘 중 한 명만 입력해도 둘 다 등록") */
-function spreadAcademy(start: User, academyId: string) {
-  const seen = new Set<string>();
-  const stack = [start];
-  while (stack.length) {
-    const u = stack.pop()!;
-    if (seen.has(u.id)) continue;
-    seen.add(u.id);
-    if (!u.academyId) u.academyId = academyId;
-    connected(u).forEach((x) => stack.push(x));
-  }
+/* ---------- 학원 자동 등록 ("학생·보호자 중 한 명만 넣어도 연결된 쪽도 등록", 11-10 회의 → 11-11 수정) ----------
+ * · 자동 등록은 연결된 한 쌍(학생 ↔ 보호자)까지만. 보호자를 거쳐 다른 아이(형제)로 넘어가지 않는다.
+ * · 학생 → 보호자: 그 학생과 연결된 보호자 중 학원이 없는 사람만 같이 등록.
+ * · 보호자 → 아이: 그 보호자에게 연결된 아이가 딱 1명일 때만. 2명 이상이면 아이는 그대로 두고 보호자에게 안내 알림.
+ * · 충돌: 대상이 이미 다른 학원이면 덮어쓰지 않고, 대상과 시작한 사람 둘 다에게 알림. 같은 학원이면 아무 일 없음.
+ * · 한계: User.academyId가 하나라 보호자는 학원 1곳에만 속한다(아이 둘이 다른 학원이면 보호자는 먼저 들어간 학원).
+ *   서버로 옮길 때 보호자-학원을 여러 개로 둘지 결정할 것. */
+const academyName = (id: string) => db.academies.find((a) => a.id === id)?.name ?? '다른 학원';
+/** 학생에겐 반말, 어른에겐 존댓말 */
+const say = (u: User, kid: string, adult: string) => (u.role === 'student' ? kid : adult);
+/** target을 academyId에 자동 등록. 이미 다른 학원이면 바꾸지 않고 target·starter 둘 다에게 알림 */
+function enrollLinked(target: User, academyId: string, starter: User) {
+  if (target.academyId === academyId) return;
+  if (!target.academyId) { target.academyId = academyId; return; }
+  const have = academyName(target.academyId), want = academyName(academyId);
+  notify(target.id, say(target,
+    `이미 「${have}」에 등록되어 있어서 「${want}」에 자동으로 옮기지 않았어.`,
+    `이미 「${have}」에 등록되어 있어 「${want}」에 자동으로 옮기지 않았어요.`));
+  const who = target.role === 'student' ? `아이 ${target.name}은(는)` : `보호자 ${target.name}님은`;
+  notify(starter.id, say(starter,
+    `${who} 이미 「${have}」에 등록되어 있어서 「${want}」에 자동으로 옮기지 않았어.`,
+    `${who} 이미 「${have}」에 등록되어 있어 「${want}」에 자동으로 옮기지 않았어요.`));
+}
+/** 학생 → 연결된 보호자들 */
+function spreadFromStudent(s: User, academyId: string) {
+  connected(s).filter((x) => x.role === 'guardian').forEach((g) => enrollLinked(g, academyId, s));
+}
+/** 보호자 → 아이: 연결된 아이가 1명일 때만. 2명 이상이면 안내만 */
+function spreadFromGuardian(g: User, academyId: string) {
+  const kids = connected(g).filter((x) => x.role === 'student');
+  if (kids.length === 1) enrollLinked(kids[0], academyId, g);
+  else if (kids.some((k) => k.academyId !== academyId))
+    notify(g.id, `아이가 여러 명이라 아이들의 학원은 자동으로 등록하지 않았어요. 아이마다 아이 계정에서 학원 코드를 넣어 주세요.`, '/settings/family');
+}
+/** 새로 연결된 한 쌍의 학원 맞추기: 학생에게 학원이 있으면 학생 → 보호자, 없으면 보호자 → 아이 규칙 */
+function syncLinkedPair(s: User, g: User) {
+  if (s.academyId) enrollLinked(g, s.academyId, s);
+  else if (g.academyId) spreadFromGuardian(g, g.academyId);
 }
 
 /* ---------- 학습(mock.ts)에서 쓰는 연결점 ---------- */
@@ -429,8 +457,7 @@ export const orgApi = {
     if (me.role === 'guardian') {
       if (!consent) fail('만 14세 미만 아이는 보호자 동의가 있어야 연결할 수 있어요.');
       if (ex) { ex.status = '연결됨'; ex.consentAt = today(); } else db.links.push({ studentId, guardianId, status: '연결됨', consentAt: today() });
-      const ac = me.academyId ?? other.academyId;
-      if (ac) spreadAcademy(me, ac);
+      syncLinkedPair(other, me);
       notify(other.id, `${me.name}님과 연결됐어!`);
     } else if (!ex) { db.links.push({ studentId, guardianId, status: '대기', consentAt: null }); notify(guardianId, `${me.name} 학생이 연결을 요청했어요. 동의하면 연결돼요.`, '/settings/family'); }
     commit();
@@ -444,8 +471,7 @@ export const orgApi = {
     l.status = '연결됨'; l.consentAt = today();
     const s = userById(studentId)!;
     notify(studentId, `${g.name}님이 동의해서 연결됐어! 이제 학원에 들어갈 수 있어.`);
-    const ac = g.academyId ?? s.academyId;
-    if (ac) spreadAcademy(g, ac);
+    syncLinkedPair(s, g);
     commit();
     return meView(g);
   },
@@ -458,7 +484,9 @@ export const orgApi = {
     const c = code.replace(/\D/g, '');
     const ac = db.academies.find((a) => a.entryCode?.code === c) ?? fail('코드가 맞지 않아요. 학원에서 받은 6자리를 확인해 주세요.');
     if (ac.entryCode!.expiresAt < Date.now()) fail('코드 시간이 지났어요. 학원에 새 코드를 요청해 주세요.');
-    spreadAcademy(me, ac.id); commit();
+    me.academyId = ac.id;
+    if (me.role === 'student') spreadFromStudent(me, ac.id); else spreadFromGuardian(me, ac.id);
+    commit();
     return meView(me);
   },
 

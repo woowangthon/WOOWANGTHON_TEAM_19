@@ -63,7 +63,7 @@ app/src/
 | 연결 요청·초대·승인·반려·교환 요청·전달·도장·칭찬은 상대에게 알림함으로 | org.notify |
 | 학생은 **보호자와 연결되기 전 제한 모드**: 학원 입장·강의실 요청·수다 불가 | org.isRestricted, mock.afterStudy |
 | 보호자가 연결할 때 만 14세 미만 **보호자 동의 필수**(consent=true). 학생이 먼저 요청하면 "대기" → 보호자 동의로 연결 | org.linkWith / confirmLink |
-| 학원 입장 코드 6자리, 10분 만료, 연결된 학생·보호자 **한 명만 넣어도 묶음 전체 등록** | org.joinAcademy / spreadAcademy |
+| 학원 입장 코드 6자리, 10분 만료. 자동 등록은 **연결된 한 쌍(학생↔보호자)까지만**: 학생이 들어가면 학원 없는 연결 보호자도 등록, 보호자가 들어가면 연결된 아이가 **1명일 때만** 아이도 등록(2명 이상이면 보호자에게 「아이 계정에서 코드」 안내). 이미 **다른 학원**이면 덮어쓰지 않고 두 사람에게 알림. 보호자는 학원 1곳만(한계) | org.joinAcademy / linkWith / confirmLink / enrollLinked |
 | 학원 등록 → 운영자 승인 시 일련번호 발급. 반려는 사유 필수 | org.reviewApplication |
 | 학습지도자는 일련번호로 가입 → 학원장 승인 전 강의실 개설 불가 | org.signup / createClassroom |
 | 강의실 입장 = 지도자 초대(학생 수락) 또는 학생 요청(지도자 수락). 같은 학원 학생만 | org.inviteStudent / answerRequest |
