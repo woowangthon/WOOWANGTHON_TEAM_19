@@ -18,7 +18,7 @@ export function TeacherClasses() {
   const { run, busy, error: actErr } = useAction();
 
   return (
-    <Frame adult title="강의실" back="/teacher/today" right={<button className="icon-btn" aria-label="강의실 열기" onClick={() => setCreate(true)}><Icon name="plus" /></button>}>
+    <Frame adult title="강의실" exit tabs="teacher" right={<button className="icon-btn" aria-label="강의실 열기" onClick={() => setCreate(true)}><Icon name="plus" /></button>}>
       {loading && !data && <Thinking label="불러오는 중" />}
       <LoadError error={error ?? actErr} onRetry={reload} />
       {data?.classrooms.length === 0 && <div className="notice notice--plain"><span>아직 강의실이 없어요. 오른쪽 위 +로 열어 주세요.</span></div>}

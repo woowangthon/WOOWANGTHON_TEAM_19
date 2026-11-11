@@ -19,7 +19,7 @@ export function TeacherToday() {
   const { me } = useAuth();
   const m = me?.membership;
   return (
-    <Frame adult title="오늘 할 것" exit right={<button className="icon-btn" aria-label="강의실 관리" onClick={() => nav('/teacher/classes')}><Icon name="people" /></button>} tabs="teacher">
+    <Frame adult title="오늘 할 것" exit right={<button className="icon-btn" aria-label="긴급 알림" onClick={() => nav('/teacher/alerts')}><Icon name="warn" /></button>} tabs="teacher">
       {loading && <Thinking label="불러오는 중" />}
       <LoadError error={error} onRetry={reload} />
       {me && (!m || m.status !== '승인됨') && (
