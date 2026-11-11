@@ -308,3 +308,51 @@ async def test_ai_hourly_cap_across_sets_uses_script(client, db_session, clock, 
     ).json()
     assert r["reply"] and r["source"] == "scripted"
     assert spy.calls == before
+
+
+# --- 공개 배포: 체험 세트만(11-11) ---------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("env", "want"),
+    [
+        ({}, False),
+        ({"VERCEL": "1"}, True),
+        ({"VERCEL": "1", "TRIAL_ONLY": "0"}, False),
+        ({"TRIAL_ONLY": "1"}, True),
+    ],
+)
+def test_trial_only_flag(monkeypatch, env, want):
+    for k in ("VERCEL", "TRIAL_ONLY"):
+        monkeypatch.delenv(k, raising=False)
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+    assert config.trial_only() is want
+
+
+async def test_trial_only_blocks_public_demo_actors(client, monkeypatch):
+    """공개 주소에서는 헤더를 꾸며도 공용 데모 아이·보호자·임의 강사로 못 들어온다."""
+    monkeypatch.setenv("TRIAL_ONLY", "1")
+    blocked = [
+        ("child", DEMO_CHILD_ID, "/student/home"),
+        ("guardian", "demo-guardian-minsu", "/guardian/today"),
+        ("instructor", DEMO_INSTRUCTOR_ID, "/teacher/today"),
+        ("instructor", "any-teacher", "/teacher/today"),
+    ]
+    for role, actor, path in blocked:
+        r = await client.get(f"{BASE}{path}", headers=_h(role, actor))
+        assert r.status_code == 403, (actor, r.text)
+        assert r.json()["code"] == "trial_only"
+    # 다른 역할의 세트 id를 써도 막는다(아이 자리에 보호자 id)
+    a = await _trial(client)
+    r = await client.get(f"{BASE}/student/home", headers=_h("child", a["actors"]["guardian"]))
+    assert r.status_code == 403
+    # 체험 세트는 그대로 된다
+    for role, path in (
+        ("child", "/student/home"),
+        ("guardian", "/guardian/today"),
+        ("instructor", "/teacher/today"),
+    ):
+        r = await client.get(f"{BASE}{path}", headers=_h(role, a["actors"][role]))
+        assert r.status_code == 200, r.text
+    assert (await client.post(f"{BASE}/trial")).status_code == 200

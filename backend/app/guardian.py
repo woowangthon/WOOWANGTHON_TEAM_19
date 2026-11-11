@@ -8,10 +8,11 @@
 from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.accounts import CurrentAccount, token_sent
 from app.actors import actor_from_request
 from app.api import HOTLINES
 from app.db import get_db
@@ -26,12 +27,17 @@ Now = Annotated[datetime, Depends(get_now)]
 
 
 async def current_guardian_child(
+    request: Request,
     db: Db,
+    account: CurrentAccount,
     x_demo_role: Annotated[str | None, Header()] = None,
     x_demo_actor: Annotated[str | None, Header()] = None,
 ) -> Student:
-    """보호자 헤더를 확인하고 그 보호자의 학생을 돌려준다."""
-    student = (await actor_from_request(db, "guardian", x_demo_role, x_demo_actor)).student
+    """보호자 계정(연결된 첫 아이) 또는 보호자 헤더를 확인하고 그 보호자의 학생을 돌려준다."""
+    actor = await actor_from_request(
+        db, "guardian", x_demo_role, x_demo_actor, account=account, token_sent=token_sent(request)
+    )
+    student = actor.student
     assert student is not None  # guardian 역할은 학생이 없으면 resolve_actor가 404
     return student
 
@@ -39,14 +45,9 @@ async def current_guardian_child(
 GuardianChild = Annotated[Student, Depends(current_guardian_child)]
 
 
-def _guardian_excerpt(alert: Alert) -> str | None:
-    """보호자 카드에 싣는 발췌. 지금은 명세대로 ±2턴·300자 그대로.
-    발췌를 빼고 분류·긴급도·행동 안내로 바꾸는 안(11-10 회의 안건 2)이 정해지면 여기만 바꾼다."""
-    return alert.excerpt
-
-
 async def _today_alert(db: AsyncSession, student: Student, now: datetime) -> dict[str, Any] | None:
-    """오늘(서울 날짜) 가장 최근 알림. SQLite가 시간대를 버려서 날짜 비교는 파이썬에서 한다."""
+    """오늘(서울 날짜) 가장 최근 알림. SQLite가 시간대를 버려서 날짜 비교는 파이썬에서 한다.
+    발췌는 싣지 않는다(11-12 결정: 보호자에게는 분류·긴급도·행동 안내만, 동의 문구와 일치)."""
     today = seoul_date(now)
     alerts = await db.scalars(
         select(Alert).where(Alert.student_id == student.id).order_by(Alert.created_at.desc())
@@ -57,7 +58,6 @@ async def _today_alert(db: AsyncSession, student: Student, now: datetime) -> dic
         if seoul_date(created) == today:
             return {
                 "created_at": created.isoformat(),
-                "excerpt": _guardian_excerpt(alert),
                 "hotlines": list(HOTLINES),
             }
     return None

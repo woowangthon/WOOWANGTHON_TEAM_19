@@ -4,14 +4,15 @@
 //   공통: 프로필 · 비밀번호 · 알림 · 공지/FAQ/문의 · 약관 · 앱 정보 · 로그아웃 · 회원 탈퇴
 import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../api';
+import { api, ORG_MODE } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon, type IconName } from '../../components/Icon';
 import { LoadError, Sheet } from '../../components/Common';
 import { useAction } from '../../lib/useAction';
-import { homeFor, useAuth } from '../../state/auth';
+import { homeFor, useAuth, useRefreshMeOnMount } from '../../state/auth';
 import { ROLE_LABEL, type AcademyForm, type Me, type NotifySettings } from '../../types';
 import { PW_RULE } from '../../api/org';
+import { gradeLabel } from '../../lib/grade';
 
 export const APP_VERSION = '0.5.0';
 
@@ -125,11 +126,11 @@ export function SettingsProfile() {
   const kid = me.role === 'student';
   return (
     <Frame adult={!kid} title="프로필 수정" back="/settings"
-      actions={<button className="btn btn--primary" disabled={busy || !name.trim()} onClick={() => run(async () => { await enter(await api.updateProfile(kid ? { name } : { name, email })); setSaved(true); })}>{saved ? '저장했어요 ✓' : '저장'}</button>}>
+      actions={<button className="btn btn--primary" disabled={busy || !name.trim()} onClick={() => run(async () => { await enter(await api.updateProfile(kid || !email.trim() ? { name } : { name, email })); setSaved(true); })}>{saved ? '저장했어요 ✓' : '저장'}</button>}>
       <label className="field">아이디<input className="input" value={me.loginId} disabled /></label>
       <label className="field">{kid ? '별명' : '이름'}<input className="input" maxLength={12} value={name} onChange={(e) => { setName(e.target.value); setSaved(false); }} /></label>
-      {kid ? <label className="field">학년<input className="input" value={`${me.grade}학년`} disabled /></label>
-        : <label className="field">이메일<input className="input" type="email" value={email} onChange={(e) => { setEmail(e.target.value); setSaved(false); }} /></label>}
+      {kid ? <label className="field">학년<input className="input" value={gradeLabel(me.grade)} disabled /></label>
+        : <label className="field">이메일<input className="input" type="email" placeholder="바꿀 때만 입력" value={email} onChange={(e) => { setEmail(e.target.value); setSaved(false); }} /></label>}
       <LoadError error={error} />
     </Frame>
   );
@@ -221,6 +222,7 @@ export function SettingsDelete() {
 /* ---------------- 연결: 학생 = 보호자 연결 / 보호자 = 자녀 관리 ---------------- */
 export function SettingsFamily() {
   const { me, enter } = useAuth();
+  useRefreshMeOnMount();
   const [code, setCode] = useState('');
   const [consentFor, setConsentFor] = useState<{ kind: 'code'; code: string } | { kind: 'confirm'; id: string; name: string } | null>(null);
   const [resetFor, setResetFor] = useState<{ id: string; name: string } | null>(null);
@@ -321,6 +323,7 @@ export function SettingsOrg() {
 function FamilyOrg() {
   const nav = useNavigate();
   const { me, enter } = useAuth();
+  useRefreshMeOnMount();
   const [entry, setEntry] = useState('');
   const [done, setDone] = useState(false);
   const { run, busy, error } = useAction();
@@ -383,7 +386,7 @@ function TeacherOrg() {
               <button className="btn btn--primary btn--small" style={{ minHeight: 46 }} disabled={serial.replace(/\W/g, '').length < 8 || busy}
                 onClick={() => run(async () => { await enter(await api.requestMembership(serial)); setSerial(''); })}>신청</button>
             </div>
-            <span className="hint">체험: WW7K-3P9Q (우왕수학학원)</span>
+            <span className="hint">{ORG_MODE === 'http' ? '체험: 원장 계정으로 로그인 → 학원 관리에서 일련번호를 확인할 수 있어요' : '체험: WW7K-3P9Q (우왕수학학원)'}</span>
           </section>
           <section className="card stack">
             <strong>새 학원·학교 등록</strong>

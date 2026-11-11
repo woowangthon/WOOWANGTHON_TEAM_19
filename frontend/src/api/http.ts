@@ -2,6 +2,7 @@
 // 경로는 임시 이름이다. 성호님 명세의 API 이름이 확정되면 여기 경로만 바꾸면 된다(화면 코드는 그대로).
 import type { MentorApi } from './client';
 import type { AccountRole } from '../types';
+import { slowWatch } from '../lib/slowServer';
 
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:8000';
 
@@ -11,6 +12,9 @@ type DemoRole = 'child' | 'guardian' | 'instructor';
 const ROLES: DemoRole[] = ['child', 'guardian', 'instructor'];
 const ROLE_KEY = 'ai-mentor-demo-role';
 const TRIAL_KEY = 'ai-mentor-trial';
+/** 계정·학원·씨앗까지 진짜 서버로 보내는 모드(VITE_API_MODE=http 그리고 VITE_ORG_MODE=http, 명세 4.12).
+ *  이때는 X-Demo-* 대신 로그인 쿠키(cm_session) + X-Trial-Id로 누구인지 알린다 */
+export const ORG_HTTP = import.meta.env.VITE_API_MODE === 'http' && import.meta.env.VITE_ORG_MODE === 'http';
 interface Trial { trialId: string; actors: Record<DemoRole, string>; date: string; }
 
 function readRole(): DemoRole | null {
@@ -26,6 +30,10 @@ export function setDemoRole(role: AccountRole | null): boolean {
   try { if (demoRole) localStorage.setItem(ROLE_KEY, demoRole); else localStorage.removeItem(ROLE_KEY); } catch { /* 저장이 막혀도 이번 실행은 메모리로 */ }
   return demoRole !== before;
 }
+
+// org http 모드에서 서버가 「로그인 안 됨」(401 not_logged_in·no_actor)이라 하면 부른다. state/auth.tsx가 등록한다
+let onLoggedOut: (() => void) | null = null;
+export function setLoggedOutHandler(fn: (() => void) | null) { onLoggedOut = fn; }
 
 /* ---------- 체험 세트 ---------- */
 function readTrial(): Trial | null {
@@ -66,6 +74,10 @@ function ensureTrial(): Promise<Trial> {
 
 /** 「처음부터 다시 체험」: 지금 세트를 버리고 새 세트를 받는다(이전 세트는 서버에 그대로 두고 버린다). 로그인 전에도 부를 수 있다 */
 export async function startNewTrial(): Promise<void> {
+  // org http: 옛 세트의 로그인 쿠키를 먼저 끊는다(실패해도 계속). 뒤이은 demoLogin(옛 id)은 서버가 새 세트의 같은 계정으로 바꿔 준다
+  if (ORG_HTTP && trial) {
+    await fetch(BASE + '/auth/logout', { method: 'POST', credentials: 'include', headers: { 'X-Trial-Id': trial.trialId } }).catch(() => undefined);
+  }
   dropTrial();
   await ensureTrial();
 }
@@ -77,17 +89,19 @@ const isTrialGone = (role: DemoRole, code: unknown) =>
   (role === 'child' && code === 'student_not_found') || (role === 'guardian' && (code === 'student_not_found' || code === 'guardian_not_found'));
 
 async function call<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown, retried = false): Promise<T> {
+  if (ORG_HTTP) return callOrg<T>(method, path, body, retried);
   // 로그인 전에는 서버가 누구인지 알 수 없어 401이 난다 → 보내지 않는다(화면은 오류를 받아 null로 둔다)
   const role = demoRole;
   if (!role) throw new Error('로그인이 필요해요.');
   const t = await ensureTrial();
   let res: Response;
   try {
-    res = await fetch(BASE + path, {
+    // slowWatch: 잠든 서버를 깨우느라 5초를 넘기면 화면에 「깨우는 중」 안내(lib/slowServer)
+    res = await slowWatch.track(fetch(BASE + path, {
       method,
       headers: { 'X-Demo-Role': role, 'X-Demo-Actor': t.actors[role], ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}) },
       body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+    }));
   } catch {
     throw new Error('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.');
   }
@@ -97,6 +111,34 @@ async function call<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, 
       // 같은 세트로 실패한 요청이 여럿이어도 한 번만 버린다(이미 새 세트면 그걸 쓴다)
       if (trial?.trialId === t.trialId) dropTrial();
       return call<T>(method, path, body, true);
+    }
+  }
+  if (!res.ok) throw new Error(await errorMessage(res));
+  return (res.status === 204 ? undefined : await res.json()) as T;
+}
+
+/** org http 모드의 call: 역할 확인 없이(로그인 전 경로도) 쿠키 + X-Trial-Id만 보낸다 */
+async function callOrg<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body: unknown, retried: boolean): Promise<T> {
+  const t = await ensureTrial();
+  let res: Response;
+  try {
+    res = await slowWatch.track(fetch(BASE + path, {
+      method,
+      credentials: 'include',
+      headers: { 'X-Trial-Id': t.trialId, ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}) },
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    }));
+  } catch {
+    throw new Error('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.');
+  }
+  if (res.status === 401 || res.status === 404) {
+    const code = (await res.clone().json().catch(() => null))?.code;
+    // 로그인이 끊김(로그아웃·만료) 또는 내 학생 행이 사라짐 → 앱 로그인 상태를 지우고 로그인 화면으로
+    if ((res.status === 401 && (code === 'not_logged_in' || code === 'no_actor')) || (code === 'student_not_found' && demoRole === 'child')) onLoggedOut?.();
+    // 세트가 서버에 없을 때만 새 세트로 한 번 다시(not_linked 등은 세트와 상관없음)
+    else if (code === 'trial_not_found' && !retried) {
+      if (trial?.trialId === t.trialId) dropTrial();
+      return callOrg<T>(method, path, body, true);
     }
   }
   if (!res.ok) throw new Error(await errorMessage(res));

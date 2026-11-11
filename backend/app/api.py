@@ -14,13 +14,14 @@ from datetime import date, datetime, timedelta
 from functools import lru_cache
 from typing import Annotated, Any, Literal, cast
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, Field, StrictBool
 from sqlalchemy import CursorResult, func, or_, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import config
+from app.accounts import CurrentAccount, token_sent
 from app.actors import actor_from_request
 from app.db import get_db
 from app.errors import ApiError
@@ -81,11 +82,17 @@ async def healthz(db: Db) -> dict[str, Any]:
 
 
 async def current_child(
+    request: Request,
     db: Db,
+    account: CurrentAccount,
     x_demo_role: Annotated[str | None, Header()] = None,
     x_demo_actor: Annotated[str | None, Header()] = None,
 ) -> Student:
-    student = (await actor_from_request(db, "child", x_demo_role, x_demo_actor)).student
+    # 로그인 계정이 먼저, 없으면 데모 헤더(명세 4.12)
+    actor = await actor_from_request(
+        db, "child", x_demo_role, x_demo_actor, account=account, token_sent=token_sent(request)
+    )
+    student = actor.student
     assert student is not None  # child 역할은 학생이 없으면 resolve_actor가 404
     return student
 
@@ -439,6 +446,10 @@ async def post_message(
 async def post_reply(session_id: str, db: Db, now: Now, student: Child, llm: Llm) -> dict[str, Any]:
     """답 안 된 조각에 멘토 답 1개(4a, 11-11). 생성 중이면 queued, 조각이 없으면 409."""
     row = await _active_row(db, session_id, student, now)
+    if row.state == State.BRIDGE.value:
+        # A1: 수다 마감 뒤(다리 놓기)에는 AI가 또 말하지 않는다. 받은 말은 이미 저장·🔴 검사됨(11-12 점검)
+        await db.commit()
+        return _out(row, None, None)
     if _lease_valid(row, now):
         await db.commit()
         return _out(row, None, None, queued=True)
@@ -449,6 +460,11 @@ async def post_reply(session_id: str, db: Db, now: Now, student: Child, llm: Llm
     await db.commit()
     if lease is None:
         return _out(row, None, None, queued=True)
+    # 표시를 잡는 사이에 다른 요청이 이미 답했으면(동시 /reply) 표시를 풀고 답하지 않는다(11-12 점검)
+    if not _unanswered(await _session_messages(db, row.id)):
+        await _release_lease(db, row.id, lease)
+        await db.commit()
+        return _out(row, None, None)
     return await _reply(
         db, now, student, llm, _Claimed(row.id, lease, str(uuid.uuid4()), None, reply_only=True)
     )

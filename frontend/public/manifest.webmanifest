@@ -1,0 +1,17 @@
+{
+  "name": "AI 멘토",
+  "short_name": "AI 멘토",
+  "description": "초등 5~6학년이 집에서 하루 30분, 멘토와 함께 수학을 풀고 이야기하는 학습 도우미",
+  "lang": "ko",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF9EF",
+  "theme_color": "#FFF9EF",
+  "icons": [
+    { "src": "mascot/horse/wave-avatar.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "mascot/horse/wave-face.png", "sizes": "256x256", "type": "image/png", "purpose": "any" }
+  ]
+}

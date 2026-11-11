@@ -95,8 +95,15 @@ button.card { text-align: left; cursor: pointer; width: 100%; }
 .chip-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .chip-row--scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--space-4)); padding: 0 var(--space-4); }
 .chip-row--scroll::-webkit-scrollbar { display: none; }
+/* 학교급을 고르면 학년 칩이 아래에서 살짝 올라오며 나타난다(가입 학년 선택) */
+/* 문장이 긴 선택지(마무리 퀴즈): 한 줄에 하나씩, 줄바꿈 허용 — 폰에서 화면 밖으로 잘리지 않게 */
+.chip-row--stack .chip { flex: 1 1 100%; min-width: 0; text-align: left; border-radius: var(--radius-sm); padding: 10px 14px; line-height: 1.4; }
+.chip-row--reveal { margin-top: var(--space-2); animation: chip-reveal .22s ease-out; }
+@keyframes chip-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .chip-row--reveal { animation: none; } }
 .chip { flex: none; min-height: 40px; padding: 6px 14px; border: 2px solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); font-size: 14px; font-weight: 600; cursor: pointer; }
 .chip--on { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary-strong); }
+.chip:disabled { opacity: .45; cursor: default; }
 .notice { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--color-accent-soft); font-size: 14px; }
 .notice--danger { background: var(--color-danger-soft); color: var(--color-danger); }
 .notice--plain { background: var(--color-surface-muted); color: var(--color-text-muted); }
@@ -347,6 +354,83 @@ button.seed-chip { cursor: pointer; }
 .notice-item:disabled { cursor: default; color: inherit; }
 .notice-item__dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent); }
 .screen-body > .progress, .progress--thin { flex: none !important; height: 6px; }
+
+/* =====================================================================
+   11-11 휴대폰·태블릿·PC 틀 + 움직임
+   - 휴대폰(~599px): 지금 그대로 꽉 찬 한 줄 화면 + 하단 탭
+   - 태블릿(600~1023px): 화면을 꽉 채우고 하단 탭 → 왼쪽 아이콘 레일. 내용은 가운데(아이 720px · 어른 960px)
+   - PC(1024px~): 레일 → 이름이 붙은 사이드바. 선생님 목록은 카드 격자
+   - 주소에 ?frame=phone 을 붙이면 예전처럼 휴대폰 모형(360×640)으로 본다(영상 촬영용, main.tsx)
+   ===================================================================== */
+.card-grid { display: flex; flex-direction: column; gap: var(--space-3); }
+
+@media (min-width: 600px) {
+  :root:not([data-frame="phone"]) .frame {
+    max-width: none; height: 100dvh; margin: 0; border-radius: 0; box-shadow: none;
+    --content-max: 720px;
+  }
+  :root:not([data-frame="phone"]) .frame--adult { --content-max: 960px; }
+  /* 탭이 있는 화면: 왼쪽 칸 = 레일, 오른쪽 칸 = 상단바·내용·하단 버튼 */
+  :root:not([data-frame="phone"]) .frame--tabs {
+    display: grid; grid-template-columns: 92px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  :root:not([data-frame="phone"]) .frame--tabs > * { grid-column: 2; }
+  :root:not([data-frame="phone"]) .frame--tabs > .tabbar {
+    grid-column: 1; grid-row: 1 / -1; flex-direction: column; justify-content: flex-start; gap: 6px;
+    padding: 20px 10px; border-top: 0; border-right: 1.5px solid var(--color-border);
+  }
+  :root:not([data-frame="phone"]) .frame--tabs .tab { flex: none; min-height: 66px; font-size: 12.5px; }
+  /* 내용 폭: 넓은 화면에서도 한 줄 길이가 너무 길어지지 않게 가운데로 모은다 */
+  :root:not([data-frame="phone"]) .screen-body,
+  :root:not([data-frame="phone"]) .bottom-actions { padding-inline: max(var(--space-5), calc((100% - var(--content-max)) / 2)); }
+  :root:not([data-frame="phone"]) .topbar { padding-inline: 16px; }
+  /* 시트: 아래에서 올라오는 판 → 가운데 대화상자 */
+  :root:not([data-frame="phone"]) .sheet-backdrop { align-items: center; justify-content: center; padding: var(--space-5); }
+  :root:not([data-frame="phone"]) .sheet { max-width: 560px; max-height: 80%; border-radius: var(--radius-lg); }
+  :root:not([data-frame="phone"]) .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  /* 휴대폰에서 양옆까지 번지던 학생 첫 화면 머리 → 넓은 화면에선 둥근 카드로 */
+  :root:not([data-frame="phone"]) .hero { margin: 0; padding: 12px var(--space-5) 24px; border-radius: 28px; }
+}
+
+@media (min-width: 1024px) {
+  :root:not([data-frame="phone"]) .frame--tabs { grid-template-columns: 220px minmax(0, 1fr); }
+  :root:not([data-frame="phone"]) .frame--tabs > .tabbar { padding: 24px 14px; gap: 4px; }
+  :root:not([data-frame="phone"]) .frame--tabs > .tabbar::before {
+    content: 'AI 멘토'; display: block; padding: 0 14px 18px; font-size: 18px; font-weight: 800; color: var(--color-primary-strong);
+  }
+  :root:not([data-frame="phone"]) .frame--tabs .tab {
+    min-height: 48px; flex-direction: row; justify-content: flex-start; gap: 12px; padding: 0 14px; font-size: 15px;
+  }
+  :root:not([data-frame="phone"]) .card-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+}
+
+/* ---- 움직임: 끊겨 보이지 않게 짧고(0.15~0.25초) 작게 ---- */
+/* 화면이 바뀌면 내용이 살짝 떠오르며 나타난다(탭·상단바는 그대로 두고 내용만) */
+.screen-body { animation: screen-in .22s ease-out; }
+@keyframes screen-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+/* 시트: 뒤 배경은 서서히, 판은 아래에서(휴대폰) / 살짝 커지며(태블릿·PC) */
+.sheet-backdrop { animation: fade-in .18s ease-out; }
+.sheet { animation: sheet-up .24s cubic-bezier(.2, .8, .2, 1); }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheet-up { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+@media (min-width: 600px) {
+  :root:not([data-frame="phone"]) .sheet { animation-name: sheet-pop; }
+  @keyframes sheet-pop { from { transform: scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+/* 탭: 선택 배경이 툭 바뀌지 않게 */
+.tab { transition: background-color .18s ease, color .18s ease; }
+/* 마우스가 있는 기기(PC)에서만: 누를 수 있는 카드·탭에 올리면 살짝 떠오름 */
+@media (hover: hover) and (pointer: fine) {
+  button.card { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  button.card:hover { transform: translateY(-2px); border-color: var(--color-primary); box-shadow: 0 4px 0 var(--color-border); }
+  .tab:not(.tab--active):hover { background: var(--color-surface-muted); }
+}
+/* 동작 줄이기를 켠 사람에게는 움직임을 모두 끈다 */
+@media (prefers-reduced-motion: reduce) {
+  .screen-body, .sheet-backdrop, .sheet { animation: none; }
+  .tab, button.card { transition: none; }
+  button.card:hover { transform: none; }
+}
 
 /* ============ 학습지도자 화면 (학습지도자만, lib/wide.ts) ============ */
 /* 학습지도자는 어느 폭에서도 폰 모양 틀 없이 창 전체를 쓴다(최대 폭 없음). 2열·표는 1024px 이상에서만 */

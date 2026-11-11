@@ -3,6 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { api } from '../api';
+import { onceAtATime, useOnResume } from '../lib/resume';
+import { WakeNotice } from '../components/Common';
 import type { Phase, SessionView } from '../types';
 
 interface SessionCtx {
@@ -22,6 +24,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return s;
   }, []);
   useEffect(() => { refresh(); }, [refresh]);
+  // 앱을 내렸다 올리거나 인터넷이 돌아오면 서버 단계를 다시 읽는다(그사이 수다 시간이 끝났을 수 있다).
+  // 실패하면 지금 화면을 그대로 둔다(아직 인터넷이 안 붙었을 때 첫 화면으로 튕기지 않게). 겹치면 한 번만.
+  const [resync] = useState(() => onceAtATime(() => api.getActiveSession().then(setSession, () => {})));
+  useOnResume(() => { void resync(); });
   return <Ctx.Provider value={{ session, ready, sync: setSession, refresh }}>{children}</Ctx.Provider>;
 }
 
@@ -46,7 +52,7 @@ export function routeFor(s: SessionView | null): string {
 /** 이 화면이 지금 단계와 맞지 않으면 맞는 화면으로 보낸다(주소를 직접 쳐도, 시간이 끝나도 안전) */
 export function RequirePhase({ phase, children }: { phase: Phase; children: ReactNode }) {
   const { session, ready } = useSession();
-  if (!ready) return <div className="frame"><main className="screen-body center muted">불러오는 중…</main></div>;
+  if (!ready) return <div className="frame"><main className="screen-body center muted">불러오는 중…<WakeNotice /></main></div>;
   if (!session || session.phase !== phase) return <Navigate to={routeFor(session)} replace />;
   return <>{children}</>;
 }

@@ -149,7 +149,7 @@ describe('학습지도자 소속 · 학원 등록(원장)', () => {
   it('강의실은 초대(학생 수락) 또는 참여 요청(지도자 수락)으로 들어간다', async () => {
     await as('t1');
     let tc = await api.getTeacherClasses();
-    const deep = tc.classrooms.find((c) => c.name === '4학년 심화반')!;
+    const deep = tc.classrooms.find((c) => c.name === '5학년 심화반')!;
     expect(deep.requests.map((r) => r.id)).toEqual(['s4']);
     tc = await api.answerRequest(deep.id, 's4', true);
     expect(tc.classrooms.find((c) => c.id === deep.id)!.members.map((m) => m.id)).toEqual(['s4']);

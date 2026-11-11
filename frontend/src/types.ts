@@ -10,6 +10,8 @@ export type Fraction = [number, number];
 export type MentorStyle = '같이 풀어주는' | '들어주는' | '짚어주는';
 export type MentorTitle = '형' | '언니' | '친구';
 export type Speech = '반말' | '존댓말';
+/** 학년 1~12 (초1=1 … 초6=6, 중1=7 … 중3=9, 고1=10 … 고3=12). 표시는 lib/grade의 gradeLabel */
+export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 /** 띠 캐릭터. 띠를 추가하려면 여기와 public/mascot/{이름}/ 폴더만 늘리면 된다 */
 export type Animal = 'horse' | 'monkey';
 export const ANIMAL_LABEL: Record<Animal, string> = { horse: '말띠', monkey: '원숭이띠' };
@@ -137,6 +139,8 @@ export interface GuardianToday {
   unit: string; solved: number; streak: number;
   hardPoint: string | null; line: string | null; quiz: string | null; teacherComment: string | null;
   attendance: boolean[]; todayIndex: number;
+  /** 오늘 🔴로 끝났을 때 첫 화면 안내(서버가 문구를 준다, 11-11). 없으면 평소 화면 */
+  alertNotice?: string | null;
 }
 
 /* ---------- 시연 ---------- */
@@ -165,7 +169,7 @@ export interface Membership {
 export interface Me {
   id: string; role: AccountRole; name: string; loginId: string;
   email: string | null;           // 어른만(아이디·비밀번호 찾기). 학생은 받지 않음
-  grade: 4 | 5 | 6 | null;
+  grade: Grade | null;
   /** 학생·보호자 고유 연동 코드(서로 연결할 때 씀) */
   linkCode: string | null;
   linked: { id: string; name: string; role: AccountRole }[];
@@ -187,7 +191,7 @@ export interface Agreements { terms: boolean; privacy: boolean; marketing: boole
 export interface SignupBody {
   role: 'student' | 'guardian' | 'teacher';
   loginId: string; password: string; name: string;
-  grade?: 4 | 5 | 6;              // 학생
+  grade?: Grade;                  // 학생 (초1~고3)
   email?: string;                 // 보호자·학습지도자
   agreements: Agreements;
 }

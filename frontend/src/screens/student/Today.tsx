@@ -10,14 +10,17 @@ import { LoadError, Thinking, Week } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useMentor } from '../../state/mentor';
 import { routeFor } from '../../state/session';
-import { useAuth } from '../../state/auth';
+import { useAuth, useRefreshMeOnMount } from '../../state/auth';
 import { SeedChip } from '../../components/Seed';
 import { isCrisisDay, isDemoChild } from '../../lib/kidScreens';
+import { GRADE_NOTE, currentGradeUi, showGradeNote } from '../../lib/gradeUi';
 
 export function StudentToday() {
   const nav = useNavigate();
+  const gradeUi = currentGradeUi();
   const { say } = useMentor();
   const { me, enter } = useAuth();
+  useRefreshMeOnMount();
   const { data, error, loading, reload } = useAsync(() => api.getStudentHome());
   const [restarting, setRestarting] = useState(false);
   const [restartError, setRestartError] = useState<string | null>(null);
@@ -73,6 +76,7 @@ export function StudentToday() {
               <div style={{ minWidth: 0 }}>
                 <div className="h3">{data.task.unit} · {data.task.count}문제 · 약 {data.task.minutes}분</div>
                 <div className="small muted">{data.task.assignedBy}이 정해 줬어요</div>
+                {showGradeNote(gradeUi) && <div className="small muted">{GRADE_NOTE}</div>}
               </div>
             </section>
           ) : !data.doneToday && <div className="notice notice--plain">오늘 할 것이 아직 없어요</div>}

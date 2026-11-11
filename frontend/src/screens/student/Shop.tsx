@@ -88,14 +88,14 @@ export function StudentShop() {
             <section key={kind} className="stack">
               <h2 className="h3">{kind === 'outfit' ? '옷' : '이모티콘'} <span className="small muted">{kind === 'emote' ? '수다에서 보낼 수 있어' : ''}</span></h2>
               <div className="deco-grid">
-                {data.cosmetics.filter((c) => c.kind === kind).map((c) => (
-                  <button key={c.id} className={'card deco' + (c.equipped ? ' card--selected' : '')}
+                {data.cosmetics.filter((c) => c.kind === kind).map((c) => { const lack = c.owned ? 0 : c.price - data.balance; return (
+                  <button key={c.id} className={'card deco' + (c.equipped ? ' card--selected' : '')} disabled={lack > 0}
                     onClick={() => (c.owned ? (c.kind === 'outfit' ? run(async () => { setData(await api.equipOutfit(c.equipped ? null : c.id)); await refresh(); }) : undefined) : (setError(null), setBuy({ kind: 'deco', item: c })))}>
                     <CosmeticArt animal={animal} kind={c.kind} id={c.id} name={c.name} size={64} />
                     <strong className="small">{c.name}</strong>
-                    {c.equipped ? <span className="pill pill--solid">입는 중</span> : c.owned ? <span className="pill pill--mint">{c.kind === 'outfit' ? '입기' : '가짐'}</span> : <SeedChip n={c.price} />}
+                    {c.equipped ? <span className="pill pill--solid">입는 중</span> : c.owned ? <span className="pill pill--mint">{c.kind === 'outfit' ? '입기' : '가짐'}</span> : lack > 0 ? <span className="pill">{lack}개 더</span> : <SeedChip n={c.price} />}
                   </button>
-                ))}
+                ); })}
               </div>
             </section>
           ))}
@@ -122,7 +122,7 @@ export function StudentShop() {
           <LoadError error={actErr} />
           <div className="btn-row">
             <button className="btn btn--secondary" onClick={() => setBuy(null)}>{say('안 바꿀래', '안 바꿀래요')}</button>
-            <button className="btn btn--primary" disabled={busy} onClick={confirm}><Icon name="seed" size={16} />{buy.item.price}개로 바꾸기</button>
+            <button className="btn btn--primary" disabled={busy || data.balance < buy.item.price} onClick={confirm}><Icon name="seed" size={16} />{buy.item.price}개로 바꾸기</button>
           </div>
         </Sheet>
       )}

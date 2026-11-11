@@ -1,7 +1,7 @@
 // 시연용 가상 데이터. 실제 학생 기록이 아니다.
 import type { StudentResult, Unit } from '../types';
 
-export const CLASS_NAME = '4학년 A반';
+export const CLASS_NAME = '5학년 A반';
 export const TEACHER_NAME = '김선생님';
 export const STUDENT = { id: 's1', name: '지우', fullName: '김지우' };
 

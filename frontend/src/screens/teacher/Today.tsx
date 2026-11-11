@@ -31,7 +31,7 @@ export function TeacherToday() {
     </button>
   ));
   return (
-    <Frame adult title="오늘 할 것" exit right={<button className="icon-btn" aria-label="강의실 관리" onClick={() => nav('/teacher/classes')}><Icon name="people" /></button>} tabs="teacher">
+    <Frame adult title="오늘 할 것" exit right={<button className="icon-btn" aria-label="긴급 알림" onClick={() => nav('/teacher/alerts')}><Icon name="warn" /></button>} tabs="teacher">
       {loading && <Thinking label="불러오는 중" />}
       <LoadError error={error} onRetry={reload} />
       {me && (!m || m.status !== '승인됨') && (
@@ -55,7 +55,7 @@ export function TeacherToday() {
             </div>
           ) : (
             <>
-              {rows}
+              <div className="card-grid">{rows}</div>
               <p className="small muted">학생을 누르면 오늘 할 것을 정하고 보호자 코멘트를 쓸 수 있어요.</p>
             </>
           )}

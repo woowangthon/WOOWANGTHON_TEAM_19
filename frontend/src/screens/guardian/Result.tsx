@@ -34,6 +34,7 @@ function NotLinked({ pending }: { pending: string[] }) {
 }
 
 function Linked() {
+  const nav = useNavigate();
   const { data, error, loading, reload } = useAsync(() => api.getGuardianToday());
   const stamp = useAsync(() => api.getStampState());
   const { run, busy, error: actErr } = useAction();
@@ -47,7 +48,12 @@ function Linked() {
             <div><h1 className="h2">{data.childName}</h1><div className="small muted">{data.dateLabel} · 내 아이의 오늘</div></div>
             {stamp.data && <SeedChip n={stamp.data.balance} />}
           </div>
-          {data.done ? (
+          {data.alertNotice ? (
+            <section className="card card--warn row between">
+              <strong>{data.alertNotice}</strong>
+              <button className="btn btn--primary btn--small" onClick={() => nav('/guardian/alerts')}><Icon name="bell" size={16} />알림 보기</button>
+            </section>
+          ) : data.done ? (
             <>
               <div className="stats" style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <Stat label={`${data.unit} · 푼 문제`} value={`${data.solved}문제`} />

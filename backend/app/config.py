@@ -65,6 +65,17 @@ def frontend_dist() -> Path | None:
     return path.resolve()
 
 
+def trial_only() -> bool:
+    """공개 배포에서는 체험 세트 id(`t-…`)만 받는다 — 헤더를 꾸며 공용 데모 배우를 쓰지 못하게(11-11).
+
+    TRIAL_ONLY가 있으면 그 값(1/true/yes = 켬), 없으면 Vercel(VERCEL=1)에서 켠다. 로컬·테스트는 꺼짐.
+    """
+    raw = os.environ.get("TRIAL_ONLY")
+    if raw is not None:
+        return raw.strip().lower() in ("1", "true", "yes")
+    return os.environ.get("VERCEL") == "1"
+
+
 def demo_token() -> str | None:
     """POST /demo/reset 비밀 토큰. 없거나 빈 값이면 None(→ 리셋 403)."""
     return os.environ.get("DEMO_TOKEN") or None

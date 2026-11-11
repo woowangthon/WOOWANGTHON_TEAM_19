@@ -64,7 +64,7 @@ function Wrap() {
           </section>}{/* 서버는 어려웠던 점 칩을 빈 목록으로 준다 → 비면 섹션을 숨긴다 */}
           <section className="stack">
             <h2 className="h3">보호자께 낼 퀴즈 하나 <span className="small muted">(선택)</span></h2>
-            <div className="chip-row">
+            <div className="chip-row chip-row--stack">
               {data.quizOptions.map((q) => (
                 <button key={q} className={'chip' + (quiz === q ? ' chip--on' : '')} aria-pressed={quiz === q} onClick={() => setQuiz(quiz === q ? null : q)}>{q}</button>
               ))}

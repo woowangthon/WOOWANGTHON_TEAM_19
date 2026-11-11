@@ -11,7 +11,7 @@ export function StudentClasses() {
   const { data, setData, error, loading, reload } = useAsync(() => api.getStudentClasses());
   const { run, busy, error: actErr } = useAction();
   return (
-    <Frame title="강의실" back="/student">
+    <Frame title="강의실" exit tabs="student">
       {loading && !data && <Thinking label="불러오는 중" />}
       <LoadError error={error ?? actErr} onRetry={reload} />
       {data && (

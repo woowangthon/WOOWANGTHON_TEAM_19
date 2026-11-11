@@ -24,7 +24,8 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import config
-from app.actors import instructor_scope
+from app.accounts import CurrentAccount, is_restricted
+from app.actors import Actor
 from app.api import (
     FINISHED,
     HOTLINES,
@@ -50,6 +51,7 @@ from app.api import (
     _with_seq_retry,
     get_bridge,
     is_solved,
+    next_streak,
     post_end,
     post_message,
     post_phase,
@@ -75,8 +77,18 @@ from app.instructor import (
     update_draft_body,
 )
 from app.models import MESSAGE_TTL, Alert, InstructorNote, Message, Problem, Session, Student
+from app.models_org import Room
 from app.pii import unredact_name
+from app.safety import check as red_keyword
 from app.seed import load_seed
+from app.seeds import (
+    STUDY_DONE,
+    balance_of,
+    earn_study_seeds,
+    earned_on,
+    in_class,
+    selected_unit_names,
+)
 from app.state_machine import (
     MAX_HINT,
     State,
@@ -86,7 +98,7 @@ from app.state_machine import (
     study_time_over,
 )
 from app.timeutil import SEOUL, as_utc, seoul_date
-from app.trial import TRIAL_HOURLY_MAX, TRIAL_PREFIX, new_trial_id
+from app.trial import ACCOUNT_PREFIX, TRIAL_HOURLY_MAX, TRIAL_PREFIX, new_trial_id
 
 
 class _CompatRoute(APIRoute):
@@ -111,6 +123,8 @@ class _CompatRoute(APIRoute):
 
 router = APIRouter(prefix="/compat", route_class=_CompatRoute)
 
+# 아이가 🔴으로 끝난 날 보호자 첫 화면 안내. 문구는 여기 한곳만 바꾸면 된다(11-11, 성호 결정 대기)
+GUARDIAN_ALERT_NOTICE = "오늘 확인이 필요한 알림이 있어요"
 DIFFICULTY = "중급"  # 시드에 난이도가 없다. 프론트 타입을 채우는 표시용 고정값
 STUDY_SEC = 20 * 60  # 명세 3.2 「같이 풀기 ~20분」. 남은 초는 state_machine.study_remaining_sec
 TASK_MINUTES = 20
@@ -152,6 +166,16 @@ def _phase(row: Session, solved: bool) -> str:
     return {"chat": "chat", "bridge": "wrap", "ended": "done", "crisis": "crisis"}[row.state]
 
 
+def _shown_streak(row: Session, student: Student, phase: str, now: datetime) -> int:
+    """완료 화면(transition)은 다음 전환에서 셀 연속 일수를 미리 보여 준다(3 → 4 어긋남, 11-11).
+
+    실제 +1은 그대로 전환 진입 때 한 번(streak_applied). 화면 숫자만 맞춘다.
+    """
+    if phase == "transition" and not row.streak_applied:
+        return next_streak(student.streak_days, student.last_streak_date, seoul_date(now))
+    return student.streak_days
+
+
 def _seconds_left(until: datetime | None, now: datetime) -> int:
     return max(0, math.ceil((until - now).total_seconds())) if until is not None else 0
 
@@ -167,9 +191,10 @@ async def _view(db: AsyncSession, row: Session, student: Student, now: datetime)
     in_study = row.state == State.STUDY.value and started is not None
     # study 밖에서는 study를 떠날 때 저장한 초(11-11, 전에는 0이 됐다)
     study_sec = (now - started).total_seconds() if in_study and started else row.study_sec or 0
+    phase = _phase(row, solved)
     return {
         "id": row.id,
-        "phase": _phase(row, solved),
+        "phase": phase,
         "unit": _tag_name(problem),
         "difficulty": DIFFICULTY,
         "solved": 1 if solved or row.hint_level >= MAX_HINT else 0,
@@ -183,7 +208,7 @@ async def _view(db: AsyncSession, row: Session, student: Student, now: datetime)
         else 0,
         "chatRemainingSec": _seconds_left(as_utc(row.deadline_at), now),
         "timedOut": in_study and study_time_over(started, now, config.timer_scale()),
-        "streakDays": student.streak_days,
+        "streakDays": _shown_streak(row, student, phase, now),
     }
 
 
@@ -220,7 +245,7 @@ def _operands(expr: str) -> tuple[list[int] | None, list[int] | None]:
 
 
 @router.get("/student/home")
-async def student_home(db: Db, now: Now, student: Child) -> dict[str, Any]:
+async def student_home(db: Db, now: Now, student: Child, account: CurrentAccount) -> dict[str, Any]:
     session = await _today_session(db, student, now)
     task = None if session is not None else await _today_task(db, student)
     task_info = None
@@ -233,6 +258,12 @@ async def student_home(db: Db, now: Now, student: Child) -> dict[str, Any]:
             "assignedBy": ASSIGNED_BY[task[1]],
         }
     view = await _view(db, session, student, now) if session is not None else None
+    # 계정 학생이면 보호자 연결 전 = 제한 모드(명세 4.12-5). 체험 헤더 경로는 전과 같이 False
+    restricted = account is not None and await is_restricted(db, account.id)
+    # 씨앗·강의실은 새 테이블에서(명세 4.12). 체험 헤더 경로의 inClass는 전과 같이 True
+    seeds = await balance_of(db, student.id)
+    earned = await earned_on(db, student.id, STUDY_DONE, seoul_date(now))
+    joined = await in_class(db, student.id) if account is not None else True
     await db.commit()
     return {
         "name": student.nickname,
@@ -246,10 +277,10 @@ async def student_home(db: Db, now: Now, student: Child) -> dict[str, Any]:
         "doneToday": session is not None and session.state in FINISHED,
         # 오늘 세션이 🔴로 끝났으면 true(계약 #2, 11-11). 홈에서 다시 시작하지 않게 한다
         "endedInCrisis": session is not None and session.state == State.CRISIS.value,
-        "restricted": False,
-        "inClass": True,
-        "seeds": 0,
-        "earnedToday": 0,
+        "restricted": restricted,
+        "inClass": joined,
+        "seeds": seeds,
+        "earnedToday": earned,
     }
 
 
@@ -365,7 +396,11 @@ async def submit_answer(
             "session": view,
         }
     text = f"{body.numerator}/{body.denominator}"
-    out = await post_message(session_id, MessageIn(kind="text", text=text), db, now, student, llm)
+    try:
+        msg = MessageIn(kind="text", text=text)
+    except ValidationError:  # 터무니없이 큰 수(11-12 점검: 500이던 것)
+        raise ApiError(422, "invalid_request", "요청 형식이 맞지 않아요.") from None
+    out = await post_message(session_id, msg, db, now, student, llm)
     correct = out["judge"] == "correct"  # 저장된 판정(흡수돼도 판정은 즉시)
     return {
         "correct": correct,
@@ -458,10 +493,24 @@ class AfterStudyIn(BaseModel):
 
 @router.post("/sessions/{session_id}/after-study")
 async def after_study(
-    session_id: str, body: AfterStudyIn, db: Db, now: Now, student: Child
+    session_id: str, body: AfterStudyIn, db: Db, now: Now, student: Child, account: CurrentAccount
 ) -> dict[str, Any]:
+    # 계정 학생만: 보호자와 연결 전이면 수다를 막는다(설계 §9-8). 체험 헤더 경로는 그대로
+    if (
+        body.choice == "chat"
+        and account is not None
+        and account.role == "student"
+        and await is_restricted(db, account.id)
+    ):
+        raise ApiError(409, "restricted", "보호자와 연결한 뒤에 수다를 할 수 있어요.")
     to: Literal["chat", "bridge"] = "chat" if body.choice == "chat" else "bridge"
     await post_phase(session_id, PhaseIn(to=to), db, now, student)
+    # 학습 완료 씨앗(하루 1번, org.ts earnStudySeeds): 같이 풀기를 끝냈을 때(정답 또는 풀이 보기)만
+    row = await _owned_session(db, session_id, student, now)
+    if row.state != State.STUDY.value:
+        problem = await _problem(db, row)
+        if row.hint_level >= MAX_HINT or await is_solved(db, row, problem):
+            await earn_study_seeds(db, student.id, _tag_name(problem), now)
     return await _session_view(db, session_id, student, now)
 
 
@@ -497,7 +546,17 @@ async def send_chat(
     row = await _owned_session(db, session_id, student, now)  # 수다 마감이 지났으면 bridge로
     # 끝난 세션(ended·crisis)·빈 말은 아래 post_message가 기본 경로와 같은 409·422로 거절한다
     if row.state == State.STUDY.value:
-        # 아직 수다 전 단계 → 빈 답(프론트는 단계를 다시 맞춘다)
+        # 아직 수다 전 단계 → 빈 답(프론트는 단계를 다시 맞춘다). 다만 🔴 문장은 그냥 버리지 않고
+        # 기본 경로(_accept)로 보내 위기 처리를 거친다(단계가 어긋난 화면, 11-12 점검). 원문은 메모리에서만
+        pieces = [t for t in (body.texts or [body.text or ""]) if t and t.strip()]
+        if any(red_keyword(t) for t in pieces) or (
+            len(pieces) > 1 and (red_keyword("\n".join(pieces)) or red_keyword("".join(pieces)))
+        ):
+            try:
+                msg = MessageIn(kind="text", texts=pieces)
+            except ValidationError:
+                raise ApiError(422, "invalid_request", "요청 형식이 맞지 않아요.") from None
+            return await _bridge_chat(db, session_id, msg, student, now)
         view = await _view(db, row, student, now)
         await db.commit()
         return _empty_chat(view)
@@ -631,12 +690,16 @@ async def get_guardian_today(db: Db, now: Now, student: GuardianChild) -> dict[s
         "teacherComment": card["instructor_comment"],
         "attendance": _attendance(student, now),
         "todayIndex": seoul_date(now).weekday(),
+        # 오늘 🔴로 끝났으면 첫 화면에 「공부 전」 대신 이 안내(알림 탭으로)
+        "alertNotice": GUARDIAN_ALERT_NOTICE
+        if session is not None and session.state == State.CRISIS.value
+        else None,
     }
 
 
 @router.get("/guardian/alerts")
 async def get_alerts(db: Db, student: GuardianChild) -> list[dict[str, Any]]:
-    """🔴 알림 목록. 발췌는 현재 정책(±2턴·300자) 그대로 싣는다(11-10 회의 안건 2 확정 전)."""
+    """🔴 알림 목록. 발췌 없이 분류·긴급도·행동 안내만(11-12 결정, 동의 문구 「분류만」과 일치)."""
     alerts = await db.scalars(
         select(Alert).where(Alert.student_id == student.id).order_by(Alert.created_at.desc())
     )
@@ -653,7 +716,6 @@ async def get_alerts(db: Db, student: GuardianChild) -> list[dict[str, Any]]:
                 "category": "안전",
                 "action": "지금 아이와 직접 이야기해 주세요. 도움: " + "·".join(HOTLINES),
                 "status": "확인함" if a.guardian_seen else "미확인",
-                "excerpt": a.excerpt,
                 "hotlines": list(HOTLINES),
             }
         )
@@ -691,13 +753,18 @@ async def _today_row(db: AsyncSession, student: Student, now: datetime) -> Sessi
     )
 
 
-async def _teacher_today(db: AsyncSession, now: datetime, actor: str) -> dict[str, Any]:
-    """체험 학습지도자는 같은 세트 아이만, 그 밖의 강사는 전체(명세 4.11-2)."""
+async def _teacher_today(db: AsyncSession, now: datetime, actor: Actor) -> dict[str, Any]:
+    """계정 학습지도자는 내 강의실 member, 체험 학습지도자는 같은 세트 아이만,
+    그 밖의 강사는 전체(명세 4.11-2·4.12)."""
     query = select(Student).order_by(Student.id)
-    if (scope := instructor_scope(actor)) is not None:
-        query = query.where(Student.id == scope)
-    else:  # 체험이 아닌 강사는 체험 아이를 못 본다(헤더를 꾸며도, 11-11)
-        query = query.where(~Student.id.startswith(TRIAL_PREFIX))
+    if actor.allowed is not None:
+        query = query.where(Student.id.in_(actor.allowed))
+    elif actor.scope is not None:
+        query = query.where(Student.id == actor.scope)
+    else:  # 체험이 아닌 헤더 강사는 체험 아이·가입 학생을 못 본다(헤더를 꾸며도, 11-11·A3)
+        query = query.where(
+            ~Student.id.startswith(TRIAL_PREFIX), ~Student.id.startswith(ACCOUNT_PREFIX)
+        )
     rows = []
     for student in await db.scalars(query):
         session = await _today_session(db, student, now)  # 수다 마감이 지났으면 먼저 전이
@@ -716,11 +783,20 @@ async def _teacher_today(db: AsyncSession, now: datetime, actor: str) -> dict[st
                 "draftStatus": DRAFT_STATUS.get(note.status) if note is not None else None,
             }
         )
+    class_name = CLASS_NAME
+    if actor.allowed is not None:  # 계정 학습지도자: 첫 강의실 이름(없으면 「내 강의실」)
+        first_room = await db.scalar(
+            select(Room.name)
+            .where(Room.teacher_id == actor.id)
+            .order_by(Room.created_at, Room.id)
+            .limit(1)
+        )
+        class_name = first_room or "내 강의실"
     await db.commit()
     return {
         "dateLabel": _date_label(now),
-        "className": CLASS_NAME,
-        "units": list(TAG_NAME.values()),
+        "className": class_name,
+        "units": await selected_unit_names(db, actor),  # 학습지도자가 고른 단원(기본 전체)
         "students": rows,
     }
 
@@ -818,6 +894,7 @@ async def save_memo(
     student_id: str, body: TeacherMemoIn, db: Db, now: Now, adapter: DraftAdapter, actor: Instructor
 ) -> None:
     """#8 post_note: 메모 저장 + 초안 생성 한 번. 오늘 노트가 있으면 그대로 둔다(명세 3.4)."""
+    await _student_or_404(db, student_id, actor)  # 없는 학생(긴 id 포함)은 404가 먼저(11-12 점검)
     note = NoteIn(
         student_id=student_id,
         covered=body.covered,
@@ -855,7 +932,8 @@ async def approve_draft(student_id: str, db: Db, now: Now, actor: Instructor) ->
     """서버가 들고 있는 draft_body를 그대로 승인본으로(#9 publish)."""
     student = await _student_or_404(db, student_id, actor)
     note = await _note_or_409(db, student, now)
-    approve = ApproveIn(final_body=note.draft_body or "", action="publish")
+    # 서버가 들고 있는 초안이라 길이 검사를 다시 하지 않는다(템플릿·이름 치환으로 2000자를 넘을 수 있음)
+    approve = ApproveIn.model_construct(final_body=note.draft_body or "", action="publish")
     await approve_note(note.id, approve, db, actor)
     return await _draft_out(db, student, note, now)
 
@@ -876,7 +954,12 @@ async def create_trial(db: Db, now: Now) -> dict[str, Any]:
     recent = await db.scalar(
         select(func.count())
         .select_from(Student)
-        .where(Student.id.startswith(TRIAL_PREFIX), Student.created_at >= now - timedelta(hours=1))
+        .where(
+            # 세트 아이(`-child`)만 센다. 체험 세상의 s2~s4 학생 행은 세지 않는다(설계 §9-6)
+            Student.id.startswith(TRIAL_PREFIX),
+            Student.id.endswith("-child"),
+            Student.created_at >= now - timedelta(hours=1),
+        )
     )
     if (recent or 0) >= TRIAL_HOURLY_MAX:
         raise ApiError(429, "trial_limit", "잠시 뒤 다시 시도해 주세요.")
