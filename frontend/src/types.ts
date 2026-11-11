@@ -133,6 +133,8 @@ export type AlertCategory = '마음' | '관계' | '안전';
 export interface SafetyAlert {
   id: string; at: string; level: AlertLevel; category: AlertCategory;
   action: string; status: '미확인' | '확인함' | '닫음'; closeReason?: string;
+  /** 🔴일 때만: 걱정된 말의 앞뒤 ±2턴(개인정보 가린 본), 최대 300자. 결정 11-11 「안전 알림 전달 수준」 */
+  excerpt?: string | null;
 }
 export interface GuardianToday {
   childName: string; dateLabel: string; done: boolean;

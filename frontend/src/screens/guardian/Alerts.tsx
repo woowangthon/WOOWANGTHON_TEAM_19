@@ -1,4 +1,5 @@
-// 보호자 ② 안전 알림 — 대화 원문 없이 분류·긴급도·다음 행동만 (BRIEF 안전 알림 정책 3)
+// 보호자 ② 안전 알림 — 분류·긴급도·다음 행동. 🔴(긴급)일 때만 걱정된 말의 앞뒤 일부(±2턴·300자)를 함께 보인다
+// (결정 11-11 「11-15 안전 알림 전달 수준」, TK-74 #14). 평소 수다는 보이지 않는다.
 // 11-09 팀 결정: 확인·오탐 닫기는 11-15에 회색 「후속」 버튼만(누를 수 없음). 서버·mock을 부르지 않는다.
 import { useState } from 'react';
 import { api } from '../../api';
@@ -25,6 +26,13 @@ export function GuardianAlerts() {
           <div className="row between small"><span className={a.level === '긴급' ? 'pill pill--danger' : 'pill pill--accent'}>{a.level}</span><span className="muted num">{a.at}</span></div>
           <h2 className="h2" style={{ margin: '8px 0 4px' }}><Icon name="warn" size={20} /> {a.category} · 확인 필요</h2>
           <p>{a.action}</p>
+          {a.excerpt && (
+            <section className="card card--flat stack" aria-label="아이가 한 말의 앞뒤 일부">
+              <span className="small muted">아이가 한 말의 앞뒤 일부 (개인정보는 가렸어요)</span>
+              <blockquote style={{ margin: 0, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{a.excerpt}</blockquote>
+              <span className="small">아이를 다그치기보다, 아이와 대화해 보세요.</span>
+            </section>
+          )}
           <button className="exit-btn" style={{ padding: '8px 0' }} onClick={() => setHelp(true)}>도움받을 곳 보기</button>
           <div className="stack">
             <button className="btn btn--secondary" disabled>후속</button>
@@ -38,7 +46,7 @@ export function GuardianAlerts() {
           <span className="num">{a.at} · {a.level}</span><span className="muted">{a.status}{a.closeReason ? ` · ${a.closeReason}` : ''}</span>
         </div>
       ))}
-      <p className="small muted" style={{ textAlign: 'center' }}>대화 원문은 표시하지 않아요</p>
+      <p className="small muted" style={{ textAlign: 'center' }}>평소 수다는 표시하지 않아요. 위험 신호가 있을 때만 그 앞뒤 일부를 보여 드려요</p>
       {help && (
         <Sheet title="도움받을 곳" onClose={() => setHelp(false)}>
           <ul className="list">

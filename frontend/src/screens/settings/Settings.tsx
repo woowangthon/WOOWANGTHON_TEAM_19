@@ -298,7 +298,7 @@ function ConsentSheet({ name, onAgree, onClose, busy }: { name: string | null; o
       <p className="small">{name ? `${name} 학생과 연결해요. ` : ''}만 14세 미만 아이의 개인정보는 보호자 동의가 있어야 처리할 수 있어요.</p>
       <dl className="kv">
         <dt>받는 정보</dt><dd>아이 아이디·별명·학년, 학습 기록(푼 문제·시간·힌트)</dd>
-        <dt>수다</dt><dd>원문은 보관하지 않고, 위험 신호의 분류만 보호자에게 알려요</dd>
+        <dt>수다</dt><dd>평소 수다는 보호자·학습지도자에게 보이지 않아요. 자해·자살 같은 위험 신호가 나오면 그 말의 앞뒤 일부(최대 300자)를 보호자에게만 함께 알려요</dd>
         <dt>쓰는 곳</dt><dd>학습 도움, 보호자·학습지도자에게 결과 공유</dd>
         <dt>보관</dt><dd>탈퇴하면 지워요</dd>
       </dl>

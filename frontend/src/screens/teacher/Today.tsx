@@ -31,7 +31,8 @@ export function TeacherToday() {
     </button>
   ));
   return (
-    <Frame adult title="오늘 할 것" exit right={<button className="icon-btn" aria-label="긴급 알림" onClick={() => nav('/teacher/alerts')}><Icon name="warn" /></button>} tabs="teacher">
+    // TK-74 #6: 11-15에는 🔴 알림이 보호자에게만 간다(서버 학습지도자 알림은 빈 목록) → 「긴급 알림」 입구를 숨긴다. 화면(/teacher/alerts)은 후속용으로 남김
+    <Frame adult title="오늘 할 것" exit tabs="teacher">
       {loading && <Thinking label="불러오는 중" />}
       <LoadError error={error} onRetry={reload} />
       {me && (!m || m.status !== '승인됨') && (
