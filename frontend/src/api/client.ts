@@ -1,7 +1,7 @@
 // 화면이 백엔드에 요청할 수 있는 일의 목록(계약).
 // mock.ts(가짜 서버)와 http.ts(진짜 FastAPI)가 둘 다 이 모양을 따른다 → 화면 코드는 어느 쪽인지 몰라도 된다.
 import type {
-  AnswerResult, ChatReply, ChatState, DemoSettings, Difficulty, Draft, GuardianToday, HintResult, MentorSetting,
+  AnswerResult, ChatReply, ChatState, Difficulty, Draft, GuardianToday, HintResult, MentorSetting,
   ProblemView, SafetyAlert, SessionView, Solution, StudentHome, StudentResult, StudyRecord, TeacherAlert, TeacherMemo,
   TeacherToday, Unit, WrapBody, WrapInfo,
 } from '../types';
@@ -54,7 +54,5 @@ export interface MentorApi extends AccountApi {
   closeAlert(id: string, reason: string): Promise<SafetyAlert>;
 
   /* 시연 */
-  getDemo(): Promise<DemoSettings>;
-  setDemo(settings: DemoSettings): Promise<DemoSettings>;
   resetDemo(): Promise<void>;
 }

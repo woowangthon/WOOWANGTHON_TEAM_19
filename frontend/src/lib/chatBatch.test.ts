@@ -37,6 +37,20 @@ describe('createBatcher — 1.5초 묶기, 최대 5조각', () => {
     vi.advanceTimersByTime(5000);
     expect(send).not.toHaveBeenCalled();
   });
+
+  it('flush면 1.5초를 기다리지 않고 모아 둔 조각을 바로 보낸다(수다 화면을 떠날 때)', () => {
+    const sent: string[][] = [];
+    const b = createBatcher((t) => sent.push(t));
+    b.push('가');
+    b.push('나');
+    b.flush();
+    expect(sent).toEqual([['가', '나']]);
+    expect(b.size()).toBe(0);
+    vi.advanceTimersByTime(5000);
+    expect(sent).toEqual([['가', '나']]); // 타이머로 두 번 보내지 않는다
+    b.flush();
+    expect(sent).toHaveLength(1); // 빈 묶음은 보내지 않는다
+  });
 });
 
 describe('followPending — pending이면 /reply 최대 3번', () => {
@@ -62,5 +76,14 @@ describe('followPending — pending이면 /reply 최대 3번', () => {
     const reply2 = vi.fn(async () => ({ pending: true }));
     await followPending({ pending: true }, reply2, () => false);
     expect(reply2).not.toHaveBeenCalled();
+  });
+});
+
+describe('수다 화면을 떠난 뒤 온 답', () => {
+  it('위기면 위기 화면으로 보낸다(109·1388 안내를 아이가 꼭 보게), 그 밖은 그대로', async () => {
+    const { routeAfterLeftChat } = await import('./chatBatch');
+    expect(routeAfterLeftChat('crisis')).toBe('/student/crisis');
+    expect(routeAfterLeftChat('chat')).toBeNull();
+    expect(routeAfterLeftChat('wrap')).toBeNull();
   });
 });

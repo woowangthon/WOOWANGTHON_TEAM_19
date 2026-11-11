@@ -7,11 +7,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
 
 from app import config, errors
 from app.api import health_router, router
 from app.compat import router as compat_router
-from app.db import get_db, get_engine
+from app.db import get_engine
 from app.demo import ensure_demo_actors
 from app.demo import router as demo_router
 from app.guardian import router as guardian_router
@@ -20,18 +22,46 @@ from app.models import Base
 from app.seed import load_seed
 from app.timeutil import get_now
 
+# 기동 준비를 한 번에 하나씩 하게 거는 Postgres 자문 잠금 번호(임의의 고정값)
+_STARTUP_LOCK_KEY = 0x6368696E6775  # "chingu"
+
+
+async def _enable_rls(conn: AsyncConnection) -> None:
+    """Supabase는 public 스키마 테이블을 Data API(anon 키)로 열 수 있다 → RLS만 켠다(정책 없음 =
+    anon·authenticated 차단). 앱은 테이블 주인 역할로 붙어 RLS를 받지 않는다.
+    이미 켜진 테이블은 건드리지 않는다(ALTER TABLE은 테이블 잠금이라 매 기동마다 걸지 않게)."""
+    names = [t.name for t in Base.metadata.sorted_tables]
+    rows = await conn.execute(
+        text(
+            "SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+            "WHERE n.nspname = current_schema() AND c.relname = ANY(:names) "
+            "AND NOT c.relrowsecurity"
+        ),
+        {"names": names},
+    )
+    for (name,) in rows.all():
+        await conn.execute(text(f'ALTER TABLE "{name}" ENABLE ROW LEVEL SECURITY'))
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    # 로컬 SQLite용: 테이블 만들고 시드 20문제 적재(여러 번 불러도 안전).
-    # 데모 배우가 없으면 day3로 만든다(배포 DB는 휘발성 — 재시작 뒤에도 바로 쓸 수 있게).
-    # 빈 DB 동시 기동은 안전하지 않으니 워커는 1개로 띄운다(render.yaml).
+    # 테이블 만들고 시드 20문제 적재, 데모 배우가 없으면 day3로 만든다(여러 번 불러도 안전).
+    # Vercel은 함수 인스턴스마다 기동이 돈다 → 빈 DB에 동시에 들어와도 깨지지 않게 Postgres는
+    # 트랜잭션 자문 잠금으로 한 줄 세운다(뒤 인스턴스는 앞이 커밋한 걸 보고 아무것도 안 한다).
+    # 전부 한 트랜잭션: 중간에 죽으면 통째로 되돌아간다. 로컬 SQLite는 예전과 같다.
     async with get_engine().begin() as conn:
+        if conn.dialect.name == "postgresql":
+            await conn.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": _STARTUP_LOCK_KEY})
         await conn.run_sync(Base.metadata.create_all)
-    async for db in get_db():
-        await load_seed(db)
-        await ensure_demo_actors(db, get_now())
-        await db.commit()
+        if conn.dialect.name == "postgresql":
+            await _enable_rls(conn)
+        db = AsyncSession(bind=conn, expire_on_commit=False)
+        try:
+            await load_seed(db)
+            await ensure_demo_actors(db, get_now())
+            await db.flush()
+        finally:
+            await db.close()
     yield
 
 

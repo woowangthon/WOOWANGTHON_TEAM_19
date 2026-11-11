@@ -54,6 +54,10 @@ class Student(Base):
     consent: Mapped[bool] = mapped_column(Boolean, default=False)
     today_task_problem_id: Mapped[str | None] = mapped_column(ForeignKey("problems.id"))
     today_task_date: Mapped[date | None] = mapped_column(Date)
+    # 체험 세트 발급 상한을 DB에서 세는 데 쓴다(명세 4.11-5). 기존 행은 비어 있을 수 있다
+    created_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(dt.UTC)
+    )
 
 
 class Problem(Base):

@@ -12,7 +12,9 @@ export interface Batcher {
   push(text: string): void;
   /** 모아 둔 조각 수 */
   size(): number;
-  /** 타이머·모아 둔 조각을 버린다(화면을 떠날 때) */
+  /** 모아 둔 조각을 1.5초를 기다리지 않고 바로 보낸다(화면을 떠날 때 — 🔴 검사를 거치게, 명세 4.11 7) */
+  flush(): void;
+  /** 타이머·모아 둔 조각을 버린다 */
   cancel(): void;
 }
 
@@ -34,6 +36,7 @@ export function createBatcher(send: (texts: string[]) => void, waitMs = BATCH_WA
       else { stop(); timer = setTimeout(flush, waitMs); }
     },
     size: () => buf.length,
+    flush,
     cancel() { stop(); buf = []; },
   };
 }
@@ -53,4 +56,9 @@ export async function followPending<R extends { pending?: boolean }>(
     if (!onReply(r) || !r.pending || i >= max) return;
     r = await reply();
   }
+}
+
+/** 수다 화면을 떠난 뒤 도착한 응답의 단계 → 보낼 화면. 위기면 위기 화면(아이가 109·1388을 꼭 보게), 그 밖은 null(그대로) */
+export function routeAfterLeftChat(phase: string): string | null {
+  return phase === 'crisis' ? '/student/crisis' : null;
 }

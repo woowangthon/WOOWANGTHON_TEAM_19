@@ -416,3 +416,31 @@
 9. **끊어 보내기(11-11)** — 수다 입력창·전송 버튼을 **전송 중에도 비활성화하지 않는다.** 1.5초 안 조각을 `texts`로 묶어 sendChat. `queued: true`면 「생각 중…」 유지, `pending: true`면 `POST /sessions/{id}/reply`를 불러 그 `reply`를 붙인다. 힌트 버튼은 답 기다리는 중이면 비활성화(누르면 409 `busy`).
 10. `session.studyMin`은 이제 수다·다리 놓기 단계에서도 같이 풀기에 쓴 분을 준다(전에는 0).
 11. **강사 화면(11-11)** — 강사 요청에 `X-Demo-Role: instructor`·`X-Demo-Actor: demo-instructor`. `saveMemo` 다음에 `createDraft`를 부르는 지금 순서를 지킨다(`createDraft`는 읽기만). 승인 뒤 `updateDraft`는 409 `note_closed`(mock처럼 「승인 대기」로 돌아가지 않는다). 같은 날 메모를 다시 저장해도 초안은 그대로다.
+
+**11-11 추가 계약 (compat)**
+
+| # | 경로 (`/api/v1/compat` 아래) | 요청 | 응답 | 오류 |
+| --- | --- | --- | --- | --- |
+| 1 | POST /demo/restart | 본문 없음. 토큰·역할 헤더 없음(있어도 보지 않는다) | 200 `{"ok": true, "date": "YYYY-MM-DD"}`(서울 날짜) | 없음(DB 오류만 500) |
+| 2 | GET /student/home | 기존과 같음(아이 헤더) | 기존 필드 + `endedInCrisis: boolean` — 오늘 세션이 crisis로 끝났으면 `true`, 세션 없음·진행 중·정상 종료는 `false` | 기존과 같음(헤더 없으면 401 `no_actor`) |
+
+- #1은 데모 아이(`demo-child-minsu`)만 day3로 되돌린다: 세션·메시지·🔴 알림·오개념 삭제, 연속 3일·오늘 과제·오개념 3개를 다시 만든다. **강사 노트(메모·코멘트)·아이의 캐릭터 설정(style·호칭·말투)·타이머 배율은 그대로**, 다른 학생·계정 행도 그대로. 여러 번 불러도 같은 상태. 시연자 전체 리셋은 기존 `POST /api/v1/demo/reset`(토큰 필요).
+- sendChat(A1, 11-11): 수다 마감 뒤(bridge)에 온 말도 PII 치환본 저장 + 🔴 키워드 검사를 거친다. 🔴이면 수다 중과 같은 crisis 응답(`crisis: true`·`hotlines`, 보호자 알림 1건). 아니면 `reply: ""`·`source: null`(LLM 호출 없음), 빈 말은 422. study 단계에 온 말은 전처럼 빈 답.
+
+**11-11 공개 체험 세트 (compat, 명세 4.11-2·5)**
+
+| # | 경로 (`/api/v1/compat` 아래) | 요청 | 응답 | 오류 |
+| --- | --- | --- | --- | --- |
+| 3 | POST /trial | 본문 없음. 토큰·역할 헤더 없음 | 200 `{"trialId": "t-…", "actors": {"child": "t-…-child", "guardian": "t-…-guardian", "instructor": "t-…-instructor"}, "date": "YYYY-MM-DD"}`(서울 날짜) | 429 `trial_limit` 「잠시 뒤 다시 시도해 주세요.」 — 서버 전체 최근 1시간 발급 300개 이상 |
+
+- `t-…`는 `t-` + 소문자·숫자 16자. 프론트는 응답을 localStorage에 두고 역할별로 `X-Demo-Role`(child/guardian/instructor) + `X-Demo-Actor`(위 `actors`의 같은 역할 id)로 쓴다. 「처음부터 다시 체험」은 `POST /trial`을 다시 불러 새 세트로 바꾼다(이전 세트는 그대로 버린다). 배포 화면에서 `/demo/restart`는 부르지 않는다.
+- 세트 아이는 day3(연속 3일·오개념 열림 2 + 해소 1·오늘 과제 3/4 ÷ 2, 별명 「지우」)지만 **약속 동의 전**이라 `GET /student/home`의 `needsOnboarding`이 `true` → 약속·캐릭터 고르기부터.
+- 보호자 `t-…-guardian`은 같은 세트 아이를 본다. 형식은 맞는데 세트가 없으면 404 `student_not_found`, 형식이 틀리면 404 `guardian_not_found`.
+- 학습지도자 `t-…-instructor`는 **같은 세트 아이만** 본다: `GET /teacher/today`의 `students`는 그 아이 1명. 다른 학생 id로 `/teacher/students/{id}/…`(memo·draft·approve·task)를 부르면 404 `student_not_found`(기본 경로 `/api/v1/instructor/…`도 같다). `demo-instructor`와 그 밖의 강사 id는 전처럼 전체.
+- AI 호출 상한: 한 아이의 오늘 멘토 답이 150개 이상이면 그 턴은 LLM 대신 대본 문장(`source: "scripted"`). 화면은 막지 않는다.
+
+### 11-11 보강 (A 세션 검수)
+- `POST /compat/demo/restart` **없앰** — 토큰 없이 공용 데모 아이를 지울 수 있었다. 「처음부터 다시 체험」은 `POST /compat/trial`(새 세트).
+- 학습지도자: 체험 강사(`t-…-instructor`)는 같은 세트 아이만. 그 밖의 강사 id는 체험 아이(`t-…`)를 못 본다(목록에서 빠지고 직접 요청은 404).
+- 체험 강사의 세트 아이가 DB에 없으면 모든 학습지도자 요청이 404 `trial_not_found` → 프론트는 세트를 버리고 새로 받는다.
+- AI 상한: 아이당 하루 150 + 서버 전체 최근 1시간 1500(멘토 답 수, DB에서 셈). 넘으면 그 턴 `source: "scripted"`.

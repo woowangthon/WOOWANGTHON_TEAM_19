@@ -27,7 +27,10 @@ SCRIPT_PATH = Path(__file__).resolve().parent / "scripts" / "day3.yaml"
 FIXED_REPLY = "잠깐 생각이 막혔어. 한 번만 다시 말해 줄래?"
 LIVE_TIMEOUT_S = 20.0
 LIVE_MAX_TOKENS = 1024  # 생각(thinking) 토큰도 여기서 나간다. 답 길이는 프롬프트가 정한다
-LIVE_EFFORT = "low"  # 짧은 대화·초안이라 낮게. thinking 끄기는 모델마다 400이라 effort로만
+# 짧은 대화·초안이라 낮게. Haiku 5.5는 thinking을 생략하면 adaptive로 켜지고(effort 기본 medium),
+# {"type": "disabled"}는 effort low~high에서만 받고 xhigh·max에서는 400이다(claude-api 스킬
+# 「Migrating to Claude Haiku 5.5」, 2026-11 기준). 공식 권장이 effort로 줄이기라 thinking은 보내지 않는다
+LIVE_EFFORT = "low"
 # 서버 쪽 역할 이름 → API 역할. 아이 쪽은 child/mentor, 초안은 user를 쓴다
 ROLE_MAP = {"child": "user", "user": "user", "mentor": "assistant", "assistant": "assistant"}
 EMPTY_TURN = "(이어서)"  # 첫·끝 메시지가 user가 아닐 때 채우는 자리표시(원문 아님)
@@ -156,6 +159,8 @@ class AnthropicAdapter:
         )
         if resp.stop_reason == "refusal":
             raise RuntimeError("llm refusal")
+        if resp.stop_reason == "max_tokens":  # 끊긴 답은 아이에게 보내지 않는다 → 폴백이 대본으로
+            raise RuntimeError("llm truncated")
         text = "".join(b.text for b in resp.content if b.type == "text").strip()
         if not text:
             raise ValueError("llm empty reply")

@@ -1,7 +1,8 @@
 """강사 API 8·9·10번. 명세 4.4·3.4·4.6.
 
 - 강사 신원은 데모 헤더 X-Demo-Role: instructor / X-Demo-Actor. 강사 테이블은 없어서
-  11-15는 역할만 확인하고 actor는 비어 있지 않은지만 본다.
+  11-15는 역할만 확인하고 actor는 비어 있지 않은지만 본다. 체험 학습지도자(`t-…-instructor`)는
+  같은 세트 아이만 보고, 다른 학생 id는 404 student_not_found(명세 4.11-2).
 - 강사 메모(3칸 + 자유 메모)와 승인본은 pii.redact 치환본만 저장한다.
 - 초안은 메모 저장 순간 한 번(재생성 없음). 어댑터 실패·빈 응답·JSON 아님이면 템플릿.
 - 로그에는 note id·길이만 남기고 문장은 남기지 않는다.
@@ -26,6 +27,7 @@ from app.llm import LIVE_TIMEOUT_S, LLMAdapter, ReplyRequest, ScriptedAdapter, b
 from app.models import InstructorNote, Problem, Session, Student
 from app.pii import redact
 from app.timeutil import get_now, seoul_date
+from app.trial import instructor_can_see
 
 log = logging.getLogger(__name__)
 
@@ -70,8 +72,12 @@ def get_draft_adapter() -> LLMAdapter:
 DraftAdapter = Annotated[LLMAdapter, Depends(get_draft_adapter)]
 
 
-async def _student_or_404(db: AsyncSession, student_id: str) -> Student:
-    student = await db.get(Student, student_id)
+async def _student_or_404(
+    db: AsyncSession, student_id: str, instructor_id: str | None = None
+) -> Student:
+    """instructor_id가 체험 학습지도자면 같은 세트 아이가 아닐 때도 404(있는지 알리지 않는다)."""
+    ok = instructor_id is None or instructor_can_see(instructor_id, student_id)
+    student = await db.get(Student, student_id) if ok else None
     if student is None:
         raise ApiError(404, "student_not_found", "학생을 찾을 수 없어요.")
     return student
@@ -86,9 +92,9 @@ class TodayTaskIn(BaseModel):
 
 @router.put("/students/{sid}/today-task")
 async def put_today_task(
-    sid: str, body: TodayTaskIn, db: Db, now: Now, _: Instructor
+    sid: str, body: TodayTaskIn, db: Db, now: Now, actor: Instructor
 ) -> dict[str, Any]:
-    student = await _student_or_404(db, sid)
+    student = await _student_or_404(db, sid, actor)
     if await db.get(Problem, body.problem_id) is None:
         raise ApiError(404, "problem_not_found", "문제를 찾을 수 없어요.")
     # 다시 지정하면 덮어쓴다(명세 4.2 today_task)
@@ -198,9 +204,9 @@ async def _today_note(db: AsyncSession, student_id: str, now: datetime) -> Instr
 
 @router.post("/notes")
 async def post_note(
-    body: NoteIn, db: Db, now: Now, adapter: DraftAdapter, _: Instructor
+    body: NoteIn, db: Db, now: Now, adapter: DraftAdapter, actor: Instructor
 ) -> dict[str, Any]:
-    student = await _student_or_404(db, body.student_id)
+    student = await _student_or_404(db, body.student_id, actor)
     existing = await _today_note(db, student.id, now)
     if existing is not None:
         # 초안은 메모 저장 순간 한 번, 재생성 없음(명세 3.4). 두 번 눌러도 같은 노트
@@ -233,8 +239,8 @@ async def post_note(
 
 
 @router.get("/notes")
-async def get_note(student_id: str, db: Db, now: Now, _: Instructor) -> dict[str, Any] | None:
-    student = await _student_or_404(db, student_id)
+async def get_note(student_id: str, db: Db, now: Now, actor: Instructor) -> dict[str, Any] | None:
+    student = await _student_or_404(db, student_id, actor)
     note = await _today_note(db, student.id, now)
     return _note_out(note) if note is not None else None
 
@@ -263,9 +269,9 @@ class ApproveIn(BaseModel):
 
 
 @router.post("/notes/{note_id}/approve")
-async def approve_note(note_id: str, body: ApproveIn, db: Db, _: Instructor) -> dict[str, str]:
+async def approve_note(note_id: str, body: ApproveIn, db: Db, actor: Instructor) -> dict[str, str]:
     note = await db.get(InstructorNote, note_id)
-    if note is None:
+    if note is None or not instructor_can_see(actor, note.student_id):
         raise ApiError(404, "note_not_found", "코멘트를 찾을 수 없어요.")
     if note.status != "draft":
         raise ApiError(409, "note_closed", "이미 처리한 코멘트예요.")

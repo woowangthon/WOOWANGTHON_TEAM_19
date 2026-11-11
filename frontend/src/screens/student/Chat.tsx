@@ -1,6 +1,7 @@
 // 학생 ④ 수다 (선택, 최대 10분) — 학생이 '끝내기'로 조절하고, 10분 마감은 서버가 판정한다.
 // 위험 표현이 감지되면 서버가 세션을 crisis로 끝내고, 화면은 위기 화면으로 넘어간다.
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
@@ -10,7 +11,7 @@ import { mmss } from '../../lib/date';
 import { useCountdown } from '../../lib/useCountdown';
 import { useAsync } from '../../lib/useAsync';
 import { RequirePhase, useSession } from '../../state/session';
-import { createBatcher, followPending } from '../../lib/chatBatch';
+import { createBatcher, followPending, routeAfterLeftChat } from '../../lib/chatBatch';
 import type { ChatMessage, ChatReply } from '../../types';
 
 const SUGGEST = ['오늘 피곤해', '자랑할 거 있어', '그냥 얘기하고 싶어'];
@@ -32,6 +33,8 @@ function Chat() {
   const stopped = useRef(false);                 // 위기·단계 바뀜 뒤 늦게 온 답은 버린다
   const [sendError, setSendError] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const left_ = useRef(false);                   // 화면을 떠났는지(떠난 뒤 온 위기 응답은 위기 화면으로 보낸다)
   useEffect(() => { if (data) setMsgs(data.messages); }, [data]);
   useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }); }, [msgs, waiting]);
   const left = useCountdown(data ? data.remainingSec : null, refresh);
@@ -39,7 +42,13 @@ function Chat() {
   /** 응답 하나 처리. 계속 받아도 되면 true */
   const take = (r: ChatReply): boolean => {
     if (stopped.current) return false;
-    if (r.session.phase !== 'chat') { stopped.current = true; sync(r.session); return false; } // 위기 감지·시간 종료 → 서버 단계에 맞는 화면으로
+    if (r.session.phase !== 'chat') {
+      stopped.current = true; sync(r.session); // 위기 감지·시간 종료 → 서버 단계에 맞는 화면으로
+      // 떠난 뒤라 RequirePhase가 옮겨 주지 못한다. 위기면 직접 위기 화면으로(홈이 예전 상태로 남지 않게)
+      const to = left_.current ? routeAfterLeftChat(r.session.phase) : null;
+      if (to) navigate(to, { replace: true });
+      return false;
+    }
     if (!r.queued && r.reply) setMsgs((m) => [...m, { from: 'mentor', text: r.reply }]); // queued면 앞 요청이 답을 가져온다
     return true;
   };
@@ -52,7 +61,9 @@ function Chat() {
   const sendRef = useRef(sendBatch);
   sendRef.current = sendBatch;
   const [batcher] = useState(() => createBatcher((texts) => { void sendRef.current(texts); }));
-  useEffect(() => () => batcher.cancel(), [batcher]);
+  // 화면을 떠날 때 모아 둔 말은 버리지 않고 먼저 보낸다(🔴 검사를 거치게, 명세 4.11 7). 이동은 막지 않고,
+  // 요청은 화면이 사라진 뒤에도 끝까지 간다(위기면 sync로 세션이 바뀐다). 마감 뒤라 빈 답이 와도 정상
+  useEffect(() => () => { left_.current = true; batcher.flush(); }, [batcher]);
 
   const send = (raw: string) => {
     const v = raw.trim();

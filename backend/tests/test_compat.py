@@ -373,14 +373,16 @@ async def test_teacher_memo_draft_edit_approve_reaches_guardian(client, db_sessi
         await call("PUT", f"{url}/draft", headers=INSTRUCTOR, json={"comment": EDITED})
     ).json()
     assert edited["status"] == "승인 대기"
-    assert "[이름]" in edited["comment"] and "[전화]" in edited["comment"]
-    assert "테스트학생" not in edited["comment"] and "010-2222-3333" not in edited["comment"]
+    # 저장본은 치환본, 학습지도자 화면에는 이름만 되돌려 보인다(11-11 성호). 전화는 계속 가림
+    assert "테스트학생" in edited["comment"] and "[이름]" not in edited["comment"]
+    assert "[전화]" in edited["comment"] and "010-2222-3333" not in edited["comment"]
     row = (await call("GET", "/teacher/today", headers=INSTRUCTOR)).json()["students"][0]
     assert row["draftStatus"] == "승인 대기"
 
     approved = (await call("POST", f"{url}/draft/approve", headers=INSTRUCTOR)).json()
     assert approved["status"] == "승인됨" and approved["comment"] == edited["comment"]
     card = (await call("GET", "/guardian/today", headers=GUARDIAN)).json()
+    # 보호자 화면에서는 표시 직전에 「[이름]」을 별명으로 되돌린다(11-11 A6)
     assert card["teacherComment"] == edited["comment"]
     row = (await call("GET", "/teacher/today", headers=INSTRUCTOR)).json()["students"][0]
     assert row["draftStatus"] == "승인됨"

@@ -6,15 +6,15 @@ import type { AccountRole } from '../types';
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:8000';
 
 // 시연 서버의 「누구인지」 헤더(로그인 서버화 전 임시). 로그인한 계정의 역할을 state/auth.tsx가 알려 준다.
-const DEMO_ACTOR: Record<'child' | 'guardian' | 'instructor', string> = {
-  child: 'demo-child-minsu',
-  guardian: 'demo-guardian-minsu',
-  instructor: 'demo-instructor',
-};
+// 누구 id를 쓸지는 방문자별 체험 세트(명세 4.11 2)가 정한다: 처음 서버를 쓸 때 POST /trial로 받아 localStorage에 둔다.
+type DemoRole = 'child' | 'guardian' | 'instructor';
+const ROLES: DemoRole[] = ['child', 'guardian', 'instructor'];
 const ROLE_KEY = 'ai-mentor-demo-role';
-type DemoRole = keyof typeof DEMO_ACTOR;
+const TRIAL_KEY = 'ai-mentor-trial';
+interface Trial { trialId: string; actors: Record<DemoRole, string>; date: string; }
+
 function readRole(): DemoRole | null {
-  try { const v = localStorage.getItem(ROLE_KEY); return v && v in DEMO_ACTOR ? (v as DemoRole) : null; } catch { return null; }
+  try { const v = localStorage.getItem(ROLE_KEY); return v && (ROLES as string[]).includes(v) ? (v as DemoRole) : null; } catch { return null; }
 }
 // 새로고침 직후 getMe보다 먼저 나가는 요청(오늘 세션·멘토)도 헤더를 달도록 마지막 역할을 기억해 둔다
 let demoRole: DemoRole | null = readRole();
@@ -26,27 +26,80 @@ export function setDemoRole(role: AccountRole | null): boolean {
   try { if (demoRole) localStorage.setItem(ROLE_KEY, demoRole); else localStorage.removeItem(ROLE_KEY); } catch { /* 저장이 막혀도 이번 실행은 메모리로 */ }
   return demoRole !== before;
 }
-function demoHeaders(): Record<string, string> {
-  return demoRole ? { 'X-Demo-Role': demoRole, 'X-Demo-Actor': DEMO_ACTOR[demoRole] } : {};
+
+/* ---------- 체험 세트 ---------- */
+function readTrial(): Trial | null {
+  try {
+    const v = JSON.parse(localStorage.getItem(TRIAL_KEY) ?? 'null') as Trial | null;
+    return v && typeof v.trialId === 'string' && ROLES.every((r) => typeof v.actors?.[r] === 'string') ? v : null;
+  } catch { return null; }
+}
+let trial: Trial | null = readTrial();      // 저장이 막혀도(사생활 모드) 이번 실행은 이 메모리 값으로
+let trialPending: Promise<Trial> | null = null; // 받는 중인 요청(동시에 여러 요청이 와도 세트는 한 번만 받는다)
+
+function dropTrial() {
+  trial = null;
+  try { localStorage.removeItem(TRIAL_KEY); } catch { /* 메모리만 비운다 */ }
 }
 
-async function call<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T> {
+async function errorMessage(res: Response): Promise<string> {
+  const detail = await res.json().then((j) => (j?.message ?? j?.detail) as string | undefined).catch(() => undefined);
+  return detail ?? `서버 오류가 났어요 (${res.status})`;
+}
+
+/** 저장된 세트를 쓰고, 없으면 POST /trial(본문·헤더 없음)로 받아 둔다. 429(과부하)면 서버 문구 그대로 오류 */
+function ensureTrial(): Promise<Trial> {
+  if (trial) return Promise.resolve(trial);
+  if (trialPending) return trialPending;
+  trialPending = (async () => {
+    let res: Response;
+    try { res = await fetch(BASE + '/trial', { method: 'POST' }); }
+    catch { throw new Error('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.'); }
+    if (!res.ok) throw new Error(await errorMessage(res));
+    const t = (await res.json()) as Trial;
+    trial = t;
+    try { localStorage.setItem(TRIAL_KEY, JSON.stringify(t)); } catch { /* 메모리로 */ }
+    return t;
+  })().finally(() => { trialPending = null; });
+  return trialPending;
+}
+
+/** 「처음부터 다시 체험」: 지금 세트를 버리고 새 세트를 받는다(이전 세트는 서버에 그대로 두고 버린다). 로그인 전에도 부를 수 있다 */
+export async function startNewTrial(): Promise<void> {
+  dropTrial();
+  await ensureTrial();
+}
+
+/** 세트가 서버에 없을 때(DB가 바뀜)의 404. 학습지도자의 student_not_found는 주소 속 학생 이야기라 제외하고,
+ *  학습지도자는 서버가 따로 주는 trial_not_found(세트 아이가 없음)로 안다 */
+const isTrialGone = (role: DemoRole, code: unknown) =>
+  code === 'trial_not_found' ||
+  (role === 'child' && code === 'student_not_found') || (role === 'guardian' && (code === 'student_not_found' || code === 'guardian_not_found'));
+
+async function call<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown, retried = false): Promise<T> {
   // 로그인 전에는 서버가 누구인지 알 수 없어 401이 난다 → 보내지 않는다(화면은 오류를 받아 null로 둔다)
-  if (!demoRole) throw new Error('로그인이 필요해요.');
+  const role = demoRole;
+  if (!role) throw new Error('로그인이 필요해요.');
+  const t = await ensureTrial();
   let res: Response;
   try {
     res = await fetch(BASE + path, {
       method,
-      headers: { ...demoHeaders(), ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}) },
+      headers: { 'X-Demo-Role': role, 'X-Demo-Actor': t.actors[role], ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}) },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
     throw new Error('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.');
   }
-  if (!res.ok) {
-    const detail = await res.json().then((j) => (j?.message ?? j?.detail) as string | undefined).catch(() => undefined);
-    throw new Error(detail ?? `서버 오류가 났어요 (${res.status})`);
+  if (res.status === 404 && !retried) {
+    const j = await res.clone().json().catch(() => null);
+    if (isTrialGone(role, j?.code)) {
+      // 같은 세트로 실패한 요청이 여럿이어도 한 번만 버린다(이미 새 세트면 그걸 쓴다)
+      if (trial?.trialId === t.trialId) dropTrial();
+      return call<T>(method, path, body, true);
+    }
   }
+  if (!res.ok) throw new Error(await errorMessage(res));
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
 
@@ -136,7 +189,5 @@ export const httpApi: MentorApi = {
   saveShopItem: (item) => (item.id ? call('PUT', `/teacher/shop/items/${item.id}`, item) : call('POST', '/teacher/shop/items', item)),
   deliverOrder: (orderId) => call('POST', `/teacher/orders/${orderId}/deliver`),
 
-  getDemo: () => call('GET', '/demo/settings'),
-  setDemo: (settings) => call('PUT', '/demo/settings', settings),
   resetDemo: () => call('POST', '/demo/reset'),
 };
