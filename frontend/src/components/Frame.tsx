@@ -14,7 +14,7 @@ interface Props extends Partial<TopBarProps> {
 
 export function Frame({ header, tabs, adult, actions, tone, children, title = '', ...top }: Props) {
   return (
-    <div className={'frame' + (adult ? ' frame--adult' : '')}>
+    <div className={'frame' + (adult ? ' frame--adult' : '') + (tabs ? ' frame--tabs' : '')}>
       {header ?? <TopBar title={title} {...top} />}
       <main className="screen-body">{children}</main>
       {actions && <div className={'bottom-actions' + (tone ? ` bottom-actions--${tone}` : '')}>{actions}</div>}

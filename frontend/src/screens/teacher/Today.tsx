@@ -34,6 +34,7 @@ export function TeacherToday() {
           <div className="row between small"><span>{data.dateLabel}</span><span className="muted">{data.className} · 학생 {data.students.length}명</span></div>
           {data.students.length === 0 && <button className="card notice" onClick={() => nav('/teacher/classes')}><span>강의실을 열고 학생을 초대해 주세요</span><Icon name="chevron" size={18} /></button>}
           {data.units.length === 0 && <div className="notice">범위 탭에서 이번 주 단원을 먼저 골라 주세요.</div>}
+          <div className="card-grid">
           {data.students.map((s) => (
             <button key={s.id} className="card student-row" onClick={() => setOpen(s)}>
               <span style={{ minWidth: 0 }}>
@@ -43,6 +44,7 @@ export function TeacherToday() {
               <span className="row"><span className={STATUS_PILL[s.status]}>{s.status}</span><Icon name="chevron" size={18} /></span>
             </button>
           ))}
+          </div>
           <p className="small muted">학생을 누르면 오늘 할 것을 정하고 보호자 코멘트를 쓸 수 있어요.</p>
         </>
       )}

@@ -22,6 +22,7 @@ export function TeacherClasses() {
       {loading && !data && <Thinking label="불러오는 중" />}
       <LoadError error={error ?? actErr} onRetry={reload} />
       {data?.classrooms.length === 0 && <div className="notice notice--plain"><span>아직 강의실이 없어요. 오른쪽 위 +로 열어 주세요.</span></div>}
+      <div className="card-grid">
       {data?.classrooms.map((c) => (
         <section key={c.id} className="card stack">
           <div className="row between">
@@ -49,6 +50,7 @@ export function TeacherClasses() {
           <button className="btn btn--secondary btn--small" style={{ alignSelf: 'flex-start' }} onClick={() => setInviteTo(c)}><Icon name="plus" size={16} />학생 초대</button>
         </section>
       ))}
+      </div>
 
       {create && (
         <Sheet title="강의실 열기" onClose={() => setCreate(false)}>
