@@ -10,7 +10,8 @@ import { mmss } from '../../lib/date';
 import { useCountdown } from '../../lib/useCountdown';
 import { useAsync } from '../../lib/useAsync';
 import { RequirePhase, useSession } from '../../state/session';
-import type { ChatMessage } from '../../types';
+import { createBatcher, followPending } from '../../lib/chatBatch';
+import type { ChatMessage, ChatReply } from '../../types';
 
 const SUGGEST = ['오늘 피곤해', '자랑할 거 있어', '그냥 얘기하고 싶어'];
 
@@ -24,25 +25,45 @@ function Chat() {
   const { data, error, reload } = useAsync(() => api.getChat(id), [id]);
   const [msgs, setMsgs] = useState<ChatMessage[]>([]);
   const [text, setText] = useState('');
-  const [busy, setBusy] = useState(false);
+  // 끊어 보내기(11-11): 입력은 막지 않는다. 모은 말은 1.5초 뒤(5개면 바로) 한 번에 보낸다(lib/chatBatch).
+  const [waiting, setWaiting] = useState(0);     // 서버에 나가 있는 요청 수 → 이 동안 「생각 중」
+  const [buffered, setBuffered] = useState(0);   // 아직 보내지 않고 모아 둔 조각 수
+  const [ending, setEnding] = useState(false);
+  const stopped = useRef(false);                 // 위기·단계 바뀜 뒤 늦게 온 답은 버린다
   const [sendError, setSendError] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
   useEffect(() => { if (data) setMsgs(data.messages); }, [data]);
-  useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }); }, [msgs, busy]);
+  useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }); }, [msgs, waiting]);
   const left = useCountdown(data ? data.remainingSec : null, refresh);
 
-  const send = async (raw: string) => {
-    const v = raw.trim();
-    if (!v || busy) return;
-    setMsgs((m) => [...m, { from: 'me', text: v }]);
-    setText(''); setBusy(true); setSendError(null);
-    try {
-      const r = await api.sendChat(id, v);
-      if (r.session.phase !== 'chat') { sync(r.session); return; } // 위기 감지·시간 종료 → 서버 단계에 맞는 화면으로
-      setMsgs((m) => [...m, { from: 'mentor', text: r.reply }]);
-    } catch (e) { setSendError((e as Error).message); } finally { setBusy(false); }
+  /** 응답 하나 처리. 계속 받아도 되면 true */
+  const take = (r: ChatReply): boolean => {
+    if (stopped.current) return false;
+    if (r.session.phase !== 'chat') { stopped.current = true; sync(r.session); return false; } // 위기 감지·시간 종료 → 서버 단계에 맞는 화면으로
+    if (!r.queued && r.reply) setMsgs((m) => [...m, { from: 'mentor', text: r.reply }]); // queued면 앞 요청이 답을 가져온다
+    return true;
   };
-  const end = async () => { setBusy(true); try { sync(await api.endChat(id)); } catch (e) { setSendError((e as Error).message); setBusy(false); } };
+  const sendBatch = async (texts: string[]) => {
+    setBuffered(0); setWaiting((n) => n + 1); setSendError(null);
+    try { await followPending(await api.sendChat(id, texts), () => api.replyChat(id), take); }
+    catch (e) { if (!stopped.current) setSendError((e as Error).message); }
+    finally { setWaiting((n) => n - 1); }
+  };
+  const sendRef = useRef(sendBatch);
+  sendRef.current = sendBatch;
+  const [batcher] = useState(() => createBatcher((texts) => { void sendRef.current(texts); }));
+  useEffect(() => () => batcher.cancel(), [batcher]);
+
+  const send = (raw: string) => {
+    const v = raw.trim();
+    if (!v || stopped.current || ending) return;
+    setMsgs((m) => [...m, { from: 'me', text: v }]);
+    setText('');
+    batcher.push(v);
+    setBuffered(batcher.size());
+  };
+  const end = async () => { setEnding(true); try { sync(await api.endChat(id)); } catch (e) { setSendError((e as Error).message); setEnding(false); } };
+  const busy = waiting > 0 || buffered > 0 || ending; // 「끝내기」는 보낼 말·답이 남아 있으면 막는다
 
   const actions = (
     <>
@@ -50,11 +71,11 @@ function Chat() {
       <div className="row" style={{ justifyContent: 'flex-end' }}>
         <button className="btn btn--secondary btn--small" disabled={busy} onClick={end}>오늘 수다 끝내기</button>
       </div>
-      <div className="chip-row chip-row--scroll">{SUGGEST.map((s) => <button key={s} className="chip" disabled={busy} onClick={() => send(s)}>{s}</button>)}</div>
+      <div className="chip-row chip-row--scroll">{SUGGEST.map((s) => <button key={s} className="chip" disabled={ending} onClick={() => send(s)}>{s}</button>)}</div>
       {/* 입력창 옆 + 버튼 금지 (BRIEF 공통 디자인) */}
       <form className="chat-form" onSubmit={(e) => { e.preventDefault(); send(text); }}>
         <input id="chat-input" className="input" aria-label="메시지 입력" placeholder="메시지 입력" maxLength={200} value={text} onChange={(e) => setText(e.target.value)} />
-        <button className="btn btn--primary" disabled={!text.trim() || busy} aria-label="보내기"><Icon name="send" size={20} /></button>
+        <button className="btn btn--primary" disabled={!text.trim() || ending} aria-label="보내기"><Icon name="send" size={20} /></button>
       </form>
     </>
   );
@@ -68,7 +89,7 @@ function Chat() {
         ) : (
           <div key={i} className="bubble bubble--me">{m.text}</div>
         ))}
-        {busy && <Thinking />}
+        {waiting > 0 && <Thinking />}
         <div ref={bottom} />
       </div>
       <LoadError error={sendError} />

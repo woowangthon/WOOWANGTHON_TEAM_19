@@ -65,8 +65,8 @@ export function GuardianAlerts() {
       {help && (
         <Sheet title="도움받을 곳" onClose={() => setHelp(false)}>
           <ul className="list">
-            <li><strong className="num" style={{ fontSize: 20, userSelect: 'all' }}>109</strong> 자살예방 상담전화</li>
-            <li><strong className="num" style={{ fontSize: 20, userSelect: 'all' }}>1388</strong> 청소년 상담전화</li>
+            <li><a href="tel:109" style={{ color: 'inherit', textDecoration: 'none' }}><strong className="num" style={{ fontSize: 20, userSelect: 'all' }}>109</strong></a> 자살예방 상담전화</li>
+            <li><a href="tel:1388" style={{ color: 'inherit', textDecoration: 'none' }}><strong className="num" style={{ fontSize: 20, userSelect: 'all' }}>1388</strong></a> 청소년 상담전화</li>
           </ul>
           <p className="small muted">먼저 아이의 말을 끝까지 들어 주세요. 혼내거나 캐묻기보다 “말해 줘서 고마워”가 먼저예요.</p>
           <button className="btn btn--secondary" onClick={() => setHelp(false)}>닫기</button>

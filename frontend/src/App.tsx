@@ -29,7 +29,8 @@ import { GuardianResult } from './screens/guardian/Result';
 import { GuardianAlerts } from './screens/guardian/Alerts';
 import { OwnerHome } from './screens/owner/Owner';
 import { OperatorHome } from './screens/operator/Operator';
-import type { ReactNode } from 'react';
+import { Component, type ReactNode } from 'react';
+import { LoadError } from './components/Common';
 import type { AccountRole } from './types';
 
 // HashRouter: 정적 호스팅·파일 더블클릭에서도 새로고침 404가 없다 / 미리보기(임베드)는 MemoryRouter: VITE_ROUTER=memory
@@ -38,12 +39,27 @@ const as = (role: AccountRole | AccountRole[], el: ReactNode) => <RequireRole ro
 const guest = (el: ReactNode) => <GuestOnly>{el}</GuestOnly>;
 const ALL: AccountRole[] = ['student', 'guardian', 'teacher', 'operator'];
 
+/** 화면 하나가 그리다 깨져도 앱 전체가 하얗게 되지 않게 막는다. 「다시 시도」는 첫 화면으로 돌아가 다시 그린다 */
+class ScreenErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <div className="frame"><main className="screen-body">
+        <LoadError error="화면을 그리다가 문제가 생겼어요." onRetry={() => { location.hash = '#/'; this.setState({ failed: false }); }} />
+      </main></div>
+    );
+  }
+}
+
 export default function App() {
   return (
     <SessionProvider>
       <MentorProvider>
       <AuthProvider>
       <Router>
+        <ScreenErrorBoundary>
         <Routes>
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={guest(<Login />)} />
@@ -89,6 +105,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </ScreenErrorBoundary>
       </Router>
       </AuthProvider>
       </MentorProvider>

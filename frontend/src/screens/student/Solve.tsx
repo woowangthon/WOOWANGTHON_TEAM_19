@@ -57,6 +57,10 @@ function Solve() {
 
   const check = () => p && act('answer', async () => {
     const r = await api.submitAnswer(id, p.id, Number(num), Number(den));
+    if (r.queued) { // 서버가 앞 답을 만드는 중: 화면을 넘기지 않고 「생각 중」으로 기다렸다가 서버 상태로 다시 읽는다
+      await new Promise((ok) => setTimeout(ok, 1500));
+      await load(); return;
+    }
     if (!r.correct && !r.message) { await refresh(); return; } // 그사이 시간이 끝난 경우
     setResult(r);
     if (!r.correct) setP({ ...p, hints: r.autoHint ? [...p.hints, r.autoHint] : p.hints, hintsLeft: r.hintsLeft, canShowSolution: r.canShowSolution });
@@ -141,12 +145,15 @@ function Solve() {
           <div className="row between small">
             <strong className="num">{p.index + 1} / {p.total} 문제</strong>
             <span className="hint-dots" aria-label={`힌트 ${p.hints.length}개 사용`}>
-              {[0, 1, 2].map((i) => <i key={i} className={i < p.hints.length ? 'on' : ''} />)}
+              {/* 점 개수 = 받은 힌트 + 남은 힌트(서버가 정함) */}
+              {Array.from({ length: p.hints.length + p.hintsLeft }, (_, i) => <i key={i} className={i < p.hints.length ? 'on' : ''} />)}
             </span>
           </div>
           <section className="card problem">
+            {p.text && <p>{p.text}</p>}
             <div className="equation">
-              <FractionView value={p.left} /> {p.op === '+' ? '+' : '−'} <FractionView value={p.right} /> ={' '}
+              {/* 기호는 서버가 준 op 그대로. 식을 두 분수로 나눌 수 없는 문제(left·right가 null)는 식을 생략하고 답 칸만 */}
+              {p.left && p.right && <><FractionView value={p.left} /> {p.op === '-' ? '−' : p.op} <FractionView value={p.right} /> ={' '}</>}
               {solution ? '?' : (
                 <span className="answer">
                   <button className={boxClass('num')} disabled={!!result} onClick={() => setField('num')} aria-label={`분자 입력${num ? ': ' + num : ''}`}>{num}</button>
@@ -155,6 +162,7 @@ function Solve() {
                 </span>
               )}
             </div>
+            {!solution && <p className="small muted">{say('답이 자연수면 분모에 1을 넣어 (3 → 3/1)', '답이 자연수면 분모에 1을 넣어요 (3 → 3/1)')}</p>}
           </section>
           {solution ? (
             <>

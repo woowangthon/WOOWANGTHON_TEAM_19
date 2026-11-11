@@ -1,4 +1,4 @@
-// 학생 ⑤ 마무리 — 오늘 요약 + 선생님께 보낼 한 줄(미리보기) + 어려웠던 점 + 보호자께 낼 퀴즈
+// 학생 ⑤ 마무리 — 오늘 요약 + 보호자께 보낼 한 줄(미리보기) + 어려웠던 점 + 보호자께 낼 퀴즈
 // 요약 숫자와 칩은 서버가 오늘 기록에서 만든다(지어내지 않는다).
 import { useState } from 'react';
 import { api } from '../../api';
@@ -49,11 +49,11 @@ function Wrap() {
             </dl>
           </section>
           <section className="stack">
-            <div className="row between"><h2 className="h3">선생님께 보낼 한 줄</h2><span className="pill pill--mint">미리보기</span></div>
+            <div className="row between"><h2 className="h3">보호자께 보낼 한 줄</h2><span className="pill pill--mint">미리보기</span></div>
             <div className="mentor"><Mascot mood="wave" size={40} /><div className="bubble">{data.aiLine}</div></div>
             <p className="small muted">수다 내용은 보내지 않아요.</p>
           </section>
-          <section className="stack">
+          {data.hardChips.length > 0 && <section className="stack">
             <h2 className="h3">오늘 어려웠던 건? <span className="small muted">(선택)</span></h2>
             <div className="chip-row">
               {data.hardChips.map((c) => (
@@ -61,7 +61,7 @@ function Wrap() {
               ))}
             </div>
             {hard === CUSTOM && <input id="wrap-custom" className="input" aria-label="어려웠던 점 직접 쓰기" maxLength={30} placeholder="한 줄로 써 줘 (30자까지)" value={custom} onChange={(e) => setCustom(e.target.value)} />}
-          </section>
+          </section>}{/* 서버는 어려웠던 점 칩을 빈 목록으로 준다 → 비면 섹션을 숨긴다 */}
           <section className="stack">
             <h2 className="h3">보호자께 낼 퀴즈 하나 <span className="small muted">(선택)</span></h2>
             <div className="chip-row">

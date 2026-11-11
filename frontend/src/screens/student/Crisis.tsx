@@ -20,8 +20,8 @@ function Crisis() {
       <section className="card">
         <h2 className="h3">지금 바로 이야기할 수 있는 곳</h2>
         <ul className="list" style={{ marginTop: 10 }}>
-          <li><strong className="num" style={{ fontSize: 20, userSelect: 'all' }}>109</strong> 자살예방 상담전화</li>
-          <li><strong className="num" style={{ fontSize: 20, userSelect: 'all' }}>1388</strong> 청소년 상담전화</li>
+          <li><a href="tel:109" style={{ color: 'inherit', textDecoration: 'none' }}><strong className="num" style={{ fontSize: 20, userSelect: 'all' }}>109</strong></a> 자살예방 상담전화</li>
+          <li><a href="tel:1388" style={{ color: 'inherit', textDecoration: 'none' }}><strong className="num" style={{ fontSize: 20, userSelect: 'all' }}>1388</strong></a> 청소년 상담전화</li>
         </ul>
       </section>
       <div className="notice" style={{ justifyContent: 'flex-start' }}>

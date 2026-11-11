@@ -74,7 +74,7 @@ describe('역할별로 가는 정보', () => {
   it('실수 유형은 학습지도자에게만, 보호자에게는 한 줄·어려운 점·퀴즈만 간다', async () => {
     const s = await api.startSession('중급');
     const p = (await api.getProblem(s.id))!;
-    await api.submitAnswer(s.id, p.id, p.left[0] + p.right[0], p.left[1] + p.right[1]); // 분모끼리 더하는 실수
+    await api.submitAnswer(s.id, p.id, p.left![0] + p.right![0], p.left![1] + p.right![1]); // 분모끼리 더하는 실수
     await solveAll(s.id);
     await api.afterStudy(s.id, 'skip');
     await api.submitWrap(s.id, { hardPoint: '분모가 헷갈렸어', quiz: null });
@@ -116,8 +116,8 @@ describe('안전 알림', () => {
     const s = await api.startSession('중급');
     await solveAll(s.id);
     await api.afterStudy(s.id, 'chat');
-    expect((await api.sendChat(s.id, '오늘 피곤해')).crisis).toBe(false);
-    const r = await api.sendChat(s.id, '그냥 사라지고 싶어');
+    expect((await api.sendChat(s.id, ['오늘 피곤해'])).crisis).toBe(false);
+    const r = await api.sendChat(s.id, ['그냥 사라지고 싶어']);
     expect(r).toMatchObject({ crisis: true });
     expect(r.session.phase).toBe('crisis');
     await as('g1');

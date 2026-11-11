@@ -122,6 +122,8 @@ describe('학습지도자 소속 · 학원 등록(원장)', () => {
     expect((await api.getMe())!.membership).toMatchObject({ name: '별빛학원', isOwner: true, status: '승인됨' });
 
     await api.logout();
+    // 가짜 서버의 새 계정 id는 역할+Date.now()라 같은 ms에 가입하면 원장과 id가 겹친다 → 1ms 넘기고 가입
+    await new Promise((r) => setTimeout(r, 2));
     const t = await api.signup(adult('teacher', 'han_t', '한쌤'));
     await expect(api.requestMembership('XXXX-XXXX')).rejects.toThrow('일련번호');
     expect((await api.requestMembership(serial.toLowerCase())).membership).toMatchObject({ status: '승인 대기', isOwner: false });

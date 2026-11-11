@@ -1,7 +1,7 @@
 // 학습지도자 ② 오늘 할 것 — 학생마다: 오늘 할 단원 지정 → 수업 메모(1~2분) → 초안 → 고쳐서 승인 → 보호자 카드에 공개
 // 초안의 "사실 칸"(범위·문제·힌트)은 기록에서 자동으로 채워지고, 사람이 고치는 것은 코멘트뿐이다.
 import { useEffect, useState } from 'react';
-import { api } from '../../api';
+import { api, API_MODE } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
 import { LoadError, Sheet, Thinking } from '../../components/Common';
@@ -106,7 +106,10 @@ function StudentSheet({ student, view, onChange, onClose }: { student: StudentRo
           {field('stuck', '막힌 것')}
           {field('homework', '숙제')}
           {field('note', '한 줄 메모')}
-          <button className="btn btn--secondary" disabled={!!busy} onClick={makeDraft}>{draft ? '초안 다시 만들기' : '보호자 코멘트 초안 만들기'}</button>
+          {/* 서버(http)는 초안을 하루 한 번만 만든다(createDraft는 읽기만) → 다시 만들기 대신 이유를 보인다. 고칠 땐 아래 코멘트를 직접 고친다 */}
+          {draft && API_MODE === 'http'
+            ? <button className="btn btn--secondary" disabled>초안은 하루 한 번만 만들어요</button>
+            : <button className="btn btn--secondary" disabled={!!busy} onClick={makeDraft}>{draft ? '초안 다시 만들기' : '보호자 코멘트 초안 만들기'}</button>}
           {busy === 'draft' && <Thinking label="초안 만드는 중" />}
 
           {draft && (

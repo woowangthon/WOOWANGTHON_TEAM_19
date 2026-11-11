@@ -27,7 +27,8 @@ export interface MentorApi extends AccountApi {
   showSolution(sessionId: string, problemId: string): Promise<Solution>;
   afterStudy(sessionId: string, choice: 'chat' | 'skip'): Promise<SessionView>; // 수다 할래 / 오늘은 끝
   getChat(sessionId: string): Promise<ChatState>;
-  sendChat(sessionId: string, text: string): Promise<ChatReply>;
+  sendChat(sessionId: string, texts: string[]): Promise<ChatReply>; // 끊어 보낸 말 묶음(1~5조각, 11-11)
+  replyChat(sessionId: string): Promise<ChatReply>;                 // pending이면 답 더 받기(서버 #4a)
   endChat(sessionId: string): Promise<SessionView>;
   getWrap(sessionId: string): Promise<WrapInfo>;
   submitWrap(sessionId: string, body: WrapBody): Promise<SessionView>;

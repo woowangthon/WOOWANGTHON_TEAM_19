@@ -4,6 +4,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { api } from '../api';
+import { setDemoRole } from '../api/http';
 import type { AccountRole, Me } from '../types';
 import { useSession } from './session';
 import { useMentor } from './mentor';
@@ -24,10 +25,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const session = useSession();
   const mentor = useMentor();
-  const refresh = useCallback(async () => { const m = await api.getMe().catch(() => null); setMe(m); setReady(true); return m; }, []);
+  const reloadSession = session.refresh; // 둘 다 useCallback이라 바뀌지 않는다(refresh 효과가 반복되지 않게)
+  const reloadMentor = mentor.reload;
+  // 서버 요청의 역할 헤더는 로그인한 계정의 역할로 정한다(api/http.ts). 역할이 바뀌면 학습 상태도 그 역할로 다시 읽는다
+  const refresh = useCallback(async () => {
+    const m = await api.getMe().catch(() => null);
+    const changed = setDemoRole(m?.role ?? null);
+    if (changed && m) await Promise.all([reloadSession(), reloadMentor()]);
+    setMe(m); setReady(true); return m;
+  }, [reloadSession, reloadMentor]);
   useEffect(() => { refresh(); }, [refresh]);
-  const enter = useCallback(async (m: Me) => { setMe(m); await Promise.all([session.refresh(), mentor.reload()]); }, [session, mentor]);
-  const logout = useCallback(async () => { await api.logout(); setMe(null); await Promise.all([session.refresh(), mentor.reload()]); }, [session, mentor]);
+  const enter = useCallback(async (m: Me) => { setDemoRole(m.role); setMe(m); await Promise.all([session.refresh(), mentor.reload()]); }, [session, mentor]);
+  const logout = useCallback(async () => { await api.logout(); setDemoRole(null); setMe(null); await Promise.all([session.refresh(), mentor.reload()]); }, [session, mentor]);
   return <Ctx.Provider value={{ me, ready, refresh, enter, logout }}>{children}</Ctx.Provider>;
 }
 

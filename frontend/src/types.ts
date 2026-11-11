@@ -62,11 +62,12 @@ export interface ProblemView {
   id: string;
   index: number;             // 0부터
   total: number;
-  left: Fraction;
-  right: Fraction;
-  op: '+' | '-';
+  text?: string;             // 문제 문장(서버가 줌. 문장제는 이것만 보일 수도 있다)
+  left: Fraction | null;     // 식을 두 분수로 나눌 수 없는 문제는 null → 식은 그리지 않는다
+  right: Fraction | null;
+  op: '+' | '-' | '÷';
   hints: string[];           // 지금까지 받은 힌트
-  hintsLeft: number;         // 남은 힌트(최대 3)
+  hintsLeft: number;         // 남은 힌트(서버가 정함. 지금 서버는 최대 2)
   canShowSolution: boolean;  // 힌트를 다 쓰고도 틀리면 true → 「풀이 같이 보기」
   remainingSec: number;
 }
@@ -79,6 +80,7 @@ export interface AnswerResult {
   autoHint: string | null;   // 틀리면 다음 힌트가 자동으로 나온다
   hintsLeft: number;
   canShowSolution: boolean;
+  queued?: boolean;          // 서버: 앞 답을 만드는 중이라 판정만 했다 → 화면을 넘기지 않는다
   session: SessionView;
 }
 export interface HintResult { hints: string[]; hintsLeft: number; }
@@ -86,7 +88,8 @@ export interface Solution { steps: string[]; session: SessionView; }
 
 export interface ChatMessage { from: 'mentor' | 'me'; text: string; }
 export interface ChatState { messages: ChatMessage[]; remainingSec: number; }
-export interface ChatReply { reply: string; crisis: boolean; session: SessionView; }
+// 끊어 보내기(11-11): queued = 앞 답을 만드는 중이라 받아만 둠, pending = 답 안 된 말이 남아 /reply를 불러야 함
+export interface ChatReply { reply: string; crisis: boolean; session: SessionView; queued?: boolean; pending?: boolean; hotlines?: string[]; }
 
 export interface WrapInfo {
   unit: string; solved: number; total: number; difficulty: Difficulty;

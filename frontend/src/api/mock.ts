@@ -356,7 +356,10 @@ export const mockApi: MentorApi = {
 
   async getChat(sessionId) { await wait(100); const s = need(sessionId); return { messages: s.messages, remainingSec: chatRemaining(s) }; },
 
-  async sendChat(sessionId, text) {
+  // 가짜 서버는 답을 늘 바로 만들므로 queued·pending이 없다 → 더 받을 답도 없다
+  async replyChat(sessionId) { return { reply: '', crisis: false, session: view(need(sessionId)) }; },
+  async sendChat(sessionId, texts) {
+    const text = texts.join(' '); // 묶음은 한 말로 본다
     await wait(600);
     const s = need(sessionId);
     if (s.phase !== 'chat') return { reply: '', crisis: false, session: view(s) };
