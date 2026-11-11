@@ -1,0 +1,39 @@
+# 비밀값
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# DB·로그 (로컬 개발용 SQLite, 실행 로그)
+*.sqlite
+*.sqlite3
+*.db
+logs/
+*.log
+
+# Claude Code 개인 설정 (공유 설정은 .claude/settings.json)
+.claude/settings.local.json
+
+# OS·편집기
+.DS_Store
+.idea/
+.vscode/
