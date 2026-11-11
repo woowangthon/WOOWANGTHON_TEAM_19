@@ -30,6 +30,10 @@ npm-debug.log*
 logs/
 *.log
 
+# Vercel 빌드가 seed/에서 복사하는 시드(정본은 seed/seed_v0.1.json)
+backend/app/_seed/
+.vercel/
+
 # 각자 로컬에서 다르게 쓰는 도구 설정 — 저장소에 올리지 않는다(11-11 성호)
 .claude/
 .githooks/

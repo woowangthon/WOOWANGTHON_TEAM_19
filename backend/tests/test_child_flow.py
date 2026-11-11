@@ -338,6 +338,8 @@ async def test_summary_input_has_no_chat_and_no_answer(client, student, sid, spy
 @pytest.mark.parametrize("bad", [RuntimeError("down"), "", FIXED_REPLY, "답은 3/8이야"])
 async def test_summary_falls_back_to_template(client, student, sid, spy, bad):
     spy.summary = bad
+    # 오답이 있어야 요약 LLM을 부른다(A8)
+    await _send(client, student, sid, kind="text", text="3/4")
     await _send(client, student, sid, kind="text", text="3/8")
     await _phase(client, student, sid, "bridge")
     body = (await _bridge(client, student, sid)).json()

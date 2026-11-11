@@ -12,6 +12,7 @@ import { FractionView } from '../../components/Fraction';
 import { Keypad } from '../../components/Keypad';
 import { LoadError, Thinking } from '../../components/Common';
 import { useCountdown } from '../../lib/useCountdown';
+import { isSolveTimeUp } from '../../lib/kidScreens';
 import { useMentor } from '../../state/mentor';
 import { RequirePhase, useSession } from '../../state/session';
 import type { AnswerResult, ProblemView, Solution } from '../../types';
@@ -45,7 +46,10 @@ function Solve() {
     } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
   }, [id, refresh]);
   useEffect(() => { load(); }, [load]);
-  const left = useCountdown(p ? p.remainingSec : null, refresh);
+  // 20분이 0이 되면 서버에 다시 묻되(refresh), 서버에 풀기 마감이 없어 단계가 안 바뀌므로 화면이 선택지를 보여 준다.
+  // 20분 뒤에는 서버가 「풀이 보기」·「수다로 넘어가기」를 힌트 수와 무관하게 허용한다(명세 4.11 4) → 두 버튼 모두 성공 경로
+  const [zero, setZero] = useState(false);
+  const left = useCountdown(p ? p.remainingSec : null, () => { setZero(true); refresh(); });
 
   const act = async (kind: 'answer' | 'hint', fn: () => Promise<void>) => {
     setBusy(kind); setError(null);
@@ -70,6 +74,8 @@ function Solve() {
     setP({ ...p, hints: h.hints, hintsLeft: h.hintsLeft });
   });
   const showSolution = () => p && act('hint', async () => { setSolution(await api.showSolution(id, p.id)); });
+  /** 시간이 끝났을 때 「수다로 갈까?」: 학습 완료 화면의 「수다 할래」와 같은 경로 */
+  const toChat = () => act('hint', async () => { sync(await api.afterStudy(id, 'chat')); });
   const retry = () => {
     if (!result) return;
     if (!result.numeratorOk) setNum('');
@@ -92,6 +98,7 @@ function Solve() {
   };
   const lastHint = p && p.hints.length > 0 ? p.hints[p.hints.length - 1] : null;
   const isLast = !!p && p.index + 1 >= p.total;
+  const timeUp = isSolveTimeUp(zero ? 0 : (p?.remainingSec ?? 1), !!p, !!solution || !!result?.correct);
 
   const header = (
     <header className="lessonbar">
@@ -105,7 +112,14 @@ function Solve() {
 
   let actions: React.ReactNode = null;
   let tone: 'ok' | 'retry' | undefined;
-  if (p && solution) {
+  if (p && timeUp) {
+    actions = (
+      <div className="btn-row">
+        <button className="btn btn--secondary" disabled={!!busy} onClick={showSolution}>풀이 같이 보기</button>
+        <button className="btn btn--primary" disabled={!!busy} onClick={toChat}>수다로 갈까?</button>
+      </div>
+    );
+  } else if (p && solution) {
     actions = <button className="btn btn--primary" onClick={next}>{isLast ? '끝내기' : '다음 문제'}</button>;
   } else if (p && result?.correct) {
     tone = 'ok';
@@ -171,6 +185,8 @@ function Solve() {
             </>
           ) : busy === 'answer' || busy === 'hint' ? (
             <Thinking />
+          ) : timeUp ? (
+            <MentorSays mood="calm" text={say('20분이 다 됐어.\n풀이를 같이 볼까, 수다로 갈까?', '20분이 다 됐어요.\n풀이를 같이 볼까요, 수다로 갈까요?')} />
           ) : result?.correct ? (
             <MentorSays mood="cheer" text={say('이 느낌 그대로 가자!', '이 느낌 그대로 가요!')} />
           ) : lastHint ? (

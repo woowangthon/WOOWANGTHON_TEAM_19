@@ -55,6 +55,7 @@ export interface StudentHome {
   inClass: boolean;          // 강의실에 들어가 있는지
   seeds: number;             // 씨앗 잔액
   earnedToday: number;       // 오늘 학습 완료로 받은 씨앗(0이면 아직)
+  endedInCrisis?: boolean;   // 계약 #2 v1: 오늘 세션이 위기(🔴)로 끝났으면 true(그때 doneToday도 true)
 }
 
 /** 화면에 보내는 문제. 정답은 절대 포함하지 않는다(판정은 서버). */
@@ -139,7 +140,6 @@ export interface GuardianToday {
 }
 
 /* ---------- 시연 ---------- */
-export interface DemoSettings { fast: boolean; } // fast: 시간을 20배 빠르게(20분 → 1분)
 
 /* =====================================================================
    v0.5 — 로그인·회원가입·설정·소속 (11-10 회의 + 사용자 추가 요청)

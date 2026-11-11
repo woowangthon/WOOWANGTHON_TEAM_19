@@ -1,8 +1,11 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from './Icon';
 import { useServerWaking } from '../lib/slowServer';
 import { useAuth } from '../state/auth';
 import { useMentor } from '../state/mentor';
+import { isSessionGone } from '../lib/kidScreens';
+import { useSession } from '../state/session';
 
 /** "생각 중" 로딩 (팀 명세: 비스트리밍 + 로딩 표시) */
 export function Thinking({ label = '생각 중' }: { label?: string }) {
@@ -34,9 +37,16 @@ export function LoadError({ error, onRetry }: { error: string | null; onRetry?: 
   return (
     <div className="notice notice--danger" role="alert">
       <span>{error}</span>
-      {onRetry && <button className="btn btn--secondary btn--small" onClick={onRetry}><Icon name="refresh" size={16} /> 다시 시도</button>}
+      {isSessionGone(error) ? <GoHome /> : onRetry && <button className="btn btn--secondary btn--small" onClick={onRetry}><Icon name="refresh" size={16} /> 다시 시도</button>}
     </div>
   );
+}
+
+/** 서버가 다시 시작돼 세션이 사라졌을 때: 세션을 다시 읽고 학생 홈으로(다시 시도는 같은 오류만 난다) */
+function GoHome() {
+  const nav = useNavigate();
+  const { refresh } = useSession();
+  return <button className="btn btn--secondary btn--small" onClick={async () => { await refresh(); nav('/student', { replace: true }); }}>처음으로</button>;
 }
 
 /** 아래에서 올라오는 시트. Esc로 닫히고, 닫히면 원래 버튼으로 포커스가 돌아간다 */

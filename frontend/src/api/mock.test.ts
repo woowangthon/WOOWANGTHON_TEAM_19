@@ -18,7 +18,7 @@ beforeEach(async () => { await api.resetDemo(); await as('s1'); });
 describe('학생 하루 세션', () => {
   it('처음에는 연속 3일, 약속·캐릭터가 필요하다', async () => {
     const home = await api.getStudentHome();
-    expect(home).toMatchObject({ streakDays: 3, needsOnboarding: true, session: null, doneToday: false });
+    expect(home).toMatchObject({ streakDays: 3, needsOnboarding: true, session: null, doneToday: false, endedInCrisis: false });
     expect(home.task?.unit).toBe('분수의 덧셈');
   });
 

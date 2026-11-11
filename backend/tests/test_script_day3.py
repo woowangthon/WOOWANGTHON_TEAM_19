@@ -92,3 +92,10 @@ def test_no_secret_promise_or_name_question_in_replies():
     for ln in LINES:
         for bad in ("비밀 지켜", "이름이 뭐", "이름 알려", "나만 믿어"):
             assert bad not in ln["reply"], ln["scenario"]
+
+
+def test_chat_lines_do_not_push_adults():
+    """11-11 성호: 수다 대본은 들어 주는 문장만. 어른 권유는 자동으로 넣지 않는다(AI 거절 때도 이 줄)."""
+    lines = yaml.safe_load(SCRIPT_PATH.read_text(encoding="utf-8"))
+    chat = [ln["reply"] for ln in lines if ln["phase"] == "chat"]
+    assert chat and not [r for r in chat if "어른" in r or "선생님" in r]

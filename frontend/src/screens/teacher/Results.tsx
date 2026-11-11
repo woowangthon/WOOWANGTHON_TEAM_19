@@ -7,6 +7,7 @@ import { Icon } from '../../components/Icon';
 import { LoadError, Sheet, Thinking } from '../../components/Common';
 import { dateLabel } from '../../lib/date';
 import { useAsync } from '../../lib/useAsync';
+import { useTeacherWide } from '../../lib/wide';
 import type { StudentResult } from '../../types';
 
 const REPEAT_FLAG = 3; // 연속 초급 선택이 이 횟수 이상이면 표시
@@ -17,13 +18,41 @@ export function TeacherResults() {
   const flagged = (s: StudentResult) => s.beginnerRepeat >= REPEAT_FLAG;
   const sorted = data ? [...data].sort((a, b) => Number(flagged(b)) - Number(flagged(a)) || Number(a.done) - Number(b.done)) : [];
   const done = data?.filter((s) => s.done).length ?? 0;
+  const wide = useTeacherWide(); // 넓은 화면: 카드 대신 표
 
   return (
     <Frame adult title="학생 결과" exit tabs="teacher">
       <div className="row between small"><span>{dateLabel()}</span>{data && <strong className="num">학습 완료 {done} / {data.length}명</strong>}</div>
       {loading && <Thinking label="불러오는 중" />}
       <LoadError error={error} onRetry={reload} />
-      {sorted.map((s) => (
+      {wide && sorted.length > 0 && (
+        <table className="table table--results">
+          <thead><tr><th>학생</th><th>상태</th><th>단원</th><th>문제</th><th>난이도</th><th>힌트</th><th>실수</th><th>어려운 점</th><th>연속</th><th></th></tr></thead>
+          <tbody>
+            {sorted.map((s) => (
+              <tr key={s.id}>
+                <td><strong>{s.name}</strong></td>
+                <td>{flagged(s) ? <span className="pill pill--accent"><Icon name="warn" size={14} /> 초급만 계속</span>
+                  : <span className={s.done ? 'pill pill--solid' : 'pill'}>{s.done ? '완료' : '아직'}</span>}
+                  {flagged(s) && <div className="small muted num" style={{ marginTop: 4 }}>최근 {s.beginnerRepeat}회 연속 초급</div>}</td>
+                {s.done ? (
+                  <>
+                    <td>{s.unit}</td>
+                    <td className="num">{s.solved}/{s.total}</td>
+                    <td>{s.difficulty}</td>
+                    <td className="num">{s.hints}번</td>
+                    <td>{s.mistake || '-'}</td>
+                    <td>{s.hardPoint || '-'}</td>
+                  </>
+                ) : <td colSpan={6} className="muted">오늘은 아직 공부하지 않았어요</td>}
+                <td className="num">{s.streak}일</td>
+                <td>{flagged(s) && <button className="btn btn--secondary btn--small" onClick={() => setTalk(s)}>이야기 나눠 보기</button>}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      {!wide && sorted.map((s) => (
         <article key={s.id} className={'card' + (flagged(s) ? ' card--warn' : '')}>
           <div className="row between">
             <h2 className="h3">{s.name}</h2>

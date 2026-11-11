@@ -59,3 +59,22 @@ def judge(text: str, answer: dict[str, Any]) -> Judge | None:
         accepted = {_canonical(a) for a in answer.get("accepted", [])}
         return "correct" if _canonical(text) in accepted else "wrong"
     return "correct" if value == Fraction(answer["value"]) else "wrong"
+
+
+def _loose(text: str) -> str:
+    """답 문장 비교용: _canonical에 더해 「8 분의 3」 둘레 공백도 붙인다."""
+    return re.sub(r"\s*분의\s*", "분의", _canonical(text))
+
+
+def _has_token(text: str, token: str) -> bool:
+    # 앞뒤가 숫자·분수 기호면 다른 수의 일부다(13/8 안의 3/8, 3/4 안의 3, 3.5 안의 3)
+    pattern = rf"(?<![\d./÷]){re.escape(token)}(?![\d/÷]|\.\d)"
+    return re.search(pattern, text) is not None
+
+
+def contains_answer(text: str, answer: dict[str, Any], problem_text: str = "") -> bool:
+    """멘토 답 문장에 정답 값·허용 표기가 들어 있나(A4 사후 검사). 문장은 돌려주지 않는다.
+    문제 글에 이미 보이는 표기(1 ÷ 3 문제의 「1÷3」)는 새는 게 아니라 뺀다."""
+    body, shown = _loose(text), _loose(problem_text)
+    tokens = {_loose(t) for t in [str(answer.get("value", "")), *answer.get("accepted", [])]}
+    return any(t and _has_token(body, t) and not _has_token(shown, t) for t in tokens)
