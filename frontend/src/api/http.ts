@@ -2,6 +2,7 @@
 // 경로는 임시 이름이다. 성호님 명세의 API 이름이 확정되면 여기 경로만 바꾸면 된다(화면 코드는 그대로).
 import type { MentorApi } from './client';
 import type { AccountRole } from '../types';
+import { slowWatch } from '../lib/slowServer';
 
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:8000';
 
@@ -35,11 +36,12 @@ async function call<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, 
   if (!demoRole) throw new Error('로그인이 필요해요.');
   let res: Response;
   try {
-    res = await fetch(BASE + path, {
+    // slowWatch: 잠든 서버를 깨우느라 5초를 넘기면 화면에 「깨우는 중」 안내(lib/slowServer)
+    res = await slowWatch.track(fetch(BASE + path, {
       method,
       headers: { ...demoHeaders(), ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}) },
       body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+    }));
   } catch {
     throw new Error('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.');
   }

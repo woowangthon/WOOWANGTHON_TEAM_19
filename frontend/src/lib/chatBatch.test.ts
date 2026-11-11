@@ -37,6 +37,19 @@ describe('createBatcher — 1.5초 묶기, 최대 5조각', () => {
     vi.advanceTimersByTime(5000);
     expect(send).not.toHaveBeenCalled();
   });
+
+  it('peek은 아직 안 보낸 조각을 순서대로 보여 주고, 묶음은 그대로 둔다(다시 읽기 때 버리지 않게)', () => {
+    const sent: string[][] = [];
+    const b = createBatcher((t) => sent.push(t));
+    b.push('가');
+    b.push('나');
+    const seen = b.peek();
+    seen.push('다'); // 복사본이라 묶음에 영향 없음
+    expect(b.peek()).toEqual(['가', '나']);
+    vi.advanceTimersByTime(1500);
+    expect(sent).toEqual([['가', '나']]);
+    expect(b.peek()).toEqual([]);
+  });
 });
 
 describe('followPending — pending이면 /reply 최대 3번', () => {

@@ -12,6 +12,8 @@ export interface Batcher {
   push(text: string): void;
   /** 모아 둔 조각 수 */
   size(): number;
+  /** 아직 보내지 않은 조각(복사본). 서버 대화를 다시 읽을 때 화면에 남겨 둔다 */
+  peek(): string[];
   /** 타이머·모아 둔 조각을 버린다(화면을 떠날 때) */
   cancel(): void;
 }
@@ -34,6 +36,7 @@ export function createBatcher(send: (texts: string[]) => void, waitMs = BATCH_WA
       else { stop(); timer = setTimeout(flush, waitMs); }
     },
     size: () => buf.length,
+    peek: () => [...buf],
     cancel() { stop(); buf = []; },
   };
 }

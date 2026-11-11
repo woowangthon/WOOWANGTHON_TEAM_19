@@ -11,6 +11,7 @@ import { useCountdown } from '../../lib/useCountdown';
 import { useAsync } from '../../lib/useAsync';
 import { RequirePhase, useSession } from '../../state/session';
 import { createBatcher, followPending } from '../../lib/chatBatch';
+import { onceAtATime, useOnResume } from '../../lib/resume';
 import type { ChatMessage, ChatReply } from '../../types';
 
 const SUGGEST = ['오늘 피곤해', '자랑할 거 있어', '그냥 얘기하고 싶어'];
@@ -22,7 +23,7 @@ export function StudentChat() {
 function Chat() {
   const { session, sync, refresh } = useSession();
   const id = session!.id;
-  const { data, error, reload } = useAsync(() => api.getChat(id), [id]);
+  const { data, setData, error, reload } = useAsync(() => api.getChat(id), [id]);
   const [msgs, setMsgs] = useState<ChatMessage[]>([]);
   const [text, setText] = useState('');
   // 끊어 보내기(11-11): 입력은 막지 않는다. 모은 말은 1.5초 뒤(5개면 바로) 한 번에 보낸다(lib/chatBatch).
@@ -31,8 +32,15 @@ function Chat() {
   const [ending, setEnding] = useState(false);
   const stopped = useRef(false);                 // 위기·단계 바뀜 뒤 늦게 온 답은 버린다
   const [sendError, setSendError] = useState<string | null>(null);
+  const inflight = useRef(0);                    // 다시 읽기용: 나가 있는 요청 수(렌더를 기다리지 않는 값)
+  const sends = useRef(0);                       // 다시 읽기용: 지금까지 보낸 묶음 수
+  const endingRef = useRef(false);
+  endingRef.current = ending;
+  const sendRef = useRef<(texts: string[]) => Promise<void>>(async () => {});
+  const [batcher] = useState(() => createBatcher((texts) => { void sendRef.current(texts); }));
   const bottom = useRef<HTMLDivElement>(null);
-  useEffect(() => { if (data) setMsgs(data.messages); }, [data]);
+  // 서버 대화 + 아직 안 보낸(묶여 있는) 내 말. 다시 읽어도 묶인 말은 버리지 않는다
+  useEffect(() => { if (data) setMsgs([...data.messages, ...batcher.peek().map((t): ChatMessage => ({ from: 'me', text: t }))]); }, [data, batcher]);
   useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }); }, [msgs, waiting]);
   const left = useCountdown(data ? data.remainingSec : null, refresh);
 
@@ -45,14 +53,24 @@ function Chat() {
   };
   const sendBatch = async (texts: string[]) => {
     setBuffered(0); setWaiting((n) => n + 1); setSendError(null);
+    inflight.current++; sends.current++;
     try { await followPending(await api.sendChat(id, texts), () => api.replyChat(id), take); }
     catch (e) { if (!stopped.current) setSendError((e as Error).message); }
-    finally { setWaiting((n) => n - 1); }
+    finally { inflight.current--; setWaiting((n) => n - 1); }
   };
-  const sendRef = useRef(sendBatch);
   sendRef.current = sendBatch;
-  const [batcher] = useState(() => createBatcher((texts) => { void sendRef.current(texts); }));
   useEffect(() => () => batcher.cancel(), [batcher]);
+
+  // 앱을 내렸다 올리거나 인터넷이 돌아오면 서버 대화·남은 시간을 다시 읽는다(겹치면 한 번만).
+  // 서버에 나가 있는 요청이 있으면 그 응답이 답을 가져오니 건너뛰고, 위기·단계 바뀜·끝내는 중이면 읽지 않는다.
+  const [resync] = useState(() => onceAtATime(async () => {
+    if (stopped.current || inflight.current > 0) return;
+    const before = sends.current;
+    const c = await api.getChat(id).catch(() => null);
+    // 읽는 사이에 새 묶음을 보냈으면 이 결과는 옛것이라 버린다(그 응답이 화면을 채운다)
+    if (c && !stopped.current && sends.current === before) setData(c);
+  }));
+  useOnResume(() => { if (!endingRef.current) void resync(); });
 
   const send = (raw: string) => {
     const v = raw.trim();
