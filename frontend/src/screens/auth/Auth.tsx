@@ -11,7 +11,8 @@ import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { homeFor, useAuth } from '../../state/auth';
 import { DOCS } from '../../data/docs';
-import { ROLE_LABEL, type Agreements, type SignupBody } from '../../types';
+import { ROLE_LABEL, type Agreements, type Grade, type SignupBody } from '../../types';
+import { SCHOOL_LEVELS, toGrade, type SchoolLevel } from '../../lib/grade';
 import { DEMO_PASSWORD, ID_RULE, PW_RULE } from '../../api/org';
 
 /* ======================= 로그인 ======================= */
@@ -98,20 +99,22 @@ export function Signup() {
   const [step, setStep] = useState(0);
   const [role, setRole] = useState<Role | null>(null);
   const [agree, setAgree] = useState<Agreements>({ terms: false, privacy: false, marketing: false });
-  const [f, setF] = useState({ loginId: '', password: '', confirm: '', name: '', email: '', grade: 4 as 4 | 5 | 6 });
+  const [f, setF] = useState({ loginId: '', password: '', confirm: '', name: '', email: '', grade: null as Grade | null });
+  // 학교급을 먼저 고르고 학년을 고른다. 학교급을 바꾸면 학년은 다시 고르게 비운다
+  const [level, setLevel] = useState<SchoolLevel | null>(null);
   const [idOk, setIdOk] = useState<null | boolean>(null);
   const [doc, setDoc] = useState<string | null>(null);
   const { run, busy, error, setError } = useAction();
   const kid = role === 'student';
-  const set = (k: keyof typeof f, v: string | number) => { setF({ ...f, [k]: v }); if (k === 'loginId') setIdOk(null); };
+  const set = (k: keyof typeof f, v: string | number | null) => { setF({ ...f, [k]: v }); if (k === 'loginId') setIdOk(null); };
   const pwOk = PW_RULE.test(f.password);
   const same = f.password.length > 0 && f.password === f.confirm;
-  const infoOk = idOk === true && pwOk && same && f.name.trim() && (kid || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email));
+  const infoOk = idOk === true && pwOk && same && f.name.trim() && (kid ? f.grade !== null : /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email));
   const back = () => (step === 0 ? nav('/login') : (setError(null), setStep(step - 1)));
 
   const checkId = () => run(async () => setIdOk(await api.checkLoginId(f.loginId)));
   const submit = () => run(async () => {
-    const me = await api.signup({ role: role!, loginId: f.loginId, password: f.password, name: f.name, agreements: agree, ...(kid ? { grade: f.grade } : { email: f.email }) });
+    const me = await api.signup({ role: role!, loginId: f.loginId, password: f.password, name: f.name, agreements: agree, ...(kid ? { grade: f.grade! } : { email: f.email }) });
     await enter(me); nav('/welcome', { replace: true });
   });
 
@@ -184,10 +187,18 @@ export function Signup() {
             <input className="input" value={f.name} maxLength={12} placeholder={kid ? '예: 지우' : '예: 김선생님'} onChange={(e) => set('name', e.target.value)} />
           </label>
           {kid ? (
-            <div className="field">학년
-              <div className="chip-row" role="radiogroup" aria-label="학년">
-                {([4, 5, 6] as const).map((g) => <button key={g} role="radio" aria-checked={f.grade === g} className={'chip' + (f.grade === g ? ' chip--on' : '')} onClick={() => set('grade', g)}>{g}학년</button>)}
+            <div className="field">학년 <span className="hint">학년에 맞는 말투로 멘토가 이야기해요</span>
+              <div className="chip-row" role="radiogroup" aria-label="학교">
+                {SCHOOL_LEVELS.map((s) => <button key={s.level} type="button" role="radio" aria-checked={level === s.level} className={'chip' + (level === s.level ? ' chip--on' : '')} onClick={() => { if (level !== s.level) { setLevel(s.level); set('grade', null); } }}>{s.label}</button>)}
               </div>
+              {level && (
+                <div className="chip-row chip-row--reveal" role="radiogroup" aria-label={`${level} 학년`}>
+                  {Array.from({ length: SCHOOL_LEVELS.find((s) => s.level === level)!.years }, (_, i) => i + 1).map((y) => {
+                    const g = toGrade(level, y)!;
+                    return <button key={g} type="button" role="radio" aria-checked={f.grade === g} className={'chip' + (f.grade === g ? ' chip--on' : '')} onClick={() => set('grade', g)}>{y}학년</button>;
+                  })}
+                </div>
+              )}
               <span className="hint">진짜 이름·전화번호는 적지 마세요</span>
             </div>
           ) : (

@@ -12,6 +12,7 @@ import { useAction } from '../../lib/useAction';
 import { homeFor, useAuth } from '../../state/auth';
 import { ROLE_LABEL, type AcademyForm, type Me, type NotifySettings } from '../../types';
 import { PW_RULE } from '../../api/org';
+import { gradeLabel } from '../../lib/grade';
 
 export const APP_VERSION = '0.5.0';
 
@@ -128,7 +129,7 @@ export function SettingsProfile() {
       actions={<button className="btn btn--primary" disabled={busy || !name.trim()} onClick={() => run(async () => { await enter(await api.updateProfile(kid ? { name } : { name, email })); setSaved(true); })}>{saved ? '저장했어요 ✓' : '저장'}</button>}>
       <label className="field">아이디<input className="input" value={me.loginId} disabled /></label>
       <label className="field">{kid ? '별명' : '이름'}<input className="input" maxLength={12} value={name} onChange={(e) => { setName(e.target.value); setSaved(false); }} /></label>
-      {kid ? <label className="field">학년<input className="input" value={`${me.grade}학년`} disabled /></label>
+      {kid ? <label className="field">학년<input className="input" value={gradeLabel(me.grade)} disabled /></label>
         : <label className="field">이메일<input className="input" type="email" value={email} onChange={(e) => { setEmail(e.target.value); setSaved(false); }} /></label>}
       <LoadError error={error} />
     </Frame>

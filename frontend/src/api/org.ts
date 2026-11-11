@@ -3,11 +3,15 @@
 // · 백엔드(성호님)는 이 파일의 규칙(throw 하는 곳)을 그대로 서버 검증으로 옮기면 된다.
 // · 한계: User.academyId가 하나라 보호자는 학원 1곳에만 속한다(아이 둘이 서로 다른 학원이면 보호자는 먼저 들어간 곳). 자세한 건 enrollLinked 위 주석.
 import type {
-  AcademyApplication, AcademyForm, AccountRole, AppNotice, Classroom, Cosmetic, EntryCode, Me, NotifySettings, Order, OrgType, OwnerDashboard, PersonRow,
+  AcademyApplication, AcademyForm, AccountRole, AppNotice, Classroom, Cosmetic, EntryCode, Grade, Me, NotifySettings, Order, OrgType, OwnerDashboard, PersonRow,
   SeedBoard, SeedEntry, SeedSource, ShopItem, SignupBody, StampState, StudentClasses, StudentShop, TeacherClasses, Wallet,
 } from '../types';
 import { ymd, stampLabel, weekKeys } from '../lib/date';
 import { load, save } from '../lib/storage';
+import { gradeLabel } from '../lib/grade';
+
+/** 학년 값 검사: 1~12 정수만 (가짜 서버도 진짜 서버처럼 입력을 믿지 않는다) */
+const isGrade = (g: unknown): g is Grade => Number.isInteger(g) && (g as number) >= 1 && (g as number) <= 12;
 
 /* ================= 규칙 숫자 (한곳에서 조정) ================= */
 export const SEED_RULES = {
@@ -29,7 +33,7 @@ interface User {
   email?: string;
   settings: NotifySettings;
   agreedAt?: string; marketing?: boolean;
-  grade?: 4 | 5 | 6;
+  grade?: Grade;
   linkCode: string | null;
   academyId: string | null;
   teacherStatus?: '승인 대기' | '승인됨';
@@ -304,7 +308,7 @@ function ownerDash(o: User): OwnerDashboard {
     pendingTeachers: inAc.filter((u) => u.role === 'teacher' && u.teacherStatus === '승인 대기').map((u) => row(u.id, '소속 신청')),
     teachers: inAc.filter((u) => u.role === 'teacher' && u.teacherStatus === '승인됨').map((u) => row(u.id, `${u.id === o.id ? '원장 · ' : ''}강의실 ${roomsOfTeacher(u.id).length}개`)),
     classrooms: db.rooms.filter((r) => r.academyId === ac.id).map((r) => ({ id: r.id, name: r.name, teacherName: nameOf(r.teacherId), count: r.members.length })),
-    students: inAc.filter((u) => u.role === 'student').map((u) => row(u.id, `${u.grade ?? '-'}학년 · ${roomsOfStudent(u.id).map((r) => r.name).join(', ') || '강의실 없음'}`)),
+    students: inAc.filter((u) => u.role === 'student').map((u) => row(u.id, `${gradeLabel(u.grade)} · ${roomsOfStudent(u.id).map((r) => r.name).join(', ') || '강의실 없음'}`)),
   };
 }
 
@@ -335,7 +339,7 @@ export const orgApi = {
     if (!PW_RULE.test(body.password)) fail('비밀번호는 영문과 숫자를 섞어 8~20자로 만들어 주세요.');
     if (!name) fail('이름을 적어 주세요.');
     if (name.length > 12) fail('이름은 12자까지 쓸 수 있어요.');
-    if (body.role === 'student' && !body.grade) fail('학년을 골라 주세요.');
+    if (body.role === 'student' && !isGrade(body.grade)) fail('학년을 골라 주세요.');
     if (body.role !== 'student' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email ?? '')) fail('이메일을 바르게 적어 주세요. 아이디·비밀번호를 찾을 때 써요.');
     const id = body.role[0] + Date.now().toString(36);
     const u: User = {
@@ -538,7 +542,7 @@ export const orgApi = {
     const inAny = new Set(rooms.flatMap((r) => [...r.members]));
     return {
       classrooms: rooms.map(classroomView),
-      academyStudents: t.teacherStatus !== '승인됨' ? [] : db.users.filter((u) => u.role === 'student' && u.academyId === t.academyId).map((u) => row(u.id, inAny.has(u.id) ? '내 강의실' : `${u.grade ?? '-'}학년`)),
+      academyStudents: t.teacherStatus !== '승인됨' ? [] : db.users.filter((u) => u.role === 'student' && u.academyId === t.academyId).map((u) => row(u.id, inAny.has(u.id) ? '내 강의실' : gradeLabel(u.grade))),
     };
   },
   async createClassroom(name: string, plan: string): Promise<TeacherClasses> {
