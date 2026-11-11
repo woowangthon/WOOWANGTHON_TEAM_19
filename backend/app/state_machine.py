@@ -3,12 +3,14 @@
 전환·힌트·시간 마감은 여기서만 정한다. LLM은 이 결과를 바꾸지 않는다.
 """
 
+import math
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from enum import StrEnum
 from typing import Literal
 
 CHAT_MINUTES = 10
+STUDY_MINUTES = 20  # 같이 풀기 ~20분. 강제 종료가 아니라 선택지가 열리는 시각(명세 4.11-4)
 MAX_HINT = 3  # 3 = 풀이 보기
 
 
@@ -36,6 +38,22 @@ class SessionState:
     deadline_at: datetime | None = None
 
 
+def study_remaining_sec(started: datetime | None, now: datetime, timer_scale: float = 1) -> int:
+    """같이 풀기 20분까지 남은 초(올림). 0이면 study_time_over와 같다."""
+    if started is None:
+        return 0
+    limit = timedelta(minutes=STUDY_MINUTES) / timer_scale
+    return max(0, math.ceil((started + limit - now).total_seconds()))
+
+
+def study_time_over(started: datetime | None, now: datetime, timer_scale: float = 1) -> bool:
+    """phase_started_at + 20분(÷ timer_scale) ≤ now(서버 시각). 시작 시각이 없으면 False.
+
+    지나면 힌트 수와 무관하게 「풀이 보기」·「수다로 넘어가기」를 허용한다(명세 4.11-4).
+    """
+    return started is not None and study_remaining_sec(started, now, timer_scale) == 0
+
+
 def start(now: datetime) -> SessionState:
     """전이 1: 시작 전 → study, hint 0."""
     return SessionState(state=State.STUDY, phase_started_at=now)
@@ -59,12 +77,13 @@ def enter_phase(
 ) -> tuple[SessionState, bool]:
     """전이 3·4·5. (새 상태, 이번에 연속 +1 했는지).
 
-    study에서 나가려면 정답(solved)이거나 풀이 보기(hint 3)여야 한다.
+    study에서 나가려면 정답(solved)이거나 풀이 보기(hint 3)이거나 20분이 지나야 한다.
     연속 +1은 study를 떠날 때 한 번만(streak_applied로 중복 방지).
     """
     target = State(to)
     if s.state is State.STUDY and target in (State.CHAT, State.BRIDGE):
-        if not (solved or s.hint_level >= MAX_HINT):
+        over = study_time_over(s.phase_started_at, now, timer_scale)
+        if not (solved or s.hint_level >= MAX_HINT or over):
             raise TransitionError("study not finished")
     elif not (s.state is State.CHAT and target is State.BRIDGE):
         raise TransitionError(f"{s.state} -> {target} not allowed")

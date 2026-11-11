@@ -8,6 +8,8 @@
 - 아이: 학생 행 id를 그대로 받는다(데모 아이 id도 학생 행 id다).
 - 보호자: 대응표에 있는 id만 받는다. 없으면 404 guardian_not_found.
 - 강사: 강사 테이블이 없어 11-15는 비어 있지 않은 actor면 받는다.
+- 공개 체험 세트(명세 4.11): 보호자 `t-…-guardian`은 같은 세트 `t-…-child`로, 학습지도자
+  `t-…-instructor`는 scope = 같은 세트 아이 id(그 아이만 본다). 다른 강사는 scope None(전체).
 """
 
 from dataclasses import dataclass
@@ -16,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.errors import ApiError
 from app.models import Student
+from app.trial import trial_child_of
 
 DEMO_CHILD_ID = "demo-child-minsu"
 DEMO_GUARDIAN_ID = "demo-guardian-minsu"
@@ -30,6 +33,12 @@ class Actor:
     role: str  # child / guardian / instructor
     id: str
     student: Student | None  # 아이·보호자는 해당 학생, 강사는 None
+    scope: str | None = None  # 체험 학습지도자만: 볼 수 있는 아이 id 하나. None = 전체
+
+
+def instructor_scope(actor_id: str) -> str | None:
+    """체험 학습지도자면 같은 세트 아이 id, 아니면 None(전체)."""
+    return trial_child_of(actor_id, "instructor")
 
 
 async def _student_or_404(db: AsyncSession, student_id: str) -> Student:
@@ -43,12 +52,16 @@ async def resolve_actor(db: AsyncSession, role: str, actor_id: str) -> Actor:
     if role == "child":
         return Actor(role, actor_id, await _student_or_404(db, actor_id))
     if role == "guardian":
-        child_id = GUARDIAN_TO_CHILD.get(actor_id)
+        child_id = GUARDIAN_TO_CHILD.get(actor_id) or trial_child_of(actor_id, "guardian")
         if child_id is None:
             raise ApiError(404, "guardian_not_found", "보호자를 찾을 수 없어요.")
         return Actor(role, actor_id, await _student_or_404(db, child_id))
     if role == "instructor":
-        return Actor(role, actor_id, None)
+        scope = instructor_scope(actor_id)
+        # 체험 세트가 DB에 없으면(재배포·만료) 404 → 프론트가 새 세트를 받는다
+        if scope is not None and await db.get(Student, scope) is None:
+            raise ApiError(404, "trial_not_found", "체험이 끝났어요. 처음부터 다시 시작해 주세요.")
+        return Actor(role, actor_id, None, scope)
     raise ApiError(403, "forbidden", "알 수 없는 역할이에요.")
 
 

@@ -1,31 +1,18 @@
 // 보호자 ② 안전 알림 — 대화 원문 없이 분류·긴급도·다음 행동만 (BRIEF 안전 알림 정책 3)
-// 긴급은 '확인했어요' 뒤에만 '괜찮아요'로 닫을 수 있다 (BRIEF v2 검토 후 확정 1). 규칙은 서버도 다시 검사한다.
+// 11-09 팀 결정: 확인·오탐 닫기는 11-15에 회색 「후속」 버튼만(누를 수 없음). 서버·mock을 부르지 않는다.
 import { useState } from 'react';
 import { api } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
 import { LoadError, Sheet, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
-import type { SafetyAlert } from '../../types';
-
-const REASONS = ['아이와 이야기해 봤어요', '오해였어요', '기타'];
 
 export function GuardianAlerts() {
-  const { data, setData, error, loading, reload } = useAsync(() => api.getAlerts());
-  const [closing, setClosing] = useState<SafetyAlert | null>(null);
-  const [reason, setReason] = useState(REASONS[0]);
+  const { data, error, loading, reload } = useAsync(() => api.getAlerts());
   const [help, setHelp] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [actError, setActError] = useState<string | null>(null);
   // 위쪽 카드: 아직 안 본 것 + 확인은 했지만 닫지 않은 긴급
   const open = data?.filter((a) => a.status === '미확인' || (a.level === '긴급' && a.status === '확인함')) ?? [];
   const history = data?.filter((a) => !open.includes(a)) ?? [];
-
-  const act = async (fn: () => Promise<SafetyAlert>) => {
-    setBusy(true); setActError(null);
-    try { const a = await fn(); setData(data!.map((x) => (x.id === a.id ? a : x))); }
-    catch (e) { setActError((e as Error).message); } finally { setBusy(false); setClosing(null); }
-  };
 
   return (
     <Frame adult title="안전 알림" exit tabs="guardian">
@@ -40,13 +27,11 @@ export function GuardianAlerts() {
           <p>{a.action}</p>
           <button className="exit-btn" style={{ padding: '8px 0' }} onClick={() => setHelp(true)}>도움받을 곳 보기</button>
           <div className="stack">
-            {a.status === '미확인' && <button className="btn btn--primary" disabled={busy} onClick={() => act(() => api.ackAlert(a.id))}>확인했어요</button>}
-            {/* 긴급은 확인 전에는 닫기 버튼이 나오지 않는다 */}
-            {(a.level === '주의' || a.status === '확인함') && <button className="btn btn--secondary" disabled={busy} onClick={() => setClosing(a)}>괜찮아요</button>}
+            <button className="btn btn--secondary" disabled>후속</button>
+            <span className="small muted">확인·닫기는 다음 버전에서 열려요</span>
           </div>
         </article>
       ))}
-      <LoadError error={actError} />
       {history.length > 0 && <h2 className="h3">이전 알림</h2>}
       {history.map((a) => (
         <div key={a.id} className="card card--flat row between small">
@@ -54,14 +39,6 @@ export function GuardianAlerts() {
         </div>
       ))}
       <p className="small muted" style={{ textAlign: 'center' }}>대화 원문은 표시하지 않아요</p>
-      {closing && (
-        <Sheet title="닫는 이유" onClose={() => setClosing(null)}>
-          {REASONS.map((r, i) => (
-            <label key={r} className="row"><input id={`reason-${i}`} type="radio" name="reason" checked={reason === r} onChange={() => setReason(r)} /> {r}</label>
-          ))}
-          <button className="btn btn--primary" disabled={busy} onClick={() => act(() => api.closeAlert(closing.id, reason))}>괜찮아요 · 닫기</button>
-        </Sheet>
-      )}
       {help && (
         <Sheet title="도움받을 곳" onClose={() => setHelp(false)}>
           <ul className="list">

@@ -8,7 +8,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Problem
 
-SEED_PATH = Path(__file__).resolve().parents[2] / "seed" / "seed_v0.1.json"
+_REPO_SEED = Path(__file__).resolve().parents[2] / "seed" / "seed_v0.1.json"
+# Vercel 백엔드 서비스는 루트가 backend/라 저장소 seed/가 함수 묶음에 안 실릴 수 있다.
+# 그래서 빌드 때 여기로 복사한다(vercel.json backend.buildCommand). 정본은 여전히 seed/.
+_BUNDLED_SEED = Path(__file__).resolve().parent / "_seed" / "seed_v0.1.json"
+
+
+def resolve_seed_path(repo: Path = _REPO_SEED, bundled: Path = _BUNDLED_SEED) -> Path:
+    """저장소 정본이 있으면 그것, 없으면(배포 함수) 빌드 때 복사한 것."""
+    return repo if repo.exists() else bundled
+
+
+SEED_PATH = resolve_seed_path()
 _FIELDS = (
     "id",
     "tag",

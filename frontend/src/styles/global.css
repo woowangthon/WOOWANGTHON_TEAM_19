@@ -428,3 +428,16 @@ button.seed-chip { cursor: pointer; }
   .tab, button.card { transition: none; }
   button.card:hover { transform: none; }
 }
+
+/* ============ 학습지도자 화면 (학습지도자만, lib/wide.ts) ============ */
+/* 학습지도자는 어느 폭에서도 폰 모양 틀 없이 창 전체를 쓴다(최대 폭 없음). 2열·표는 1024px 이상에서만 */
+.frame--wide { max-width: none; height: 100dvh; margin-top: 0; border-radius: 0; box-shadow: none; }
+@media (min-width: 1024px) {
+  .frame--wide .screen-body { padding: var(--space-4) 24px; }
+}
+/* 「오늘」: 왼쪽 학생 목록, 오른쪽 선택한 학생의 메모·초안 */
+.teacher-split { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 20px; align-items: start; }
+.teacher-split__list { display: flex; flex-direction: column; gap: var(--space-3); }
+.teacher-split__panel { position: sticky; top: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+/* 「결과」 표 */
+.table--results td { vertical-align: top; }

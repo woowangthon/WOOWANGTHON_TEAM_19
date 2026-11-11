@@ -2,7 +2,7 @@
 // 규칙(아이디·비밀번호 형식, 중복, 필수 약관)은 서버(org.ts)가 최종 판단한다. 화면은 미리 알려 주는 역할.
 import { useState, type ReactNode } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { api, API_MODE } from '../../api';
+import { api, API_MODE, restartDemoAll } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon, type IconName } from '../../components/Icon';
 import { Mascot } from '../../components/Mascot';
@@ -59,8 +59,8 @@ export function Login() {
 /** 심사위원용: 체험 계정을 누르면 아이디·비밀번호가 채워진다 + 시연 설정 */
 function DemoSheet({ onPick, onClose }: { onPick: (loginId: string) => void; onClose: () => void }) {
   const { data: accounts } = useAsync(() => api.demoAccounts());
-  const { data: settings, setData } = useAsync(() => api.getDemo());
   const [resetDone, setResetDone] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
   return (
     <Sheet title="체험 계정 (시연용)" onClose={onClose}>
       <p className="small muted">누르면 아이디·비밀번호가 채워져요. 비밀번호는 모두 <strong className="num">{DEMO_PASSWORD}</strong></p>
@@ -74,12 +74,12 @@ function DemoSheet({ onPick, onClose }: { onPick: (loginId: string) => void; onC
       </div>
       <section className="card card--flat stack" aria-label="시연 설정">
         <div className="row between"><strong className="small">시연 설정</strong><span className="pill">{API_MODE === 'mock' ? '가짜 서버' : '실제 서버'}</span></div>
-        <label className="row between small" style={{ cursor: 'pointer' }}>
-          <span>빠른 시연 <span className="muted">(20분 → 1분)</span></span>
-          <input type="checkbox" checked={!!settings?.fast} onChange={async () => settings && setData(await api.setDemo({ fast: !settings.fast }))} style={{ width: 20, height: 20, accentColor: 'var(--color-primary)' }} />
-        </label>
         <button className="btn btn--ghost btn--small" style={{ alignSelf: 'flex-start', padding: 0 }}
-          onClick={async () => { await api.resetDemo(); setResetDone(true); }}>{resetDone ? '처음 상태로 되돌렸어요 ✓' : '시연 데이터 처음으로'}</button>
+          onClick={async () => {
+            setResetError(null); setResetDone(false);
+            try { await restartDemoAll(); setResetDone(true); } catch (e) { setResetError((e as Error).message); }
+          }}>{resetDone ? '처음 상태로 되돌렸어요 ✓' : '시연 데이터 처음으로'}</button>
+        <LoadError error={resetError && `되돌리지 못했어요. ${resetError}`} />
       </section>
     </Sheet>
   );

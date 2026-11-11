@@ -16,6 +16,7 @@ from app.actors import actor_from_request
 from app.api import HOTLINES
 from app.db import get_db
 from app.models import Alert, InstructorNote, Problem, Session, Student
+from app.pii import unredact_name
 from app.timeutil import as_utc, get_now, seoul_date
 
 router = APIRouter(prefix="/guardian")
@@ -89,5 +90,6 @@ async def guardian_today(db: Db, now: Now, student: GuardianChild) -> dict[str, 
         "alert": await _today_alert(db, student, now),
         "child_line": child_line,
         "quiz": quiz,
-        "instructor_comment": comment,
+        # 저장본은 치환본. 보호자 화면에 보이기 직전에만 별명으로 되돌린다(11-11 A6)
+        "instructor_comment": unredact_name(comment, student.nickname),
     }

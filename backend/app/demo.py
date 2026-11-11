@@ -63,13 +63,15 @@ class ResetBody(BaseModel):
     timer_scale: float | None = Field(default=None, gt=0, allow_inf_nan=False)
 
 
-async def _wipe_demo_child(db: AsyncSession) -> None:
+async def _wipe_demo_child(db: AsyncSession, *, keep_notes: bool = False) -> None:
+    """keep_notes=True면 강사 노트(메모·코멘트)는 남긴다(compat /demo/restart, 11-11)."""
     sessions = select(Session.id).where(Session.student_id == DEMO_CHILD_ID)
     await db.execute(delete(Message).where(Message.session_id.in_(sessions)))
     await db.execute(delete(Alert).where(Alert.student_id == DEMO_CHILD_ID))
     await db.execute(delete(Session).where(Session.student_id == DEMO_CHILD_ID))
     await db.execute(delete(Misconception).where(Misconception.student_id == DEMO_CHILD_ID))
-    await db.execute(delete(InstructorNote).where(InstructorNote.student_id == DEMO_CHILD_ID))
+    if not keep_notes:
+        await db.execute(delete(InstructorNote).where(InstructorNote.student_id == DEMO_CHILD_ID))
 
 
 async def _today_task_problem(db: AsyncSession) -> str | None:
@@ -83,7 +85,14 @@ async def _today_task_problem(db: AsyncSession) -> str | None:
     )
 
 
-async def _write_day3_student(db: AsyncSession, body: ResetBody, today: date) -> None:
+async def _write_day3_student(
+    db: AsyncSession,
+    body: ResetBody,
+    today: date,
+    student_id: str = DEMO_CHILD_ID,
+    consent: bool = True,
+) -> None:
+    """student_id 학생을 day3로. 체험 세트(명세 4.11)는 consent=False로 약속 화면부터."""
     values: dict[str, Any] = {
         "nickname": "지우",  # 합성 배우(프론트 체험 계정 jiwoo와 같은 이름, 11-11)
         "grade_band": "초5-6",
@@ -95,13 +104,13 @@ async def _write_day3_student(db: AsyncSession, body: ResetBody, today: date) ->
         "freezes": 2,
         "fence_codes": [],
         "guardian_contact_enc": None,
-        "consent": True,  # day3 = 약속 화면을 이미 지난 아이
+        "consent": consent,  # 데모 day3 = 약속 화면을 이미 지난 아이
         "today_task_problem_id": await _today_task_problem(db),
         "today_task_date": today,
     }
-    student = await db.get(Student, DEMO_CHILD_ID)
+    student = await db.get(Student, student_id)
     if student is None:
-        db.add(Student(id=DEMO_CHILD_ID, **values))
+        db.add(Student(id=student_id, **values))
     else:
         for key, value in values.items():
             setattr(student, key, value)
@@ -109,7 +118,7 @@ async def _write_day3_student(db: AsyncSession, body: ResetBody, today: date) ->
     for tag, status, days_ago in DAY3_MISCONCEPTIONS:
         db.add(
             Misconception(
-                student_id=DEMO_CHILD_ID,
+                student_id=student_id,
                 tag=tag,
                 status=status,
                 first_wrong_date=today - timedelta(days=days_ago),

@@ -1,7 +1,8 @@
 // 학생 ① 오늘 시작 — 탭 첫 화면(뒤로가기 없음). 상태에 따라 버튼이 달라진다:
 // 처음 → 약속부터 / 진행 중 → 이어서 하기 / 끝남 → 내일 봐 / 과제 없음 → 안내
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../api';
+import { api, restartDemoAll } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
 import { Mascot } from '../../components/Mascot';
@@ -11,18 +12,31 @@ import { useMentor } from '../../state/mentor';
 import { routeFor } from '../../state/session';
 import { useAuth } from '../../state/auth';
 import { SeedChip } from '../../components/Seed';
+import { isCrisisDay, isDemoChild } from '../../lib/kidScreens';
 
 export function StudentToday() {
   const nav = useNavigate();
   const { say } = useMentor();
-  const { me } = useAuth();
+  const { me, enter } = useAuth();
   const { data, error, loading, reload } = useAsync(() => api.getStudentHome());
+  const [restarting, setRestarting] = useState(false);
+  const [restartError, setRestartError] = useState<string | null>(null);
+  // 시연용: 데모 아이만 「처음부터 다시 체험」. 서버·mock을 되돌리면 mock 로그인도 풀리므로 같은 계정으로 다시 들어온다
+  const restart = async () => {
+    if (!me) return;
+    setRestarting(true); setRestartError(null);
+    try { await restartDemoAll(); await enter(await api.demoLogin(me.id)); reload(); }
+    catch (e) { setRestartError(`되돌리지 못했어요. ${(e as Error).message}`); }
+    finally { setRestarting(false); }
+  };
 
   let cta: { label: string; to?: string } = { label: '시작하기', to: '/student/difficulty' };
   let line = say('왔구나! 오늘은\n이것 하나만 같이 하자', '왔군요! 오늘은\n이것 하나만 같이 해요');
   if (data) {
     const inProgress = data.session && !['done', 'crisis'].includes(data.session.phase);
-    if (data.doneToday) { cta = { label: '오늘은 끝! 내일 봐' }; line = say('오늘도 해냈어!\n내일 또 만나자', '오늘도 해냈어요!\n내일 또 만나요'); }
+    // 위기(🔴)로 끝난 날은 축하하지 않고 차분하게. 문구는 임시(성호 확인 대상)
+    if (data.doneToday && isCrisisDay(data)) { cta = { label: '오늘은 여기까지' }; line = say('오늘은 여기까지 할게.\n믿을 수 있는 어른과 꼭 이야기해 줘', '오늘은 여기까지 할게요.\n믿을 수 있는 어른과 꼭 이야기해 주세요'); }
+    else if (data.doneToday) { cta = { label: '오늘은 끝! 내일 봐' }; line = say('오늘도 해냈어!\n내일 또 만나자', '오늘도 해냈어요!\n내일 또 만나요'); }
     else if (inProgress) { cta = { label: '이어서 하기', to: routeFor(data.session) }; line = say('하던 데서\n이어서 하자', '하던 데서\n이어서 해요'); }
     else if (!data.task) { cta = { label: '오늘은 쉬는 날' }; line = say('오늘은 선생님이 정한\n공부가 없어. 푹 쉬어!', '오늘은 선생님이 정한\n공부가 없어요. 푹 쉬어요!'); }
     else if (data.needsOnboarding) cta = { label: '시작하기', to: '/student/onboarding/promise' };
@@ -49,7 +63,7 @@ export function StudentToday() {
                 <SeedChip n={data.seeds} onClick={() => nav('/student/shop')} />
               </span>
             </div>
-            <Mascot mood={data.doneToday ? 'cheer' : 'wave'} size={104} variant="face" outfit={me?.outfit} />
+            <Mascot mood={data.doneToday ? (isCrisisDay(data) ? 'calm' : 'cheer') : 'wave'} size={104} variant="face" outfit={me?.outfit} />
           </section>
           <div className="week week--lift" style={{ display: 'contents' }}><Week attendance={data.attendance} todayIndex={data.todayIndex} /></div>
           <div className="bubble" style={{ maxWidth: '100%' }}>{line}</div>
@@ -61,7 +75,11 @@ export function StudentToday() {
                 <div className="small muted">{data.task.assignedBy}이 정해 줬어요</div>
               </div>
             </section>
-          ) : <div className="notice notice--plain">오늘 할 것이 아직 없어요</div>}
+          ) : !data.doneToday && <div className="notice notice--plain">오늘 할 것이 아직 없어요</div>}
+          {isDemoChild(me) && (
+            <button className="exit-btn" style={{ alignSelf: 'center' }} disabled={restarting} onClick={restart}>{restarting ? '되돌리는 중…' : '처음부터 다시 체험'}</button>
+          )}
+          <LoadError error={restartError} />
         </>
       )}
     </Frame>

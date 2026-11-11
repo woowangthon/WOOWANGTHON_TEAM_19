@@ -16,7 +16,7 @@ from typing import Annotated, Any, Literal, cast
 
 from fastapi import APIRouter, Depends, Header
 from pydantic import BaseModel, Field, StrictBool
-from sqlalchemy import CursorResult, or_, select, text, update
+from sqlalchemy import CursorResult, func, or_, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,7 +24,7 @@ from app import config
 from app.actors import actor_from_request
 from app.db import get_db
 from app.errors import ApiError
-from app.judge import judge, parse_value
+from app.judge import contains_answer, judge, parse_value
 from app.llm import FIXED_REPLY, LLMAdapter, Reply, ReplyRequest, ScriptedAdapter, build_adapter
 from app.models import (
     EXCERPT_MAX,
@@ -52,6 +52,7 @@ from app.state_machine import (
     to_crisis,
 )
 from app.timeutil import as_utc, get_now, seoul_date
+from app.trial import AI_DAILY_MAX, AI_HOURLY_MAX
 
 log = logging.getLogger(__name__)
 
@@ -530,6 +531,17 @@ async def _accept(
     return _Claimed(row.id, lease, turn_id, summary)
 
 
+async def _mentor_last_hour(db: AsyncSession, now: datetime) -> int:
+    """서버 전체 최근 1시간 멘토 답 수. 만료 시각 = 만든 시각 + 72시간이라 그걸로 센다(칸 추가 없음)."""
+    since = now - timedelta(hours=1) + MESSAGE_TTL
+    count = await db.scalar(
+        select(func.count())
+        .select_from(Message)
+        .where(Message.role == "mentor", Message.expires_at >= since)
+    )
+    return count or 0
+
+
 async def _reply(
     db: AsyncSession, now: datetime, student: Student, llm: LLMAdapter, claim: _Claimed
 ) -> dict[str, Any]:
@@ -574,10 +586,26 @@ async def _reply(
         turns=prompt.turns,
         judge=verdict,
     )
+    # 남용 상한(명세 4.11-5): 오늘 세션 또는 서버 전체 최근 1시간 멘토 답이 상한이면 그 턴은 대본.
+    # DB에서 센다. LLM 호출 전 트랜잭션 안에서 세어 두고 커밋한다(호출 중 연결을 쥐지 않게)
+    over_cap = sum(m.role == "mentor" for m in messages) >= AI_DAILY_MAX or (
+        await _mentor_last_hour(db, now) >= AI_HOURLY_MAX
+    )
     await db.commit()  # 읽기만 했다. LLM을 기다리는 동안 연결·잠금을 쥐지 않는다
     started = time.monotonic()
     try:
-        reply = await llm.reply(req)
+        reply = await (_scripted() if over_cap else llm).reply(req)
+        # A4 사후 검사: 풀이 보기(힌트 3) 전·못 맞힌 study에서 정답이 새면 대본으로(폴백과 같은 대본)
+        if (
+            phase == State.STUDY.value
+            and row.hint_level < 3
+            and problem is not None
+            and contains_answer(reply.text, problem.answer, problem.text)
+            and not await is_solved(db, row, problem)
+        ):
+            log.warning("answer_leak 대체 session=%s source=%s", row.id, reply.source)
+            reply = await _scripted().reply(req)
+            await db.commit()  # is_solved 읽기 트랜잭션을 닫는다
     except Exception:
         await _release_lease(db, row.id, claim.lease)
         await db.commit()
@@ -703,6 +731,7 @@ TAG_NAME = {
 }
 QUIZ_COUNT = 3
 STUCK_FALLBACK = "막힌 곳 기록 없음"  # 부록 E 요약 ② 실패 시
+STUCK_NO_WRONG = "틀린 답 없음"  # 요약 ② 오답 0건(풀이 보기로 넘어간 경우도 맞는 말)
 SUMMARY_PHASE = "summary"  # 대본에 없는 단계 → scripted는 FIXED_REPLY → 템플릿
 
 
@@ -843,6 +872,8 @@ async def _stuck_phrase(
     # texts = 저장 판정 "wrong"(숫자·분수 형식의 study 답). 수다는 판정을 저장하지 않는다.
     # exact 문제에서 값만 같은 표기(6/16 등)도 정답 값이라 뺀다.
     attempts = [t for t in texts if parse_value(t) != answer_value]
+    if not attempts:  # A8: 틀린 답이 없으면 요약할 막힌 곳이 없다 → LLM 없이 고정 문장
+        return STUCK_NO_WRONG
     try:
         out = await llm.reply(
             ReplyRequest(

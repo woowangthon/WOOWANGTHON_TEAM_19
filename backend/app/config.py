@@ -6,7 +6,23 @@ from pathlib import Path
 
 
 def database_url() -> str:
-    return os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./dev.db")
+    """로컬·테스트는 SQLite 그대로. 배포(Supabase)가 주는 `postgres://`·`postgresql://`는
+    async 드라이버 `postgresql+asyncpg://`로 바꾼다. libpq 식 `sslmode`는 asyncpg가 모르니
+    `ssl`로 옮기고, Vercel 연동이 붙이는 `supa=` 같은 모르는 값은 뺀다."""
+    raw = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./dev.db")
+    scheme, sep, rest = raw.partition("://")
+    if not sep or scheme not in ("postgres", "postgresql"):
+        return raw
+    base, qsep, query = rest.partition("?")
+    kept: list[str] = []
+    for pair in query.split("&") if qsep else []:
+        key, _, value = pair.partition("=")
+        if key == "sslmode":
+            kept.append(f"ssl={value}")
+        elif key == "ssl":
+            kept.append(pair)
+    url = f"postgresql+asyncpg://{base}"
+    return f"{url}?{'&'.join(kept)}" if kept else url
 
 
 def llm_mode() -> str:
@@ -55,6 +71,9 @@ def demo_token() -> str | None:
 
 
 # 리셋(POST /demo/reset)이 정한 배율. 테이블 칸이 없어 프로세스 메모리에 둔다.
+# 로컬(영상 촬영)·테스트 전용. Vercel 배포는 함수 인스턴스마다 메모리가 따로라 리셋한
+# 인스턴스에만 먹고 나머지는 모른다 → 배포는 실제 시간(명세 4.11-3)이고 환경변수
+# TIMER_SCALE도 넣지 않는다. 배포에서 이 값에 기대는 기능을 만들지 않는다.
 _timer_scale_override: float | None = None
 
 

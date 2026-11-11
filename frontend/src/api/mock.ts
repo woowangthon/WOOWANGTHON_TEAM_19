@@ -37,7 +37,6 @@ interface DayRecord {
 interface Learner { promise: boolean; mentor: MentorSetting | null; days: DayRecord[]; session: SessionState | null; }
 interface DB {
   version: 4;
-  settings: { fast: boolean };
   learners: Record<string, Learner>;      // 학생 id → 학습 기록
   units: Unit[];
   tasks: Record<string, string | null>;   // 학생 id → 오늘 할 단원
@@ -59,7 +58,6 @@ function seed(): DB {
   });
   return {
     version: 4,
-    settings: { fast: false },
     learners: { s1: { promise: false, mentor: null, session: null, days: [past(3, '초급', 4, 4), past(2, '초급', 1), past(1, '중급', 3)] } }, // 지우: 어제까지 연속 3일
     units: SEED_UNITS,
     tasks: { s1: '분수의 덧셈', s2: '분수의 덧셈', s3: '분수의 덧셈' },
@@ -90,7 +88,6 @@ const fullName = (id: string) => (id === 's1' ? '김지우' : nameOf(id));
 
 /* ================= 계산 도우미 ================= */
 const speech = (): Speech => me().mentor?.speech ?? '반말';
-const scale = () => (db.settings.fast ? 20 : 1);
 const today = () => ymd();
 
 function streak(days: DayRecord[] = me().days): number {
@@ -101,9 +98,9 @@ function streak(days: DayRecord[] = me().days): number {
   while (set.has(ymd(d))) { n++; d = addDays(d, -1); }
   return n;
 }
-const studyRemaining = (s: SessionState) => Math.max(0, Math.round(STUDY_SEC - ((s.studyEndedAt ?? Date.now()) - s.startedAt) / 1000 * scale()));
+const studyRemaining = (s: SessionState) => Math.max(0, Math.round(STUDY_SEC - ((s.studyEndedAt ?? Date.now()) - s.startedAt) / 1000));
 const chatRemaining = (s: SessionState) => s.chatStartedAt == null ? CHAT_SEC
-  : Math.max(0, Math.round(CHAT_SEC - ((s.chatEndedAt ?? Date.now()) - s.chatStartedAt) / 1000 * scale()));
+  : Math.max(0, Math.round(CHAT_SEC - ((s.chatEndedAt ?? Date.now()) - s.chatStartedAt) / 1000));
 const states = (s: SessionState) => s.problems.map((p) => s.per[p.id]);
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 /** 받침이 있으면 '을', 없으면 '를' (한글이 아니면 '을(를)') */
@@ -251,6 +248,7 @@ export const mockApi: MentorApi = {
       task: task(id), needsOnboarding: !L.promise || !L.mentor,
       session: s ? view(s) : null,
       doneToday: done.has(today()) && (!s || s.phase === 'done' || s.phase === 'crisis'),
+      endedInCrisis: done.has(today()) && s?.phase === 'crisis', // 계약 #2 v1과 같은 필드
       restricted: isRestricted(id), inClass: roomsOfStudent(id).length > 0,
       seeds: balanceOf(id), earnedToday: studySeedsToday(id),
     };
@@ -501,8 +499,6 @@ export const mockApi: MentorApi = {
   },
 
   /* ---------- 시연 ---------- */
-  async getDemo() { return db.settings; },
-  async setDemo(settings) { db.settings = settings; commit(); return db.settings; },
   async resetDemo() { db = seed(); commit(); resetOrg(); },
 
   /* ---------- v0.4 계정·학원·강의실·씨앗 (org.ts) ---------- */

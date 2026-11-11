@@ -1,6 +1,6 @@
 // 학습지도자 ② 오늘 할 것 — 학생마다: 오늘 할 단원 지정 → 수업 메모(1~2분) → 초안 → 고쳐서 승인 → 보호자 카드에 공개
 // 초안의 "사실 칸"(범위·문제·힌트)은 기록에서 자동으로 채워지고, 사람이 고치는 것은 코멘트뿐이다.
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { api, API_MODE } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
@@ -8,6 +8,7 @@ import { LoadError, Sheet, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../state/auth';
+import { useTeacherWide } from '../../lib/wide';
 import type { Draft, StudentRow, TaskStatus, TeacherMemo, TeacherToday as TodayView } from '../../types';
 
 const STATUS_PILL: Record<TaskStatus, string> = { '지정 전': 'pill', '지정됨': 'pill pill--accent', '진행 중': 'pill pill--mint', '완료': 'pill pill--solid' };
@@ -18,6 +19,17 @@ export function TeacherToday() {
   const nav = useNavigate();
   const { me } = useAuth();
   const m = me?.membership;
+  const wide = useTeacherWide(); // 넓은 화면: 목록 옆에 상세를 같이 보인다(시트 대신)
+  const close = () => { setOpen(null); reload(); };
+  const rows = data?.students.map((s) => (
+    <button key={s.id} className={'card student-row' + (wide && open?.id === s.id ? ' card--selected' : '')} onClick={() => setOpen(s)}>
+      <span style={{ minWidth: 0 }}>
+        <strong>{s.name}</strong>
+        <span className="small muted" style={{ display: 'block' }}>{s.task ?? '오늘 할 것 없음'}{s.draftStatus ? ` · 코멘트 ${s.draftStatus}` : ''}</span>
+      </span>
+      <span className="row"><span className={STATUS_PILL[s.status]}>{s.status}</span><Icon name="chevron" size={18} /></span>
+    </button>
+  ));
   return (
     <Frame adult title="오늘 할 것" exit right={<button className="icon-btn" aria-label="긴급 알림" onClick={() => nav('/teacher/alerts')}><Icon name="warn" /></button>} tabs="teacher">
       {loading && <Thinking label="불러오는 중" />}
@@ -34,26 +46,27 @@ export function TeacherToday() {
           <div className="row between small"><span>{data.dateLabel}</span><span className="muted">{data.className} · 학생 {data.students.length}명</span></div>
           {data.students.length === 0 && <button className="card notice" onClick={() => nav('/teacher/classes')}><span>강의실을 열고 학생을 초대해 주세요</span><Icon name="chevron" size={18} /></button>}
           {data.units.length === 0 && <div className="notice">범위 탭에서 이번 주 단원을 먼저 골라 주세요.</div>}
-          <div className="card-grid">
-          {data.students.map((s) => (
-            <button key={s.id} className="card student-row" onClick={() => setOpen(s)}>
-              <span style={{ minWidth: 0 }}>
-                <strong>{s.name}</strong>
-                <span className="small muted" style={{ display: 'block' }}>{s.task ?? '오늘 할 것 없음'}{s.draftStatus ? ` · 코멘트 ${s.draftStatus}` : ''}</span>
-              </span>
-              <span className="row"><span className={STATUS_PILL[s.status]}>{s.status}</span><Icon name="chevron" size={18} /></span>
-            </button>
-          ))}
-          </div>
-          <p className="small muted">학생을 누르면 오늘 할 것을 정하고 보호자 코멘트를 쓸 수 있어요.</p>
+          {wide && data.students.length > 0 ? (
+            <div className="teacher-split">
+              <div className="teacher-split__list">{rows}</div>
+              {open
+                ? <StudentSheet key={open.id} inline student={open} view={data} onChange={setData} onClose={close} />
+                : <section className="card card--flat teacher-split__panel"><p className="small muted">왼쪽에서 학생을 누르면 오늘 할 것을 정하고 보호자 코멘트를 쓸 수 있어요.</p></section>}
+            </div>
+          ) : (
+            <>
+              <div className="card-grid">{rows}</div>
+              <p className="small muted">학생을 누르면 오늘 할 것을 정하고 보호자 코멘트를 쓸 수 있어요.</p>
+            </>
+          )}
         </>
       )}
-      {open && data && <StudentSheet student={open} view={data} onChange={setData} onClose={() => { setOpen(null); reload(); }} />}
+      {!wide && open && data && <StudentSheet student={open} view={data} onChange={setData} onClose={close} />}
     </Frame>
   );
 }
 
-function StudentSheet({ student, view, onChange, onClose }: { student: StudentRow; view: TodayView; onChange: (v: TodayView) => void; onClose: () => void }) {
+function StudentSheet({ student, view, onChange, onClose, inline }: { student: StudentRow; view: TodayView; onChange: (v: TodayView) => void; onClose: () => void; inline?: boolean }) {
   const [task, setTask] = useState(student.task ?? '');
   const [memo, setMemo] = useState<TeacherMemo>({ covered: '', stuck: '', homework: '', note: '' });
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -91,8 +104,9 @@ function StudentSheet({ student, view, onChange, onClose }: { student: StudentRo
   );
   const edited = !!draft && comment.trim() !== draft.comment;
 
-  return (
-    <Sheet title={`${student.name} · 오늘`} onClose={onClose}>
+  const title = `${student.name} · 오늘`;
+  const body: ReactNode = (
+    <>
       {busy === 'load' ? <Thinking label="불러오는 중" /> : (
         <>
           <label className="field">오늘 할 것
@@ -136,6 +150,10 @@ function StudentSheet({ student, view, onChange, onClose }: { student: StudentRo
         </>
       )}
       <button className="btn btn--ghost" onClick={onClose}>닫기</button>
-    </Sheet>
+    </>
   );
+  // 넓은 화면에서는 시트 대신 목록 오른쪽 칸에 같은 내용을 그린다
+  return inline
+    ? <section className="card card--flat teacher-split__panel" aria-label={title}><h2 className="h3">{title}</h2>{body}</section>
+    : <Sheet title={title} onClose={onClose}>{body}</Sheet>;
 }

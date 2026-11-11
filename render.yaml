@@ -1,3 +1,4 @@
+# 버림(11-11, 명세 4.11-1) — 지금 배포는 vercel.json + docs/deploy_vercel_v0.1.md. 기록용으로만 둔다.
 # Render Blueprint — 웹 서비스 1개(TK-56). 프론트 화면과 API를 한 주소로. 사용법은 docs/deploy_render_v0.1.md.
 # 비밀 값(키·토큰)은 여기에 적지 않는다. sync: false = 대시보드에서 직접 입력.
 services:
