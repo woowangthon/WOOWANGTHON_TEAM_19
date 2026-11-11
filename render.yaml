@@ -1,0 +1,37 @@
+# 버림(11-11, 명세 4.11-1) — 지금 배포는 vercel.json + docs/deploy_vercel_v0.1.md. 기록용으로만 둔다.
+# Render Blueprint — 웹 서비스 1개(TK-56). 프론트 화면과 API를 한 주소로. 사용법은 docs/deploy_render_v0.1.md.
+# 비밀 값(키·토큰)은 여기에 적지 않는다. sync: false = 대시보드에서 직접 입력.
+services:
+  - type: web
+    name: chingu1-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    # Render는 rootDir에 uv.lock이 있으면 uv를 넣어 주지만, 없을 때도 되게 pip로 한 번 더 설치한다
+    # 프론트도 같은 빌드에서 만든다(네이티브 런타임에 node·npm 포함). API는 같은 주소의 상대 경로.
+    # 키·데모 토큰은 빌드에 넣지 않는다(VITE_* 값은 번들에 그대로 박힌다)
+    buildCommand: >-
+      pip install uv && uv sync --frozen --no-dev &&
+      cd ../frontend && npm ci &&
+      VITE_API_MODE=http VITE_API_BASE=/api/v1/compat npm run build
+    # 워커는 1개 고정: 빈 DB에 여러 워커가 동시에 테이블·시드를 만들면 충돌하고,
+    # 리셋 timer_scale도 프로세스 메모리라 워커마다 달라진다
+    # --frozen --no-dev: uv run이 기동 때 dev 의존성(pyright 등)을 다시 설치하지 않게
+    startCommand: uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.16 # pyproject requires-python >=3.12. Render는 패치까지 적어야 한다
+      - key: LLM_MODE
+        value: live
+      - key: LLM_API_KEY
+        sync: false
+      - key: DEMO_TOKEN
+        sync: false # 시연자가 리셋 curl에 같은 값을 써야 하니 직접 정해 넣는다
+      - key: FRONTEND_DIST
+        value: ../frontend/dist # backend/ 기준. FastAPI가 이 빌드를 같은 주소에서 서빙
+      - key: CORS_ORIGINS
+        sync: false # 같은 주소 서빙이라 비워 둬도 된다. 다른 주소 프론트가 붙을 때만(쉼표로 여러 개)
+      - key: DATABASE_URL
+        # 무료 플랜 디스크는 휘발성: 재시작·재배포·슬립 뒤 DB가 빈다(기동 시 시드·데모 배우 재생성)
+        value: sqlite+aiosqlite:////tmp/chingu1.db
