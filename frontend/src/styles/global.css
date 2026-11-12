@@ -643,3 +643,97 @@ body { font-variant-numeric: tabular-nums; }
 
 /* 강의실 수업 진행(11-13): 학생 화면 위 「수업 중 · 쉬는 시간」 띠 — 기존 .notice 위에 글자만 조정. 정식 모양은 GPT 요청서 */
 .class-ribbon { justify-content: flex-start; gap: 6px; font-size: 13px; font-weight: 700; }
+
+/* =====================================================================
+   11-13 GPT 디자인 전달본(GPT-037~048) 강의실 수업 진행 — 원본: AI-Mentor-Design-GPT-2026-11-13/styles/global.patch.css
+   ===================================================================== */
+/* GPT-037~048. Append after current global.css. No token renames/changes. */
+/* GPT-037: ClassDefaultsCard */
+.class-defaults fieldset {border:0;padding:0;margin:20px 0;min-width:0}
+.class-defaults legend {font-weight:700;margin-bottom:8px}
+.class-defaults .chip-row {flex-wrap:wrap;gap:8px}
+.class-defaults .chip {min-height:44px;min-width:64px}
+.session-setting {display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;padding:12px 0;border-bottom:1px solid var(--color-border);cursor:pointer}
+.session-setting__label {display:grid;gap:4px;flex:1}
+.session-setting__state {font-size:13px;color:var(--color-text-muted)}
+/* GPT-038: OwnerClassrooms, create Sheet */
+.classroom-meta {display:grid;gap:12px;margin-top:16px}
+.classroom-meta label,.classroom-form label {display:grid;gap:6px}
+.classroom-meta input,.classroom-meta select,.classroom-form input,.classroom-form select {min-height:46px;width:100%;min-width:0;font:inherit;border:1px solid var(--color-border);border-radius:10px;padding:10px;background:var(--color-surface);color:var(--color-text)}
+.classroom-form {display:grid;gap:16px}
+.classroom-empty {padding:28px 16px;text-align:center;display:grid;justify-items:center;gap:12px}
+/* GPT-039/040: TeacherSessionPanel */
+.timer {padding:20px;border-radius:20px;border:1px solid var(--color-border);display:grid;gap:14px}
+.timer__status {display:flex;gap:8px;align-items:center;font-size:16px;font-weight:700}
+.timer__end {font-size:24px;font-weight:800;line-height:1.35;font-variant-numeric:tabular-nums}
+.timer__end small {display:block;font-size:13px;font-weight:400;margin-top:4px}
+.timer--class {background:var(--color-primary-soft)}
+.timer--break {background:var(--color-surface)}
+.timer--soon {background:var(--color-accent-soft);border-color:var(--color-accent)}
+.session-start {width:100%;min-height:48px}
+.card-grid > .session-room:not(:first-child) .session-start {background:var(--color-surface);color:var(--color-text);border:1px solid var(--color-border);box-shadow:0 4px 0 var(--color-border)}
+.student-session > .session-start {min-height:48px}
+.session-adjust {display:flex;flex-wrap:wrap;gap:8px}
+.session-adjust .chip {min-width:88px;min-height:44px}
+.session-actions {display:grid;gap:12px}
+.session-actions .btn {min-height:44px;white-space:normal}
+.session-end {border-top:1px solid var(--color-border);padding-top:12px;margin-top:4px;display:flex;justify-content:flex-end}
+.session-end .btn {min-height:44px}
+/* GPT-041: JoinedList */
+.joined-list {margin-top:20px}
+.joined-list summary {min-height:44px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.joined-list ul {list-style:none;padding:0;margin:8px 0 0;max-height:360px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.joined-row {display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 0;border-bottom:1px solid var(--color-border)}
+.joined-row__person {display:grid;gap:5px;min-width:0}
+.joined-row__state {display:flex;align-items:center;gap:6px;font-size:13px;color:var(--color-text-muted)}
+.joined-row .btn {min-height:44px;flex-shrink:0;padding:8px;width:auto}
+.joined-row__person {flex:1}
+/* GPT-042/043: StudentSessionCard / ClassRibbon */
+.student-timer {display:grid;gap:12px;padding:16px;border-radius:20px}
+.student-timer .btn {min-height:48px;width:100%}
+.class-ribbon {display:flex;align-items:center;gap:8px;padding:8px 12px;min-height:44px;font-size:13px;line-height:1.5;margin-bottom:16px}
+.class-ribbon > span {flex:1;min-width:0;overflow-wrap:anywhere}
+.class-ribbon a {min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+/* GPT-044: preserve NavLink and route gate; never disable locked links */
+.tab--locked {position:relative}
+.tab__lock-note {font-size:13px;line-height:1.2;color:var(--color-text-muted)}
+.tab--locked .tab__lock-note {display:block}
+/* GPT-045: Locked */
+.locked-mentor {display:grid;justify-items:center;text-align:center;gap:16px;padding:16px 0}
+.locked-mentor img {width:128px;height:128px;object-fit:contain}
+.locked-mentor h2 {font-size:20px;line-height:1.4;margin:0}
+.locked-mentor p {font-size:16px;line-height:1.65;margin:0;max-width:32ch}
+.safety-link {display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border:1px solid var(--color-primary);border-radius:14px;padding:10px 12px;text-decoration:underline;font-size:13px;color:var(--color-primary-strong)}
+/* GPT-046: Games presentation only */
+.game-list {display:grid;gap:12px}
+.game-choice {min-height:88px;display:flex;align-items:center;gap:16px;text-align:left;color:var(--color-text);text-decoration:none}
+.game-choice span {display:grid;gap:4px}
+.game-choice small {font-size:13px}
+.pairs-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pairs-card {min-height:64px;aspect-ratio:1;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);color:var(--color-primary-strong);display:grid;place-items:center}
+.pairs-card--open {background:var(--color-primary-soft);border:2px solid var(--color-primary)}
+.pairs-card--done {background:var(--color-accent-soft);border:2px solid var(--color-accent)}
+.pairs-card__done {font-size:13px}
+.guess-form {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.guess-form input {min-height:46px;width:100%;min-width:0;font:inherit;font-size:22px;font-variant-numeric:tabular-nums}
+.guess-log {display:grid;gap:12px;padding:16px;list-style:none}
+.reaction-pad {min-height:240px;width:100%;border:2px solid var(--color-border);border-radius:24px;display:grid;place-content:center;justify-items:center;gap:16px;font:inherit;font-size:24px;font-weight:700;background:var(--color-surface);color:var(--color-text)}
+.reaction-pad--go {background:var(--color-primary);color:white;border-color:var(--color-primary-strong)}
+.reaction-pad--early {background:var(--color-accent-soft);border-color:var(--color-accent)}
+/* GPT-047: GuardianClassCard */
+.guardian-session {display:grid;gap:12px}
+.guardian-session__time {font-size:24px;line-height:1.4;font-weight:800;font-variant-numeric:tabular-nums}
+.guardian-session__state {display:flex;align-items:center;gap:8px;font-weight:700}
+.guardian-session__note {font-size:13px;line-height:1.6;color:var(--color-text-muted)}
+/* GPT-048: SessionToasts (noninteractive, keep existing timing) */
+.timer-toast {max-width:min(440px,calc(100vw - 32px));width:max-content;white-space:normal;overflow-wrap:anywhere;display:flex;align-items:flex-start;gap:10px;background:var(--color-accent-soft);color:var(--color-text);border:1px solid var(--color-accent);border-radius:16px;padding:14px 16px;box-shadow:0 8px 24px #163d331a;pointer-events:none;font-size:16px;line-height:1.5;animation:session-toast-in .2s ease-out}
+.timer-toast svg {flex-shrink:0;margin-top:2px}
+.timer__end .small {display:block;font-size:13px;font-weight:400;margin-top:4px}
+.timer-toast--leave {animation:session-toast-out .2s ease-in forwards}
+@keyframes session-toast-in {from {opacity:0;margin-top:-6px}to {opacity:1;margin-top:0}}
+@keyframes session-toast-out {to {opacity:0;margin-top:-4px}}
+@media (min-width:600px) {.session-actions {grid-template-columns:1fr}.joined-list ul {max-height:440px}.locked-mentor {padding:40px 0}.pairs-grid {max-width:480px;margin-inline:auto}.sheet {border-radius:24px;box-shadow:0 24px 64px #163d3329}}
+@media (prefers-reduced-motion:reduce) {.timer-toast,.timer-toast--leave {animation:none}.timer-toast--leave {opacity:0}}
+
+/* GPT-037 보정(Claude): .check-row input(20px)이 .switch 크기를 덮어써서 스위치가 찌그러짐 → 원래 46×28로 */
+.session-setting .switch { width: 46px; height: 28px; accent-color: initial; }

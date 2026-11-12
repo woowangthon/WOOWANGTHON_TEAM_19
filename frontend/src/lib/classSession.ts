@@ -1,6 +1,6 @@
 // 강의실 수업 진행(11-13 재하 시나리오) — 학습지도자가 「수업 시작」, 학생은 「수업 참여」, 쉬는 시간엔 잠금이 풀린다.
 // · 원장(학원 관리): 수업·쉬는 시간 기본 길이, 쉬는 시간 게임 허용, 보호자에게 수업 상태 알리기, 강의실 장소 표시
-// · 알림 시점은 고정: 끝나기 5분 전 + 끝날 때(원장이 고르지 않는다). 쉬는 시간은 학생에게 1분 전도 알린다
+// · 알림 시점은 고정: 끝나기 5분 전 + 끝날 때(원장이 고르지 않는다). 보호자는 수업 5분 전 · 예정 시각 · 「수업 끝내기」. 쉬는 시간은 학생에게 1분 전도 알린다
 // · 「수업 참여」는 출석이 아니다(학원 출결과 헷갈리지 않게). 교실에 없는 학생은 학습지도자가 참여 목록에서 바로 뺀다
 // · 위기 화면·1388·안전 단어는 수업 중에도 절대 잠그지 않는다(잠그는 화면 목록 LOCKED_IN_CLASS에 넣지 않음)
 // 서버가 아직 없어 이 기기(브라우저)에만 저장한다 → 같은 브라우저에서 역할을 바꿔 가며 시연. 다른 탭은 storage 이벤트로 따라온다.
@@ -128,7 +128,12 @@ const LATE_MS = 60_000;
 export function noticesFor(role: 'teacher' | 'student' | 'guardian', userId: string, linkedIds: string[], all = loadSessions(), d = loadDefaults()): SessionNotice[] {
   const out: SessionNotice[] = [];
   for (const s of Object.values(all)) {
-    if (s.closedAt) continue;
+    const myChild = role === 'guardian' && d.notifyGuardian && s.members.some((m) => linkedIds.includes(m.id));
+    // 보호자: 선생님이 「수업 끝내기」를 누른 순간 → 픽업 안내(11-13 GPT 검수에서 빠진 것 발견)
+    if (s.closedAt) {
+      if (myChild) out.push({ key: `${s.classId}:closed:${s.closedAt}`, at: s.closedAt, text: `${s.className} 수업이 끝났어요 (${hhmm(s.closedAt)})`, to: '/guardian' });
+      continue;
+    }
     const k = `${s.classId}:${s.phase}:${s.startAt}:${s.endAt}`;
     const name = s.phase === 'class' ? '수업' : '쉬는 시간';
     if (role === 'teacher') {
@@ -142,8 +147,10 @@ export function noticesFor(role: 'teacher' | 'student' | 'guardian', userId: str
         out.push({ key: `${s.classId}:break:${s.startAt}:start`, at: s.startAt, text: '쉬는 시간이야! 잠깐 쉬어 가자', to: null });
         if (s.endAt - BREAK_SOON_MIN * MIN > s.startAt) out.push({ key: k + ':soon', at: s.endAt - BREAK_SOON_MIN * MIN, text: '곧 수업 다시 시작해요', to: null });
       }
-    } else if (d.notifyGuardian && s.members.some((m) => linkedIds.includes(m.id)) && s.phase === 'class') {
+    } else if (myChild && s.phase === 'class') {
       if (s.endAt - SOON_MIN * MIN > s.startAt) out.push({ key: k + ':soon', at: s.endAt - SOON_MIN * MIN, text: `${s.className} 수업이 ${SOON_MIN}분 뒤 끝나요 (${hhmm(s.endAt)})`, to: '/guardian' });
+      // 예정 시각이 됐을 때(선생님이 늘리면 key가 바뀌어 새 시각에 다시 알림)
+      out.push({ key: k + ':end', at: s.endAt, text: `${s.className} 수업 시간이 다 됐어요 (${hhmm(s.endAt)})`, to: '/guardian' });
     }
   }
   return out.sort((a, b) => a.at - b.at);

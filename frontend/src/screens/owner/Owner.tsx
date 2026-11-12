@@ -100,28 +100,32 @@ function ClassDefaultsCard() {
   const { defaults: d } = useClassSessions();
   const set = (p: Partial<ClassDefaults>) => saveDefaults({ ...d, ...p });
   const Toggle = ({ k, label, sub }: { k: 'games' | 'notifyGuardian' | 'showPlace'; label: string; sub: string }) => (
-    <label className={'check-row' + (d[k] ? ' check-row--on' : '')}>
-      <span><strong>{label}</strong><span className="small muted" style={{ display: 'block' }}>{sub}</span></span>
-      <input type="checkbox" checked={d[k]} onChange={(e) => set({ [k]: e.target.checked })} />
+    <label className="check-row session-setting">
+      <span className="session-setting__label"><strong>{label}</strong><span className="small muted">{sub}</span>
+        <span className="session-setting__state">{d[k] ? '켜짐' : '꺼짐'}</span>
+      </span>
+      <input className="switch" type="checkbox" checked={d[k]} onChange={(e) => set({ [k]: e.target.checked })} />
     </label>
   );
   return (
-    <section className="card stack" aria-label="수업 기본값">
+    <section className="card stack class-defaults" aria-label="수업 기본값">
       <div className="row between"><strong>수업 기본값</strong><span className="small muted">학습지도자가 「수업 시작」하면 이 길이로</span></div>
-      <div className="small muted">수업 길이</div>
-      <div className="chip-row" role="group" aria-label="수업 길이">
+      <fieldset><legend>수업 시간</legend>
+      <div className="chip-row">
         {CLASS_LENGTHS.map((m) => <button key={m} type="button" aria-pressed={d.classMin === m} className={'chip' + (d.classMin === m ? ' chip--on' : '')} onClick={() => set({ classMin: m })}>{m}분</button>)}
       </div>
-      <div className="small muted">쉬는 시간</div>
-      <div className="chip-row" role="group" aria-label="쉬는 시간 길이">
+      </fieldset>
+      <fieldset><legend>쉬는 시간</legend>
+      <div className="chip-row">
         {BREAK_LENGTHS.map((m) => <button key={m} type="button" aria-pressed={d.breakMin === m} className={'chip' + (d.breakMin === m ? ' chip--on' : '')} onClick={() => set({ breakMin: m })}>{m}분</button>)}
       </div>
-      <div className="card card--flat" style={{ padding: 0 }}>
+      </fieldset>
+      <div>
         <Toggle k="games" label="쉬는 시간 게임" sub="쉬는 시간에 학생이 짧은 게임을 할 수 있어요" />
         <Toggle k="notifyGuardian" label="보호자에게 수업 상태 알리기" sub="수업 중 · 끝나기 5분 전 · 끝남 (픽업 시간 안내)" />
         <Toggle k="showPlace" label="강의실 장소 표시" sub="큰 학원이라면 켜서 「302호」처럼 보여 주세요" />
       </div>
-      <p className="small muted">알림은 끝나기 5분 전과 끝날 때 화면에 잠깐 떠요. 학습지도자가 시간을 늘리고 줄일 수 있어요.</p>
+      <p className="small muted">알림은 끝나기 5분 전과 끝날 때 학습지도자·보호자 화면에 잠깐 떠요(고정). 학습지도자가 시간을 늘리고 줄일 수 있어요.</p>
     </section>
   );
 }
@@ -139,19 +143,25 @@ function OwnerClassrooms({ data, onChange }: { data: OwnerDashboard; onChange: (
   return (
     <section className="card stack" aria-label="강의실 관리">
       <div className="row between"><strong>강의실</strong><span className="pill">{data.classrooms.length}</span></div>
-      {data.classrooms.length === 0 && <p className="small muted">아직 강의실이 없어요</p>}
+      {data.classrooms.length === 0 && (
+        <div className="classroom-empty">
+          <Icon name="building" size={28} />
+          <p className="small muted">아직 강의실이 없어요{canEdit ? '. 아래에서 만들어 주세요.' : ''}</p>
+        </div>
+      )}
       <ul className="list">
         {data.classrooms.map((c) => (
           <li key={c.id} className="stack" style={{ alignItems: 'stretch', gap: 6 }}>
             <div className="row between"><strong>{c.name}</strong><span className="small muted">{c.count}명</span></div>
-            <div className="row" style={{ flexWrap: 'wrap' }}>
+            <div className="classroom-meta">
               {canEdit && c.teacherId ? (
-                <select className="input" style={{ flex: '1 1 140px' }} aria-label={`${c.name} 담당 학습지도자`} value={c.teacherId} disabled={busy}
-                  onChange={(e) => run(async () => onChange(await api.ownerSetTeacher(c.id, e.target.value)))}>
-                  {data.teachers.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-                </select>
-              ) : <span className="small muted" style={{ flex: '1 1 140px' }}>{c.teacherName}</span>}
-              {d.showPlace && <input className="input" style={{ flex: '1 1 100px' }} aria-label={`${c.name} 장소`} placeholder="장소 (예: 302호)" defaultValue={places[c.id] ?? ''} onBlur={(e) => savePlace(c.id, e.target.value)} />}
+                <label>담당 학습지도자
+                  <select value={c.teacherId} disabled={busy} onChange={(e) => run(async () => onChange(await api.ownerSetTeacher(c.id, e.target.value)))}>
+                    {data.teachers.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                </label>
+              ) : <span className="small muted">담당 · {c.teacherName}</span>}
+              {d.showPlace && <label>강의실 장소<input placeholder="예: 302호" defaultValue={places[c.id] ?? ''} onBlur={(e) => savePlace(c.id, e.target.value)} /></label>}
             </div>
           </li>
         ))}
@@ -162,6 +172,7 @@ function OwnerClassrooms({ data, onChange }: { data: OwnerDashboard; onChange: (
         : <p className="small muted">강의실 만들기·담당 바꾸기는 서버 연결 뒤에 열려요. 지금은 학습지도자가 강의실 탭에서 만들어요.</p>}
       {create && (
         <Sheet title="강의실 만들기" onClose={() => setCreate(false)}>
+          <div className="classroom-form">
           <label className="field">강의실 이름<input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="예: 5학년 B반" /></label>
           <label className="field">학습 계획<input className="input" value={plan} onChange={(e) => setPlan(e.target.value)} placeholder="예: 소수의 덧셈 (12월)" /></label>
           <label className="field">담당 학습지도자
@@ -170,6 +181,7 @@ function OwnerClassrooms({ data, onChange }: { data: OwnerDashboard; onChange: (
             </select>
           </label>
           <label className="field">장소 <span className="small muted">(선택 · 「장소 표시」를 켜면 보여요)</span><input className="input" value={place} onChange={(e) => setPlace(e.target.value)} placeholder="예: 302호" /></label>
+          </div>
           <LoadError error={error} />
           <button className="btn btn--primary" disabled={!name.trim() || !teacher || busy} onClick={() => run(async () => {
             const next = await api.ownerCreateClassroom(name, plan, teacher);

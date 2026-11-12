@@ -36,9 +36,11 @@ export function TabBar({ set }: { set: TabSet }) {
         <img src={`${import.meta.env.BASE_URL}mascot/horse/wave-avatar.png`} alt="" /><span>AI 멘토</span>
       </Link>
       {TABS[set].map((t) => (
-        <NavLink key={t.to} to={t.to} end className={({ isActive }) => 'tab' + (isActive ? ' tab--active' : '')}>
+        <NavLink key={t.to} to={t.to} end className={({ isActive }) => 'tab' + (isActive ? ' tab--active' : '') + (locked && LOCKED_IN_CLASS.includes(t.to) ? ' tab--locked' : '')}>
           <Icon name={locked && LOCKED_IN_CLASS.includes(t.to) ? 'lock' : t.icon} size={22} />
           {t.label}
+          {/* GPT-044: 눌러도 된다(잠금 안내로 감) — disabled로 막지 않는다 */}
+          {locked && LOCKED_IN_CLASS.includes(t.to) && <span className="tab__lock-note">잠김</span>}
         </NavLink>
       ))}
     </nav>

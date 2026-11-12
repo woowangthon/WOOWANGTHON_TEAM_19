@@ -48,10 +48,13 @@ describe('수업 진행', () => {
     expect(sessionsForChild('s2', T0)).toHaveLength(1);
     expect(sessionsForChild('s9', T0)).toHaveLength(0);
     expect(dueNotice(noticesFor('guardian', 'g1', ['s2']), [], T0 + 45 * MIN)?.text).toContain('5분 뒤 끝나요');
-    endClass('c1', T0 + 50 * MIN);
-    expect(sessionState(loadSessions().c1, T0 + 50 * MIN)).toBe('closed');
-    expect(sessionsForChild('s2', T0 + 79 * MIN)).toHaveLength(1);
-    expect(sessionsForChild('s2', T0 + 81 * MIN)).toHaveLength(0);
+    expect(dueNotice(noticesFor('guardian', 'g1', ['s2']), [], T0 + 50 * MIN)?.text).toContain('수업 시간이 다 됐어요');
+    endClass('c1', T0 + 52 * MIN);
+    expect(dueNotice(noticesFor('guardian', 'g1', ['s2']), [], T0 + 52 * MIN)?.text).toContain('수업이 끝났어요');
+    expect(noticesFor('guardian', 'g1', ['s9'])).toHaveLength(0); // 다른 집 아이 강의실 X
+    expect(sessionState(loadSessions().c1, T0 + 52 * MIN)).toBe('closed');
+    expect(sessionsForChild('s2', T0 + 81 * MIN)).toHaveLength(1);
+    expect(sessionsForChild('s2', T0 + 83 * MIN)).toHaveLength(0);
     saveDefaults({ ...DEFAULTS, notifyGuardian: false });
     startClass(room, 50, T0);
     expect(noticesFor('guardian', 'g1', ['s2'])).toHaveLength(0);

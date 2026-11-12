@@ -28,7 +28,7 @@ export function TeacherClasses() {
       {data?.classrooms.length === 0 && <div className="notice notice--plain"><span>{ORG_MODE === 'http' ? '아직 강의실이 없어요. 오른쪽 위 +로 열어 주세요.' : '아직 맡은 강의실이 없어요. 원장님이 학원 관리에서 강의실을 만들고 정해 줘요.'}</span></div>}
       <div className="card-grid">
       {data?.classrooms.map((c) => (
-        <section key={c.id} className="card stack timer-card">
+        <section key={c.id} className="card stack timer-card session-room">
           <div className="row between">
             <span><strong className="h3">{c.name}</strong><span className="small muted" style={{ display: 'block' }}>{c.plan || '학습 계획 없음'}</span></span>
             <span className="pill pill--mint">{c.members.length}명</span>

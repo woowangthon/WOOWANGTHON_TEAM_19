@@ -81,7 +81,8 @@
 | 학습지도자 | 강의실 카드 | 「수업 시작 · N분」 → 끝나는 시각 · 남은 분 · −5분/+5분 · 쉬는 시간 · 수업 다시 시작 · 수업 끝내기 · **수업 참여 목록**(「참여 취소」로 바로 뺌). 강의실은 직접 만들지 않는다(+ 버튼 없음) |
 | 학생 | 강의실 카드 | 수업 중이면 「수업 참여」 → **수업 모드**: 수다 · 내 멘토(옷장) · 상점이 잠긴다(탭에 자물쇠, 누르면 잠금 안내). 화면 위 띠 「수업 중 · ○시에 끝나」. 쉬는 시간엔 풀리고 「쉬는 시간 게임」 |
 | 보호자 | 결과(첫 화면) | 수업 상태 카드: 수업 중 · 끝나기 N분 전 · 쉬는 시간 · 끝났어요(30분까지) + 장소. 픽업용 |
-- 알림 시점은 고정: 끝나기 **5분 전 + 끝날 때**(학습지도자·보호자), 학생은 수업 시작 · 쉬는 시간 시작 · 쉬는 시간 끝나기 1분 전. 화면에 4초 떴다 사라짐(`.timer-toast`).
+- 알림 시점은 고정: 끝나기 **5분 전 + 끝날 때**(학습지도자·보호자 — 보호자는 예정 시각과 「수업 끝내기」를 누른 때 둘 다), 학생은 수업 시작 · 쉬는 시간 시작 · 쉬는 시간 끝나기 1분 전. 화면에 4초 떴다 사라짐(`.timer-toast`, 머스터드 안내, 누를 수 없음).
+- 모양(GPT-037~048): 원장 설정 행 `.session-setting`+`.switch`(켜짐/꺼짐 글자), 강의실 `.classroom-meta`·`.classroom-form`, 수업 진행 `.session-start`·`.session-adjust`·`.session-actions`·`.session-end`(끝내기는 아래로 떨어뜨린 ghost), 여러 강의실이면 첫 카드만 주요색(`.session-room`), 참여 목록 `.joined-list`·`.joined-row`, 학생 `.student-session`, 탭 `.tab--locked`+「잠김」(누르면 잠금 안내 — 막지 않음), 잠금 화면 `.locked-mentor`(아이가 고른 멘토 얼굴)+`.safety-link`, 게임 `.game-choice`·`.pairs-card`·`.guess-form`·`.reaction-pad`, 보호자 `.guardian-session`(시각 24px).
 - 「수업 참여」는 **출석이 아니다** — 화면에서 「출석」이라고 부르지 않는다.
 - 서버 전이라 이 기기(브라우저)에만 저장(`lib/classSession.ts`). 다른 기기와 맞추려면 서버 필요.
 
@@ -112,7 +113,7 @@
 | 캐릭터 넘기기 | `.stack3` `.stack-card[data-off]` | 가운데 크게, 양옆 작게 뒤로 |
 | 옷장 | `.wardrobe` `.ward` `.ward--on` `.ward--locked` | |
 | 상태 | `Thinking`(로딩) `LoadError`(오류) | 화면마다 로딩·오류·빈 상태 필수 |
-| 수업 진행 | `TeacherSessionPanel` `StudentSessionCard` `ClassRibbon`(`.class-ribbon`) `ClassLockGate` `BreakOnlyGate` `GuardianClassCard` `SessionToasts` | `components/ClassSession.tsx`. 모양은 `.timer` `.student-timer` `.notice` 재사용 — 정식 시안은 GPT 요청 중 |
+| 수업 진행 | `TeacherSessionPanel` `StudentSessionCard` `ClassRibbon`(`.class-ribbon`) `ClassLockGate` `BreakOnlyGate` `GuardianClassCard` `SessionToasts` | `components/ClassSession.tsx`. 모양 GPT-037~048(6-1장 클래스 목록) |
 
 ## 9. 캐릭터 그림
 - **띠(십이지신) 캐릭터**: 말띠(`horse`)·원숭이띠(`monkey`). 그림체 **B 부드러운 플랫**.
@@ -194,6 +195,7 @@
 
 | 날짜 | 바뀐 것 | 고친 장 |
 |---|---|---|
+| 11-13 | GPT 전달본 GPT-037~048 적용(강의실 수업 진행 모양 전부): 원장 설정 스위치 행·강의실 관리, 수업 진행 칸·참여 목록, 학생 카드·띠·탭 「잠김」, 잠금 화면(고른 멘토 얼굴 + 안전 링크 테두리), 게임 3개, 보호자 카드(시각 크게), 알림 머스터드. 학생 문구 반말/존댓말(`say`). 보호자 「수업 시간이 다 됐어요」·「수업이 끝났어요」 알림 추가(GPT 검수에서 빠진 것 발견). `.check-row input`이 `.switch`를 찌그러뜨려 보정 1줄 | 6·8 |
 | 11-13 | 강의실 수업 진행: 원장 강의실 만들기·담당·장소·수업 기본값, 학습지도자 수업 시작·±5분·쉬는 시간·끝내기·참여 목록(참여 취소), 학생 「수업 참여」·수업 모드 잠금(수다·내 멘토·상점)·화면 위 띠·쉬는 시간 게임 3개(`/student/games`), 보호자 수업 상태 카드. 성호 님 타이머(11-12, 원장 알림 시점 선택)는 이것으로 바꿈 — 알림 시점은 5분 전·끝 고정. TK-56-deploy 합침 | 6·8·11 |
 | 11-12 | GPT 전달본 GPT-001~008·019~022 적용: 긴 퀴즈 칩 줄바꿈(`.quiz-chips`), 안전 영역 여백, 터치 44px, 밝은 색 고정·수다 키보드 배치, 앱 아이콘(`public/icons`), 옷·이모티콘 그림 16+8장, 풀이 화면 키패드 → 버튼 순서, 레일·사이드바 로고(`.brand-logo--nav`), 시트 가운데 대화상자, `--color-accent-strong` #76520A, 통신 오류 안내는 빨강 대신 `.notice--plain`. 두 재화(B)·타이머(C) 마크업·CSS는 들어왔지만 화면 연결은 아직 | 3·4·8·9·13 |
 | 11-12 | TK-74: 🔴 보호자 카드에 발췌 표시, 약속·위기·동의 문구를 사실대로, 학습지도자 긴급 알림 입구 숨김, 수다 첫 인사(화면에만), mock 아이 이름 「지우」로 | 6·11 |
