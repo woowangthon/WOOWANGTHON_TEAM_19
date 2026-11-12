@@ -35,7 +35,8 @@ export function WakeNotice() {
 export function LoadError({ error, onRetry }: { error: string | null; onRetry?: () => void }) {
   if (!error) return null;
   return (
-    <div className="notice notice--danger" role="alert">
+    // 통신 실패는 일반 안내(빨강은 긴급 안전 알림에만, DESIGN.md 4장 · GPT 전달 메모 1)
+    <div className="notice notice--plain" role="alert">
       <span>{error}</span>
       {isSessionGone(error) ? <GoHome /> : onRetry && <button className="btn btn--secondary btn--small" onClick={onRetry}><Icon name="refresh" size={16} /> 다시 시도</button>}
     </div>

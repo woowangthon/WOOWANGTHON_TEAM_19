@@ -11,7 +11,8 @@
   "background_color": "#FFF9EF",
   "theme_color": "#FFF9EF",
   "icons": [
-    { "src": "mascot/horse/wave-avatar.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
-    { "src": "mascot/horse/wave-face.png", "sizes": "256x256", "type": "image/png", "purpose": "any" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

@@ -49,7 +49,7 @@
   /* 카드 그림자·눌리는 버튼 깊이 */
   --shadow-card: 0 2px 0 var(--color-border);
   --press: 4px;
-  --color-accent-strong: #A87406;  /* 머스터드 글자·그림자 */
+  --color-accent-strong: #76520A;  /* 머스터드 글자·그림자 */
 
   /* 기준 프레임 (CLAUDE-016 / GPT-005: 360×640, 9:16) */
   --frame-width: 360px;
