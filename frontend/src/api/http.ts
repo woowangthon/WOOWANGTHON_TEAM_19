@@ -209,6 +209,9 @@ export const httpApi: MentorApi = {
   joinAcademy: (code) => call('POST', '/academy/join', { code }),
   getOwnerDashboard: () => call('GET', '/owner/dashboard'),
   issueEntryCode: () => call('POST', '/owner/entry-code'),
+  // 11-13 원장 강의실 관리: 서버 주소 제안(아직 서버에 없음 — org http 모드 화면은 이 버튼을 숨긴다)
+  ownerCreateClassroom: (name, plan, teacherId) => call('POST', '/owner/classrooms', { name, plan, teacherId }),
+  ownerSetTeacher: (classId, teacherId) => call('PUT', `/owner/classrooms/${classId}/teacher`, { teacherId }),
   getTimerAlerts: () => call('GET', '/academy/timer-alerts'),
   saveTimerAlerts: (alertsMin) => call('PUT', '/academy/timer-alerts', { alertsMin }),
   approveTeachers: (ids) => call('POST', '/owner/teachers/approve', { ids }),

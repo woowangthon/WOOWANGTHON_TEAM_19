@@ -5,6 +5,7 @@ import { LoadError, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { useMentor } from '../../state/mentor';
+import { StudentSessionCard } from '../../components/ClassSession';
 
 export function StudentClasses() {
   const { say } = useMentor();
@@ -28,7 +29,13 @@ export function StudentClasses() {
           ))}
           <h2 className="h3">내 강의실</h2>
           {data.joined.length === 0 && <div className="notice notice--plain"><span>{say('아직 들어간 강의실이 없어', '아직 들어간 강의실이 없어요')}</span></div>}
-          {data.joined.map((c) => <div key={c.id} className="card card--flat row between"><strong>{c.name}</strong><span className="small muted">{c.teacherName}</span></div>)}
+          {data.joined.map((c) => (
+            <div key={c.id} className="card card--flat stack">
+              <div className="row between"><strong>{c.name}</strong><span className="small muted">{c.teacherName}</span></div>
+              {/* 선생님이 수업을 시작하면 「수업 참여」, 쉬는 시간이면 게임 입구 */}
+              <StudentSessionCard classId={c.id} />
+            </div>
+          ))}
           {data.available.length > 0 && <h2 className="h3">다른 강의실</h2>}
           {data.available.map((c) => (
             <div key={c.id} className="card card--flat row between">

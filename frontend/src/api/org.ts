@@ -312,7 +312,7 @@ function ownerDash(o: User): OwnerDashboard {
     entryCode: code,
     pendingTeachers: inAc.filter((u) => u.role === 'teacher' && u.teacherStatus === '승인 대기').map((u) => row(u.id, '소속 신청')),
     teachers: inAc.filter((u) => u.role === 'teacher' && u.teacherStatus === '승인됨').map((u) => row(u.id, `${u.id === o.id ? '원장 · ' : ''}강의실 ${roomsOfTeacher(u.id).length}개`)),
-    classrooms: db.rooms.filter((r) => r.academyId === ac.id).map((r) => ({ id: r.id, name: r.name, teacherName: nameOf(r.teacherId), count: r.members.length })),
+    classrooms: db.rooms.filter((r) => r.academyId === ac.id).map((r) => ({ id: r.id, name: r.name, teacherName: nameOf(r.teacherId), teacherId: r.teacherId, count: r.members.length })),
     students: inAc.filter((u) => u.role === 'student').map((u) => row(u.id, `${gradeLabel(u.grade)} · ${roomsOfStudent(u.id).map((r) => r.name).join(', ') || '강의실 없음'}`)),
   };
 }
@@ -505,6 +505,28 @@ export const orgApi = {
     const o = mustOwner();
     const ac = ownedAcademy(o)!;
     ac.entryCode = { code: rand(6, '0123456789'), expiresAt: Date.now() + SEED_RULES.entryCodeMin * 60_000 };
+    commit();
+    return ownerDash(o);
+  },
+  /** 11-13: 강의실은 원장이 만들고 담당 학습지도자를 정한다(서버는 아직 — http.ts에 주소 제안) */
+  async ownerCreateClassroom(name: string, plan: string, teacherId: string): Promise<OwnerDashboard> {
+    const o = mustOwner();
+    const ac = ownedAcademy(o)!;
+    if (!name.trim()) fail('강의실 이름을 적어 주세요.');
+    const t = userById(teacherId);
+    if (!t || t.role !== 'teacher' || t.academyId !== ac.id || t.teacherStatus !== '승인됨') fail('우리 학원 학습지도자를 골라 주세요.');
+    db.rooms.push({ id: 'c' + Date.now().toString(36), academyId: ac.id, teacherId, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
+    if (teacherId !== o.id) notify(teacherId, `「${name.trim()}」 강의실을 맡게 됐어요`, '/teacher/classes');
+    commit();
+    return ownerDash(o);
+  },
+  async ownerSetTeacher(classId: string, teacherId: string): Promise<OwnerDashboard> {
+    const o = mustOwner();
+    const ac = ownedAcademy(o)!;
+    const r = db.rooms.find((x) => x.id === classId && x.academyId === ac.id) ?? fail('강의실을 찾지 못했어요.');
+    const t = userById(teacherId);
+    if (!t || t.role !== 'teacher' || t.academyId !== ac.id || t.teacherStatus !== '승인됨') fail('우리 학원 학습지도자를 골라 주세요.');
+    if (r.teacherId !== teacherId) { r.teacherId = teacherId; if (teacherId !== o.id) notify(teacherId, `「${r.name}」 강의실을 맡게 됐어요`, '/teacher/classes'); }
     commit();
     return ownerDash(o);
   },

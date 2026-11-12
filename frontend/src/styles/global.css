@@ -640,3 +640,6 @@ body { font-variant-numeric: tabular-nums; }
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .btn:active, .key:active, .price-btn:active, button.card:hover { transform: none; }
 }
+
+/* 강의실 수업 진행(11-13): 학생 화면 위 「수업 중 · 쉬는 시간」 띠 — 기존 .notice 위에 글자만 조정. 정식 모양은 GPT 요청서 */
+.class-ribbon { justify-content: flex-start; gap: 6px; font-size: 13px; font-weight: 700; }

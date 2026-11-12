@@ -214,7 +214,7 @@ export interface OwnerDashboard {
   entryCode: EntryCode | null;
   pendingTeachers: PersonRow[];
   teachers: PersonRow[];
-  classrooms: { id: string; name: string; teacherName: string; count: number }[];
+  classrooms: { id: string; name: string; teacherName: string; teacherId?: string; count: number }[];
   students: PersonRow[];
 }
 

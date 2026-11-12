@@ -9,6 +9,7 @@ import { LoadError, Stat, Thinking, Week } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { useAuth } from '../../state/auth';
+import { GuardianClassCard } from '../../components/ClassSession';
 
 export function GuardianResult() {
   const { me } = useAuth();
@@ -48,6 +49,8 @@ function Linked() {
             <div><h1 className="h2">{data.childName}</h1><div className="small muted">{data.dateLabel} · 내 아이의 오늘</div></div>
             {stamp.data && <><SeedChip n={stamp.data.balance} /><StampChip n={stamp.data.stamps ?? 0} /></>}
           </div>
+          {/* 강의실 수업 상태(픽업용, 11-13). 원장님이 「보호자에게 알리기」를 끄면 안 보인다 */}
+          <GuardianClassCard />
           {data.alertNotice ? (
             <section className="card card--warn row between">
               <strong>{data.alertNotice}</strong>

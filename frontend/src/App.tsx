@@ -4,7 +4,7 @@ import { HashRouter, MemoryRouter, Navigate, Route, Routes } from 'react-router-
 import { SessionProvider } from './state/session';
 import { MentorProvider } from './state/mentor';
 import { AuthProvider, GuestOnly, RequireRole, RootRedirect } from './state/auth';
-import { ClassTimerToasts } from './components/ClassTimer';
+import { BreakOnlyGate, ClassLockGate, SessionToasts } from './components/ClassSession';
 import { DocPageView, Find, Login, Signup, Welcome } from './screens/auth/Auth';
 import { Settings, SettingsDelete, SettingsFamily, SettingsNotify, SettingsOrg, SettingsPassword, SettingsProfile } from './screens/settings/Settings';
 import { Notifications } from './screens/settings/Notifications';
@@ -20,6 +20,7 @@ import { StudentWrap } from './screens/student/Wrap';
 import { StudentRecords } from './screens/student/Records';
 import { StudentShop } from './screens/student/Shop';
 import { StudentClasses } from './screens/student/Classes';
+import { StudentGames } from './screens/student/Games';
 import { TeacherScope } from './screens/teacher/Scope';
 import { TeacherToday } from './screens/teacher/Today';
 import { TeacherResults } from './screens/teacher/Results';
@@ -60,7 +61,7 @@ export default function App() {
       <MentorProvider>
       <AuthProvider>
       <Router>
-        <ClassTimerToasts />
+        <SessionToasts />
         <ScreenErrorBoundary>
         <Routes>
           <Route path="/" element={<RootRedirect />} />
@@ -84,13 +85,14 @@ export default function App() {
           <Route path="/student/difficulty" element={as('student', <StudentDifficulty />)} />
           <Route path="/student/solve" element={as('student', <StudentSolve />)} />
           <Route path="/student/done" element={as('student', <StudentDone />)} />
-          <Route path="/student/chat" element={as('student', <StudentChat />)} />
+          <Route path="/student/chat" element={as('student', <ClassLockGate><StudentChat /></ClassLockGate>)} />
           <Route path="/student/crisis" element={as('student', <StudentCrisis />)} />
           <Route path="/student/wrap" element={as('student', <StudentWrap />)} />
           <Route path="/student/records" element={as('student', <StudentRecords />)} />
-          <Route path="/student/mentor" element={as('student', <StudentCharacter editMode />)} />
-          <Route path="/student/shop" element={as('student', <StudentShop />)} />
+          <Route path="/student/mentor" element={as('student', <ClassLockGate><StudentCharacter editMode /></ClassLockGate>)} />
+          <Route path="/student/shop" element={as('student', <ClassLockGate><StudentShop /></ClassLockGate>)} />
           <Route path="/student/classes" element={as('student', <StudentClasses />)} />
+          <Route path="/student/games" element={as('student', <BreakOnlyGate><StudentGames /></BreakOnlyGate>)} />
 
           <Route path="/teacher/scope" element={as('teacher', <TeacherScope />)} />
           <Route path="/teacher/today" element={as('teacher', <TeacherToday />)} />

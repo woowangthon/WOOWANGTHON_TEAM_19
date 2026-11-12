@@ -1,5 +1,7 @@
 // 학습지도자: 강의실 — 학습 계획에 맞춰 강의실을 열고, 학생은 초대(학생 수락) 또는 참여 요청(내가 수락)으로 들어온다.
 // 학원 입장 코드는 여기서 쓰지 않는다(11-10 확정).
+// 11-13: 강의실은 원장님이 학원 관리에서 만들고 학습지도자를 정한다. 서버가 아직 그걸 못 해서 org http 모드에서만 + 를 남긴다.
+// 강의실 카드마다 수업 진행(수업 시작 · 시간 조정 · 쉬는 시간 · 끝내기 · 참여 목록)
 import { useState } from 'react';
 import { api } from '../../api';
 import { Frame } from '../../components/Frame';
@@ -8,7 +10,8 @@ import { LoadError, Sheet, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import type { Classroom } from '../../types';
-import { ClassroomTimer } from '../../components/ClassTimer';
+import { TeacherSessionPanel } from '../../components/ClassSession';
+import { ORG_MODE } from '../../api';
 
 export function TeacherClasses() {
   const { data, setData, error, loading, reload } = useAsync(() => api.getTeacherClasses());
@@ -19,10 +22,10 @@ export function TeacherClasses() {
   const { run, busy, error: actErr } = useAction();
 
   return (
-    <Frame adult title="강의실" exit tabs="teacher" right={<button className="icon-btn" aria-label="강의실 열기" onClick={() => setCreate(true)}><Icon name="plus" /></button>}>
+    <Frame adult title="강의실" exit tabs="teacher" right={ORG_MODE === 'http' ? <button className="icon-btn" aria-label="강의실 열기" onClick={() => setCreate(true)}><Icon name="plus" /></button> : undefined}>
       {loading && !data && <Thinking label="불러오는 중" />}
       <LoadError error={error ?? actErr} onRetry={reload} />
-      {data?.classrooms.length === 0 && <div className="notice notice--plain"><span>아직 강의실이 없어요. 오른쪽 위 +로 열어 주세요.</span></div>}
+      {data?.classrooms.length === 0 && <div className="notice notice--plain"><span>{ORG_MODE === 'http' ? '아직 강의실이 없어요. 오른쪽 위 +로 열어 주세요.' : '아직 맡은 강의실이 없어요. 원장님이 학원 관리에서 강의실을 만들고 정해 줘요.'}</span></div>}
       <div className="card-grid">
       {data?.classrooms.map((c) => (
         <section key={c.id} className="card stack timer-card">
@@ -30,7 +33,7 @@ export function TeacherClasses() {
             <span><strong className="h3">{c.name}</strong><span className="small muted" style={{ display: 'block' }}>{c.plan || '학습 계획 없음'}</span></span>
             <span className="pill pill--mint">{c.members.length}명</span>
           </div>
-          <ClassroomTimer classId={c.id} className={c.name} />
+          <TeacherSessionPanel room={c} />
           {c.requests.length > 0 && (
             <div className="stack">
               <div className="small muted">참여 요청</div>
