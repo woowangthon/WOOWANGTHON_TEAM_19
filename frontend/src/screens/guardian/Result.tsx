@@ -10,6 +10,7 @@ import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { useAuth } from '../../state/auth';
 import { GuardianClassCard } from '../../components/ClassSession';
+import { GuardianHomeworkCard } from '../../components/ClassBoard';
 
 export function GuardianResult() {
   const { me } = useAuth();
@@ -51,6 +52,7 @@ function Linked() {
           </div>
           {/* 강의실 수업 상태(픽업용, 11-13). 원장님이 「보호자에게 알리기」를 끄면 안 보인다 */}
           <GuardianClassCard />
+          <GuardianHomeworkCard />
           {data.alertNotice ? (
             <section className="card card--warn row between">
               <strong>{data.alertNotice}</strong>

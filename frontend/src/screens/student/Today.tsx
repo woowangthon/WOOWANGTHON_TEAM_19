@@ -12,6 +12,7 @@ import { useMentor } from '../../state/mentor';
 import { routeFor } from '../../state/session';
 import { useAuth, useRefreshMeOnMount } from '../../state/auth';
 import { SeedChip, StampChip } from '../../components/Seed';
+import { StudentHomeworkCard } from '../../components/ClassBoard';
 import { isCrisisDay, isDemoChild } from '../../lib/kidScreens';
 import { GRADE_NOTE, currentGradeUi, showGradeNote } from '../../lib/gradeUi';
 import { callName } from '../../lib/josa';
@@ -71,6 +72,7 @@ export function StudentToday() {
             <Mascot mood={data.doneToday ? (isCrisisDay(data) ? 'calm' : 'cheer') : 'wave'} size={104} variant="face" outfit={me?.outfit} />
           </section>
           <p className="wallet-help">씨앗: 학원 학습 완료 +3 · 선생님 칭찬 / 도장: 보호자와 이야기한 날 하루 1번</p>
+          <StudentHomeworkCard />
           <div className="week week--lift" style={{ display: 'contents' }}><Week attendance={data.attendance} todayIndex={data.todayIndex} /></div>
           <div className="bubble" style={{ maxWidth: '100%' }}>{line}</div>
           {setup ? <SetupSteps linked={!data.restricted} academy={!!me?.academy} inClass={data.inClass} code={me?.linkCode ?? null} /> : data.task ? (

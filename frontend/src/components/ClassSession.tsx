@@ -13,6 +13,7 @@ import {
   noticesFor, placeOf, removeJoined, resumeClass, sessionState, sessionsForChild, startClass, useClassSessions,
   type ClassSession, type SessionState,
 } from '../lib/classSession';
+import { boardNotices } from '../lib/classBoard';
 import type { Classroom } from '../types';
 
 const where = (place: string | null) => (place ? ` · ${place}` : '');
@@ -249,7 +250,9 @@ export function SessionToasts() {
     const firedKey = `ai-mentor-class-fired:${me.id}`;
     const tick = () => {
       const fired = load<string[]>(firedKey, []);
-      const n = dueNotice(noticesFor(role, me.id, me.linked.map((l) => l.id)), fired, Date.now());
+      const now = Date.now(), linked = me.linked.map((l) => l.id);
+      // 수업 진행 알림 + 공지·숙제 알림(새 글, 마감 전날·당일)
+      const n = dueNotice([...noticesFor(role, me.id, linked), ...boardNotices(role, me.id, linked, now)], fired, now);
       if (!n) return;
       save(firedKey, [...fired, n.key].slice(-100));
       setToast({ key: n.key, text: n.text, leaving: false });

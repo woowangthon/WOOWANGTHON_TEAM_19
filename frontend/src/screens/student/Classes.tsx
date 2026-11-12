@@ -6,6 +6,7 @@ import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { useMentor } from '../../state/mentor';
 import { StudentSessionCard } from '../../components/ClassSession';
+import { StudentBoard } from '../../components/ClassBoard';
 
 export function StudentClasses() {
   const { say } = useMentor();
@@ -34,6 +35,7 @@ export function StudentClasses() {
               <div className="row between"><strong>{c.name}</strong><span className="small muted">{c.teacherName}</span></div>
               {/* 선생님이 수업을 시작하면 「수업 참여」, 쉬는 시간이면 게임 입구 */}
               <StudentSessionCard classId={c.id} />
+              <StudentBoard classId={c.id} />
             </div>
           ))}
           {data.available.length > 0 && <h2 className="h3">다른 강의실</h2>}

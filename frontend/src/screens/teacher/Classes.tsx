@@ -11,6 +11,7 @@ import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import type { Classroom } from '../../types';
 import { TeacherSessionPanel } from '../../components/ClassSession';
+import { TeacherBoard } from '../../components/ClassBoard';
 import { ORG_MODE } from '../../api';
 
 export function TeacherClasses() {
@@ -34,6 +35,7 @@ export function TeacherClasses() {
             <span className="pill pill--mint">{c.members.length}명</span>
           </div>
           <TeacherSessionPanel room={c} />
+          <TeacherBoard room={c} />
           {c.requests.length > 0 && (
             <div className="stack">
               <div className="small muted">참여 요청</div>
