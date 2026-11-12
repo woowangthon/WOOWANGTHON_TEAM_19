@@ -11,6 +11,7 @@ import { mmss } from '../../lib/date';
 import { useCountdown } from '../../lib/useCountdown';
 import { useAsync } from '../../lib/useAsync';
 import { RequirePhase, useSession } from '../../state/session';
+import { useMentor } from '../../state/mentor';
 import { createBatcher, followPending, routeAfterLeftChat } from '../../lib/chatBatch';
 import { onceAtATime, useOnResume } from '../../lib/resume';
 import type { ChatMessage, ChatReply } from '../../types';
@@ -23,6 +24,7 @@ export function StudentChat() {
 
 function Chat() {
   const { session, sync, refresh } = useSession();
+  const { say } = useMentor();
   const id = session!.id;
   const { data, setData, error, reload } = useAsync(() => api.getChat(id), [id]);
   const [msgs, setMsgs] = useState<ChatMessage[]>([]);
@@ -113,6 +115,10 @@ function Chat() {
     <Frame title="수다" back="/student" right={<span className="pill pill--mint num"><Icon name="clock" size={14} /> {mmss(left)}</span>} actions={actions}>
       <LoadError error={error} onRetry={reload} />
       <div className="chat-log" aria-live="polite">
+        {/* TK-74 #8: 서버는 첫 인사 없이 빈 대화로 시작한다 → 화면에만 보이는 첫 인사(서버로 보내지 않음) */}
+        {data && msgs.length === 0 && (
+          <div className="mentor"><Mascot mood="wave" size={40} /><div className="bubble">{say('수다 시간이야! 오늘 하루 어땠어? 아무 얘기나 해도 돼.', '수다 시간이에요! 오늘 하루 어땠어요? 아무 얘기나 해도 돼요.')}</div></div>
+        )}
         {msgs.map((m, i) => m.from === 'mentor' ? (
           <div key={i} className="mentor"><Mascot mood="wave" size={40} /><div className="bubble">{m.text}</div></div>
         ) : (
