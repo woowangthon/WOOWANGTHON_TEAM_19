@@ -70,9 +70,11 @@ function Linked() {
 
           <section className={'card stamp-card' + (stamp.data?.stampedToday ? ' stamp-card--done' : '')}>
             <span className="stamp-card__mark"><Icon name="stamp" size={28} /></span>
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="stamp-card__body" style={{ minWidth: 0, flex: 1 }}>
               <strong>{stamp.data?.stampedToday ? '오늘 도장을 찍었어요' : '오늘 하루 이야기를 나눴나요?'}</strong>
-              <div className="small muted">이야기 내용을 평가하지 않아요. 함께 이야기한 것에 찍어요 · 하루 1번 · 아이에게 칭찬 도장 +1(옷을 살 수 있어요)</div>
+              <div className="small">이야기의 내용을 평가하지 않고, 함께 이야기한 것에 도장을 줘요.</div>
+              <div className="small muted">하루 1번 · 칭찬 도장 1개 · 옷과 이모티콘 꾸미기에 써요</div>
+              <span className={'pill ' + (stamp.data?.stampedToday ? 'pill--mint' : 'pill--accent')}>{stamp.data?.stampedToday ? '오늘 찍음' : '아직 찍지 않음'}</span>
             </div>
             {stamp.data && !stamp.data.stampedToday && (
               <button className="btn btn--primary btn--small" disabled={busy} onClick={() => run(async () => stamp.setData(await api.stamp()))}>도장 찍기</button>

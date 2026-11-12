@@ -81,6 +81,15 @@ export const COSMETICS: CosmeticDef[] = [
   { id: 'thanks', kind: 'emote', name: '고마워', price: 1 },
   { id: 'sleepy', kind: 'emote', name: '졸려', price: 1 },
   { id: 'best', kind: 'emote', name: '최고야', price: 2 },
+  // 11-13 추가(재하 요청): 공부·학원 생활에 어울리는 옷, 수다에서 마음을 표현하는 이모티콘. 그림은 GPT 요청서(GPT-049~), 서버 목록(seeds.py)은 성호 님께 요청
+  { id: 'cap', kind: 'outfit', name: '야구 모자', price: 2 },
+  { id: 'backpack', kind: 'outfit', name: '새 책가방', price: 3 },
+  { id: 'headphones', kind: 'outfit', name: '집중 헤드폰', price: 3 },
+  { id: 'hanbok', kind: 'outfit', name: '색동 한복', price: 5 },
+  { id: 'cheer', kind: 'emote', name: '힘내', price: 1 },
+  { id: 'question', kind: 'emote', name: '궁금해', price: 1 },
+  { id: 'idea', kind: 'emote', name: '알았다!', price: 1 },
+  { id: 'sorry', kind: 'emote', name: '미안해', price: 1 },
 ];
 
 /** 시연 계정 비밀번호(모두 같음) — 체험 계정 시트에 표시 */
@@ -140,6 +149,9 @@ function seed(): OrgDB {
       { id: 'i2', teacherId: 't1', name: '자리 고르기권', price: 15, stock: null, visible: true, note: '다음 수업 자리를 내가 골라요' },
       { id: 'i3', teacherId: 't1', name: '보드게임 10분', price: 25, stock: 5, visible: true, note: '금요일 수업 끝에' },
       { id: 'i4', teacherId: 't1', name: '겨울방학 특별 선물', price: 40, stock: 3, visible: false, note: '12월에 공개 예정' },
+      { id: 'i5', teacherId: 't1', name: '칭찬 스티커', price: 5, stock: null, visible: true, note: '공책에 붙이는 스티커 1장' },
+      { id: 'i6', teacherId: 't1', name: '책갈피', price: 10, stock: 15, visible: true, note: '학원 이름이 들어간 책갈피' },
+      { id: 'i7', teacherId: 't1', name: '쉬는 시간 게임 고르기권', price: 12, stock: null, visible: true, note: '다음 쉬는 시간에 반 게임을 내가 골라요' },
     ],
     orders: [{ id: 'o1', studentId: 's2', teacherId: 't1', itemName: '칭찬 간식 쿠폰', price: 20, at: stampLabel(d(0).setHours(16, 40)), status: '교환 요청' }],
     owned: { s1: ['glasses'] },

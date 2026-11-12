@@ -27,6 +27,11 @@ export function TeacherSeeds() {
 
   return (
     <Frame adult title="씨앗" exit tabs="teacher" right={tab === 'shop' && <button className="icon-btn" aria-label="상품 추가" onClick={() => { setError(null); setEdit({ ...EMPTY }); }}><Icon name="plus" /></button>}>
+      <section className="card academy-currency">
+        <Icon name="seed" size={24} />
+        <div><strong>학원 씨앗 관리</strong><div className="small muted">학원 상품에만 써요 · 학습 완료 +3과 선생님 칭찬으로 모아요</div></div>
+      </section>
+      <div className="notice notice--plain"><span>칭찬 도장은 보호자가 주는 따로 된 꾸미기 재화예요. 여기서 다루지 않아요.</span></div>
       <div className="seg" role="tablist">
         {([['students', '학생별'], ['shop', '상점 관리'], ['orders', `교환 요청${waiting ? ` ${waiting}` : ''}`]] as [Tab, string][]).map(([k, l]) => (
           <button key={k} role="tab" aria-selected={tab === k} className={'seg__btn' + (tab === k ? ' seg__btn--on' : '')} onClick={() => setTab(k)}>{l}</button>

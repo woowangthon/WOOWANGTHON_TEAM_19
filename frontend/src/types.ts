@@ -13,8 +13,14 @@ export type Speech = '반말' | '존댓말';
 /** 학년 1~12 (초1=1 … 초6=6, 중1=7 … 중3=9, 고1=10 … 고3=12). 표시는 lib/grade의 gradeLabel */
 export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 /** 띠 캐릭터. 띠를 추가하려면 여기와 public/mascot/{이름}/ 폴더만 늘리면 된다 */
-export type Animal = 'horse' | 'monkey';
-export const ANIMAL_LABEL: Record<Animal, string> = { horse: '말띠', monkey: '원숭이띠' };
+/** 십이지신 12종(11-13, GPT-025~036 추가). 띠는 아이가 고르는 캐릭터일 뿐 — 성격·능력과 연결하지 않고 생년도 묻지 않는다 */
+export type Animal = 'rat' | 'ox' | 'tiger' | 'rabbit' | 'dragon' | 'snake' | 'horse' | 'sheep' | 'monkey' | 'rooster' | 'dog' | 'pig';
+export const ANIMAL_LABEL: Record<Animal, string> = {
+  rat: '쥐띠', ox: '소띠', tiger: '호랑이띠', rabbit: '토끼띠', dragon: '용띠', snake: '뱀띠',
+  horse: '말띠', sheep: '양띠', monkey: '원숭이띠', rooster: '닭띠', dog: '개띠', pig: '돼지띠',
+};
+/** 표정(think·cheer·promise·calm·read)과 옷·이모티콘 그림까지 다 있는 동물. 나머지는 인사(wave) 그림만 있다(11-13) */
+export const FULL_ART_ANIMALS: Animal[] = ['horse', 'monkey'];
 export interface MentorSetting { style: MentorStyle; title: MentorTitle; speech: Speech; animal: Animal; }
 
 /* ---------- 학생: 하루 세션 ---------- */

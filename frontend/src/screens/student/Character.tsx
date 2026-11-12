@@ -24,7 +24,7 @@ const STYLES: { style: MentorStyle; mood: Mood; casual: string; polite: string }
   { style: '짚어주는', mood: 'promise', casual: '오늘은 이것 하나만 짚자.', polite: '오늘은 이것 하나만 짚어요.' },
 ];
 /** 띠를 추가하면 여기와 types.ts Animal에 넣는다 */
-const ANIMALS: Animal[] = ['horse', 'monkey'];
+const ANIMALS: Animal[] = ['rat', 'ox', 'tiger', 'rabbit', 'dragon', 'snake', 'horse', 'sheep', 'monkey', 'rooster', 'dog', 'pig']; // 십이지신 순서
 const TITLES: MentorTitle[] = ['형', '언니', '친구'];
 const SPEECHES: Speech[] = ['반말', '존댓말'];
 

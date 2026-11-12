@@ -65,11 +65,12 @@ export function StudentToday() {
               <span className="row" style={{ gap: 6 }}>
                 <span className="pill pill--accent"><Icon name="flame" size={14} fill /> 연속 {data.streakDays}일</span>
                 <SeedChip n={data.seeds} onClick={() => nav('/student/shop')} />
-                <StampChip n={data.stamps ?? 0} onClick={() => nav('/student/shop')} />
+                <StampChip n={data.stamps ?? 0} onClick={() => nav('/student/shop', { state: { tab: 'deco' } })} />
               </span>
             </div>
             <Mascot mood={data.doneToday ? (isCrisisDay(data) ? 'calm' : 'cheer') : 'wave'} size={104} variant="face" outfit={me?.outfit} />
           </section>
+          <p className="wallet-help">씨앗: 학원 학습 완료 +3 · 선생님 칭찬 / 도장: 보호자와 이야기한 날 하루 1번</p>
           <div className="week week--lift" style={{ display: 'contents' }}><Week attendance={data.attendance} todayIndex={data.todayIndex} /></div>
           <div className="bubble" style={{ maxWidth: '100%' }}>{line}</div>
           {setup ? <SetupSteps linked={!data.restricted} academy={!!me?.academy} inClass={data.inClass} code={me?.linkCode ?? null} /> : data.task ? (
