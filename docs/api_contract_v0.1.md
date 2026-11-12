@@ -184,7 +184,7 @@
 ```
 
 - `crisis`가 `null`이 아니면 🔴 화면(부록 E)으로 간다: 고정 문장, `excerpt` 그대로, 109·1388 전화 버튼, 「오늘은 여기까지 하자」. 다리 놓기 없음.
-- `excerpt`는 🔴 문장과 그 앞 2턴의 치환본, 300자 이하(넘치면 앞이 `…`로 잘림). 아이 본인 응답에만 있고, 보호자 API에는 싣지 않는다(11-12 결정).
+- `excerpt`는 🔴 문장과 그 앞 2턴의 치환본, 300자 이하(넘치면 앞이 `…`로 잘림). 보호자 카드에도 싣는다(결정 11-10·11-11).
 - 이 세션의 이후 요청은 409 `session_finished`.
 - 🔴은 조각마다 즉시 본다. 앞 답을 만드는 중이어도 이 조각의 응답이 바로 위 모양이고, 늦게 끝난 앞 요청의 답은 버려진다(그 응답은 `reply: null`, `state: "crisis"`, `crisis`가 채워짐).
 
@@ -352,7 +352,7 @@
 ```
 
 - 「오늘」은 서울 날짜. `created_at`은 UTC ISO 8601(화면에서 서울 시각으로 바꿔 "오늘 {시각} 위험 신호가 있었어요").
-- `alert`: 그 학생의 오늘 🔴 알림 중 가장 최근 1건. 있으면 카드 맨 위 빨간 줄. 발췌(`excerpt`)는 싣지 않는다(11-12 결정) — `created_at`·`hotlines`만.
+- `alert`: 그 학생의 오늘 🔴 알림 중 가장 최근 1건. 있으면 카드 맨 위 빨간 줄. 발췌(`excerpt`)를 싣는다(결정 11-10·11-11).
 - `child_line`: 오늘 세션이 `ended`(정상 종료)일 때만 보호자 한 줄. 진행 중·`crisis`면 `null`.
 - `quiz`: 아이가 고른 퀴즈 문제의 `text`. 정답은 오지 않는다.
 - `instructor_comment`: 오늘 강사 노트가 `published`일 때 승인본. 초안·건너뜀·노트 없음은 `null` → 프론트가 **"선생님이 확인하면 여기에 와요"**를 보여 준다.
@@ -382,7 +382,7 @@
 | getWrap | GET /sessions/{id}/wrap | #6 `get_bridge`. `aiLine`=보호자 한 줄, `quizOptions`=같은 태그 시드 3개의 문장 |
 | submitWrap | POST /sessions/{id}/wrap `{hardPoint, quiz}` | 퀴즈 문장→id로 바꿔 #7 `post_end`. `hardPoint`는 칸이 없어 버림 |
 | getGuardianToday | GET /guardian/today | #11 `guardian_today` + 세션 숫자 |
-| getAlerts | GET /guardian/alerts | Alert 행 목록. 분류·긴급도·행동 안내만, **`excerpt` 없음**(11-12 결정) |
+| getAlerts | GET /guardian/alerts | Alert 행 목록. **발췌 ±2턴·300자 그대로** `excerpt`로 실음 |
 | acceptPromise | POST /student/promise | `Student.consent = true`, 204. `getStudentHome.needsOnboarding = not consent`(11-11). 데모 리셋은 consent true라 리셋 뒤에는 약속 화면이 안 나온다 |
 
 **강사 경로 (11-11).** 헤더 `X-Demo-Role: instructor`·`X-Demo-Actor: demo-instructor`. 아이·보호자 헤더면 403 `forbidden`. 내부는 #8·#9·#10 그대로(초안 1회·재생성 없음).

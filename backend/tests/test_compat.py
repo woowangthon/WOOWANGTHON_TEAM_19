@@ -186,8 +186,7 @@ async def test_crisis_in_chat(client, clock):
     assert len(alerts) == 1
     a = alerts[0]
     assert a["level"] == "긴급" and a["status"] == "미확인"
-    assert "excerpt" not in a  # 11-12 결정: 원문 발췌 없이 분류·긴급도·행동 안내만
-    assert a["category"] == "안전" and a["action"]
+    assert a["excerpt"]  # 🔴이면 발췌 ±2턴·300자가 보호자에게 간다(결정 11-10·11-11)
     card = (await call("GET", "/guardian/today", headers=GUARDIAN)).json()
     assert card["done"] is False and card["line"] is None
     # 위기로 끝난 날 보호자 첫 화면: 「공부 전」 대신 알림 확인 안내(문구는 상수 한곳, 11-11)

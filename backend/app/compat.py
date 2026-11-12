@@ -699,7 +699,7 @@ async def get_guardian_today(db: Db, now: Now, student: GuardianChild) -> dict[s
 
 @router.get("/guardian/alerts")
 async def get_alerts(db: Db, student: GuardianChild) -> list[dict[str, Any]]:
-    """🔴 알림 목록. 발췌 없이 분류·긴급도·행동 안내만(11-12 결정, 동의 문구 「분류만」과 일치)."""
+    """🔴 알림 목록. 발췌 ±2턴·300자를 싣는다(결정 11-10·11-11, 🔴일 때만)."""
     alerts = await db.scalars(
         select(Alert).where(Alert.student_id == student.id).order_by(Alert.created_at.desc())
     )
@@ -716,6 +716,7 @@ async def get_alerts(db: Db, student: GuardianChild) -> list[dict[str, Any]]:
                 "category": "안전",
                 "action": "지금 아이와 직접 이야기해 주세요. 도움: " + "·".join(HOTLINES),
                 "status": "확인함" if a.guardian_seen else "미확인",
+                "excerpt": a.excerpt,
                 "hotlines": list(HOTLINES),
             }
         )
