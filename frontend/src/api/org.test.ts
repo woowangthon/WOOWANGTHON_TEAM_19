@@ -1,5 +1,5 @@
 // 계정·학원·강의실·씨앗 규칙 테스트 (BRIEF "v0.4 회의 확정" · "v0.5")
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockApi as api } from './mock';
 import { DEMO_PASSWORD, SEED_RULES } from './org';
 import { generateProblems } from './engine';
@@ -13,6 +13,15 @@ const adult = (role: 'guardian' | 'teacher', loginId: string, name = '어른'): 
 beforeEach(async () => { await api.resetDemo(); });
 
 describe('로그인·가입·찾기', () => {
+  it('TK-76: 같은 ms에 같은 역할로 두 명이 가입해도 id가 겹치지 않는다', async () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(1_800_000_000_000);
+    try {
+      const a = await api.signup(kid('same1')); await api.logout();
+      const b = await api.signup(kid('same2')); await api.logout();
+      expect(a.id).not.toBe(b.id);
+    } finally { now.mockRestore(); }
+  });
+
   it('아이디/비밀번호로 로그인, 틀리면 거절. 자동 로그인 꺼도 이번 실행에서는 로그인 상태', async () => {
     expect(await api.getMe()).toBeNull();
     await expect(api.login('jiwoo', 'wrong123')).rejects.toThrow('맞지 않아요');
@@ -122,8 +131,6 @@ describe('학습지도자 소속 · 학원 등록(원장)', () => {
     expect((await api.getMe())!.membership).toMatchObject({ name: '별빛학원', isOwner: true, status: '승인됨' });
 
     await api.logout();
-    // 가짜 서버의 새 계정 id는 역할+Date.now()라 같은 ms에 가입하면 원장과 id가 겹친다 → 1ms 넘기고 가입
-    await new Promise((r) => setTimeout(r, 2));
     const t = await api.signup(adult('teacher', 'han_t', '한쌤'));
     await expect(api.requestMembership('XXXX-XXXX')).rejects.toThrow('일련번호');
     expect((await api.requestMembership(serial.toLowerCase())).membership).toMatchObject({ status: '승인 대기', isOwner: false });

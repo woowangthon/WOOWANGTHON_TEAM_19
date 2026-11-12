@@ -163,6 +163,12 @@ function rand(n: number, chars = CODE_CHARS) {
   try { crypto.getRandomValues(a); } catch { for (let i = 0; i < n; i++) a[i] = Math.floor(Math.random() * 1e9); }
   return Array.from(a, (x) => chars[x % chars.length]).join('');
 }
+/** 새 id(TK-76): 시각만 쓰면 같은 ms에 만든 두 개가 겹친다 → 랜덤 4자리를 붙이고, 이미 있으면 다시 뽑는다 */
+function newId(prefix: string, taken: (id: string) => boolean): string {
+  let id = '';
+  do id = prefix + Date.now().toString(36) + rand(4, 'abcdefghijkmnpqrstuvwxyz23456789'); while (taken(id));
+  return id;
+}
 function uniqueLinkCode() { let c = rand(6); while (db.users.some((u) => u.linkCode === c)) c = rand(6); return c; }
 function uniqueSerial() { let c = `${rand(4)}-${rand(4)}`; while (db.academies.some((a) => a.serial === c)) c = `${rand(4)}-${rand(4)}`; return c; }
 const norm = (s: string) => s.replace(/[\s-]/g, '').toUpperCase();
@@ -346,7 +352,7 @@ export const orgApi = {
     if (name.length > 12) fail('이름은 12자까지 쓸 수 있어요.');
     if (body.role === 'student' && !isGrade(body.grade)) fail('학년을 골라 주세요.');
     if (body.role !== 'student' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email ?? '')) fail('이메일을 바르게 적어 주세요. 아이디·비밀번호를 찾을 때 써요.');
-    const id = body.role[0] + Date.now().toString(36);
+    const id = newId(body.role[0], (x) => db.users.some((u) => u.id === x));
     const u: User = {
       id, role: body.role, name, loginId, pw: hash(body.password), linkCode: null, academyId: null,
       settings: { ...DEFAULT_SETTINGS, marketing: body.agreements.marketing, studyReminder: body.role === 'student' ? '17:00' : null },
@@ -446,7 +452,7 @@ export const orgApi = {
     if (!f.academyName.trim()) fail('이름을 적어 주세요.');
     if (f.orgType === '학원' && !/^\d{3}-?\d{2}-?\d{5}$/.test(f.bizNo.trim())) fail('사업자등록번호는 숫자 10자리예요 (예: 123-45-67890).');
     if (!f.ceo.trim() || !f.phone.trim()) fail('대표자와 연락처를 적어 주세요.');
-    const appId = 'app' + Date.now().toString(36);
+    const appId = newId('app', (x) => db.applications.some((a) => a.id === x));
     db.applications.push({ id: appId, ownerId: t.id, ownerName: t.name, ...f, academyName: f.academyName.trim(), status: '심사 중', appliedAt: stampLabel(Date.now()), serial: null, rejectReason: null });
     t.applicationId = appId; commit();
     return meView(t);
@@ -515,7 +521,7 @@ export const orgApi = {
     if (!name.trim()) fail('강의실 이름을 적어 주세요.');
     const t = userById(teacherId);
     if (!t || t.role !== 'teacher' || t.academyId !== ac.id || t.teacherStatus !== '승인됨') fail('우리 학원 학습지도자를 골라 주세요.');
-    db.rooms.push({ id: 'c' + Date.now().toString(36), academyId: ac.id, teacherId, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
+    db.rooms.push({ id: newId('c', (x) => db.rooms.some((r) => r.id === x)), academyId: ac.id, teacherId, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
     if (teacherId !== o.id) notify(teacherId, `「${name.trim()}」 강의실을 맡게 됐어요`, '/teacher/classes');
     commit();
     return ownerDash(o);
@@ -565,7 +571,7 @@ export const orgApi = {
       notify(app.ownerId, `${app.academyName} 등록이 반려됐어요: ${app.rejectReason}`, '/settings/org');
     } else {
       app.status = '승인'; app.serial = uniqueSerial();
-      const acId = 'a' + Date.now().toString(36);
+      const acId = newId('a', (x) => db.academies.some((a) => a.id === x));
       db.academies.push({ id: acId, name: app.academyName, orgType: app.orgType, serial: app.serial, ownerId: app.ownerId, entryCode: null });
       const owner = userById(app.ownerId); if (owner) { owner.academyId = acId; owner.teacherStatus = '승인됨'; }
       notify(app.ownerId, `${app.academyName} 등록이 승인됐어요. 일련번호 ${app.serial}`, '/owner');
@@ -588,7 +594,7 @@ export const orgApi = {
     const t = must('teacher');
     if (!t.academyId || t.teacherStatus !== '승인됨') fail('소속 학원·학교의 승인을 받은 뒤에 강의실을 열 수 있어요.');
     if (!name.trim()) fail('강의실 이름을 적어 주세요.');
-    db.rooms.push({ id: 'c' + Date.now().toString(36), academyId: t.academyId!, teacherId: t.id, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
+    db.rooms.push({ id: newId('c', (x) => db.rooms.some((r) => r.id === x)), academyId: t.academyId!, teacherId: t.id, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
     commit();
     return orgApi.getTeacherClasses();
   },
@@ -657,7 +663,7 @@ export const orgApi = {
     if (balanceOf(s.id) < it.price) fail('씨앗이 모자라요.');
     if (it.stock !== null) it.stock -= 1;
     addSeed(s.id, -it.price, '상점 구매', it.name, s.id);
-    db.orders.push({ id: 'o' + Date.now().toString(36), studentId: s.id, teacherId: it.teacherId, itemName: it.name, price: it.price, at: stampLabel(Date.now()), status: '교환 요청' });
+    db.orders.push({ id: newId('o', (x) => db.orders.some((o) => o.id === x)), studentId: s.id, teacherId: it.teacherId, itemName: it.name, price: it.price, at: stampLabel(Date.now()), status: '교환 요청' });
     notify(it.teacherId, `${s.name} 학생이 「${it.name}」 교환을 요청했어요`, '/teacher/seeds');
     commit();
     return studentShop(s);
@@ -716,7 +722,7 @@ export const orgApi = {
     if (item.id) {
       const it = db.items.find((i) => i.id === item.id && i.teacherId === t.id) ?? fail('상품을 찾지 못했어요.');
       Object.assign(it, { ...item, name: item.name.trim() });
-    } else db.items.push({ ...item, name: item.name.trim(), id: 'i' + Date.now().toString(36), teacherId: t.id });
+    } else db.items.push({ ...item, name: item.name.trim(), id: newId('i', (x) => db.items.some((i) => i.id === x)), teacherId: t.id });
     commit();
     return seedBoard(t);
   },
