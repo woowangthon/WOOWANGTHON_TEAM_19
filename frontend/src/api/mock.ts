@@ -62,7 +62,7 @@ function seed(): DB {
     units: SEED_UNITS,
     tasks: { s1: '분수의 덧셈', s2: '분수의 덧셈', s3: '분수의 덧셈' },
     memos: {}, drafts: {},
-    alerts: [{ id: 'a0', studentId: 's1', studentName: '김지우', at: stampLabel(addDays(new Date(), -1).setHours(17, 2)), level: '주의', category: '마음', action: '오늘 저녁 편하게 하루 얘기를 물어봐 주세요.', status: '확인함' }],
+    alerts: [{ id: 'a0', studentId: 's1', studentName: '지우', at: stampLabel(addDays(new Date(), -1).setHours(17, 2)), level: '주의', category: '마음', action: '오늘 저녁 편하게 하루 얘기를 물어봐 주세요.', status: '확인함' }],
   };
 }
 
@@ -84,7 +84,8 @@ const me = () => learner(sid());
 const childId = () => { if (currentRole() !== 'guardian') fail('보호자 계정으로 들어와야 해요.'); return childOf(currentUserId()!) ?? fail('아직 연결된 아이가 없어요. 내 정보에서 아이와 연결해 주세요.'); };
 /** 학습지도자의 강의실 학생 id들 */
 const myStudents = () => { if (currentRole() !== 'teacher') fail('학습지도자 계정으로 들어와야 해요.'); return [...new Set(roomsOfTeacher(currentUserId()!).flatMap((r) => r.members))]; };
-const fullName = (id: string) => (id === 's1' ? '김지우' : nameOf(id));
+// TK-74 #12: 서버 데모 아이와 같은 이름(「지우」). 학생은 별명만 받으므로 성까지 붙인 이름을 쓰지 않는다
+const fullName = (id: string) => nameOf(id);
 
 /* ================= 계산 도우미 ================= */
 const speech = (): Speech => me().mentor?.speech ?? '반말';
@@ -250,7 +251,7 @@ export const mockApi: MentorApi = {
       doneToday: done.has(today()) && (!s || s.phase === 'done' || s.phase === 'crisis'),
       endedInCrisis: done.has(today()) && s?.phase === 'crisis', // 계약 #2 v1과 같은 필드
       restricted: isRestricted(id), inClass: roomsOfStudent(id).length > 0,
-      seeds: balanceOf(id), earnedToday: studySeedsToday(id),
+      seeds: balanceOf(id), stamps: balanceOf(id, 'stamp'), earnedToday: studySeedsToday(id),
     };
   },
   async acceptPromise() { await wait(80); me().promise = true; commit(); },
@@ -364,10 +365,11 @@ export const mockApi: MentorApi = {
     const turn = s.messages.filter((m) => m.from === 'me').length;
     s.messages.push({ from: 'me', text: maskPII(text) });
     if (detectCrisis(text)) {
-      // 🔴 조언을 멈추고 세션을 끝낸다. 보호자에게는 원문 없이 분류·긴급도·행동 안내만 간다
+      // 🔴 조언을 멈추고 세션을 끝낸다. 보호자에게는 분류·긴급도·행동 안내 + 발췌(±2턴·300자, 가린 본) — 서버 build_excerpt와 같은 규칙
       s.phase = 'crisis'; s.chatEndedAt = Date.now();
       upsertDay(s);
-      db.alerts = [{ id: 'a' + Date.now(), studentId: sid(), studentName: fullName(sid()), at: stampLabel(Date.now()), level: '긴급', category: '안전', action: '지금 아이와 직접 이야기해 주세요.', status: '미확인' }, ...db.alerts];
+      const excerpt = s.messages.slice(-5).map((m) => `${m.from === 'me' ? '아이' : '멘토'}: ${m.text}`).join('\n').slice(-300);
+      db.alerts = [{ id: 'a' + Date.now(), studentId: sid(), studentName: fullName(sid()), at: stampLabel(Date.now()), level: '긴급', category: '안전', action: '지금 아이와 직접 이야기해 주세요.', status: '미확인', excerpt }, ...db.alerts];
       commit();
       return { reply: crisisLine(speech()), crisis: true, session: view(s) };
     }

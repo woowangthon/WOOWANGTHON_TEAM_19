@@ -14,13 +14,14 @@ from datetime import date, datetime, timedelta
 from functools import lru_cache
 from typing import Annotated, Any, Literal, cast
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, Field, StrictBool
 from sqlalchemy import CursorResult, func, or_, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import config
+from app.accounts import CurrentAccount, token_sent
 from app.actors import actor_from_request
 from app.db import get_db
 from app.errors import ApiError
@@ -36,11 +37,13 @@ from app.models import (
     Session,
     Student,
 )
+from app.models_org import SessionProblem
 from app.pii import redact
 from app.prompts import PROMPT_VERSION, PromptInput, build_prompt
 from app.safety import check as red_keyword
 from app.state_machine import (
     ACTIVE,
+    MAX_HINT,
     SessionState,
     State,
     TransitionError,
@@ -49,6 +52,7 @@ from app.state_machine import (
     expire_if_due,
     press_hint,
     start,
+    study_time_over,
     to_crisis,
 )
 from app.timeutil import as_utc, get_now, seoul_date
@@ -81,11 +85,17 @@ async def healthz(db: Db) -> dict[str, Any]:
 
 
 async def current_child(
+    request: Request,
     db: Db,
+    account: CurrentAccount,
     x_demo_role: Annotated[str | None, Header()] = None,
     x_demo_actor: Annotated[str | None, Header()] = None,
 ) -> Student:
-    student = (await actor_from_request(db, "child", x_demo_role, x_demo_actor)).student
+    # 로그인 계정이 먼저, 없으면 데모 헤더(명세 4.12)
+    actor = await actor_from_request(
+        db, "child", x_demo_role, x_demo_actor, account=account, token_sent=token_sent(request)
+    )
+    student = actor.student
     assert student is not None  # child 역할은 학생이 없으면 resolve_actor가 404
     return student
 
@@ -143,6 +153,138 @@ async def _today_task(db: AsyncSession, student: Student) -> tuple[str, str] | N
         if pid is not None:
             return pid, "misconception"
     return None
+
+
+# --- 한 세션 여러 문제(SESSION_PROBLEMS > 1, 11-12) ------------------------------------
+# 기본 1이면 session_problems 표를 아예 읽지 않는다(그 표가 없는 DB에서도 예전 그대로).
+# 지금 문제·힌트는 sessions.problem_id·hint_level 그대로 쓰고, 다음 문제로 갈 때 바꿔 적는다.
+
+
+async def _plan_ids(db: AsyncSession, first_id: str) -> list[str]:
+    """첫 문제 + 같은 태그 시드를 id 순으로(첫 문제 뒤부터 돌아서). 최대 SESSION_PROBLEMS개."""
+    n = config.session_problems()
+    if n <= 1:
+        return [first_id]
+    first = await db.get(Problem, first_id)
+    if first is None:
+        return [first_id]
+    ids = list(
+        (
+            await db.scalars(
+                select(Problem.id).where(Problem.tag == first.tag).order_by(Problem.id)
+            )
+        ).all()
+    )
+    i = ids.index(first_id)
+    return (ids[i:] + ids[:i])[:n]
+
+
+async def _create_plan(db: AsyncSession, session: Session, now: datetime) -> None:
+    """세션을 새로 만들 때 한 번. 문제가 1개뿐이면 행을 만들지 않는다(= 한 문제 세션)."""
+    if config.session_problems() <= 1 or session.problem_id is None:
+        return
+    ids = await _plan_ids(db, session.problem_id)
+    if len(ids) <= 1:
+        return
+    from app.seeds import _trial_of  # seeds가 api를 import한다(순환 방지)
+
+    trial = await _trial_of(db, session.student_id)
+    for i, pid in enumerate(ids):
+        db.add(
+            SessionProblem(
+                session_id=session.id, idx=i, problem_id=pid, trial_id=trial, created_at=now
+            )
+        )
+    await db.flush()
+
+
+async def _plan(db: AsyncSession, row: Session) -> list[SessionProblem]:
+    if config.session_problems() <= 1:
+        return []
+    return list(
+        (
+            await db.scalars(
+                select(SessionProblem)
+                .where(SessionProblem.session_id == row.id)
+                .order_by(SessionProblem.idx)
+            )
+        ).all()
+    )
+
+
+def _current(plan: Sequence[SessionProblem]) -> SessionProblem | None:
+    """끝나지 않은 첫 문제. 다 끝났으면(마지막은 끝 표시를 하지 않는다) 마지막."""
+    return next((p for p in plan if not p.finished), plan[-1] if plan else None)
+
+
+async def plan_position(db: AsyncSession, row: Session) -> tuple[int, int]:
+    """(지금 문제 순번 0부터, 전체 문제 수). 한 문제 세션은 (0, 1)."""
+    plan = await _plan(db, row)
+    cur = _current(plan)
+    return (cur.idx, len(plan)) if cur is not None else (0, 1)
+
+
+async def sync_progress(db: AsyncSession, row: Session, now: datetime) -> None:
+    """지금 문제를 끝냈으면(정답 또는 풀이 보기) 다음 문제로: problem_id 교체, hint_level 0.
+
+    마지막 문제이거나 20분이 지났으면 넘기지 않는다 → 지금처럼 transition(수다·다리 놓기).
+    """
+    if row.state != State.STUDY.value:
+        return
+    plan = await _plan(db, row)
+    cur = _current(plan)
+    if cur is None or cur.finished or cur.idx >= len(plan) - 1:
+        return
+    solved = await is_solved(db, row, await db.get(Problem, row.problem_id))
+    if not (solved or row.hint_level >= MAX_HINT):
+        return
+    if study_time_over(as_utc(row.phase_started_at), now, config.timer_scale()):
+        return
+    cur.finished = True
+    cur.hint_level = row.hint_level
+    cur.assisted = not solved
+    nxt = plan[cur.idx + 1]
+    last_seq = await db.scalar(select(func.max(Message.seq)).where(Message.session_id == row.id))
+    nxt.start_seq = last_seq or 0
+    row.problem_id = nxt.problem_id
+    row.hint_level = 0
+    await db.flush()
+    log.info("next problem session=%s idx=%d", row.id, nxt.idx)
+
+
+@dataclass(frozen=True)
+class Progress:
+    """세션 전체 결과. 한 문제 세션은 예전 계산(solved 0/1, total 1)과 같다."""
+
+    solved: int  # 끝낸 문제(정답 + 풀이 보기)
+    total: int
+    assisted: int  # 그중 풀이 보기로 끝낸 문제
+    hints: int  # 쓴 힌트 수(문제마다 최대 2, 풀이 보기는 세지 않는다)
+    hint_presses: int  # 힌트 단계 합(풀이 보기 3 포함). 한 문제면 hint_level 그대로
+
+
+async def progress(db: AsyncSession, row: Session) -> Progress:
+    problem = await db.get(Problem, row.problem_id) if row.problem_id else None
+    solved = await is_solved(db, row, problem)
+    done = solved or row.hint_level >= MAX_HINT
+    assisted = row.hint_level >= MAX_HINT and not solved
+    plan = await _plan(db, row)
+    finished = [p for p in plan if p.finished]
+    return Progress(
+        solved=len(finished) + int(done),
+        total=len(plan) or 1,
+        assisted=sum(p.assisted for p in finished) + int(assisted),
+        hints=sum(min(p.hint_level, MAX_HINT - 1) for p in finished)
+        + min(row.hint_level, MAX_HINT - 1),
+        hint_presses=sum(p.hint_level for p in finished) + row.hint_level,
+    )
+
+
+async def _quiz_base(db: AsyncSession, row: Session) -> Problem | None:
+    """다리 놓기 퀴즈의 기준 문제 = 세션의 첫 문제(여러 문제면 problem_id가 바뀌므로)."""
+    plan = await _plan(db, row)
+    pid = plan[0].problem_id if plan else row.problem_id
+    return await db.get(Problem, pid) if pid else None
 
 
 def _streak_text(student: Student) -> str:
@@ -208,6 +350,8 @@ async def start_session(db: Db, now: Now, student: Child) -> dict[str, Any]:
             await db.refresh(student)
             session = await _today_session(db, student, now)
             assert session is not None
+        else:
+            await _create_plan(db, session, now)  # 여러 문제 모드일 때만 행이 생긴다
     problem = await db.get(Problem, session.problem_id) if session.problem_id else None
     await db.commit()
     return {
@@ -439,6 +583,10 @@ async def post_message(
 async def post_reply(session_id: str, db: Db, now: Now, student: Child, llm: Llm) -> dict[str, Any]:
     """답 안 된 조각에 멘토 답 1개(4a, 11-11). 생성 중이면 queued, 조각이 없으면 409."""
     row = await _active_row(db, session_id, student, now)
+    if row.state == State.BRIDGE.value:
+        # A1: 수다 마감 뒤(다리 놓기)에는 AI가 또 말하지 않는다. 받은 말은 이미 저장·🔴 검사됨(11-12 점검)
+        await db.commit()
+        return _out(row, None, None)
     if _lease_valid(row, now):
         await db.commit()
         return _out(row, None, None, queued=True)
@@ -449,6 +597,11 @@ async def post_reply(session_id: str, db: Db, now: Now, student: Child, llm: Llm
     await db.commit()
     if lease is None:
         return _out(row, None, None, queued=True)
+    # 표시를 잡는 사이에 다른 요청이 이미 답했으면(동시 /reply) 표시를 풀고 답하지 않는다(11-12 점검)
+    if not _unanswered(await _session_messages(db, row.id)):
+        await _release_lease(db, row.id, lease)
+        await db.commit()
+        return _out(row, None, None)
     return await _reply(
         db, now, student, llm, _Claimed(row.id, lease, str(uuid.uuid4()), None, reply_only=True)
     )
@@ -775,28 +928,31 @@ async def _owned_session(
     return row
 
 
-async def _judged_texts(db: AsyncSession, row: Session, verdict: str) -> list[str]:
-    """저장된 판정(messages.judge)이 verdict인 아이 조각 치환본. 다시 판정하지 않는다."""
-    return list(
-        (
-            await db.scalars(
-                select(Message.text_redacted)
-                .where(
-                    Message.session_id == row.id,
-                    Message.role == "child",
-                    Message.judge == verdict,
-                )
-                .order_by(Message.seq)
-            )
-        ).all()
+async def _judged_texts(
+    db: AsyncSession, row: Session, verdict: str, since_seq: int = 0
+) -> list[str]:
+    """저장된 판정(messages.judge)이 verdict인 아이 조각 치환본. 다시 판정하지 않는다.
+
+    since_seq > 0이면 그 순번 뒤 조각만(여러 문제 세션의 지금 문제)."""
+    query = select(Message.text_redacted).where(
+        Message.session_id == row.id,
+        Message.role == "child",
+        Message.judge == verdict,
     )
+    if since_seq > 0:
+        query = query.where(Message.seq > since_seq)
+    return list((await db.scalars(query.order_by(Message.seq))).all())
 
 
 async def is_solved(db: AsyncSession, row: Session, problem: Problem | None) -> bool:
-    """저장된 판정 중 정답이 하나라도 있으면 solved(11-11: 재판정 제거)."""
+    """저장된 판정 중 정답이 하나라도 있으면 solved(11-11: 재판정 제거).
+
+    여러 문제 세션이면 지금 문제를 시작한 뒤의 판정만 본다."""
     if problem is None:
         return False
-    return bool(await _judged_texts(db, row, "correct"))
+    cur = _current(await _plan(db, row))
+    since = cur.start_seq if cur is not None else 0
+    return bool(await _judged_texts(db, row, "correct", since))
 
 
 @router.post("/sessions/{session_id}/phase")
@@ -912,8 +1068,18 @@ async def _ensure_bridge(
         )
     ).all()
     line3 = "미해결: " + ", ".join(_tag_name(t) for t in open_tags) if open_tags else "미해결 없음"
+    prog = await progress(db, row)
+    if prog.total > 1:  # 여러 문제 세션(SESSION_PROBLEMS)
+        line1 = (
+            f"{name} 문제 {prog.total}개 중 {prog.solved}개, "
+            f"힌트 {prog.hints}번(풀이 보기 {prog.assisted}개)"
+        )
+    else:
+        line1 = (
+            f"{name} 문제 1개, 힌트 {row.hint_level}단계에서 {'정답' if solved else '풀이 보기'}"
+        )
     row.study_summary = [
-        f"{name} 문제 1개, 힌트 {row.hint_level}단계에서 {'정답' if solved else '풀이 보기'}",
+        line1,
         await _stuck_phrase(llm, student, row, problem, await _judged_texts(db, row, "wrong")),
         line3,
     ]
@@ -929,7 +1095,7 @@ async def get_bridge(session_id: str, db: Db, now: Now, student: Child, llm: Llm
         raise ApiError(409, "phase_not_allowed", "아직 다리 놓기 단계가 아니에요.")
     problem = await db.get(Problem, row.problem_id) if row.problem_id else None
     await _ensure_bridge(db, llm, student, row, problem)
-    quiz = await _quiz_options(db, problem)
+    quiz = await _quiz_options(db, await _quiz_base(db, row))
     await db.commit()
     log.info("bridge session=%s state=%s", row.id, row.state)
     return {
@@ -954,7 +1120,7 @@ async def post_end(
         raise ApiError(409, "phase_not_allowed", "다리 놓기에서만 끝낼 수 있어요.") from None
     problem = await db.get(Problem, row.problem_id) if row.problem_id else None
     if body.quiz_problem_id is not None:
-        allowed = {q["id"] for q in await _quiz_options(db, problem)}
+        allowed = {q["id"] for q in await _quiz_options(db, await _quiz_base(db, row))}
         if body.quiz_problem_id not in allowed:
             await db.commit()
             raise ApiError(422, "invalid_request", "고를 수 있는 퀴즈가 아니에요.")

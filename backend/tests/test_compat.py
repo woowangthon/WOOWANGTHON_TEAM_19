@@ -13,6 +13,7 @@ from sqlalchemy import select
 
 from app.actors import DEMO_CHILD_ID, DEMO_GUARDIAN_ID, DEMO_INSTRUCTOR_ID
 from app.api import TAG_NAME, get_llm
+from app.compat import GUARDIAN_ALERT_NOTICE
 from app.db import get_db
 from app.llm import ScriptedAdapter
 from app.main import create_app
@@ -127,6 +128,9 @@ async def test_day_flow(client, db_session, clock):
     ).json()
     assert ok["correct"] is True
     assert ok["session"]["phase"] == "transition" and ok["session"]["solved"] == 1
+    # 완료 화면은 수다·끝으로 넘어갈 때 셀 연속 일수를 미리 보여 준다(3 → 4 어긋남 없앰, 11-11)
+    assert ok["session"]["streakDays"] == 1
+    assert (await call("GET", "/guardian/today", headers=GUARDIAN)).json()["alertNotice"] is None
     assert (await call("GET", f"/sessions/{sid}/problem")).json() is None
 
     clock.tick()
@@ -182,9 +186,11 @@ async def test_crisis_in_chat(client, clock):
     assert len(alerts) == 1
     a = alerts[0]
     assert a["level"] == "긴급" and a["status"] == "미확인"
-    assert a["excerpt"]  # 현재 정책(발췌 ±2턴·300자) 그대로 — 11-10 안건 2
+    assert a["excerpt"]  # 🔴이면 발췌 ±2턴·300자가 보호자에게 간다(결정 11-10·11-11)
     card = (await call("GET", "/guardian/today", headers=GUARDIAN)).json()
     assert card["done"] is False and card["line"] is None
+    # 위기로 끝난 날 보호자 첫 화면: 「공부 전」 대신 알림 확인 안내(문구는 상수 한곳, 11-11)
+    assert card["alertNotice"] == GUARDIAN_ALERT_NOTICE
 
 
 async def test_solution_needs_both_hints(client):
@@ -501,3 +507,73 @@ async def test_teacher_task_and_scope_follow_started_session(client, scripted_dr
         await call("POST", f"/teacher/students/{DEMO_CHILD_ID}/draft", headers=INSTRUCTOR)
     ).json()
     assert draft["scope"] == "분수 ÷ 자연수"
+
+
+# --- 11-12 이상 입력 점검(탐침) 결과 ------------------------------------------------------
+
+
+async def test_study_chat_still_checks_red_keyword(client, clock):
+    """같이 풀기 중에 수다 경로로 온 말도 🔴 검사를 거친다(단계가 어긋난 화면에서 사라지지 않게)."""
+    call = Recorder(client)
+    sid = (await call("POST", "/sessions", json={"difficulty": "초급"})).json()["id"]
+    r = (await call("POST", f"/sessions/{sid}/chat", json={"text": CHAT_LINE})).json()
+    assert r["crisis"] is False and r["reply"] == ""
+    r = (
+        await call("POST", f"/sessions/{sid}/chat", json={"texts": ["요즘 그냥", "죽고 싶어"]})
+    ).json()
+    assert r["crisis"] is True and r["hotlines"] == ["109", "1388"]
+    alerts = (await call("GET", "/guardian/alerts", headers=GUARDIAN)).json()
+    assert len(alerts) == 1
+
+
+async def test_huge_answer_is_422_not_500(client):
+    call = Recorder(client)
+    sid = (await call("POST", "/sessions", json={"difficulty": "초급"})).json()["id"]
+    big = int("9" * 600)
+    r = await call(
+        "POST",
+        f"/sessions/{sid}/answer",
+        json={"problemId": PROBLEM, "numerator": big, "denominator": big},
+    )
+    assert r.status_code == 422 and r.json()["code"] == "invalid_request"
+
+
+async def test_memo_long_student_id_is_404(client, scripted_draft):
+    call = Recorder(client)
+    r = await call("PUT", f"/teacher/students/{'x' * 37}/memo", headers=INSTRUCTOR, json=MEMO)
+    assert r.status_code == 404 and r.json()["code"] == "student_not_found"
+
+
+@pytest.mark.parametrize("field", ["covered", "comment"])
+async def test_long_draft_can_be_approved(client, scripted_draft, field):
+    """템플릿 문장·이름 치환으로 초안이 2000자를 넘어도 승인은 된다(강사 화면이 막히지 않게)."""
+    call = Recorder(client)
+    url = f"/teacher/students/{DEMO_CHILD_ID}"
+    memo = {**MEMO, "covered": "분수" * 1000} if field == "covered" else MEMO
+    assert (await call("PUT", f"{url}/memo", headers=INSTRUCTOR, json=memo)).status_code == 204
+    if field == "comment":
+        r = await call("PUT", f"{url}/draft", headers=INSTRUCTOR, json={"comment": "지우 " * 400})
+        assert r.status_code == 200
+    r = await call("POST", f"{url}/draft/approve", headers=INSTRUCTOR)
+    assert r.status_code == 200, r.text
+
+
+async def test_reply_after_chat_deadline_does_not_answer(client, db_session, clock):
+    """A1: 마감 뒤(다리 놓기)에 온 말에는 /reply로도 AI가 답하지 않는다."""
+    from sqlalchemy import func, select
+
+    from app.models import Message
+
+    async def mentor_count() -> int:
+        q = select(func.count()).select_from(Message)
+        return await db_session.scalar(q.where(Message.session_id == sid, Message.role == "mentor"))
+
+    call = Recorder(client)
+    sid = await _to_chat(call, clock)
+    clock.tick(11 * 60)
+    r = (await call("POST", f"/sessions/{sid}/chat", json={"text": CHAT_LINE})).json()
+    assert r["reply"] == "" and r["session"]["phase"] == "wrap"
+    before = await mentor_count()
+    r = await call("POST", f"/sessions/{sid}/reply")
+    assert r.status_code == 200 and r.json()["reply"] == ""
+    assert await mentor_count() == before

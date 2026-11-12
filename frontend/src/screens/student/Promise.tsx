@@ -4,6 +4,8 @@ import { api } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
 import { MentorSays } from '../../components/Mascot';
+import { LoadError } from '../../components/Common';
+import { useAction } from '../../lib/useAction';
 import { useMentor } from '../../state/mentor';
 
 const DO = ['함께 생각하기', '힌트로 돕기', '끝까지 응원하기'];
@@ -12,10 +14,12 @@ const DONT = ['답부터 알려주기', '숙제 대신하기', '개인정보 묻
 export function StudentPromise() {
   const nav = useNavigate();
   const { say } = useMentor();
-  const agree = async () => { await api.acceptPromise(); nav('/student/onboarding/character'); };
+  // 저장이 실패하면 버튼 아래에 이유를 보이고, 보내는 동안은 다시 못 누르게(N4)
+  const { run, busy, error } = useAction();
+  const agree = () => run(async () => { await api.acceptPromise(); nav('/student/onboarding/character'); });
   return (
     <Frame title="약속" back="/student" right={<span className="pill pill--mint">1/2</span>}
-      actions={<button className="btn btn--primary" onClick={agree}>약속할게</button>}>
+      actions={<><LoadError error={error} /><button className="btn btn--primary" disabled={busy} onClick={agree}>{busy ? '저장하는 중…' : say('약속할게', '약속할게요')}</button></>}>
       <MentorSays mood="promise" size={64} text={say('우리, 이렇게 약속하고\n함께 공부하자!', '우리, 이렇게 약속하고\n함께 공부해요!')} />
       <section className="card stack">
         <h2 className="h3">같이 하는 것</h2>
@@ -27,7 +31,8 @@ export function StudentPromise() {
       </section>
       <div className="notice" style={{ justifyContent: 'flex-start' }}>
         <Icon name="shield" size={20} />
-        <span>{say('걱정되는 얘기가 나오면 보호자께 알려 줄게. 우리 대화 내용은 안 보내.', '걱정되는 얘기가 나오면 보호자께 알려 드려요. 우리 대화 내용은 보내지 않아요.')}</span>
+        {/* TK-74 #13 · 결정(11-11): 평소 수다는 안 보내고, 🔴일 때만 앞뒤 일부가 보호자에게 간다 */}
+        <span>{say('평소 수다는 보호자께 안 보내. 다만 너를 해칠 수 있는 걱정되는 얘기가 나오면, 그 말과 앞뒤 몇 마디를 보호자께 알려 줄게.', '평소 수다는 보호자께 보내지 않아요. 다만 스스로를 해칠 수 있는 걱정되는 얘기가 나오면, 그 말과 앞뒤 몇 마디를 보호자께 알려 드려요.')}</span>
       </div>
     </Frame>
   );

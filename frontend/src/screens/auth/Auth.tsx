@@ -9,9 +9,12 @@ import { Mascot } from '../../components/Mascot';
 import { LoadError, Sheet } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
-import { homeFor, useAuth } from '../../state/auth';
+import { signupMissing } from '../../lib/signupHint';
+import { GRADE_NOTE, TONE_NOTE, currentGradeUi, gradeOpen, showToneNote } from '../../lib/gradeUi';
+import { clearJustSignedUp, homeFor, markJustSignedUp, takeLoginExpired, useAuth } from '../../state/auth';
 import { DOCS } from '../../data/docs';
-import { ROLE_LABEL, type Agreements, type SignupBody } from '../../types';
+import { ROLE_LABEL, type Agreements, type Grade, type SignupBody } from '../../types';
+import { SCHOOL_LEVELS, toGrade, type SchoolLevel } from '../../lib/grade';
 import { DEMO_PASSWORD, ID_RULE, PW_RULE } from '../../api/org';
 
 /* ======================= 로그인 ======================= */
@@ -23,6 +26,7 @@ export function Login() {
   const [show, setShow] = useState(false);
   const [remember, setRemember] = useState(true);
   const [demo, setDemo] = useState(false);
+  const [expired] = useState(takeLoginExpired); // 로그인이 서버에서 끝나 이 화면으로 왔으면 한 번 안내
   const { run, busy, error } = useAction();
   const submit = () => run(async () => { const me = await api.login(id, pw, remember); await enter(me); nav(homeFor(me), { replace: true }); });
 
@@ -33,6 +37,7 @@ export function Login() {
         <h1 className="h1">AI 멘토</h1>
         <p className="small muted">하루 20분, 같이 푸는 공부 친구</p>
       </div>
+      {expired && <div className="notice notice--plain">로그인이 끝났어요. 다시 로그인해 주세요.</div>}
       <form className="stack" onSubmit={(e) => { e.preventDefault(); if (id && pw) submit(); }}>
         <input className="input" aria-label="아이디" placeholder="아이디" autoComplete="username" autoCapitalize="none" value={id} onChange={(e) => setId(e.target.value)} />
         <div className="pw-field">
@@ -57,7 +62,7 @@ export function Login() {
 
 /** 심사위원용: 체험 계정을 누르면 아이디·비밀번호가 채워진다 + 시연 설정 */
 function DemoSheet({ onPick, onClose }: { onPick: (loginId: string) => void; onClose: () => void }) {
-  const { data: accounts } = useAsync(() => api.demoAccounts());
+  const { data: accounts, reload } = useAsync(() => api.demoAccounts());
   const [resetDone, setResetDone] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
   return (
@@ -75,8 +80,9 @@ function DemoSheet({ onPick, onClose }: { onPick: (loginId: string) => void; onC
         <div className="row between"><strong className="small">시연 설정</strong><span className="pill">{API_MODE === 'mock' ? '가짜 서버' : '실제 서버'}</span></div>
         <button className="btn btn--ghost btn--small" style={{ alignSelf: 'flex-start', padding: 0 }}
           onClick={async () => {
+            // 되돌린 뒤 새 세트의 체험 계정 목록으로 다시 읽는다(reload)
             setResetError(null); setResetDone(false);
-            try { await restartDemoAll(); setResetDone(true); } catch (e) { setResetError((e as Error).message); }
+            try { await restartDemoAll(); reload(); setResetDone(true); } catch (e) { setResetError((e as Error).message); }
           }}>{resetDone ? '처음 상태로 되돌렸어요 ✓' : '시연 데이터 처음으로'}</button>
         <LoadError error={resetError && `되돌리지 못했어요. ${resetError}`} />
       </section>
@@ -93,32 +99,38 @@ const ROLES: { role: Role; icon: IconName; title: string; sub: string }[] = [
 ];
 
 export function Signup() {
+  const gradeUi = currentGradeUi();
   const nav = useNavigate();
   const { enter } = useAuth();
   const [step, setStep] = useState(0);
   const [role, setRole] = useState<Role | null>(null);
   const [agree, setAgree] = useState<Agreements>({ terms: false, privacy: false, marketing: false });
-  const [f, setF] = useState({ loginId: '', password: '', confirm: '', name: '', email: '', grade: 4 as 4 | 5 | 6 });
+  const [f, setF] = useState({ loginId: '', password: '', confirm: '', name: '', email: '', grade: (gradeUi === 'b' ? 5 : null) as Grade | null });
+  // 학교급을 먼저 고르고 학년을 고른다. 학교급을 바꾸면 학년은 다시 고르게 비운다
+  const [level, setLevel] = useState<SchoolLevel | null>(gradeUi === 'b' ? '초' : null);
   const [idOk, setIdOk] = useState<null | boolean>(null);
   const [doc, setDoc] = useState<string | null>(null);
   const { run, busy, error, setError } = useAction();
   const kid = role === 'student';
-  const set = (k: keyof typeof f, v: string | number) => { setF({ ...f, [k]: v }); if (k === 'loginId') setIdOk(null); };
+  const set = (k: keyof typeof f, v: string | number | null) => { setF({ ...f, [k]: v }); if (k === 'loginId') setIdOk(null); };
   const pwOk = PW_RULE.test(f.password);
   const same = f.password.length > 0 && f.password === f.confirm;
-  const infoOk = idOk === true && pwOk && same && f.name.trim() && (kid || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email));
+  const infoOk = idOk === true && pwOk && same && f.name.trim() && (kid ? f.grade !== null : /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email));
   const back = () => (step === 0 ? nav('/login') : (setError(null), setStep(step - 1)));
 
   const checkId = () => run(async () => setIdOk(await api.checkLoginId(f.loginId)));
   const submit = () => run(async () => {
-    const me = await api.signup({ role: role!, loginId: f.loginId, password: f.password, name: f.name, agreements: agree, ...(kid ? { grade: f.grade } : { email: f.email }) });
-    await enter(me); nav('/welcome', { replace: true });
+    const me = await api.signup({ role: role!, loginId: f.loginId, password: f.password, name: f.name, agreements: agree, ...(kid ? { grade: f.grade! } : { email: f.email }) });
+    // enter 직후 GuestOnly가 먼저 홈으로 보내 「가입 완료」를 건너뛰지 않게 표시해 둔다(GuestOnly가 /welcome으로 보냄)
+    markJustSignedUp(); await enter(me); nav('/welcome', { replace: true });
   });
 
   const titles = ['어떤 분인가요?', '약관 동의', '정보 입력'];
   let action: ReactNode = null;
   if (step === 1) action = <button className="btn btn--primary" disabled={!agree.terms || !agree.privacy} onClick={() => setStep(2)}>다음</button>;
-  if (step === 2) action = <button className="btn btn--primary" disabled={!infoOk || busy} onClick={submit}>가입하기</button>;
+  // 막혔으면 무엇이 빠졌는지 한 줄(R3) — 특히 「중복 확인」을 안 눌러 막히는 경우가 많다
+  const missing = step === 2 ? signupMissing({ loginId: f.loginId, idOk, pwOk, same, name: f.name, kid, grade: f.grade, emailOk: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email) }) : null;
+  if (step === 2) action = <>{missing && <p className="hint" role="status" style={{ textAlign: 'center' }}>{missing}</p>}<button className="btn btn--primary" disabled={!infoOk || busy} onClick={submit}>가입하기</button></>;
 
   return (
     <Frame adult={!!role && !kid} title="회원가입" back={false} right={<span className="pill pill--mint">{step + 1}/3</span>}
@@ -184,10 +196,20 @@ export function Signup() {
             <input className="input" value={f.name} maxLength={12} placeholder={kid ? '예: 지우' : '예: 김선생님'} onChange={(e) => set('name', e.target.value)} />
           </label>
           {kid ? (
-            <div className="field">학년
-              <div className="chip-row" role="radiogroup" aria-label="학년">
-                {([4, 5, 6] as const).map((g) => <button key={g} role="radio" aria-checked={f.grade === g} className={'chip' + (f.grade === g ? ' chip--on' : '')} onClick={() => set('grade', g)}>{g}학년</button>)}
+            <div className="field">학년 <span className="hint">학년에 맞는 말투로 멘토가 이야기해요</span>
+              <div className="chip-row" role="radiogroup" aria-label="학교">
+                {SCHOOL_LEVELS.map((s) => <button key={s.level} type="button" role="radio" aria-checked={level === s.level} disabled={!gradeOpen(gradeUi, toGrade(s.level, s.years)!)} className={'chip' + (level === s.level ? ' chip--on' : '')} onClick={() => { if (level !== s.level) { setLevel(s.level); set('grade', null); } }}>{s.label}{gradeOpen(gradeUi, toGrade(s.level, s.years)!) ? '' : ' · 준비 중'}</button>)}
               </div>
+              {level && (
+                <div className="chip-row chip-row--reveal" role="radiogroup" aria-label={`${level} 학년`}>
+                  {Array.from({ length: SCHOOL_LEVELS.find((s) => s.level === level)!.years }, (_, i) => i + 1).map((y) => {
+                    const g = toGrade(level, y)!;
+                    return <button key={g} type="button" role="radio" aria-checked={f.grade === g} disabled={!gradeOpen(gradeUi, g)} className={'chip' + (f.grade === g ? ' chip--on' : '')} onClick={() => set('grade', g)}>{y}학년</button>;
+                  })}
+                </div>
+              )}
+              {gradeUi === 'b' && <span className="hint">체험에서는 초5·6만 고를 수 있어요 (다른 학년은 준비 중)</span>}
+              {showToneNote(gradeUi) && <span className="hint">{GRADE_NOTE}. {TONE_NOTE}</span>}
               <span className="hint">진짜 이름·전화번호는 적지 마세요</span>
             </div>
           ) : (
@@ -250,6 +272,7 @@ export function DocPageView() {
 export function Welcome() {
   const nav = useNavigate();
   const { me } = useAuth();
+  clearJustSignedUp();
   if (!me) return null;
   const next: Record<string, string[]> = {
     student: [`내 연결 코드 ${me.linkCode}를 보호자에게 알려 줘`, '보호자가 동의하면 학원에 들어갈 수 있어', '선생님 강의실에 들어가면 공부 시작!'],
