@@ -176,6 +176,9 @@ export const httpApi: MentorApi = {
   createClassroom: (name, plan) => call('POST', '/teacher/classes', { name, plan }),
   inviteStudent: (classId, studentId) => call('POST', `/teacher/classes/${classId}/invites`, { studentId }),
   answerRequest: (classId, studentId, accept) => call('POST', `/teacher/classes/${classId}/requests/${studentId}`, { accept }),
+  // 수업 타이머(TK-98): 서버 주소 제안. 아직 서버에 없어 http 모드에서도 mock을 쓴다(api/index.ts HTTP_FUNCS에 없음)
+  startClassTimer: (classId, start) => call('PUT', `/teacher/classes/${classId}/timer`, start),
+  stopClassTimer: (classId) => call('DELETE', `/teacher/classes/${classId}/timer`),
   getStudentClasses: () => call('GET', '/student/classes'),
   requestJoin: (classId) => call('POST', `/student/classes/${classId}/request`),
   acceptInvite: (classId, accept) => call('POST', `/student/classes/${classId}/invite`, { accept }),

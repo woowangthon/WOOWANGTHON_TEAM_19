@@ -3,7 +3,7 @@
 // · 백엔드(성호님)는 이 파일의 규칙(throw 하는 곳)을 그대로 서버 검증으로 옮기면 된다.
 // · 한계: User.academyId가 하나라 보호자는 학원 1곳에만 속한다(아이 둘이 서로 다른 학원이면 보호자는 먼저 들어간 곳). 자세한 건 enrollLinked 위 주석.
 import type {
-  AcademyApplication, AcademyForm, AccountRole, AppNotice, Classroom, Cosmetic, EntryCode, Grade, Me, NotifySettings, Order, OrgType, OwnerDashboard, PersonRow,
+  AcademyApplication, AcademyForm, AccountRole, AppNotice, Classroom, ClassTimer, ClassTimerStart, Cosmetic, EntryCode, Grade, Me, NotifySettings, Order, OrgType, OwnerDashboard, PersonRow,
   SeedBoard, SeedEntry, SeedSource, ShopItem, SignupBody, StampState, StudentClasses, StudentShop, TeacherClasses, Wallet,
 } from '../types';
 import { ymd, stampLabel, weekKeys } from '../lib/date';
@@ -42,7 +42,7 @@ interface User {
 interface Link { studentId: string; guardianId: string; status: '대기' | '연결됨'; consentAt: string | null; }
 interface Academy { id: string; name: string; orgType: OrgType; serial: string; ownerId: string; entryCode: EntryCode | null; }
 interface Notice { id: string; userId: string; at: string; text: string; to: string | null; read: boolean; }
-interface Room { id: string; academyId: string; teacherId: string; name: string; plan: string; members: string[]; invited: string[]; requests: string[]; }
+interface Room { id: string; academyId: string; teacherId: string; name: string; plan: string; members: string[]; invited: string[]; requests: string[]; timer?: ClassTimer | null; }
 interface Ledger { id: string; studentId: string; date: string; at: string; amount: number; source: SeedSource; note: string; by: string; }
 interface Item extends ShopItem { teacherId: string; }
 interface OrderRow { id: string; studentId: string; teacherId: string; itemName: string; price: number; at: string; status: Order['status']; }
@@ -270,7 +270,7 @@ export const studySeedsToday = (studentId: string) => earnedOn(studentId, '학�
 /* ---------- 화면 조각 ---------- */
 const row = (id: string, sub?: string): PersonRow => ({ id, name: nameOf(id), sub });
 function classroomView(r: Room): Classroom {
-  return { id: r.id, name: r.name, plan: r.plan, teacherName: nameOf(r.teacherId), members: r.members.map((i) => row(i)), invited: r.invited.map((i) => row(i)), requests: r.requests.map((i) => row(i)) };
+  return { id: r.id, name: r.name, plan: r.plan, teacherName: nameOf(r.teacherId), members: r.members.map((i) => row(i)), invited: r.invited.map((i) => row(i)), requests: r.requests.map((i) => row(i)), timer: r.timer ?? null };
 }
 function myTeacherItems(t: User) { return db.items.filter((i) => i.teacherId === t.id).map(({ teacherId: _t, ...i }) => i); }
 const orderView = (o: OrderRow): Order => ({ id: o.id, studentName: nameOf(o.studentId), itemName: o.itemName, price: o.price, at: o.at, status: o.status });
@@ -573,6 +573,26 @@ export const orgApi = {
     commit();
     return orgApi.getTeacherClasses();
   },
+  /** 수업 타이머 켜기(TK-98). 이미 켜져 있으면 새로 시작. 알림 시점은 길이보다 짧아야 한다 */
+  async startClassTimer(classId: string, start: ClassTimerStart): Promise<TeacherClasses> {
+    const t = must('teacher');
+    const r = db.rooms.find((x) => x.id === classId && x.teacherId === t.id) ?? fail('강의실을 찾지 못했어요.');
+    const { kind, minutes, warnMin } = start;
+    if (kind !== 'class' && kind !== 'break') fail('수업 또는 쉬는 시간을 골라 주세요.');
+    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180) fail('길이를 골라 주세요.');
+    if (!Number.isInteger(warnMin) || warnMin < 1 || warnMin >= minutes) fail('알림은 길이보다 짧게 골라 주세요.');
+    const now = Date.now();
+    r.timer = { kind, minutes, warnMin, startedAt: now, endsAt: now + minutes * 60_000 };
+    commit();
+    return orgApi.getTeacherClasses();
+  },
+  async stopClassTimer(classId: string): Promise<TeacherClasses> {
+    const t = must('teacher');
+    const r = db.rooms.find((x) => x.id === classId && x.teacherId === t.id) ?? fail('강의실을 찾지 못했어요.');
+    r.timer = null;
+    commit();
+    return orgApi.getTeacherClasses();
+  },
 
   /* ---------- 학생: 강의실 ---------- */
   async getStudentClasses(): Promise<StudentClasses> {
@@ -580,7 +600,7 @@ export const orgApi = {
     const ofAc = db.rooms.filter((r) => r.academyId === s.academyId);
     const v = (r: Room) => ({ id: r.id, name: r.name, teacherName: nameOf(r.teacherId) });
     return {
-      joined: ofAc.filter((r) => r.members.includes(s.id)).map(v),
+      joined: ofAc.filter((r) => r.members.includes(s.id)).map((r) => ({ ...v(r), timer: r.timer ?? null })), // 학생은 보기만(TK-98)
       invites: ofAc.filter((r) => r.invited.includes(s.id)).map(v),
       available: ofAc.filter((r) => !r.members.includes(s.id) && !r.invited.includes(s.id)).map((r) => ({ ...v(r), requested: r.requests.includes(s.id) })),
     };

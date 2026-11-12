@@ -215,15 +215,20 @@ export interface OwnerDashboard {
   students: PersonRow[];
 }
 
+/** 강의실 수업 타이머(11-11 회의 결정, TK-98). 시각은 ms. 남은 시간은 화면이 endsAt로 계산한다 */
+export type ClassTimerKind = 'class' | 'break';
+export interface ClassTimer { kind: ClassTimerKind; minutes: number; warnMin: number; startedAt: number; endsAt: number; }
+export interface ClassTimerStart { kind: ClassTimerKind; minutes: number; warnMin: number; }
 export interface Classroom {
   id: string; name: string; plan: string; teacherName: string;
   members: PersonRow[];
   invited: PersonRow[];   // 학습지도자가 초대했고 학생이 아직 수락 안 함
   requests: PersonRow[];  // 학생이 참여 요청했고 학습지도자가 아직 수락 안 함
+  timer?: ClassTimer | null;
 }
 export interface TeacherClasses { classrooms: Classroom[]; academyStudents: PersonRow[]; }
 export interface StudentClasses {
-  joined: { id: string; name: string; teacherName: string }[];
+  joined: { id: string; name: string; teacherName: string; timer?: ClassTimer | null }[];
   invites: { id: string; name: string; teacherName: string }[];
   available: { id: string; name: string; teacherName: string; requested: boolean }[];
 }
