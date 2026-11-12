@@ -14,6 +14,7 @@ import { useAuth, useRefreshMeOnMount } from '../../state/auth';
 import { SeedChip } from '../../components/Seed';
 import { isCrisisDay, isDemoChild } from '../../lib/kidScreens';
 import { GRADE_NOTE, currentGradeUi, showGradeNote } from '../../lib/gradeUi';
+import { callName } from '../../lib/josa';
 
 export function StudentToday() {
   const nav = useNavigate();
@@ -60,7 +61,7 @@ export function StudentToday() {
           <section className="hero">
             <div className="hero__text">
               <span className="small muted">{data.dateLabel}</span>
-              <h1 className="h1">{say(`${data.name}야, 안녕!`, `${data.name}, 안녕하세요!`)}</h1>
+              <h1 className="h1">{say(`${callName(data.name)}, 안녕!`, `${data.name}, 안녕하세요!`)}</h1>
               <span className="row" style={{ gap: 6 }}>
                 <span className="pill pill--accent"><Icon name="flame" size={14} fill /> 연속 {data.streakDays}일</span>
                 <SeedChip n={data.seeds} onClick={() => nav('/student/shop')} />
