@@ -9,6 +9,7 @@ import { Mascot } from '../../components/Mascot';
 import { LoadError, Sheet } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
+import { signupMissing } from '../../lib/signupHint';
 import { GRADE_NOTE, TONE_NOTE, currentGradeUi, gradeOpen, showToneNote } from '../../lib/gradeUi';
 import { clearJustSignedUp, homeFor, markJustSignedUp, takeLoginExpired, useAuth } from '../../state/auth';
 import { DOCS } from '../../data/docs';
@@ -127,7 +128,9 @@ export function Signup() {
   const titles = ['어떤 분인가요?', '약관 동의', '정보 입력'];
   let action: ReactNode = null;
   if (step === 1) action = <button className="btn btn--primary" disabled={!agree.terms || !agree.privacy} onClick={() => setStep(2)}>다음</button>;
-  if (step === 2) action = <button className="btn btn--primary" disabled={!infoOk || busy} onClick={submit}>가입하기</button>;
+  // 막혔으면 무엇이 빠졌는지 한 줄(R3) — 특히 「중복 확인」을 안 눌러 막히는 경우가 많다
+  const missing = step === 2 ? signupMissing({ loginId: f.loginId, idOk, pwOk, same, name: f.name, kid, grade: f.grade, emailOk: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email) }) : null;
+  if (step === 2) action = <>{missing && <p className="hint" role="status" style={{ textAlign: 'center' }}>{missing}</p>}<button className="btn btn--primary" disabled={!infoOk || busy} onClick={submit}>가입하기</button></>;
 
   return (
     <Frame adult={!!role && !kid} title="회원가입" back={false} right={<span className="pill pill--mint">{step + 1}/3</span>}

@@ -1,7 +1,7 @@
 """명세 4.12 씨앗·상점·도장·꾸미기 + 남은 학습 함수(records·results·units), 설계 §10 P4·P5.
 
 체험 세상(org.ts seed()와 같은 값)을 데모 로그인으로 쓴다. 이름·아이디는 모두 합성 값.
-NOW = 서울 11-10(화) 06:00 → 이번 주 = 11-09(월)~. 지우(s1) 기록 합 18, 이번 주 +5.
+NOW = 서울 11-10(화) 06:00 → 이번 주 = 11-09(월)~. 지우(s1) 씨앗 14·도장 2, 이번 주 씨앗 +3.
 """
 
 from datetime import UTC, datetime, timedelta
@@ -125,10 +125,10 @@ async def test_wallet_balance_from_ledger(client):
     t = await _trial(client)
     kid = await _login(client, t, "s1")
     w = (await client.get(f"{BASE}/student/wallet", headers=_b(kid))).json()
-    assert w["balance"] == 18
+    assert w["balance"] == 14
     assert len(w["history"]) == 6
     first = w["history"][0]
-    assert set(first) == {"id", "at", "amount", "source", "note"}
+    assert set(first) == {"id", "at", "amount", "source", "currency", "note"}
     assert first["at"] == "11월 9일 · 18:10"  # 가장 최근이 먼저
     assert {h["source"] for h in w["history"]} == {"학습 완료", "보호자 도장", "학습지도자 칭찬"}
 
@@ -146,7 +146,7 @@ async def test_student_shop_shape(client):
     t = await _trial(client)
     kid = await _login(client, t, "s1")
     shop = (await client.get(f"{BASE}/student/shop", headers=_b(kid))).json()
-    assert shop["balance"] == 18
+    assert shop["balance"] == 14
     names = [i["name"] for i in shop["academyItems"]]
     assert names == ["칭찬 간식 쿠폰", "자리 고르기권", "보드게임 10분"]  # 숨긴 상품 제외
     assert set(shop["academyItems"][0]) == {"id", "name", "price", "stock", "visible", "note"}
@@ -155,7 +155,7 @@ async def test_student_shop_shape(client):
         "id": "glasses",
         "kind": "outfit",
         "name": "공부 안경",
-        "price": 10,
+        "price": 1,  # 칭찬 도장 개수
         "owned": True,
         "equipped": False,
     }
@@ -166,7 +166,7 @@ async def test_student_shop_shape(client):
 async def test_buy_item_stock_price_notice_order(client, db_session):
     t = await _trial(client)
     kid = await _login(client, t, "s1")
-    # 18씨앗: 20짜리는 모자라다
+    # 14씨앗: 20짜리는 모자라다
     r = await client.post(f"{BASE}/student/shop/items/{t}-i1/buy", headers=_b(kid))
     assert r.status_code == 409 and r.json()["detail"] == "씨앗이 모자라요."
     # 숨긴 상품·없는 상품은 못 찾는다
@@ -175,7 +175,7 @@ async def test_buy_item_stock_price_notice_order(client, db_session):
     # 수량 있는 상품을 사면 수량 -1, 씨앗 -가격, 교환 요청, 선생님 알림
     await _give(db_session, f"{t}-child", 30)
     shop = (await client.post(f"{BASE}/student/shop/items/{t}-i3/buy", headers=_b(kid))).json()
-    assert shop["balance"] == 18 + 30 - 25
+    assert shop["balance"] == 14 + 30 - 25
     item = next(i for i in shop["academyItems"] if i["id"] == f"{t}-i3")
     assert item["stock"] == 4
     assert shop["orders"][0]["itemName"] == "보드게임 10분"
@@ -212,13 +212,13 @@ async def test_cosmetic_buy_and_equip(client):
     shop = (
         await client.post(f"{BASE}/student/shop/cosmetics/raincoat/buy", headers=_b(kid))
     ).json()
-    assert shop["balance"] == 3
+    assert shop["stamps"] == 0 and shop["balance"] == 14  # 도장 2 - 우비 2, 씨앗은 그대로
     rain = next(c for c in shop["cosmetics"] if c["id"] == "raincoat")
     assert rain["owned"] and rain["equipped"]  # 옷은 사면 바로 입는다
     me = (await client.get(f"{BASE}/me", headers=_b(kid))).json()
     assert me["outfit"] == "raincoat"
     r = await client.post(f"{BASE}/student/shop/cosmetics/cape/buy", headers=_b(kid))
-    assert r.status_code == 409 and r.json()["detail"] == "씨앗이 모자라요."
+    assert r.status_code == 409 and r.json()["detail"] == "도장이 5개 더 필요해요."
     # 입기
     r = await client.put(f"{BASE}/student/outfit", json={"id": "cape"}, headers=_b(kid))
     assert r.status_code == 409 and r.json()["detail"] == "아직 없는 옷이에요."
@@ -235,7 +235,7 @@ async def test_emote_buy_does_not_change_outfit(client):
     t = await _trial(client)
     kid = await _login(client, t, "s1")
     shop = (await client.post(f"{BASE}/student/shop/cosmetics/thumbs/buy", headers=_b(kid))).json()
-    assert shop["balance"] == 10
+    assert shop["stamps"] == 1 and shop["balance"] == 14
     assert (await client.get(f"{BASE}/me", headers=_b(kid))).json()["outfit"] is None
 
 
@@ -246,13 +246,13 @@ async def test_stamp_once_a_day(client, db_session, clock):
     t = await _trial(client)
     mom = await _login(client, t, "g1")
     s = (await client.get(f"{BASE}/guardian/stamp", headers=_b(mom))).json()
-    assert s == {"stampedToday": False, "balance": 18}
+    assert s == {"stampedToday": False, "balance": 14, "stamps": 2}
     s = (await client.post(f"{BASE}/guardian/stamp", headers=_b(mom))).json()
-    assert s == {"stampedToday": True, "balance": 20}
+    assert s == {"stampedToday": True, "balance": 14, "stamps": 3}
     r = await client.post(f"{BASE}/guardian/stamp", headers=_b(mom))
     assert r.status_code == 409
     assert r.json()["detail"] == "오늘 도장은 이미 찍었어요. 내일 또 찍어 주세요."
-    assert "보호자가 도장을 찍어 줬어! 씨앗 +2" in await _notices(db_session, f"{t}-child")
+    assert "보호자가 도장을 찍어 줬어! 도장 +1" in await _notices(db_session, f"{t}-child")
     # 다음 날(서울)은 다시 찍을 수 있다
     clock.now += timedelta(days=1)
     s = (await client.get(f"{BASE}/guardian/stamp", headers=_b(mom))).json()
@@ -263,7 +263,7 @@ async def test_stamp_needs_linked_child(client):
     await _trial(client)
     mom = await _signup(client, "guardian", "mom_new")
     s = (await client.get(f"{BASE}/guardian/stamp", headers=_b(mom))).json()
-    assert s == {"stampedToday": False, "balance": 0}
+    assert s == {"stampedToday": False, "balance": 0, "stamps": 0}
     r = await client.post(f"{BASE}/guardian/stamp", headers=_b(mom))
     assert r.status_code == 404 and r.json()["detail"] == "먼저 아이와 연결해 주세요."
 
@@ -280,8 +280,9 @@ async def test_seed_board_shape(client):
     assert rows["지우"] == {
         "id": f"{t}-child",
         "name": "지우",
-        "balance": 18,
-        "earnedWeek": 5,
+        "balance": 14,
+        "stamps": 2,
+        "earnedWeek": 3,
         "grantedToday": 0,
     }
     assert rows["이민준"]["balance"] == 4 and rows["이민준"]["earnedWeek"] == 24
@@ -421,7 +422,7 @@ async def test_study_done_seed_token_path(client, clock):
     await client.post(f"{BASE}/student/promise", headers=kid)
     await _finish_study(client, clock, kid)
     home = (await client.get(f"{BASE}/student/home", headers=kid)).json()
-    assert home["earnedToday"] == 3 and home["seeds"] == 21
+    assert home["earnedToday"] == 3 and home["seeds"] == 17
     w = (await client.get(f"{BASE}/student/wallet", headers=kid)).json()
     assert w["history"][0]["source"] == "학습 완료"
     assert w["history"][0]["note"] == "분수 ÷ 자연수"
@@ -447,7 +448,7 @@ async def test_home_fields_from_tables(client):
     t = await _trial(client)
     kid = await _login(client, t, "s1")
     home = (await client.get(f"{BASE}/student/home", headers=_b(kid))).json()
-    assert home["seeds"] == 18 and home["earnedToday"] == 0 and home["inClass"] is True
+    assert home["seeds"] == 14 and home["earnedToday"] == 0 and home["inClass"] is True
     new = await _signup(client, "student", "kid_new")
     home = (await client.get(f"{BASE}/student/home", headers=_b(new))).json()
     assert home["seeds"] == 0 and home["inClass"] is False
@@ -632,7 +633,7 @@ async def test_stamp_race_is_409(client, monkeypatch):
     assert r.status_code == 409 and r.json()["code"] == "already_stamped"
     monkeypatch.undo()
     s = (await client.get(f"{BASE}/guardian/stamp", headers=_b(mom))).json()
-    assert s == {"stampedToday": True, "balance": 20}
+    assert s == {"stampedToday": True, "balance": 14, "stamps": 3}
 
 
 async def test_stock_never_below_zero(client, db_session):
@@ -655,6 +656,114 @@ async def test_stock_never_below_zero(client, db_session):
     await db_session.refresh(item)
     assert item.stock == 0
     w = (await client.get(f"{BASE}/student/wallet", headers=_b(kid))).json()
-    assert w["balance"] == 118  # 씨앗도 빠지지 않았다
+    assert w["balance"] == 114  # 씨앗도 빠지지 않았다
     bought = await db_session.scalars(select(Order).where(Order.item_name == "보드게임 10분"))
     assert list(bought) == []
+
+
+# --- 두 재화: 칭찬 도장(옷)·씨앗(학원 상점) — 결정 11-11 「보상은 두 재화」, 성호 11-12 ---------------
+# 지우(s1) 체험 기록: 씨앗 = 학습 완료 3+3+3 + 칭찬 5 = 14, 도장 = 보호자 도장 2번 × 1 = 2.
+
+
+async def test_two_currencies_in_wallet_home_shop(client):
+    t = await _trial(client)
+    kid = await _login(client, t, "s1")
+    w = (await client.get(f"{BASE}/student/wallet", headers=_b(kid))).json()
+    assert w["balance"] == 14 and w["stamps"] == 2
+    cur = {h["source"]: h["currency"] for h in w["history"]}
+    assert cur == {"학습 완료": "seed", "학습지도자 칭찬": "seed", "보호자 도장": "stamp"}
+    assert all(h["amount"] == 1 for h in w["history"] if h["source"] == "보호자 도장")
+    home = (await client.get(f"{BASE}/student/home", headers=_b(kid))).json()
+    assert home["seeds"] == 14 and home["stamps"] == 2
+    shop = (await client.get(f"{BASE}/student/shop", headers=_b(kid))).json()
+    assert shop["balance"] == 14 and shop["stamps"] == 2
+    prices = {c["id"]: c["price"] for c in shop["cosmetics"]}
+    assert prices == {
+        "glasses": 1,
+        "raincoat": 2,
+        "scarf": 3,
+        "cape": 5,
+        "thumbs": 1,
+        "thanks": 1,
+        "sleepy": 1,
+        "best": 2,
+    }
+
+
+async def test_cosmetic_costs_stamps_not_seeds(client):
+    t = await _trial(client)
+    kid = await _login(client, t, "s1")
+    r = await client.post(f"{BASE}/student/shop/cosmetics/cape/buy", headers=_b(kid))
+    assert r.status_code == 409 and r.json()["detail"] == "도장이 3개 더 필요해요."
+    shop = (
+        await client.post(f"{BASE}/student/shop/cosmetics/raincoat/buy", headers=_b(kid))
+    ).json()
+    assert shop["stamps"] == 0 and shop["balance"] == 14  # 씨앗은 그대로
+    w = (await client.get(f"{BASE}/student/wallet", headers=_b(kid))).json()
+    buy = w["history"][0]
+    assert buy["amount"] == -2 and buy["currency"] == "stamp" and buy["source"] == "꾸미기 구매"
+
+
+async def test_academy_item_still_costs_seeds(client):
+    t = await _trial(client)
+    kid = await _login(client, t, "s1")
+    shop = (await client.get(f"{BASE}/student/shop", headers=_b(kid))).json()
+    cheap = min(shop["academyItems"], key=lambda i: i["price"])  # 자리 고르기권 15
+    r = await client.post(f"{BASE}/student/shop/items/{cheap['id']}/buy", headers=_b(kid))
+    assert r.status_code == 409 and r.json()["detail"] == "씨앗이 모자라요."  # 씨앗 14
+
+
+async def test_guardian_stamp_gives_one_stamp(client, db_session):
+    t = await _trial(client)
+    mom = await _login(client, t, "g1")
+    s = (await client.get(f"{BASE}/guardian/stamp", headers=_b(mom))).json()
+    assert s == {"stampedToday": False, "balance": 14, "stamps": 2}
+    s = (await client.post(f"{BASE}/guardian/stamp", headers=_b(mom))).json()
+    assert s == {"stampedToday": True, "balance": 14, "stamps": 3}
+    assert "보호자가 도장을 찍어 줬어! 도장 +1" in await _notices(db_session, f"{t}-child")
+
+
+async def test_seed_board_has_stamps_and_counts_only_seeds(client):
+    t = await _trial(client)
+    teacher = await _login(client, t, "t1")
+    board = (await client.get(f"{BASE}/teacher/seeds", headers=_b(teacher))).json()
+    jiwoo = next(s for s in board["students"] if s["id"] == f"{t}-child")
+    assert jiwoo["balance"] == 14 and jiwoo["stamps"] == 2
+    # 이번 주(11-09~) 받은 씨앗: 어제 학습 완료 3만(도장은 씨앗이 아니다)
+    assert jiwoo["earnedWeek"] == 3
+
+
+# --- 수업 타이머 알림 시점(학원 설정) — 결정 11-11 「강의실 수업 타이머」, 성호 11-12 기본 [10, 5] -----
+
+
+async def test_timer_alerts_default_and_owner_save(client):
+    t = await _trial(client)
+    teacher = await _login(client, t, "t1")
+    owner = await _login(client, t, "own1")
+    url = f"{BASE}/academy/timer-alerts"
+    assert (await client.get(url, headers=_b(teacher))).json() == {"alertsMin": [10, 5]}
+    r = await client.put(url, json={"alertsMin": [3, 15, 3]}, headers=_b(owner))
+    assert r.status_code == 200 and r.json() == {"alertsMin": [15, 3]}  # 중복 없이 큰 것부터
+    assert (await client.get(url, headers=_b(teacher))).json() == {"alertsMin": [15, 3]}
+    assert (await client.get(url, headers=_b(owner))).json() == {"alertsMin": [15, 3]}
+
+
+async def test_timer_alerts_only_owner_writes(client):
+    t = await _trial(client)
+    url = f"{BASE}/academy/timer-alerts"
+    teacher = await _login(client, t, "t1")
+    r = await client.put(url, json={"alertsMin": [5]}, headers=_b(teacher))
+    assert r.status_code == 403
+    kid = await _login(client, t, "s1")
+    assert (await client.get(url, headers=_b(kid))).status_code == 403
+    loner = await _login(client, t, "t3")  # 학원 없는 학습지도자 → 기본값
+    assert (await client.get(url, headers=_b(loner))).json() == {"alertsMin": [10, 5]}
+
+
+async def test_timer_alerts_validation(client):
+    t = await _trial(client)
+    owner = await _login(client, t, "own1")
+    url = f"{BASE}/academy/timer-alerts"
+    for bad in ([], [0], [61], [1.5], [10, 5, 3, 1], ["5"]):
+        r = await client.put(url, json={"alertsMin": bad}, headers=_b(owner))
+        assert r.status_code == 422, bad

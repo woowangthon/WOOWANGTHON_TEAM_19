@@ -40,7 +40,7 @@ from app.models_org import (
     SeedLedger,
     ShopItem,
 )
-from app.seeds import once_key
+from app.seeds import currency_of, once_key
 from app.timeutil import SEOUL, seoul_date
 
 _SUFFIX_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -289,14 +289,14 @@ async def ensure_world(db: AsyncSession, trial_id: str, now: datetime) -> bool:
     rows.append(
         RoomPerson(room_id=wid("c2"), student_account_id=wid("s4"), state="requested", **stamp)
     )
-    # 씨앗 기록(org.ts L(): 학습 완료·보호자 도장·칭찬). created_at이 화면 시각(at)
+    # 재화 기록(org.ts L(): 학습 완료·칭찬 = 씨앗, 보호자 도장 = 도장 1개). created_at이 화면 시각(at)
     ledger = [
         ("s1", 3, 3, "학습 완료", "분수의 덧셈", "system", (18, 10)),
-        ("s1", 3, 2, "보호자 도장", "오늘 이야기를 나눴어요", "g1", (18, 10)),
+        ("s1", 3, 1, "보호자 도장", "오늘 이야기를 나눴어요", "g1", (18, 10)),
         ("s1", 2, 3, "학습 완료", "분수의 덧셈", "system", (18, 10)),
         ("s1", 2, 5, "학습지도자 칭찬", "단원평가 100점", "t1", (18, 10)),
         ("s1", 1, 3, "학습 완료", "분수의 덧셈", "system", (18, 10)),
-        ("s1", 1, 2, "보호자 도장", "오늘 이야기를 나눴어요", "g1", (18, 10)),
+        ("s1", 1, 1, "보호자 도장", "오늘 이야기를 나눴어요", "g1", (18, 10)),
         ("s2", 1, 24, "학습 완료", "지난 기록", "system", None),
         ("s2", 0, -20, "상점 구매", "칭찬 간식 쿠폰", "s2", None),
         ("s3", 1, 11, "학습 완료", "지난 기록", "system", None),
@@ -310,6 +310,7 @@ async def ensure_world(db: AsyncSession, trial_id: str, now: datetime) -> bool:
                 date=today - timedelta(days=days),
                 amount=amount,
                 source=source,
+                currency=currency_of(source),
                 note=note,
                 by=by if by == "system" else wid(by),
                 once_key=once_key(wid(key), source, today - timedelta(days=days)),

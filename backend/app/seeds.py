@@ -24,7 +24,7 @@ from app.timeutil import seoul_date
 
 SEED_RULES = {
     "studyDone": 3,  # 하루 학습 완료 (하루 1번)
-    "guardianStamp": 2,  # 보호자 도장 (하루 1번, 아이 1명당)
+    "guardianStamp": 1,  # 보호자 도장 → 칭찬 도장 1개 (하루 1번, 아이 1명당, 11-12)
     "teacherMax": 5,  # 학습지도자 칭찬 1번에 최대
     "teacherDailyCap": 10,  # 학습지도자 칭찬 학생 1명 하루 최대
 }
@@ -32,17 +32,22 @@ STUDY_DONE = "학습 완료"
 STAMP = "보호자 도장"
 PRAISE = "학습지도자 칭찬"
 PURCHASE = "상점 구매"
+COSMETIC_BUY = "꾸미기 구매"
+# 두 재화(결정 11-11 「보상은 두 재화」, 성호 11-12): 칭찬 도장 = 보호자 도장으로 얻고 캐릭터 옷에 씀,
+# 씨앗 = 학습 완료·학습지도자 칭찬으로 얻고 학원 상점에 씀. 재화는 출처로 정해진다.
+SEED, STAMP_CUR = "seed", "stamp"
+STAMP_SOURCES = (STAMP, COSMETIC_BUY)
 
-# (id, kind, name, price) — org.ts COSMETICS 순서 그대로
+# (id, kind, name, price) — org.ts COSMETICS 순서 그대로. price = 칭찬 도장 개수(11-12, 1~5)
 COSMETICS: list[tuple[str, str, str, int]] = [
-    ("glasses", "outfit", "공부 안경", 10),
-    ("raincoat", "outfit", "노란 우비", 15),
-    ("scarf", "outfit", "겨울 목도리", 20),
-    ("cape", "outfit", "별 망토", 25),
-    ("thumbs", "emote", "엄지 척", 8),
-    ("thanks", "emote", "고마워", 8),
-    ("sleepy", "emote", "졸려", 8),
-    ("best", "emote", "최고야", 12),
+    ("glasses", "outfit", "공부 안경", 1),
+    ("raincoat", "outfit", "노란 우비", 2),
+    ("scarf", "outfit", "겨울 목도리", 3),
+    ("cape", "outfit", "별 망토", 5),
+    ("thumbs", "emote", "엄지 척", 1),
+    ("thanks", "emote", "고마워", 1),
+    ("sleepy", "emote", "졸려", 1),
+    ("best", "emote", "최고야", 2),
 ]
 ONCE_A_DAY = (STUDY_DONE, STAMP)  # once_key를 붙이는 출처
 UNITS_KEY = "units"  # accounts.settings 안 학습지도자 단원 선택(태그 목록)
@@ -52,13 +57,22 @@ _TRIAL_OF = re.compile(r"^(t-[a-z0-9]{16})-")
 # --- 씨앗 기록 ---------------------------------------------------------------------------
 
 
-async def balance_of(db: AsyncSession, student_id: str) -> int:
+def currency_of(source: str) -> str:
+    return STAMP_CUR if source in STAMP_SOURCES else SEED
+
+
+async def balance_of(db: AsyncSession, student_id: str, currency: str = SEED) -> int:
+    """잔액(재화별 기록 합). 기본은 씨앗."""
     total = await db.scalar(
         select(func.coalesce(func.sum(SeedLedger.amount), 0)).where(
-            SeedLedger.student_account_id == student_id
+            SeedLedger.student_account_id == student_id, SeedLedger.currency == currency
         )
     )
     return int(total or 0)
+
+
+async def stamps_of(db: AsyncSession, student_id: str) -> int:
+    return await balance_of(db, student_id, STAMP_CUR)
 
 
 async def earned_on(db: AsyncSession, student_id: str, source: str, day: date) -> int:
@@ -116,6 +130,7 @@ async def add_seed(
         date=day,
         amount=amount,
         source=source,
+        currency=currency_of(source),
         note=note[:60],
         by=by,
         trial_id=await _trial_of(db, student_id),

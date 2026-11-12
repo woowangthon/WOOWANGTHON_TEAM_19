@@ -41,8 +41,19 @@ from app.accounts import (
 from app.compat import _CompatRoute
 from app.demo import ResetBody, _write_day3_student
 from app.demo_world import RESERVED_LOGIN, demo_accounts, ensure_world, seed_key_of, world_id
-from app.models import Student
-from app.models_org import Academy, Account, AuthToken, Link, Notice, RoomPerson
+from app.models import Alert, InstructorNote, Message, Misconception, Session, Student
+from app.models_org import (
+    Academy,
+    Account,
+    AuthToken,
+    CosmeticOwned,
+    Link,
+    Notice,
+    Order,
+    RoomPerson,
+    SeedLedger,
+    SessionProblem,
+)
 from app.seed import load_seed
 from app.timeutil import seoul_date
 
@@ -348,6 +359,27 @@ async def save_settings(body: SettingsIn, db: Db, account: CurrentAccount) -> di
     return await me_view(db, u)
 
 
+async def _delete_student_data(db: Db, student_id: str) -> None:
+    """학생 탈퇴 — 그 학생의 기록을 남김없이 지운다(명세 「탈퇴 시 삭제」, TK-107).
+
+    학습·대화(students 아래 행)에 더해 씨앗·칭찬 도장(seed_ledger)·옷(cosmetics_owned)·
+    교환 요청(orders)·알림(notices)도 지운다(성호 결정 11-12: 탈퇴하면 아예 사라져야 한다).
+    테스트 DB(SQLite)는 FK CASCADE가 꺼져 있어 운영(Postgres)과 같게 자식부터 직접 지운다.
+    """
+    sessions = select(Session.id).where(Session.student_id == student_id)
+    await db.execute(delete(Message).where(Message.session_id.in_(sessions)))
+    await db.execute(delete(SessionProblem).where(SessionProblem.session_id.in_(sessions)))
+    await db.execute(delete(Alert).where(Alert.student_id == student_id))
+    await db.execute(delete(Session).where(Session.student_id == student_id))
+    await db.execute(delete(Misconception).where(Misconception.student_id == student_id))
+    await db.execute(delete(InstructorNote).where(InstructorNote.student_id == student_id))
+    await db.execute(delete(SeedLedger).where(SeedLedger.student_account_id == student_id))
+    await db.execute(delete(CosmeticOwned).where(CosmeticOwned.student_account_id == student_id))
+    await db.execute(delete(Order).where(Order.student_account_id == student_id))
+    await db.execute(delete(Notice).where(Notice.account_id == student_id))
+    await db.execute(delete(Student).where(Student.id == student_id))
+
+
 class DeleteIn(BaseModel):
     password: str
 
@@ -356,7 +388,7 @@ class DeleteIn(BaseModel):
 async def delete_account(
     body: DeleteIn, response: Response, db: Db, account: CurrentAccount
 ) -> None:
-    """비밀번호 확인 뒤 계정·연결·강의실 자리·토큰을 지운다. 학습 기록(students 행)은 남는다."""
+    """비밀번호 확인 뒤 계정·연결·강의실 자리·토큰을 지운다. 학생이면 학습·대화 기록도(TK-107)."""
     u = require_account(account)
     if u.trial_id is not None:  # 체험 세상은 여럿이 같이 쓴다 — 지우면 그 세트 로그인이 깨진다(A1)
         fail("체험 계정은 탈퇴할 수 없어요.", 409, "trial_account")
@@ -371,6 +403,8 @@ async def delete_account(
     )
     await db.execute(delete(RoomPerson).where(RoomPerson.student_account_id == u.id))
     await db.execute(delete(AuthToken).where(AuthToken.account_id == u.id))
+    if u.role == "student":
+        await _delete_student_data(db, u.id)
     await db.delete(u)
     await db.commit()
     clear_session_cookie(response)

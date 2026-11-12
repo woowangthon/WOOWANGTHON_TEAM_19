@@ -11,7 +11,7 @@ import { useAsync } from '../../lib/useAsync';
 import { useMentor } from '../../state/mentor';
 import { routeFor } from '../../state/session';
 import { useAuth, useRefreshMeOnMount } from '../../state/auth';
-import { SeedChip } from '../../components/Seed';
+import { SeedChip, StampChip } from '../../components/Seed';
 import { isCrisisDay, isDemoChild } from '../../lib/kidScreens';
 import { GRADE_NOTE, currentGradeUi, showGradeNote } from '../../lib/gradeUi';
 import { callName } from '../../lib/josa';
@@ -65,6 +65,7 @@ export function StudentToday() {
               <span className="row" style={{ gap: 6 }}>
                 <span className="pill pill--accent"><Icon name="flame" size={14} fill /> 연속 {data.streakDays}일</span>
                 <SeedChip n={data.seeds} onClick={() => nav('/student/shop')} />
+                <StampChip n={data.stamps ?? 0} onClick={() => nav('/student/shop')} />
               </span>
             </div>
             <Mascot mood={data.doneToday ? (isCrisisDay(data) ? 'calm' : 'cheer') : 'wave'} size={104} variant="face" outfit={me?.outfit} />

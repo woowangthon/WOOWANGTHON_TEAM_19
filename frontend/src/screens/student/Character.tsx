@@ -9,9 +9,9 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
-import { Sheet } from '../../components/Common';
+import { LoadError, Sheet } from '../../components/Common';
 import { Mascot, type Mood } from '../../components/Mascot';
-import { CosmeticArt, SeedChip } from '../../components/Seed';
+import { CosmeticArt, StampChip } from '../../components/Seed';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { useMentor } from '../../state/mentor';
@@ -30,7 +30,7 @@ const SPEECHES: Speech[] = ['반말', '존댓말'];
 
 export function StudentCharacter({ editMode = false }: { editMode?: boolean }) {
   const nav = useNavigate();
-  const { setting: saved, save } = useMentor();
+  const { setting: saved, save, say } = useMentor();
   const { me } = useAuth();
   const [setting, setSetting] = useState<MentorSetting>({ style: '같이 풀어주는', title: '형', speech: '반말', animal: 'horse' });
   const [savedNow, setSavedNow] = useState(false);
@@ -40,10 +40,12 @@ export function StudentCharacter({ editMode = false }: { editMode?: boolean }) {
   useEffect(() => { if (saved) setSetting((cur) => ({ ...saved, animal: animalTouched.current ? cur.animal : saved.animal })); }, [saved]);
   const set = (patch: Partial<MentorSetting>) => { setSavedNow(false); setSetting({ ...setting, ...patch }); };
   // 탭 화면에서는 캐릭터(띠)만 바꾼다. 말투는 시트에서 따로 저장하니 저장된 값을 그대로 둔다
-  const submit = async () => {
+  // 저장 실패(409 등)면 이유를 보이고, 보내는 동안은 버튼을 막는다(P4)
+  const { run, busy, error } = useAction();
+  const submit = () => run(async () => {
     if (editMode) { await save(saved ? { ...saved, animal: setting.animal } : setting); animalTouched.current = false; setSavedNow(true); }
     else { await save(setting); nav('/student/difficulty'); }
-  };
+  });
   const idx = Math.max(0, ANIMALS.indexOf(setting.animal));
   const go = (d: number) => { animalTouched.current = true; set({ animal: ANIMALS[(idx + d + ANIMALS.length) % ANIMALS.length] }); };
   const style = STYLES.find((s) => s.style === setting.style)!;
@@ -52,7 +54,7 @@ export function StudentCharacter({ editMode = false }: { editMode?: boolean }) {
     <Frame title={editMode ? '내 멘토' : '캐릭터 고르기'} back={editMode ? undefined : '/student/onboarding/promise'} exit={editMode}
       right={editMode ? <button className="icon-btn" aria-label="멘토 말투 설정" onClick={() => setTalkOpen(true)}><Icon name="talk" /></button> : <span className="pill pill--mint">2/2</span>}
       tabs={editMode ? 'student' : undefined}
-      actions={<button className="btn btn--primary" onClick={submit}>{savedNow ? '저장했어 ✓' : editMode ? '이 친구로 바꿀래' : '이 친구로 할래'}</button>}>
+      actions={<><LoadError error={error} /><button className="btn btn--primary" disabled={busy} onClick={submit}>{busy ? '저장하는 중…' : savedNow ? say('저장했어 ✓', '저장했어요 ✓') : editMode ? say('이 친구로 바꿀래', '이 친구로 바꿀래요') : say('이 친구로 할래', '이 친구로 할래요')}</button></>}>
       <Stack index={idx} onMove={go} labels={ANIMALS.map((a) => ANIMAL_LABEL[a])}>
         {ANIMALS.map((a) => (
           <div key={a} className="stack-card__inner">
@@ -142,8 +144,8 @@ function Wardrobe({ preview, animal }: { preview: boolean; animal: Animal }) {
     <section className="wardrobe" aria-label="옷장">
       <div className="row between">
         <strong className="h3">옷장</strong>
-        {preview ? <span className="small muted">씨앗을 모으면 옷을 입힐 수 있어</span>
-          : <button className="seed-link" onClick={() => nav('/student/shop')}><SeedChip n={data.balance} /> 상점 <Icon name="chevron" size={14} /></button>}
+        {preview ? <span className="small muted">칭찬 도장을 모으면 옷을 입힐 수 있어</span>
+          : <button className="seed-link" onClick={() => nav('/student/shop')}><StampChip n={data.stamps ?? 0} /> 상점 <Icon name="chevron" size={14} /></button>}
       </div>
       <div className="chip-row chip-row--scroll wardrobe__row">
         {!preview && (
@@ -155,7 +157,7 @@ function Wardrobe({ preview, animal }: { preview: boolean; animal: Animal }) {
           <button key={c.id} className={'ward' + (c.equipped ? ' ward--on' : '') + (c.owned ? '' : ' ward--locked')} disabled={busy || preview}
             onClick={() => (c.owned ? put(c.equipped ? null : c.id) : nav('/student/shop'))}>
             <CosmeticArt animal={animal} kind="outfit" id={c.id} name={c.name} size={56} />
-            <span className="small">{c.owned ? c.name : <><Icon name="lock" size={12} /> {c.price}</>}</span>
+            <span className="small">{c.owned ? c.name : <><Icon name="lock" size={12} /> 도장 {c.price}</>}</span>
           </button>
         ))}
       </div>

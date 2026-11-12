@@ -64,7 +64,8 @@ function Wrap() {
           </section>}{/* 서버는 어려웠던 점 칩을 빈 목록으로 준다 → 비면 섹션을 숨긴다 */}
           <section className="stack">
             <h2 className="h3">보호자께 낼 퀴즈 하나 <span className="small muted">(선택)</span></h2>
-            <div className="chip-row chip-row--stack">
+            {/* GPT-001: 긴 퀴즈 문장도 화면 안에서 줄바꿈 */}
+            <div className="chip-row quiz-chips">
               {data.quizOptions.map((q) => (
                 <button key={q} className={'chip' + (quiz === q ? ' chip--on' : '')} aria-pressed={quiz === q} onClick={() => setQuiz(quiz === q ? null : q)}>{q}</button>
               ))}

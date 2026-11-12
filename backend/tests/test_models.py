@@ -41,7 +41,8 @@ ORG_TABLES = {
 async def test_seven_tables_are_created(engine):
     async with engine.connect() as conn:
         names = await conn.run_sync(lambda c: set(inspect(c).get_table_names()))
-    assert names == EXPECTED_TABLES | ORG_TABLES
+    # session_problems: 한 세션 여러 문제(SESSION_PROBLEMS, 11-12). 기본 1이면 비어 있다
+    assert names == EXPECTED_TABLES | ORG_TABLES | {"session_problems"}
 
 
 async def test_student_has_no_real_name_column(engine):

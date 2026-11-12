@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
-import { SeedChip } from '../../components/Seed';
+import { SeedChip, StampChip } from '../../components/Seed';
 import { LoadError, Stat, Thinking, Week } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
@@ -46,7 +46,7 @@ function Linked() {
         <>
           <div className="row between">
             <div><h1 className="h2">{data.childName}</h1><div className="small muted">{data.dateLabel} · 내 아이의 오늘</div></div>
-            {stamp.data && <SeedChip n={stamp.data.balance} />}
+            {stamp.data && <><SeedChip n={stamp.data.balance} /><StampChip n={stamp.data.stamps ?? 0} /></>}
           </div>
           {data.alertNotice ? (
             <section className="card card--warn row between">
@@ -69,7 +69,7 @@ function Linked() {
             <span className="stamp-card__mark"><Icon name="stamp" size={28} /></span>
             <div style={{ minWidth: 0, flex: 1 }}>
               <strong>{stamp.data?.stampedToday ? '오늘 도장을 찍었어요' : '오늘 하루 이야기를 나눴나요?'}</strong>
-              <div className="small muted">이야기 내용을 평가하지 않아요. 함께 이야기한 것에 찍어요 · 하루 1번 · 씨앗 +2</div>
+              <div className="small muted">이야기 내용을 평가하지 않아요. 함께 이야기한 것에 찍어요 · 하루 1번 · 아이에게 칭찬 도장 +1(옷을 살 수 있어요)</div>
             </div>
             {stamp.data && !stamp.data.stampedToday && (
               <button className="btn btn--primary btn--small" disabled={busy} onClick={() => run(async () => stamp.setData(await api.stamp()))}>도장 찍기</button>

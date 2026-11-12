@@ -8,6 +8,7 @@ import { LoadError, Sheet, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import type { Classroom } from '../../types';
+import { ClassroomTimer } from '../../components/ClassTimer';
 
 export function TeacherClasses() {
   const { data, setData, error, loading, reload } = useAsync(() => api.getTeacherClasses());
@@ -24,11 +25,12 @@ export function TeacherClasses() {
       {data?.classrooms.length === 0 && <div className="notice notice--plain"><span>아직 강의실이 없어요. 오른쪽 위 +로 열어 주세요.</span></div>}
       <div className="card-grid">
       {data?.classrooms.map((c) => (
-        <section key={c.id} className="card stack">
+        <section key={c.id} className="card stack timer-card">
           <div className="row between">
             <span><strong className="h3">{c.name}</strong><span className="small muted" style={{ display: 'block' }}>{c.plan || '학습 계획 없음'}</span></span>
             <span className="pill pill--mint">{c.members.length}명</span>
           </div>
+          <ClassroomTimer classId={c.id} className={c.name} />
           {c.requests.length > 0 && (
             <div className="stack">
               <div className="small muted">참여 요청</div>

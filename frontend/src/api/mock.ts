@@ -251,7 +251,7 @@ export const mockApi: MentorApi = {
       doneToday: done.has(today()) && (!s || s.phase === 'done' || s.phase === 'crisis'),
       endedInCrisis: done.has(today()) && s?.phase === 'crisis', // 계약 #2 v1과 같은 필드
       restricted: isRestricted(id), inClass: roomsOfStudent(id).length > 0,
-      seeds: balanceOf(id), earnedToday: studySeedsToday(id),
+      seeds: balanceOf(id), stamps: balanceOf(id, 'stamp'), earnedToday: studySeedsToday(id),
     };
   },
   async acceptPromise() { await wait(80); me().promise = true; commit(); },

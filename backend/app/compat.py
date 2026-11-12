@@ -6,7 +6,7 @@
   current_instructor).
 - 문제 화면에 정답·풀이를 싣지 않는다. 풀이는 hint_level 3(풀이 보기)에서만 준다.
 - 오류는 기존 {code, message, request_id}에 프론트가 읽는 `detail`(= message)만 덧붙인다.
-- 시드는 한 세션에 한 문제라 total은 1, 난이도는 시드에 없어 받기만 하고 버린다.
+- 한 세션 문제 수는 SESSION_PROBLEMS(기본 1 → total 1). 난이도는 시드에 없어 받기만 하고 버린다.
 """
 
 import math
@@ -43,6 +43,8 @@ from app.api import (
     _lease_valid,
     _open_misconception,
     _owned_session,
+    _plan_ids,
+    _quiz_base,
     _quiz_options,
     _release_lease,
     _row_state,
@@ -52,12 +54,15 @@ from app.api import (
     get_bridge,
     is_solved,
     next_streak,
+    plan_position,
     post_end,
     post_message,
     post_phase,
     post_reply,
+    progress,
     put_mentor,
     start_session,
+    sync_progress,
 )
 from app.demo import ResetBody, _write_day3_student
 from app.errors import ApiError, _body
@@ -88,6 +93,7 @@ from app.seeds import (
     earned_on,
     in_class,
     selected_unit_names,
+    stamps_of,
 )
 from app.state_machine import (
     MAX_HINT,
@@ -185,8 +191,11 @@ async def _problem(db: AsyncSession, row: Session) -> Problem | None:
 
 
 async def _view(db: AsyncSession, row: Session, student: Student, now: datetime) -> dict[str, Any]:
+    # 여러 문제 세션: 지금 문제를 끝냈으면 먼저 다음 문제로(기본 1문제면 아무것도 안 한다)
+    await sync_progress(db, row, now)
     problem = await _problem(db, row)
     solved = await is_solved(db, row, problem)
+    prog = await progress(db, row)
     started = as_utc(row.phase_started_at)
     in_study = row.state == State.STUDY.value and started is not None
     # study 밖에서는 study를 떠날 때 저장한 초(11-11, 전에는 0이 됐다)
@@ -197,10 +206,10 @@ async def _view(db: AsyncSession, row: Session, student: Student, now: datetime)
         "phase": phase,
         "unit": _tag_name(problem),
         "difficulty": DIFFICULTY,
-        "solved": 1 if solved or row.hint_level >= MAX_HINT else 0,
-        "total": 1,
-        "assisted": 1 if row.hint_level >= MAX_HINT and not solved else 0,
-        "hintsUsed": min(row.hint_level, HINT_COUNT),
+        "solved": prog.solved,
+        "total": prog.total,
+        "assisted": prog.assisted,
+        "hintsUsed": prog.hints,
         "studyMin": math.ceil(study_sec / 60),
         # 0이면 서버가 풀이 보기·수다로 넘어가기를 연다(같은 함수, 명세 4.11-4)
         "studyRemainingSec": study_remaining_sec(started, now, config.timer_scale())
@@ -253,7 +262,7 @@ async def student_home(db: Db, now: Now, student: Child, account: CurrentAccount
         problem = await db.get(Problem, task[0])
         task_info = {
             "unit": _tag_name(problem),
-            "count": 1,
+            "count": len(await _plan_ids(db, task[0])),  # 기본 1(SESSION_PROBLEMS)
             "minutes": TASK_MINUTES,
             "assignedBy": ASSIGNED_BY[task[1]],
         }
@@ -262,6 +271,7 @@ async def student_home(db: Db, now: Now, student: Child, account: CurrentAccount
     restricted = account is not None and await is_restricted(db, account.id)
     # 씨앗·강의실은 새 테이블에서(명세 4.12). 체험 헤더 경로의 inClass는 전과 같이 True
     seeds = await balance_of(db, student.id)
+    stamps = await stamps_of(db, student.id)
     earned = await earned_on(db, student.id, STUDY_DONE, seoul_date(now))
     joined = await in_class(db, student.id) if account is not None else True
     await db.commit()
@@ -280,6 +290,7 @@ async def student_home(db: Db, now: Now, student: Child, account: CurrentAccount
         "restricted": restricted,
         "inClass": joined,
         "seeds": seeds,
+        "stamps": stamps,
         "earnedToday": earned,
     }
 
@@ -344,8 +355,10 @@ async def start(db: Db, now: Now, student: Child, _: StartIn | None = None) -> d
 @router.get("/sessions/{session_id}/problem")
 async def get_problem(session_id: str, db: Db, now: Now, student: Child) -> dict[str, Any] | None:
     row = await _owned_session(db, session_id, student, now)
+    await sync_progress(db, row, now)
     problem = await _problem(db, row)
     solved = await is_solved(db, row, problem)
+    index, total = await plan_position(db, row)
     await db.commit()
     if problem is None or _phase(row, solved) != "solve":
         return None  # 풀기 단계가 끝났다
@@ -354,8 +367,8 @@ async def get_problem(session_id: str, db: Db, now: Now, student: Child) -> dict
     scale = config.timer_scale()
     return {
         "id": problem.id,
-        "index": 0,
-        "total": 1,
+        "index": index,
+        "total": total,
         "text": problem.text,  # 나눗셈 문장제. 프론트 left/op/right 대신 보여야 한다
         "left": left,
         "right": right,
@@ -377,6 +390,7 @@ async def submit_answer(
     session_id: str, body: AnswerIn, db: Db, now: Now, student: Child, llm: Llm
 ) -> dict[str, Any]:
     row = await _owned_session(db, session_id, student, now)
+    await sync_progress(db, row, now)
     problem = await _problem(db, row)
     solved = await is_solved(db, row, problem)
     if problem is None or body.problemId != problem.id or _phase(row, solved) != "solve":
@@ -441,6 +455,7 @@ async def _solving(
     if _lease_valid(row, now):  # 답 생성 중: 기본 경로 kind:hint와 같이 409(계약 프론트 할 일 9)
         await db.commit()
         raise ApiError(409, "busy", "앞의 말에 답하고 있어요. 답을 본 뒤 다시 눌러 줘.")
+    await sync_progress(db, row, now)
     problem = await _problem(db, row)
     if problem is None or _phase(row, await is_solved(db, row, problem)) != "solve":
         await db.commit()
@@ -509,7 +524,8 @@ async def after_study(
     row = await _owned_session(db, session_id, student, now)
     if row.state != State.STUDY.value:
         problem = await _problem(db, row)
-        if row.hint_level >= MAX_HINT or await is_solved(db, row, problem):
+        # 여러 문제면 한 문제라도 끝냈을 때(한 문제면 예전과 같은 조건)
+        if (await progress(db, row)).solved > 0:
             await earn_study_seeds(db, student.id, _tag_name(problem), now)
     return await _session_view(db, session_id, student, now)
 
@@ -524,8 +540,11 @@ async def get_chat(session_id: str, db: Db, now: Now, student: Child) -> dict[st
         rows = await db.scalars(
             select(Message).where(Message.session_id == row.id).order_by(Message.seq)
         )
+        # 아이 말은 화면에 보이기 직전에만 자기 별명으로 되돌린다(TK-106). 저장본·프롬프트는 치환본
         messages = [
-            {"from": "me" if m.role == "child" else "mentor", "text": m.text_redacted}
+            {"from": "me", "text": unredact_name(m.text_redacted, student.nickname) or ""}
+            if m.role == "child"
+            else {"from": "mentor", "text": m.text_redacted}
             for m in rows
             if (created := as_utc(m.expires_at)) is not None and created - MESSAGE_TTL >= started
         ]
@@ -656,7 +675,7 @@ async def submit_wrap(
     quiz_id = None
     if body.quiz is not None:  # 프론트는 문장으로 고른다 → 같은 태그 퀴즈 후보에서 id로
         row = await _owned_session(db, session_id, student, now)
-        options = await _quiz_options(db, await _problem(db, row))
+        options = await _quiz_options(db, await _quiz_base(db, row))
         quiz_id = next((q["id"] for q in options if q["text"] == body.quiz), None)
         if quiz_id is None:
             await db.commit()
@@ -675,14 +694,13 @@ async def get_guardian_today(db: Db, now: Now, student: GuardianChild) -> dict[s
         select(Session).where(Session.student_id == student.id, Session.date == seoul_date(now))
     )
     problem = await _problem(db, session) if session is not None else None
-    solved = await is_solved(db, session, problem) if session is not None else False
-    hint_level = session.hint_level if session is not None else 0
+    solved = (await progress(db, session)).solved if session is not None else 0
     return {
         "childName": student.nickname,
         "dateLabel": _date_label(now),
         "done": session is not None and session.state == State.ENDED.value,
         "unit": _tag_name(problem) if problem else "-",
-        "solved": 1 if solved or hint_level >= MAX_HINT else 0,
+        "solved": solved,  # 끝낸 문제 수(한 문제 세션이면 0/1 그대로)
         "streak": student.streak_days,
         "hardPoint": None,
         "line": card["child_line"],
@@ -808,9 +826,8 @@ async def _draft_out(
     """사실 칸(scope·amount·mode)은 기록에서, comment는 초안(승인 뒤엔 승인본)."""
     session = await _today_row(db, student, now)
     if session is not None:
-        problem = await _problem(db, session)
-        solved = await is_solved(db, session, problem) or session.hint_level >= MAX_HINT
-        amount, mode = f"{1 if solved else 0}/1문제", f"힌트 {session.hint_level}번"
+        prog = await progress(db, session)  # 한 문제면 예전 그대로(0·1/1문제, 힌트 hint_level번)
+        amount, mode = f"{prog.solved}/{prog.total}문제", f"힌트 {prog.hint_presses}번"
     else:
         amount, mode = "미완료", "-"
     published = note.status == "published"

@@ -55,7 +55,8 @@ export interface StudentHome {
   doneToday: boolean;
   restricted: boolean;       // 보호자와 연결 전(제한 모드)
   inClass: boolean;          // 강의실에 들어가 있는지
-  seeds: number;             // 씨앗 잔액
+  seeds: number;             // 씨앗 잔액(학원 재화 — 학원 상점)
+  stamps?: number;           // 칭찬 도장 잔액(앱 재화 — 캐릭터 옷). 서버가 아직 안 주면 0으로 본다(11-12 두 재화)
   earnedToday: number;       // 오늘 학습 완료로 받은 씨앗(0이면 아직)
   endedInCrisis?: boolean;   // 계약 #2 v1: 오늘 세션이 위기(🔴)로 끝났으면 true(그때 doneToday도 true)
 }
@@ -234,15 +235,18 @@ export interface StudentClasses {
 export interface AppNotice { id: string; at: string; text: string; to: string | null; read: boolean; }
 
 /* ---------- 씨앗(재화) ---------- */
-export type SeedSource = '학습 완료' | '보호자 도장' | '학습지도자 칭찬' | '상점 구매';
-export interface SeedEntry { id: string; at: string; amount: number; source: SeedSource; note: string; }
-export interface Wallet { balance: number; history: SeedEntry[]; }
+export type SeedSource = '학습 완료' | '보호자 도장' | '학습지도자 칭찬' | '상점 구매' | '꾸미기 구매';
+/** 두 재화(11-12 결정): 씨앗 = 학원 재화(학원 상점), 칭찬 도장 = 앱 재화(보호자 도장·칭찬 → 캐릭터 옷) */
+export type Currency = 'seed' | 'stamp';
+export interface SeedEntry { id: string; at: string; amount: number; source: SeedSource; note: string; currency?: Currency; }
+export interface Wallet { balance: number; stamps?: number; history: SeedEntry[]; }
 
 export interface ShopItem { id: string; name: string; price: number; stock: number | null; visible: boolean; note: string; }
 export type CosmeticKind = 'outfit' | 'emote';
 export interface Cosmetic { id: string; kind: CosmeticKind; name: string; price: number; owned: boolean; equipped: boolean; }
-export interface StudentShop { balance: number; academyItems: ShopItem[]; cosmetics: Cosmetic[]; orders: Order[]; }
+/** balance = 씨앗(학원 상품 값), stamps = 칭찬 도장(꾸미기 값 — cosmetics.price는 도장 개수) */
+export interface StudentShop { balance: number; stamps?: number; academyItems: ShopItem[]; cosmetics: Cosmetic[]; orders: Order[]; }
 export type OrderStatus = '교환 요청' | '전달 완료';
 export interface Order { id: string; studentName: string; itemName: string; price: number; at: string; status: OrderStatus; }
-export interface SeedBoard { students: { id: string; name: string; balance: number; earnedWeek: number; grantedToday: number }[]; orders: Order[]; items: ShopItem[]; }
-export interface StampState { stampedToday: boolean; balance: number; }
+export interface SeedBoard { students: { id: string; name: string; balance: number; stamps?: number; earnedWeek: number; grantedToday: number }[]; orders: Order[]; items: ShopItem[]; }
+export interface StampState { stampedToday: boolean; balance: number; stamps?: number; }

@@ -30,15 +30,17 @@ from app.accounts import (
     stamp_label,
 )
 from app.actors import Actor
-from app.api import TAG_NAME, Child, _today_session, is_solved
-from app.compat import DIFFICULTY, HINT_COUNT, _CompatRoute, _problem, _unit_today
+from app.api import TAG_NAME, Child, _today_session, progress
+from app.compat import DIFFICULTY, _CompatRoute, _problem, _unit_today
 from app.instructor import Instructor
 from app.models import Message, Problem, Session, Student
 from app.models_org import Account, CosmeticOwned, Order, Room, RoomPerson, SeedLedger, ShopItem
 from app.seeds import (
+    COSMETIC_BUY,
     COSMETICS,
     PRAISE,
     PURCHASE,
+    SEED,
     SEED_RULES,
     STAMP,
     add_seed,
@@ -47,10 +49,11 @@ from app.seeds import (
     lock_student,
     save_selected_tags,
     selected_tags,
+    stamps_of,
     teachers_of_student,
     week_days,
 )
-from app.state_machine import MAX_HINT, State
+from app.state_machine import State
 from app.timeutil import seoul_date
 from app.trial import ACCOUNT_PREFIX, TRIAL_PREFIX
 
@@ -113,11 +116,16 @@ async def get_wallet(db: Db, account: CurrentAccount) -> dict[str, Any]:
             "at": stamp_label(r.created_at),
             "amount": r.amount,
             "source": r.source,
+            "currency": r.currency,
             "note": r.note,
         }
         for r in rows
     ]
-    return {"balance": await balance_of(db, s.id), "history": history}
+    return {
+        "balance": await balance_of(db, s.id),
+        "stamps": await stamps_of(db, s.id),
+        "history": history,
+    }
 
 
 async def _student_shop(db: AsyncSession, s: Account) -> dict[str, Any]:
@@ -142,7 +150,8 @@ async def _student_shop(db: AsyncSession, s: Account) -> dict[str, Any]:
         .order_by(Order.created_at.desc(), Order.id.desc())
     )
     return {
-        "balance": await balance_of(db, s.id),
+        "balance": await balance_of(db, s.id),  # 씨앗(학원 상점)
+        "stamps": await stamps_of(db, s.id),  # 칭찬 도장(꾸미기, cosmetics.price 단위)
         "academyItems": [_item_view(i) for i in items],
         "cosmetics": [
             {
@@ -229,9 +238,10 @@ async def buy_cosmetic(
     await lock_student(db, s.id)  # 같은 학생의 동시 구매를 줄 세운 뒤 보유·잔액을 읽는다
     if await db.get(CosmeticOwned, (s.id, cosmetic_id)) is not None:
         fail("이미 가지고 있어요.", 409, "already_owned")
-    if await balance_of(db, s.id) < price:
-        fail("씨앗이 모자라요.", 409, "not_enough_seeds")
-    await add_seed(db, s.id, -price, PURCHASE, name, s.id, now)
+    short = price - await stamps_of(db, s.id)
+    if short > 0:
+        fail(f"도장이 {short}개 더 필요해요.", 409, "not_enough_stamps")
+    await add_seed(db, s.id, -price, COSMETIC_BUY, name, s.id, now)
     db.add(
         CosmeticOwned(
             student_account_id=s.id, cosmetic_id=cosmetic_id, trial_id=s.trial_id, created_at=now
@@ -262,10 +272,11 @@ async def equip_outfit(body: OutfitIn, db: Db, account: CurrentAccount) -> dict[
 
 async def _stamp_state(db: AsyncSession, child: str | None, now: datetime) -> dict[str, Any]:
     if child is None:
-        return {"stampedToday": False, "balance": 0}
+        return {"stampedToday": False, "balance": 0, "stamps": 0}
     return {
         "stampedToday": await earned_on(db, child, STAMP, seoul_date(now)) > 0,
-        "balance": await balance_of(db, child),
+        "balance": await balance_of(db, child),  # 씨앗(그대로)
+        "stamps": await stamps_of(db, child),
     }
 
 
@@ -288,7 +299,7 @@ async def stamp(db: Db, now: Now, account: CurrentAccount) -> dict[str, Any]:
         # 동시 요청이 먼저 찍었다(once_key 유일 제약)
         fail("오늘 도장은 이미 찍었어요. 내일 또 찍어 주세요.", 409, "already_stamped")
     notify(
-        db, child, f"보호자가 도장을 찍어 줬어! 씨앗 +{amount}", "/student/shop", now, g.trial_id
+        db, child, f"보호자가 도장을 찍어 줬어! 도장 +{amount}", "/student/shop", now, g.trial_id
     )
     await db.commit()
     return await _stamp_state(db, child, now)
@@ -316,6 +327,7 @@ async def _seed_board(db: AsyncSession, t: Account, now: datetime) -> dict[str, 
         earned_week = await db.scalar(
             select(func.coalesce(func.sum(SeedLedger.amount), 0)).where(
                 SeedLedger.student_account_id == sid,
+                SeedLedger.currency == SEED,
                 SeedLedger.amount > 0,
                 SeedLedger.date >= week[0],
                 SeedLedger.date <= week[-1],
@@ -326,6 +338,7 @@ async def _seed_board(db: AsyncSession, t: Account, now: datetime) -> dict[str, 
                 "id": sid,
                 "name": await _name_of(db, sid),
                 "balance": await balance_of(db, sid),
+                "stamps": await stamps_of(db, sid),
                 "earnedWeek": int(earned_week or 0),
                 "grantedToday": await earned_on(db, sid, PRAISE, today),
             }
@@ -477,10 +490,6 @@ def _short_label(d: date) -> str:
     return f"{d.month}월 {d.day}일 ({_WEEKDAY_SUN0[(d.weekday() + 1) % 7]})"
 
 
-async def _solved(db: AsyncSession, row: Session) -> bool:
-    return row.hint_level >= MAX_HINT or await is_solved(db, row, await _problem(db, row))
-
-
 @router.get("/student/records")
 async def get_records(db: Db, student: Child) -> list[dict[str, Any]]:
     """같이 풀기를 끝낸 날(세션이 study를 떠남)마다 한 줄. 메타데이터만(대화 원문 없음).
@@ -500,14 +509,15 @@ async def get_records(db: Db, student: Child) -> list[dict[str, Any]]:
             .limit(1)
         )
         problem = await _problem(db, row)
+        prog = await progress(db, row)  # 한 문제 세션이면 예전 값(0·1 / 1, 힌트 최대 2)
         out.append(
             {
                 "date": _short_label(row.date),
                 "unit": TAG_NAME.get(problem.tag, problem.tag) if problem else "오늘 문제",
-                "solved": 1 if await _solved(db, row) else 0,
-                "total": 1,
+                "solved": prog.solved,
+                "total": prog.total,
                 "difficulty": DIFFICULTY,
-                "hints": min(row.hint_level, HINT_COUNT),
+                "hints": prog.hints,
                 "chatted": chatted is not None,
             }
         )
@@ -533,17 +543,18 @@ async def get_results(db: Db, now: Now, actor: Instructor) -> list[dict[str, Any
     for student in await db.scalars(query):
         session = await _today_session(db, student, now)
         done = session is not None and session.state != State.STUDY.value
+        prog = await progress(db, session) if session is not None else None
         out.append(
             {
                 "id": student.id,
                 "name": student.nickname,
                 "done": done,
                 "unit": await _unit_today(db, student, session, now) or "-",
-                "solved": 1 if session is not None and done and await _solved(db, session) else 0,
-                "total": 1,
+                "solved": prog.solved if prog is not None and done else 0,
+                "total": prog.total if prog is not None else 1,
                 "difficulty": DIFFICULTY if done else None,
                 "streak": student.streak_days,
-                "hints": min(session.hint_level, HINT_COUNT) if session is not None else 0,
+                "hints": prog.hints if prog is not None else 0,
                 "mistake": None,
                 "hardPoint": None,
                 "beginnerRepeat": 0,  # 난이도를 저장하지 않는다

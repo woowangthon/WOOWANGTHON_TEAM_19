@@ -161,9 +161,10 @@ describe('학습지도자 소속 · 학원 등록(원장)', () => {
 });
 
 describe('씨앗', () => {
-  it('학습 완료 +3(하루 1번) · 보호자 도장 +2(하루 1번) · 지도자 칭찬(1~5, 하루 10)', async () => {
+  it('학습 완료 씨앗 +3(하루 1번) · 보호자 도장 → 칭찬 도장 +1(하루 1번, 씨앗과 따로) · 지도자 칭찬 씨앗(1~5, 하루 10)', async () => {
     await as('s1');
     const start = (await api.getWallet()).balance;
+    const startStamps = (await api.getWallet()).stamps!;
     await api.acceptPromise();
     const s = await api.startSession('중급');
     for (const [n, d] of generateProblems('분수의 덧셈', '중급', ymd()).map((p) => p.answer)) {
@@ -181,7 +182,9 @@ describe('씨앗', () => {
     await api.grantSeeds('s1', 5, '친구를 도와줬어요');
     await expect(api.grantSeeds('s1', 1, '성실')).rejects.toThrow('하루');
     await expect(api.grantSeeds('s4', 1, '칭찬')).rejects.toThrow('내 강의실');
-    expect((await api.getSeedBoard()).students.find((x) => x.id === 's1')!.balance).toBe(start + 3 + 2 + 10);
+    const row = (await api.getSeedBoard()).students.find((x) => x.id === 's1')!;
+    expect(row.balance).toBe(start + 3 + 10); // 씨앗: 학습 완료 + 칭찬
+    expect(row.stamps).toBe(startStamps + SEED_RULES.guardianStamp); // 도장은 따로
   });
 
   it('학원 상품 구매 → 씨앗 차감·교환 요청 → 지도자가 전달 체크. 숨긴 상품은 안 보인다', async () => {
@@ -204,8 +207,11 @@ describe('씨앗', () => {
 
   it('꾸미기: 사면 바로 입고, 이미 산 건 다시 못 산다', async () => {
     await as('s1');
+    const before = await api.getStudentShop();
     const s = await api.buyCosmetic('thumbs');
     expect(s.cosmetics.find((c) => c.id === 'thumbs')!.owned).toBe(true);
+    expect(s.stamps).toBe(before.stamps! - 1); // 꾸미기는 칭찬 도장으로
+    expect(s.balance).toBe(before.balance); // 씨앗은 그대로
     await expect(api.buyCosmetic('thumbs')).rejects.toThrow('이미');
     await api.equipOutfit('glasses');
     expect((await api.getMe())!.outfit).toBe('glasses');

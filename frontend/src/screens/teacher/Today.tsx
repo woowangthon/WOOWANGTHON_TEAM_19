@@ -1,6 +1,6 @@
 // 학습지도자 ② 오늘 할 것 — 학생마다: 오늘 할 단원 지정 → 수업 메모(1~2분) → 초안 → 고쳐서 승인 → 보호자 카드에 공개
 // 초안의 "사실 칸"(범위·문제·힌트)은 기록에서 자동으로 채워지고, 사람이 고치는 것은 코멘트뿐이다.
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { api, API_MODE } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
@@ -88,10 +88,14 @@ function StudentSheet({ student, view, onChange, onClose, inline }: { student: S
     try { await fn(); } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
   };
   const assign = (unit: string) => run('save', async () => { setTask(unit); onChange(await api.assignTask(student.id, unit || null)); });
+  // 초안이 새로 생기면 그 카드(코멘트·승인)로 스크롤 — 1280×800·태블릿 시트에서 화면 밖에 생겨 변화가 없어 보이던 것(D8)
+  const draftCard = useRef<HTMLElement>(null);
+  const [drafted, setDrafted] = useState(0);
+  useEffect(() => { if (drafted) draftCard.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [drafted]);
   const makeDraft = () => run('draft', async () => {
     await api.saveMemo(student.id, memo);
     const d = await api.createDraft(student.id);
-    setDraft(d); setComment(d.comment);
+    setDraft(d); setComment(d.comment); setDrafted((n) => n + 1);
   });
   const saveComment = () => run('save', async () => { setDraft(await api.updateDraft(student.id, comment.trim())); });
   const approve = () => run('save', async () => {
@@ -113,7 +117,7 @@ function StudentSheet({ student, view, onChange, onClose, inline }: { student: S
           <label className="field">오늘 할 것
             <select id="task-unit" className="input" value={task} disabled={started || !!busy} onChange={(e) => assign(e.target.value)}>
               <option value="">없음(쉬는 날)</option>
-              {view.units.map((u) => <option key={u} value={u}>{u} · 5문제 · 약 20분</option>)}
+              {view.units.map((u) => <option key={u} value={u}>{u} · 약 20분</option>)}
             </select>
           </label>
           {started && <p className="small muted">이미 시작한 날은 바꿀 수 없어요.</p>}
@@ -130,7 +134,7 @@ function StudentSheet({ student, view, onChange, onClose, inline }: { student: S
           {busy === 'draft' && <Thinking label="초안 만드는 중" />}
 
           {draft && (
-            <section className="card card--flat stack">
+            <section ref={draftCard} className="card card--flat stack">
               <div className="row between"><span className="pill pill--mint">초안</span><span className={draft.status === '승인됨' ? 'pill pill--solid' : 'pill pill--accent'}>{draft.status}</span></div>
               <dl className="kv">
                 <dt>학습</dt><dd>{draft.scope}</dd>

@@ -21,7 +21,7 @@ from typing import Any, Literal
 
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.accounts import (
@@ -334,18 +334,27 @@ class CodeIn(BaseModel):
 
 
 @router.post("/academy/join")
-async def join_academy(body: CodeIn, db: Db, now: Now, account: CurrentAccount) -> dict[str, Any]:
+async def join_academy(
+    body: CodeIn, request: Request, db: Db, now: Now, account: CurrentAccount
+) -> dict[str, Any]:
     me = require_account(account, "student", "guardian")
     if me.role == "student" and await is_restricted(db, me.id):
         fail("보호자와 먼저 연결해야 학원에 들어갈 수 있어요.", 403, "restricted")
     if me.academy_id:
         fail("이미 학원에 등록되어 있어요.", 409)
     code = "".join(ch for ch in body.code if ch.isdigit())
+    # 영역: 자기 영역 학원. 실제 가입 계정은 「이 브라우저의 체험 세트(X-Trial-Id)」 학원도 — 심사위원이
+    # 새로 가입한 아이도 체험 학원 코드로 들어가 공부까지 가게(성호 11-12). 계정 영역은 그대로(None),
+    # 연결 코드·일련번호는 여전히 같은 영역끼리만. 다른 세트·헤더 없음은 404.
+    realm = same_realm(Academy.trial_id, me.trial_id)
+    browser_trial = trial_id_from(request) if me.trial_id is None else None
+    if browser_trial is not None:
+        realm = or_(realm, Academy.trial_id == browser_trial)
     # 같은 숫자가 다른 학원의 지난 코드로 남아 있을 수 있어 가장 늦게 끝나는 것을 고른다
     ac = (
         await db.scalar(
             select(Academy)
-            .where(Academy.entry_code == code, same_realm(Academy.trial_id, me.trial_id))
+            .where(Academy.entry_code == code, realm)
             .order_by(Academy.entry_expires_at.desc())
             .limit(1)
         )
@@ -879,3 +888,42 @@ async def accept_invite(
         await db.delete(place)
     await db.commit()
     return await _student_classes(db, s)
+
+
+# --- 수업 타이머 알림 시점(학원 설정) — 결정 11-11 「강의실 수업 타이머」, 성호 11-12 -----------------
+# 서버는 학원별 「n분 전」 목록만 저장한다. 타이머 실행·알림 표시는 프론트(서버 푸시·큐 없음).
+# 읽기 = 학원 소속 학습지도자·원장, 쓰기 = 원장. 1~60 정수, 중복 없이, 최대 3개, 큰 것부터 저장.
+
+TIMER_ALERTS_DEFAULT = [10, 5]
+TIMER_ALERTS_MAX = 3
+
+
+def _parse_alerts(raw: str | None) -> list[int]:
+    nums = [int(x) for x in (raw or "").split(",") if x.strip().isdigit()]
+    return nums or list(TIMER_ALERTS_DEFAULT)
+
+
+class TimerAlertsIn(BaseModel):
+    alertsMin: list[Any]
+
+
+@router.get("/academy/timer-alerts")
+async def get_timer_alerts(db: Db, account: CurrentAccount) -> dict[str, Any]:
+    u = require_account(account, "teacher")
+    ac = await _owned_academy(db, u)
+    if ac is None and u.academy_id is not None:
+        ac = await db.get(Academy, u.academy_id)
+    return {"alertsMin": _parse_alerts(ac.timer_alerts if ac is not None else None)}
+
+
+@router.put("/academy/timer-alerts")
+async def save_timer_alerts(body: TimerAlertsIn, db: Db, account: CurrentAccount) -> dict[str, Any]:
+    _, ac = await _must_owner(db, account)
+    vals = body.alertsMin
+    ok = all(type(v) is int and 1 <= v <= 60 for v in vals)  # bool·실수·문자 거부
+    nums = sorted(set(vals), reverse=True) if ok else []
+    if not nums or len(nums) > TIMER_ALERTS_MAX:
+        fail(f"알림은 1~60분 사이로 {TIMER_ALERTS_MAX}개까지 정해 주세요.", 422, "invalid_alerts")
+    ac.timer_alerts = ",".join(str(n) for n in nums)
+    await db.commit()
+    return {"alertsMin": nums}

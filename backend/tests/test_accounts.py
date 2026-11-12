@@ -577,3 +577,106 @@ async def test_trial_account_accepts_demo_password_after_change(client):
         json={"loginId": "real_mom", "password": "demo1234", "remember": True},
     )
     assert r.status_code == 401
+
+
+# --- TK-107 학생 탈퇴 시 학습·대화 기록 삭제(명세 「탈퇴 시 삭제」) ---------------------------
+
+
+async def _add_day(db, student_id: str, now: datetime) -> None:
+    """세션 1·메시지 2·🔴 알림 1·강사 메모 1을 직접 만든다(합성 문장)."""
+    from app.models import Alert, InstructorNote, Message, Session
+
+    s = Session(student_id=student_id, date=now.date(), state="ended")
+    db.add(s)
+    await db.flush()
+    db.add(Message.new(session_id=s.id, seq=1, role="child", text_redacted="줄넘기 했어", now=now))
+    db.add(Message.new(session_id=s.id, seq=2, role="mentor", text_redacted="좋다", now=now))
+    db.add(Alert.new(session_id=s.id, student_id=student_id, trigger="K01", excerpt="-", now=now))
+    db.add(InstructorNote(student_id=student_id, date=now.date()))
+    # 씨앗·칭찬 도장·옷·교환 요청·알림(학원·앱 재화, 결정 11-12 성호: 탈퇴하면 같이 사라진다)
+    from app.models_org import CosmeticOwned, Notice, Order, SeedLedger
+
+    for cur in ("seed", "stamp"):
+        db.add(
+            SeedLedger(
+                student_account_id=student_id,
+                date=now.date(),
+                amount=3,
+                source="학습 완료",
+                by="system",
+                currency=cur,
+            )
+        )
+    db.add(CosmeticOwned(student_account_id=student_id, cosmetic_id="hat-1"))
+    db.add(
+        Order(
+            id=f"o-{student_id}",
+            student_account_id=student_id,
+            teacher_id="t-x",
+            item_name="연필",
+            price=3,
+            status="교환 요청",
+        )
+    )
+    db.add(Notice(account_id=student_id, text="합성 알림"))
+    await db.flush()
+
+
+async def _rows_of(db, student_id: str) -> dict[str, int]:
+    from app.models import Alert, InstructorNote, Message, Misconception, Session
+    from app.models_org import CosmeticOwned, Notice, Order, SeedLedger
+
+    sids = select(Session.id).where(Session.student_id == student_id)
+    counts = {
+        "students": select(func.count()).select_from(Student).where(Student.id == student_id),
+        "sessions": select(func.count())
+        .select_from(Session)
+        .where(Session.student_id == student_id),
+        "messages": select(func.count()).select_from(Message).where(Message.session_id.in_(sids)),
+        "alerts": select(func.count()).select_from(Alert).where(Alert.student_id == student_id),
+        "misconceptions": select(func.count())
+        .select_from(Misconception)
+        .where(Misconception.student_id == student_id),
+        "instructor_notes": select(func.count())
+        .select_from(InstructorNote)
+        .where(InstructorNote.student_id == student_id),
+        "seed_ledger": select(func.count())
+        .select_from(SeedLedger)
+        .where(SeedLedger.student_account_id == student_id),
+        "cosmetics_owned": select(func.count())
+        .select_from(CosmeticOwned)
+        .where(CosmeticOwned.student_account_id == student_id),
+        "orders": select(func.count())
+        .select_from(Order)
+        .where(Order.student_account_id == student_id),
+        "notices": select(func.count()).select_from(Notice).where(Notice.account_id == student_id),
+    }
+    return {k: await db.scalar(q) for k, q in counts.items()}
+
+
+async def test_student_delete_removes_learning_and_chat_records(client, db_session):
+    token, me = await _signup(client, login="kid_one")
+    _, other = await _signup(client, login="kid_two")
+    await _add_day(db_session, me["id"], NOW)
+    await _add_day(db_session, other["id"], NOW)
+    before = await _rows_of(db_session, me["id"])
+    assert before["students"] == 1 and before["messages"] == 2 and before["alerts"] == 1
+    assert before["seed_ledger"] >= 2 and before["cosmetics_owned"] == 1 and before["orders"] == 1
+    other_before = await _rows_of(db_session, other["id"])
+
+    r = await client.post(f"{BASE}/me/delete", json={"password": PW}, headers=_bearer(token))
+    assert r.status_code == 204
+    db_session.expire_all()
+    assert await _rows_of(db_session, me["id"]) == dict.fromkeys(before, 0)
+    assert await _rows_of(db_session, other["id"]) == other_before  # 다른 학생은 그대로
+
+
+async def test_guardian_delete_keeps_child_records(client, db_session):
+    _, kid = await _signup(client, login="kid_one")
+    token, _ = await _signup(client, role="guardian", login="mom_one")
+    await _add_day(db_session, kid["id"], NOW)
+    before = await _rows_of(db_session, kid["id"])
+    r = await client.post(f"{BASE}/me/delete", json={"password": PW}, headers=_bearer(token))
+    assert r.status_code == 204
+    db_session.expire_all()
+    assert await _rows_of(db_session, kid["id"]) == before

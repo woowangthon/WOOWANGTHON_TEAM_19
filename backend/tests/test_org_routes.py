@@ -577,12 +577,17 @@ async def test_realm_isolation_codes(client, db_session):
     assert r.status_code == 404
     r = await g1.call("POST", "/links", json={"code": solo.me["linkCode"], "consent": True})
     assert r.status_code == 404
-    # 학원 입장 코드: 실제 학생 → 체험 학원 404
+    # 학원 입장 코드: 실제 학생 → 체험 학원은 「그 브라우저의 체험 세트(X-Trial-Id)」가 아니면 404
+    # (같은 세트면 들어간다 — test_real_account_joins_own_trial_academy, 성호 11-12)
     demo_code = await _entry_code(own1)
+    kid.trial = None
     r = await kid.call("POST", "/academy/join", json={"code": demo_code})
     assert r.status_code == 404
+    other = await _trial(client)
+    mom.trial = other
     r = await mom.call("POST", "/academy/join", json={"code": demo_code})
     assert r.status_code == 404
+    kid.trial = mom.trial = t
     # 일련번호: 실제 강사 → 체험 학원 404
     demo_serial = (await own1.ok("GET", "/owner/dashboard"))["academy"]["serial"]
     r = await teach.call("POST", "/teacher/membership", json={"serial": demo_serial})
@@ -607,6 +612,30 @@ async def test_realm_isolation_codes(client, db_session):
     # 같은 영역끼리는 된다
     await kid.ok("POST", "/academy/join", json={"code": real_code})
     await t3.ok("POST", "/teacher/membership", json={"serial": demo_serial})
+
+
+async def test_real_account_joins_own_trial_academy(client, db_session):
+    """성호 11-12: 심사위원이 새로 가입한 아이도 그 브라우저 체험 학원 코드로 들어가 공부까지 간다.
+    계정은 실제 영역(trial_id None) 그대로, 학원만 체험 학원. 체험 강사가 강의실에 받으면 「할 일」에 보인다."""
+    from app.models_org import Account
+
+    t = await _trial(client)
+    own1 = await _demo(client, t, "own1")
+    kid, mom = await _linked_pair(client, "kid_trialjoin", "mom_trialjoin", t)
+    code = await _entry_code(own1)
+    me = await kid.ok("POST", "/academy/join", json={"code": code})
+    assert me["academy"] is not None
+    acc = await db_session.get(Account, kid.id)
+    assert acc is not None and acc.trial_id is None  # 계정 영역은 바뀌지 않는다
+    assert (await mom.refresh())["academy"] == me["academy"]  # 연결된 보호자도 같이(기존 규칙)
+    # 체험 강사 강의실에 참여 요청 → 강사 수락 → 강사 「할 일」에 보인다
+    t1 = await _demo(client, t, "t1")
+    rooms = await kid.ok("GET", "/student/classes")
+    room_id = next(r for r in rooms["available"] if r["teacherName"] == t1.me["name"])["id"]
+    await kid.ok("POST", f"/student/classes/{room_id}/request")
+    await t1.ok("POST", f"/teacher/classes/{room_id}/requests/{kid.id}", json={"accept": True})
+    today = await t1.ok("GET", "/teacher/today")
+    assert kid.id in [s["id"] for s in today["students"]]
 
 
 async def test_real_teacher_reviewed_in_demo_world_gets_real_academy(client, db_session):

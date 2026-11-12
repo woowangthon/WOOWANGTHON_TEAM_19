@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useMentor } from '../state/mentor';
 import type { Animal } from '../types';
+import { hasCosmeticArt } from './Seed';
 
 export type Mood = 'wave' | 'think' | 'cheer' | 'promise' | 'calm' | 'read';
 type Variant = 'avatar' | 'face' | 'full';
@@ -23,7 +24,8 @@ export function Mascot({ mood = 'wave', size = 72, animal, variant, outfit }: { 
   const [outfitBroken, setOutfitBroken] = useState<string | null>(null);
   const base = `${import.meta.env.BASE_URL}mascot/${a}/`;
   const plain = `${base}${mood}${v === 'full' ? '' : '-' + v}.png`;
-  const dressed = outfit && v !== 'avatar' ? `${base}outfit-${outfit}${v === 'full' ? '' : '-' + v}.png` : null;
+  // 옷 그림이 있는 것만 요청(없으면 맨 캐릭터) — 404 없이(11-12)
+  const dressed = outfit && v !== 'avatar' && hasCosmeticArt(a, 'outfit', outfit) ? `${base}outfit-${outfit}${v === 'full' ? '' : '-' + v}.png` : null;
   const src = dressed && outfitBroken !== dressed ? dressed : plain;
   return (
     <div className={'mascot mascot--' + v} style={{ width: size, height: size }} aria-hidden>

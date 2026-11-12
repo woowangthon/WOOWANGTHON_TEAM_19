@@ -112,3 +112,14 @@ def timer_scale() -> float:
     except ValueError:
         return 1
     return scale if math.isfinite(scale) and scale > 0 else 1
+
+
+def session_problems() -> int:
+    """같이 풀기 한 세션에 잇는 문제 수(SESSION_PROBLEMS, 11-12). 기본 1 = 예전 그대로.
+
+    숫자가 아니거나 1보다 작으면 1. 같은 단원 시드가 모자라면 있는 만큼만(app.api)."""
+    try:
+        n = int(os.environ.get("SESSION_PROBLEMS", "1"))
+    except ValueError:
+        return 1
+    return max(n, 1)

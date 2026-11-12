@@ -139,8 +139,10 @@ function Solve() {
       </>
     );
   } else if (p) {
+    // GPT-008: 키패드를 먼저, 힌트·답 확인을 맨 아래(엄지 영역)에 둔다 — 320×568에서 문제 카드와 겹치지 않게
     actions = (
       <>
+        <Keypad onDigit={type} onDelete={del} disabled={!!busy} />
         <div className="btn-row">
           <button className="btn btn--secondary" disabled={!!busy || p.hintsLeft === 0} onClick={askHint}>
             <Icon name="bulb" size={18} /> 힌트 {p.hintsLeft}개 남음
@@ -148,7 +150,6 @@ function Solve() {
           {/* 분자·분모를 다 넣기 전에는 누를 수 없다 */}
           <button className="btn btn--primary" disabled={!num || !den || !!busy} onClick={check}>답 확인</button>
         </div>
-        <Keypad onDigit={type} onDelete={del} disabled={!!busy} />
       </>
     );
   }
