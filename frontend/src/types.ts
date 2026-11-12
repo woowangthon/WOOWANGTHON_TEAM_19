@@ -55,7 +55,8 @@ export interface StudentHome {
   doneToday: boolean;
   restricted: boolean;       // 보호자와 연결 전(제한 모드)
   inClass: boolean;          // 강의실에 들어가 있는지
-  seeds: number;             // 씨앗 잔액
+  seeds: number;             // 씨앗 잔액(학원 재화 — 학원 상점)
+  stamps?: number;           // 칭찬 도장 잔액(앱 재화 — 캐릭터 옷). 서버가 아직 안 주면 0으로 본다(11-12 두 재화)
   earnedToday: number;       // 오늘 학습 완료로 받은 씨앗(0이면 아직)
   endedInCrisis?: boolean;   // 계약 #2 v1: 오늘 세션이 위기(🔴)로 끝났으면 true(그때 doneToday도 true)
 }
@@ -141,6 +142,8 @@ export interface GuardianToday {
   unit: string; solved: number; streak: number;
   hardPoint: string | null; line: string | null; quiz: string | null; teacherComment: string | null;
   attendance: boolean[]; todayIndex: number;
+  /** 오늘 🔴로 끝났을 때 첫 화면 안내(서버가 문구를 준다, 11-11). 없으면 평소 화면 */
+  alertNotice?: string | null;
 }
 
 /* ---------- 시연 ---------- */
@@ -215,20 +218,15 @@ export interface OwnerDashboard {
   students: PersonRow[];
 }
 
-/** 강의실 수업 타이머(11-11 회의 결정, TK-98). 시각은 ms. 남은 시간은 화면이 endsAt로 계산한다 */
-export type ClassTimerKind = 'class' | 'break';
-export interface ClassTimer { kind: ClassTimerKind; minutes: number; warnMin: number; startedAt: number; endsAt: number; }
-export interface ClassTimerStart { kind: ClassTimerKind; minutes: number; warnMin: number; }
 export interface Classroom {
   id: string; name: string; plan: string; teacherName: string;
   members: PersonRow[];
   invited: PersonRow[];   // 학습지도자가 초대했고 학생이 아직 수락 안 함
   requests: PersonRow[];  // 학생이 참여 요청했고 학습지도자가 아직 수락 안 함
-  timer?: ClassTimer | null;
 }
 export interface TeacherClasses { classrooms: Classroom[]; academyStudents: PersonRow[]; }
 export interface StudentClasses {
-  joined: { id: string; name: string; teacherName: string; timer?: ClassTimer | null }[];
+  joined: { id: string; name: string; teacherName: string }[];
   invites: { id: string; name: string; teacherName: string }[];
   available: { id: string; name: string; teacherName: string; requested: boolean }[];
 }
@@ -237,15 +235,18 @@ export interface StudentClasses {
 export interface AppNotice { id: string; at: string; text: string; to: string | null; read: boolean; }
 
 /* ---------- 씨앗(재화) ---------- */
-export type SeedSource = '학습 완료' | '보호자 도장' | '학습지도자 칭찬' | '상점 구매';
-export interface SeedEntry { id: string; at: string; amount: number; source: SeedSource; note: string; }
-export interface Wallet { balance: number; history: SeedEntry[]; }
+export type SeedSource = '학습 완료' | '보호자 도장' | '학습지도자 칭찬' | '상점 구매' | '꾸미기 구매';
+/** 두 재화(11-12 결정): 씨앗 = 학원 재화(학원 상점), 칭찬 도장 = 앱 재화(보호자 도장·칭찬 → 캐릭터 옷) */
+export type Currency = 'seed' | 'stamp';
+export interface SeedEntry { id: string; at: string; amount: number; source: SeedSource; note: string; currency?: Currency; }
+export interface Wallet { balance: number; stamps?: number; history: SeedEntry[]; }
 
 export interface ShopItem { id: string; name: string; price: number; stock: number | null; visible: boolean; note: string; }
 export type CosmeticKind = 'outfit' | 'emote';
 export interface Cosmetic { id: string; kind: CosmeticKind; name: string; price: number; owned: boolean; equipped: boolean; }
-export interface StudentShop { balance: number; academyItems: ShopItem[]; cosmetics: Cosmetic[]; orders: Order[]; }
+/** balance = 씨앗(학원 상품 값), stamps = 칭찬 도장(꾸미기 값 — cosmetics.price는 도장 개수) */
+export interface StudentShop { balance: number; stamps?: number; academyItems: ShopItem[]; cosmetics: Cosmetic[]; orders: Order[]; }
 export type OrderStatus = '교환 요청' | '전달 완료';
 export interface Order { id: string; studentName: string; itemName: string; price: number; at: string; status: OrderStatus; }
-export interface SeedBoard { students: { id: string; name: string; balance: number; earnedWeek: number; grantedToday: number }[]; orders: Order[]; items: ShopItem[]; }
-export interface StampState { stampedToday: boolean; balance: number; }
+export interface SeedBoard { students: { id: string; name: string; balance: number; stamps?: number; earnedWeek: number; grantedToday: number }[]; orders: Order[]; items: ShopItem[]; }
+export interface StampState { stampedToday: boolean; balance: number; stamps?: number; }

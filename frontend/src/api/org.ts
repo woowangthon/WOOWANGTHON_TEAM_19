@@ -2,13 +2,14 @@
 // · 학습(문제·수다)은 mock.ts, 사람·조직·재화는 이 파일. 둘 다 "서버가 판단할 규칙"을 그대로 담고 있다.
 // · 백엔드(성호님)는 이 파일의 규칙(throw 하는 곳)을 그대로 서버 검증으로 옮기면 된다.
 // · 한계: User.academyId가 하나라 보호자는 학원 1곳에만 속한다(아이 둘이 서로 다른 학원이면 보호자는 먼저 들어간 곳). 자세한 건 enrollLinked 위 주석.
-import type {
-  AcademyApplication, AcademyForm, AccountRole, AppNotice, Classroom, ClassTimer, ClassTimerStart, Cosmetic, EntryCode, Grade, Me, NotifySettings, Order, OrgType, OwnerDashboard, PersonRow,
+import type { Currency,
+  AcademyApplication, AcademyForm, AccountRole, AppNotice, Classroom, Cosmetic, EntryCode, Grade, Me, NotifySettings, Order, OrgType, OwnerDashboard, PersonRow,
   SeedBoard, SeedEntry, SeedSource, ShopItem, SignupBody, StampState, StudentClasses, StudentShop, TeacherClasses, Wallet,
 } from '../types';
 import { ymd, stampLabel, weekKeys } from '../lib/date';
 import { load, save } from '../lib/storage';
 import { gradeLabel } from '../lib/grade';
+import { normalizeAlerts } from '../lib/classTimer';
 
 /** 학년 값 검사: 1~12 정수만 (가짜 서버도 진짜 서버처럼 입력을 믿지 않는다) */
 const isGrade = (g: unknown): g is Grade => Number.isInteger(g) && (g as number) >= 1 && (g as number) <= 12;
@@ -16,7 +17,7 @@ const isGrade = (g: unknown): g is Grade => Number.isInteger(g) && (g as number)
 /* ================= 규칙 숫자 (한곳에서 조정) ================= */
 export const SEED_RULES = {
   studyDone: 3,          // 하루 학습 완료 (하루 1번)
-  guardianStamp: 2,      // 보호자 도장 (하루 1번, 아이 1명당)
+  guardianStamp: 1,      // 보호자 도장 → 칭찬 도장 +1 (하루 1번, 아이 1명당). 11-12 두 재화: 도장은 앱 재화, 옷에 쓴다
   teacherMax: 5,         // 학습지도자 칭찬 1번에 최대
   teacherDailyCap: 10,   // 학습지도자 칭찬 학생 1명 하루 최대
   entryCodeMin: 10,      // 학원 입장 코드 유효 시간(분)
@@ -40,10 +41,12 @@ interface User {
   applicationId?: string;
 }
 interface Link { studentId: string; guardianId: string; status: '대기' | '연결됨'; consentAt: string | null; }
-interface Academy { id: string; name: string; orgType: OrgType; serial: string; ownerId: string; entryCode: EntryCode | null; }
+interface Academy { id: string; name: string; orgType: OrgType; serial: string; ownerId: string; entryCode: EntryCode | null; timerAlertsMin?: number[]; }
 interface Notice { id: string; userId: string; at: string; text: string; to: string | null; read: boolean; }
-interface Room { id: string; academyId: string; teacherId: string; name: string; plan: string; members: string[]; invited: string[]; requests: string[]; timer?: ClassTimer | null; }
+interface Room { id: string; academyId: string; teacherId: string; name: string; plan: string; members: string[]; invited: string[]; requests: string[]; }
 interface Ledger { id: string; studentId: string; date: string; at: string; amount: number; source: SeedSource; note: string; by: string; }
+/** 두 재화(11-12): 보호자 도장·꾸미기는 칭찬 도장, 그 밖(학습 완료·학원 상점·선생님 칭찬)은 씨앗 */
+const currencyOf = (l: Pick<Ledger, 'source'>): Currency => (l.source === '보호자 도장' || l.source === '꾸미기 구매' ? 'stamp' : 'seed');
 interface Item extends ShopItem { teacherId: string; }
 interface OrderRow { id: string; studentId: string; teacherId: string; itemName: string; price: number; at: string; status: Order['status']; }
 interface CosmeticDef { id: string; kind: Cosmetic['kind']; name: string; price: number; }
@@ -69,14 +72,15 @@ const KEY = 'aimentor:org';
 
 /** 우리가 파는 꾸미기(옷·이모티콘). 그림은 public/mascot/{animal}/outfit-{id}.png · emote-{id}.png (GPT 제작 예정) */
 export const COSMETICS: CosmeticDef[] = [
-  { id: 'glasses', kind: 'outfit', name: '공부 안경', price: 10 },
-  { id: 'raincoat', kind: 'outfit', name: '노란 우비', price: 15 },
-  { id: 'scarf', kind: 'outfit', name: '겨울 목도리', price: 20 },
-  { id: 'cape', kind: 'outfit', name: '별 망토', price: 25 },
-  { id: 'thumbs', kind: 'emote', name: '엄지 척', price: 8 },
-  { id: 'thanks', kind: 'emote', name: '고마워', price: 8 },
-  { id: 'sleepy', kind: 'emote', name: '졸려', price: 8 },
-  { id: 'best', kind: 'emote', name: '최고야', price: 12 },
+  // 값 = 칭찬 도장 개수(성호 11-12: 옷 1·2·3·5, 이모티콘 1·1·1·2 — 서버와 같은 값)
+  { id: 'glasses', kind: 'outfit', name: '공부 안경', price: 1 },
+  { id: 'raincoat', kind: 'outfit', name: '노란 우비', price: 2 },
+  { id: 'scarf', kind: 'outfit', name: '겨울 목도리', price: 3 },
+  { id: 'cape', kind: 'outfit', name: '별 망토', price: 5 },
+  { id: 'thumbs', kind: 'emote', name: '엄지 척', price: 1 },
+  { id: 'thanks', kind: 'emote', name: '고마워', price: 1 },
+  { id: 'sleepy', kind: 'emote', name: '졸려', price: 1 },
+  { id: 'best', kind: 'emote', name: '최고야', price: 2 },
 ];
 
 /** 시연 계정 비밀번호(모두 같음) — 체험 계정 시트에 표시 */
@@ -96,7 +100,7 @@ function seed(): OrgDB {
     me: null, remember: true,
     notices: [
       { id: 'n1', userId: 'g1', at: stampLabel(new Date().setHours(9, 0)), text: '김선생님이 지우의 이번 주 범위를 정했어요: 분수의 덧셈·뺄셈', to: null, read: false },
-      { id: 'n2', userId: 's1', at: stampLabel(new Date().setHours(9, 0)), text: '보호자가 어제 도장을 찍어 줬어! 씨앗 +2', to: '/student/shop', read: false },
+      { id: 'n2', userId: 's1', at: stampLabel(new Date().setHours(9, 0)), text: '보호자가 어제 도장을 찍어 줬어! 칭찬 도장 +1', to: '/student/shop', read: false },
       { id: 'n3', userId: 'own1', at: stampLabel(new Date().setHours(10, 0)), text: '이선생님이 소속을 신청했어요', to: '/owner', read: false },
       { id: 'n4', userId: 't1', at: stampLabel(new Date().setHours(16, 40)), text: '이민준이 「칭찬 간식 쿠폰」 교환을 요청했어요', to: '/teacher/seeds', read: false },
     ],
@@ -107,10 +111,10 @@ function seed(): OrgDB {
       U('t1', 'teacher', '김선생님', 'kim_teacher', { academyId: 'a1', teacherStatus: '승인됨', email: 'kim@example.com' }),
       U('t2', 'teacher', '이선생님', 'lee_teacher', { academyId: 'a1', teacherStatus: '승인 대기', email: 'lee@example.com' }),
       U('t3', 'teacher', '정선생님', 'jung_teacher', { email: 'jung@example.com' }),
-      U('s1', 'student', '지우', 'jiwoo', { grade: 4, linkCode: 'JW4K7P', academyId: 'a1' }),
-      U('s2', 'student', '이민준', 'minjun', { grade: 4, linkCode: 'MJ8Q2X', academyId: 'a1' }),
-      U('s3', 'student', '박서연', 'seoyeon', { grade: 4, linkCode: 'SY3N6R', academyId: 'a1' }),
-      U('s4', 'student', '최하린', 'harin', { grade: 4, linkCode: 'HR5T9W', academyId: 'a1' }),
+      U('s1', 'student', '지우', 'jiwoo', { grade: 5, linkCode: 'JW4K7P', academyId: 'a1' }),
+      U('s2', 'student', '이민준', 'minjun', { grade: 5, linkCode: 'MJ8Q2X', academyId: 'a1' }),
+      U('s3', 'student', '박서연', 'seoyeon', { grade: 5, linkCode: 'SY3N6R', academyId: 'a1' }),
+      U('s4', 'student', '최하린', 'harin', { grade: 5, linkCode: 'HR5T9W', academyId: 'a1' }),
       U('g1', 'guardian', '지우 보호자', 'jiwoo_mom', { linkCode: 'PG2M8C', academyId: 'a1', email: 'mom@example.com' }),
     ],
     links: [{ studentId: 's1', guardianId: 'g1', status: '연결됨', consentAt: ymd(d(20)) }],
@@ -120,13 +124,13 @@ function seed(): OrgDB {
     ],
     academies: [{ id: 'a1', name: '우왕수학학원', orgType: '학원', serial: 'WW7K-3P9Q', ownerId: 'own1', entryCode: null }],
     rooms: [
-      { id: 'c1', academyId: 'a1', teacherId: 't1', name: '4학년 A반', plan: '분수의 덧셈·뺄셈 (11월)', members: ['s1', 's2', 's3'], invited: [], requests: [] },
-      { id: 'c2', academyId: 'a1', teacherId: 't1', name: '4학년 심화반', plan: '분수 응용 문제', members: [], invited: [], requests: ['s4'] },
+      { id: 'c1', academyId: 'a1', teacherId: 't1', name: '5학년 A반', plan: '분수의 나눗셈 (11월)', members: ['s1', 's2', 's3'], invited: [], requests: [] },
+      { id: 'c2', academyId: 'a1', teacherId: 't1', name: '5학년 심화반', plan: '분수 응용 문제', members: [], invited: [], requests: ['s4'] },
     ],
     ledger: [
-      L(3, 3, '학습 완료', '분수의 덧셈', 'system', 1), L(3, 2, '보호자 도장', '오늘 이야기를 나눴어요', 'g1', 2),
+      L(3, 3, '학습 완료', '분수의 덧셈', 'system', 1), L(3, 1, '보호자 도장', '오늘 이야기를 나눴어요', 'g1', 2),
       L(2, 3, '학습 완료', '분수의 덧셈', 'system', 3), L(2, 5, '학습지도자 칭찬', '단원평가 100점', 't1', 4),
-      L(1, 3, '학습 완료', '분수의 덧셈', 'system', 5), L(1, 2, '보호자 도장', '오늘 이야기를 나눴어요', 'g1', 6),
+      L(1, 3, '학습 완료', '분수의 덧셈', 'system', 5), L(1, 1, '보호자 도장', '오늘 이야기를 나눴어요', 'g1', 6), L(4, 4, '학습지도자 칭찬', '숙제를 다 해 왔어요', 't1', 12),
       { id: 'l7', studentId: 's2', date: ymd(d(1)), at: stampLabel(d(1).getTime()), amount: 24, source: '학습 완료', note: '지난 기록', by: 'system' },
       { id: 'l8', studentId: 's2', date: ymd(d(0)), at: stampLabel(d(0).getTime()), amount: -20, source: '상점 구매', note: '칭찬 간식 쿠폰', by: 's2' },
       { id: 'l9', studentId: 's3', date: ymd(d(1)), at: stampLabel(d(1).getTime()), amount: 11, source: '학습 완료', note: '지난 기록', by: 'system' },
@@ -253,7 +257,7 @@ export const childOf = (guardianId: string) => { const g = userById(guardianId);
 export const roomsOfTeacher = (teacherId: string) => db.rooms.filter((r) => r.teacherId === teacherId);
 export const roomsOfStudent = (studentId: string) => db.rooms.filter((r) => r.members.includes(studentId));
 export const teacherOfStudent = (studentId: string) => { const r = roomsOfStudent(studentId)[0]; return r ? nameOf(r.teacherId) : null; };
-export const balanceOf = (studentId: string) => db.ledger.filter((l) => l.studentId === studentId).reduce((a, b) => a + b.amount, 0);
+export const balanceOf = (studentId: string, cur: Currency = 'seed') => db.ledger.filter((l) => l.studentId === studentId && currencyOf(l) === cur).reduce((a, b) => a + b.amount, 0);
 const earnedOn = (studentId: string, source: SeedSource, date = today()) =>
   db.ledger.filter((l) => l.studentId === studentId && l.source === source && l.date === date).reduce((a, b) => a + b.amount, 0);
 function addSeed(studentId: string, amount: number, source: SeedSource, note: string, by: string) {
@@ -270,7 +274,7 @@ export const studySeedsToday = (studentId: string) => earnedOn(studentId, '학�
 /* ---------- 화면 조각 ---------- */
 const row = (id: string, sub?: string): PersonRow => ({ id, name: nameOf(id), sub });
 function classroomView(r: Room): Classroom {
-  return { id: r.id, name: r.name, plan: r.plan, teacherName: nameOf(r.teacherId), members: r.members.map((i) => row(i)), invited: r.invited.map((i) => row(i)), requests: r.requests.map((i) => row(i)), timer: r.timer ?? null };
+  return { id: r.id, name: r.name, plan: r.plan, teacherName: nameOf(r.teacherId), members: r.members.map((i) => row(i)), invited: r.invited.map((i) => row(i)), requests: r.requests.map((i) => row(i)) };
 }
 function myTeacherItems(t: User) { return db.items.filter((i) => i.teacherId === t.id).map(({ teacherId: _t, ...i }) => i); }
 const orderView = (o: OrderRow): Order => ({ id: o.id, studentName: nameOf(o.studentId), itemName: o.itemName, price: o.price, at: o.at, status: o.status });
@@ -280,8 +284,8 @@ function seedBoard(t: User): SeedBoard {
   const week = new Set(weekKeys());
   return {
     students: ids.map((id) => ({
-      id, name: nameOf(id), balance: balanceOf(id),
-      earnedWeek: db.ledger.filter((l) => l.studentId === id && l.amount > 0 && week.has(l.date)).reduce((a, b) => a + b.amount, 0),
+      id, name: nameOf(id), balance: balanceOf(id), stamps: balanceOf(id, 'stamp'),
+      earnedWeek: db.ledger.filter((l) => l.studentId === id && l.amount > 0 && week.has(l.date) && currencyOf(l) === 'seed').reduce((a, b) => a + b.amount, 0),
       grantedToday: earnedOn(id, '학습지도자 칭찬'),
     })),
     orders: db.orders.filter((o) => o.teacherId === t.id).sort((a, b) => (a.status === b.status ? b.id.localeCompare(a.id) : a.status === '교환 요청' ? -1 : 1)).map(orderView),
@@ -293,6 +297,7 @@ function studentShop(s: User): StudentShop {
   const owned = db.owned[s.id] ?? [];
   return {
     balance: balanceOf(s.id),
+    stamps: balanceOf(s.id, 'stamp'),
     academyItems: db.items.filter((i) => teacherIds.has(i.teacherId) && i.visible).map(({ teacherId: _t, ...i }) => i),
     cosmetics: COSMETICS.map((c) => ({ ...c, owned: owned.includes(c.id), equipped: db.equipped[s.id] === c.id })),
     orders: db.orders.filter((o) => o.studentId === s.id).sort((a, b) => b.id.localeCompare(a.id)).map(orderView),
@@ -503,6 +508,18 @@ export const orgApi = {
     commit();
     return ownerDash(o);
   },
+  /** 수업 타이머 알림 시점(분 전, 학원마다). 읽기 = 학원 소속 학습지도자, 쓰기 = 원장. 기본 [10, 5] (11-12) */
+  async getTimerAlerts(): Promise<{ alertsMin: number[] }> {
+    const t = must('teacher');
+    const ac = db.academies.find((a) => a.id === t.academyId);
+    return { alertsMin: normalizeAlerts(ac?.timerAlertsMin) };
+  },
+  async saveTimerAlerts(alertsMin: number[]): Promise<{ alertsMin: number[] }> {
+    const ac = ownedAcademy(mustOwner())!;
+    ac.timerAlertsMin = normalizeAlerts(alertsMin);
+    commit();
+    return { alertsMin: ac.timerAlertsMin };
+  },
   async approveTeachers(ids: string[]): Promise<OwnerDashboard> {
     const o = mustOwner();
     const ac = ownedAcademy(o)!;
@@ -573,26 +590,6 @@ export const orgApi = {
     commit();
     return orgApi.getTeacherClasses();
   },
-  /** 수업 타이머 켜기(TK-98). 이미 켜져 있으면 새로 시작. 알림 시점은 길이보다 짧아야 한다 */
-  async startClassTimer(classId: string, start: ClassTimerStart): Promise<TeacherClasses> {
-    const t = must('teacher');
-    const r = db.rooms.find((x) => x.id === classId && x.teacherId === t.id) ?? fail('강의실을 찾지 못했어요.');
-    const { kind, minutes, warnMin } = start;
-    if (kind !== 'class' && kind !== 'break') fail('수업 또는 쉬는 시간을 골라 주세요.');
-    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180) fail('길이를 골라 주세요.');
-    if (!Number.isInteger(warnMin) || warnMin < 1 || warnMin >= minutes) fail('알림은 길이보다 짧게 골라 주세요.');
-    const now = Date.now();
-    r.timer = { kind, minutes, warnMin, startedAt: now, endsAt: now + minutes * 60_000 };
-    commit();
-    return orgApi.getTeacherClasses();
-  },
-  async stopClassTimer(classId: string): Promise<TeacherClasses> {
-    const t = must('teacher');
-    const r = db.rooms.find((x) => x.id === classId && x.teacherId === t.id) ?? fail('강의실을 찾지 못했어요.');
-    r.timer = null;
-    commit();
-    return orgApi.getTeacherClasses();
-  },
 
   /* ---------- 학생: 강의실 ---------- */
   async getStudentClasses(): Promise<StudentClasses> {
@@ -600,7 +597,7 @@ export const orgApi = {
     const ofAc = db.rooms.filter((r) => r.academyId === s.academyId);
     const v = (r: Room) => ({ id: r.id, name: r.name, teacherName: nameOf(r.teacherId) });
     return {
-      joined: ofAc.filter((r) => r.members.includes(s.id)).map((r) => ({ ...v(r), timer: r.timer ?? null })), // 학생은 보기만(TK-98)
+      joined: ofAc.filter((r) => r.members.includes(s.id)).map(v),
       invites: ofAc.filter((r) => r.invited.includes(s.id)).map(v),
       available: ofAc.filter((r) => !r.members.includes(s.id) && !r.invited.includes(s.id)).map((r) => ({ ...v(r), requested: r.requests.includes(s.id) })),
     };
@@ -626,8 +623,8 @@ export const orgApi = {
   async getWallet(): Promise<Wallet> {
     const s = must('student');
     const history: SeedEntry[] = db.ledger.filter((l) => l.studentId === s.id).sort((a, b) => b.id.localeCompare(a.id))
-      .map((l) => ({ id: l.id, at: l.at, amount: l.amount, source: l.source, note: l.note }));
-    return { balance: balanceOf(s.id), history };
+      .map((l) => ({ id: l.id, at: l.at, amount: l.amount, source: l.source, note: l.note, currency: currencyOf(l) }));
+    return { balance: balanceOf(s.id), stamps: balanceOf(s.id, 'stamp'), history };
   },
   async getStudentShop(): Promise<StudentShop> { return studentShop(must('student')); },
   async buyAcademyItem(itemId: string): Promise<StudentShop> {
@@ -648,8 +645,8 @@ export const orgApi = {
     const c = COSMETICS.find((x) => x.id === id) ?? fail('상품을 찾지 못했어요.');
     const owned = db.owned[s.id] ?? [];
     if (owned.includes(id)) fail('이미 가지고 있어요.');
-    if (balanceOf(s.id) < c.price) fail('씨앗이 모자라요.');
-    addSeed(s.id, -c.price, '상점 구매', c.name, s.id);
+    if (balanceOf(s.id, 'stamp') < c.price) fail(`도장이 ${c.price - balanceOf(s.id, 'stamp')}개 더 필요해요.`);
+    addSeed(s.id, -c.price, '꾸미기 구매', c.name, s.id);
     db.owned[s.id] = [...owned, id];
     if (c.kind === 'outfit') db.equipped[s.id] = id; // 사면 바로 입어 본다
     commit();
@@ -666,14 +663,14 @@ export const orgApi = {
   async getStampState(): Promise<StampState> {
     const g = must('guardian');
     const child = childOf(g.id);
-    return { stampedToday: !!child && earnedOn(child, '보호자 도장') > 0, balance: child ? balanceOf(child) : 0 };
+    return { stampedToday: !!child && earnedOn(child, '보호자 도장') > 0, balance: child ? balanceOf(child) : 0, stamps: child ? balanceOf(child, 'stamp') : 0 };
   },
   async stamp(): Promise<StampState> {
     const g = must('guardian');
     const child = childOf(g.id) ?? fail('먼저 아이와 연결해 주세요.');
     if (earnedOn(child, '보호자 도장') > 0) fail('오늘 도장은 이미 찍었어요. 내일 또 찍어 주세요.');
     addSeed(child, SEED_RULES.guardianStamp, '보호자 도장', '오늘 이야기를 나눴어요', g.id);
-    notify(child, `보호자가 도장을 찍어 줬어! 씨앗 +${SEED_RULES.guardianStamp}`, '/student/shop'); commit();
+    notify(child, `보호자가 도장을 찍어 줬어! 도장 +${SEED_RULES.guardianStamp}`, '/student/shop'); commit();
     return orgApi.getStampState();
   },
 

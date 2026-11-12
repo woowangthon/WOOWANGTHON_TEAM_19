@@ -7,9 +7,8 @@ import { Icon } from '../../components/Icon';
 import { LoadError, Sheet, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
-import { mmss } from '../../lib/date';
-import { KIND_LABEL, TIMER_LENGTHS, WARN_OPTIONS, fitWarn, timerState, timerStatusText, useNow, warnAllowed } from '../../lib/classTimer';
-import type { Classroom, ClassTimer, ClassTimerKind, ClassTimerStart } from '../../types';
+import type { Classroom } from '../../types';
+import { ClassroomTimer } from '../../components/ClassTimer';
 
 export function TeacherClasses() {
   const { data, setData, error, loading, reload } = useAsync(() => api.getTeacherClasses());
@@ -17,9 +16,7 @@ export function TeacherClasses() {
   const [name, setName] = useState('');
   const [plan, setPlan] = useState('');
   const [inviteTo, setInviteTo] = useState<Classroom | null>(null);
-  const [timerFor, setTimerFor] = useState<Classroom | null>(null);
   const { run, busy, error: actErr } = useAction();
-  const now = useNow(!!data?.classrooms.some((c) => c.timer));
 
   return (
     <Frame adult title="강의실" exit tabs="teacher" right={<button className="icon-btn" aria-label="강의실 열기" onClick={() => setCreate(true)}><Icon name="plus" /></button>}>
@@ -29,14 +26,11 @@ export function TeacherClasses() {
       <div className="card-grid">
       {data?.classrooms.map((c) => (
         <section key={c.id} className="card stack timer-card">
-          <div className="timer-card__head">
+          <div className="row between">
             <span><strong className="h3">{c.name}</strong><span className="small muted" style={{ display: 'block' }}>{c.plan || '학습 계획 없음'}</span></span>
             <span className="pill pill--mint">{c.members.length}명</span>
           </div>
-          <TimerBlock timer={c.timer} now={now} />
-          {c.timer
-            ? <button className="btn btn--secondary btn--small" disabled={busy} onClick={() => run(async () => setData(await api.stopClassTimer(c.id)))}>타이머 끄기</button>
-            : <button className="btn btn--secondary btn--small" onClick={() => setTimerFor(c)}><Icon name="clock" size={16} />타이머 켜기</button>}
+          <ClassroomTimer classId={c.id} className={c.name} />
           {c.requests.length > 0 && (
             <div className="stack">
               <div className="small muted">참여 요청</div>
@@ -60,10 +54,6 @@ export function TeacherClasses() {
       ))}
       </div>
 
-      {timerFor && (
-        <TimerSheet room={timerFor} busy={busy} error={actErr} onClose={() => setTimerFor(null)}
-          onStart={(s) => run(async () => { setData(await api.startClassTimer(timerFor.id, s)); setTimerFor(null); })} />
-      )}
       {create && (
         <Sheet title="강의실 열기" onClose={() => setCreate(false)}>
           <label className="field">강의실 이름<input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="예: 5학년 B반" /></label>
@@ -90,71 +80,5 @@ export function TeacherClasses() {
         </Sheet>
       )}
     </Frame>
-  );
-}
-
-/** 강의실 카드 안 타이머 상태(GPT-015): 꺼짐 · 수업 중 · 쉬는 시간 중 · 곧 끝남 · 끝남. 아이콘+글자+시간으로 */
-function TimerBlock({ timer, now }: { timer: ClassTimer | null | undefined; now: number }) {
-  const { phase, leftSec } = timerState(timer, now);
-  const cls = phase === 'soon' ? ' timer--soon' : phase === 'running' && timer ? (timer.kind === 'class' ? ' timer--class' : ' timer--break') : '';
-  const icon = phase === 'ended' ? 'check' : phase === 'running' && timer ? (timer.kind === 'class' ? 'book' : 'cup') : 'clock';
-  return (
-    <div className={'timer' + cls}>
-      {/* 상태 문구는 바뀔 때만 읽힌다(매초 읽지 않게 시간은 live 영역 밖) */}
-      <div className="timer__status" role="status"><Icon name={icon} size={16} />{timerStatusText(timer, phase)}</div>
-      <time className="timer__time" aria-label={phase === 'off' ? '꺼짐' : `남은 시간 ${Math.floor(leftSec / 60)}분 ${leftSec % 60}초`}>{phase === 'off' ? '— : —' : mmss(leftSec)}</time>
-      {phase === 'off' && <p className="small muted">타이머를 켜면 끝나기 전에 화면으로 알려 드려요.</p>}
-      {(phase === 'running') && timer && <p className="small muted">끝나기 {timer.warnMin}분 전에 알려 드려요</p>}
-      {phase === 'soon' && <div className="notice"><Icon name="info" size={16} /><span>{Math.ceil(leftSec / 60)}분 뒤 끝나요</span></div>}
-    </div>
-  );
-}
-
-/** 타이머 켜기 시트(GPT-016): 종류 · 길이 · 몇 분 전 알림. 시트 안 주요 버튼은 「시작」 하나 */
-function TimerSheet({ room, busy, error, onClose, onStart }: {
-  room: Classroom; busy: boolean; error: string | null; onClose: () => void; onStart: (s: ClassTimerStart) => void;
-}) {
-  const [kind, setKind] = useState<ClassTimerKind>('class');
-  const [minutes, setMinutes] = useState(TIMER_LENGTHS.class.base);
-  const [warnMin, setWarnMin] = useState(TIMER_LENGTHS.class.warn);
-  const [fitted, setFitted] = useState(false); // 길이 때문에 알림 시점이 바뀌었는지(글자로 알린다)
-  const pickKind = (k: ClassTimerKind) => { setKind(k); setMinutes(TIMER_LENGTHS[k].base); setWarnMin(TIMER_LENGTHS[k].warn); setFitted(false); };
-  const pickLen = (m: number) => { const w = fitWarn(m, warnMin); setFitted(w !== warnMin); setMinutes(m); setWarnMin(w); };
-  return (
-    <Sheet title={`${room.name} 타이머`} onClose={onClose}>
-      <div className="timer-setup">
-        <fieldset><legend>종류</legend>
-          <div className="seg">
-            {(['class', 'break'] as const).map((k) => (
-              <button key={k} type="button" className={'seg__btn' + (kind === k ? ' seg__btn--on' : '')} aria-pressed={kind === k} onClick={() => pickKind(k)}>
-                <Icon name={k === 'class' ? 'book' : 'cup'} size={18} />{KIND_LABEL[k]}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset><legend>길이</legend>
-          <div className="chip-row">
-            {TIMER_LENGTHS[kind].options.map((m) => (
-              <button key={m} type="button" className={'chip' + (minutes === m ? ' chip--on' : '')} aria-pressed={minutes === m} onClick={() => pickLen(m)}>{minutes === m && <Icon name="check" size={14} />}{m}분</button>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset><legend>몇 분 전 알림</legend>
-          <div className="chip-row">
-            {WARN_OPTIONS.map((w) => {
-              const ok = warnAllowed(minutes, w);
-              return <button key={w} type="button" className={'chip' + (warnMin === w ? ' chip--on' : '')} aria-pressed={warnMin === w} disabled={!ok} onClick={() => { setWarnMin(w); setFitted(false); }}>{warnMin === w && <Icon name="check" size={14} />}{w}분 전</button>;
-            })}
-          </div>
-          {fitted && <p className="hint" role="status">{KIND_LABEL[kind]}보다 짧게 골라야 해서 {warnMin}분 전으로 바꿨어요</p>}
-        </fieldset>
-        <p className="small muted">소리 없이 화면으로 알려 드려요.</p>
-      </div>
-      <LoadError error={error} />
-      <div className="sheet__actions">
-        <button className="btn btn--primary" disabled={busy} onClick={() => onStart({ kind, minutes, warnMin })}>시작</button>
-        <button className="btn btn--ghost" onClick={onClose}>취소</button>
-      </div>
-    </Sheet>
   );
 }

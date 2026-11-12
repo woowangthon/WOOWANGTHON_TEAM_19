@@ -4,6 +4,7 @@ import { HashRouter, MemoryRouter, Navigate, Route, Routes } from 'react-router-
 import { SessionProvider } from './state/session';
 import { MentorProvider } from './state/mentor';
 import { AuthProvider, GuestOnly, RequireRole, RootRedirect } from './state/auth';
+import { ClassTimerToasts } from './components/ClassTimer';
 import { DocPageView, Find, Login, Signup, Welcome } from './screens/auth/Auth';
 import { Settings, SettingsDelete, SettingsFamily, SettingsNotify, SettingsOrg, SettingsPassword, SettingsProfile } from './screens/settings/Settings';
 import { Notifications } from './screens/settings/Notifications';
@@ -59,6 +60,7 @@ export default function App() {
       <MentorProvider>
       <AuthProvider>
       <Router>
+        <ClassTimerToasts />
         <ScreenErrorBoundary>
         <Routes>
           <Route path="/" element={<RootRedirect />} />

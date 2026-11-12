@@ -2,13 +2,29 @@
 // (결정 11-11 「11-15 안전 알림 전달 수준」, TK-74 #14). 평소 수다는 보이지 않는다.
 // 11-09 팀 결정: 확인·오탐 닫기는 11-15에 회색 「후속」 버튼만(누를 수 없음). 서버·mock을 부르지 않는다.
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
 import { LoadError, Sheet, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
+import { useAuth } from '../../state/auth';
 
 export function GuardianAlerts() {
+  const { me } = useAuth();
+  const nav = useNavigate();
+  if (!me) return null;
+  // 아이와 연결 전에는 서버가 not_linked를 돌려준다 → 오류 대신 연결 안내
+  if (me.linked.length === 0) return (
+    <Frame adult title="안전 알림" exit tabs="guardian"
+      actions={<button className="btn btn--primary" onClick={() => nav('/settings/family')}><Icon name="link" size={18} />아이와 연결하기</button>}>
+      <div className="notice notice--plain">아이와 연결하면 확인이 필요한 일이 생겼을 때 여기에 알림이 와요.</div>
+    </Frame>
+  );
+  return <AlertList />;
+}
+
+function AlertList() {
   const { data, error, loading, reload } = useAsync(() => api.getAlerts());
   const [help, setHelp] = useState(false);
   // 위쪽 카드: 아직 안 본 것 + 확인은 했지만 닫지 않은 긴급

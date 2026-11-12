@@ -96,11 +96,14 @@ button.card { text-align: left; cursor: pointer; width: 100%; }
 .chip-row--scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--space-4)); padding: 0 var(--space-4); }
 .chip-row--scroll::-webkit-scrollbar { display: none; }
 /* 학교급을 고르면 학년 칩이 아래에서 살짝 올라오며 나타난다(가입 학년 선택) */
+/* 문장이 긴 선택지(마무리 퀴즈): 한 줄에 하나씩, 줄바꿈 허용 — 폰에서 화면 밖으로 잘리지 않게 */
+.chip-row--stack .chip { flex: 1 1 100%; min-width: 0; text-align: left; border-radius: var(--radius-sm); padding: 10px 14px; line-height: 1.4; }
 .chip-row--reveal { margin-top: var(--space-2); animation: chip-reveal .22s ease-out; }
 @keyframes chip-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .chip-row--reveal { animation: none; } }
 .chip { flex: none; min-height: 40px; padding: 6px 14px; border: 2px solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); font-size: 14px; font-weight: 600; cursor: pointer; }
 .chip--on { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary-strong); }
+.chip:disabled { opacity: .45; cursor: default; }
 .notice { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--color-accent-soft); font-size: 14px; }
 .notice--danger { background: var(--color-danger-soft); color: var(--color-danger); }
 .notice--plain { background: var(--color-surface-muted); color: var(--color-text-muted); }
@@ -115,6 +118,8 @@ button.card { text-align: left; cursor: pointer; width: 100%; }
 .input:focus { outline: none; border-color: var(--color-primary); }
 textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 700; color: var(--color-text-muted); }
+/* 칸 안 글자는 라벨(13px 회색 굵게)을 물려받지 않게 — 로그인 칸과 같은 16px 보통 글씨(R4). 16px은 아이폰에서 누를 때 확대되지 않는 크기 */
+.field .input { font-size: 16px; font-weight: 400; color: var(--color-text); }
 .check-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 50px; padding: 0 14px; border-bottom: 1.5px solid var(--color-border); cursor: pointer; }
 .check-row:last-child { border-bottom: 0; }
 .check-row input { width: 20px; height: 20px; accent-color: var(--color-primary); }
@@ -234,11 +239,19 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; }
 /* 씨앗: 민트 새싹 + 머스터드 테두리 */
 .seed-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px 2px 3px; border: 2px solid var(--color-accent); border-radius: var(--radius-pill); background: var(--color-surface); font-size: 13px; font-weight: 800; color: var(--color-text); cursor: default; }
 button.seed-chip { cursor: pointer; }
+.seed-chip--stamp { border-color: var(--color-primary); }
+.seed-dot--stamp { background: var(--color-accent-soft); color: var(--color-accent-strong); }
 .seed-dot { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--color-primary-soft); color: var(--color-primary); }
 .seed-link { display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; font-size: 13px; font-weight: 700; color: var(--color-text-muted); cursor: pointer; }
 .seed-hero { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: var(--radius-md); background: var(--color-primary-soft); border: 2px solid var(--color-accent); }
 .seed-hero__n { display: flex; align-items: center; gap: 6px; font-size: 30px; font-weight: 800; color: var(--color-primary-strong); }
 .seed-hero__how { text-align: right; color: var(--color-text-muted); line-height: 1.5; }
+/* 두 재화를 나란히(좁으면 위아래). 도장 카드는 머스터드 바탕으로 구분 */
+.wallet-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-2); }
+.wallet-pair .seed-hero { flex-direction: column; align-items: flex-start; gap: 4px; }
+.wallet-pair .seed-hero__how { text-align: left; }
+.seed-hero--stamp { background: var(--color-accent-soft); border-color: var(--color-primary); }
+.seed-hero--stamp .seed-hero__n { color: var(--color-accent-strong); }
 .plus { color: var(--color-primary-strong); }
 .minus { color: var(--color-text-muted); }
 
@@ -316,7 +329,7 @@ button.seed-chip { cursor: pointer; }
 .link-row button { border: 0; background: none; padding: 8px 2px; color: var(--color-text-muted); cursor: pointer; }
 .link-row button.strong { color: var(--color-primary-strong); font-weight: 800; }
 .link-row i { width: 1px; height: 12px; background: var(--color-border); }
-.hint { font-size: 12px; font-weight: 600; color: var(--color-text-muted); }
+.hint { font-size: 13px; font-weight: 600; color: var(--color-text-muted); } /* 학생 화면 글자 하한 13px(DESIGN-RULES) */
 .hint--ok { color: var(--color-primary-strong); }
 .hint--bad { color: var(--color-accent-strong); }
 .agree { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 50px; padding: 0 14px; border-bottom: 1.5px solid var(--color-border); }
@@ -442,6 +455,16 @@ button.seed-chip { cursor: pointer; }
 /* 「결과」 표 */
 .table--results td { vertical-align: top; }
 
+/* ============ 수업 타이머 알림 (학습지도자, 11-12) — 위에서 살짝 내려왔다 4초 뒤 사라짐. 화면을 가리지 않게 작게 ============ */
+.timer-toast { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 60px); left: 50%; transform: translateX(-50%); z-index: 1000; max-width: calc(100vw - 32px); white-space: nowrap;
+  display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: var(--radius-pill);
+  background: var(--color-text); color: var(--color-surface); font-size: 14px; font-weight: 700; box-shadow: 0 6px 20px rgba(0, 0, 0, .18);
+  pointer-events: none; animation: timer-toast-in .3s ease-out both; }
+.timer-toast--leave { animation: timer-toast-out .4s ease-in both; }
+@keyframes timer-toast-in { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes timer-toast-out { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -12px); } }
+@media (prefers-reduced-motion: reduce) { .timer-toast, .timer-toast--leave { animation: none; } .timer-toast--leave { opacity: 0; } }
+
 /* =====================================================================
    11-12 GPT 디자인 전달본(GPT-001~022) 병합 — 원본: AI-Mentor-Design-GPT-2026-11-12/styles/global.patch.css
    ===================================================================== */
@@ -555,6 +578,7 @@ body { font-variant-numeric: tabular-nums; }
 .timer { display: grid; gap: 8px; padding: 12px; background: var(--color-surface-muted); border-radius: var(--radius-sm); }
 .timer__status { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; }
 .timer__time { font-size: var(--font-size-hero); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.25; }
+.timer__end { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; } /* 끝나는 시각만(숫자 카운트다운 없음, 11-12) */
 .timer--class { background: var(--color-primary-soft); }
 .timer--break { background: var(--color-bg); }
 .timer--soon { background: var(--color-accent-soft); border: 2px solid var(--color-accent); }

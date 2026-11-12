@@ -91,10 +91,12 @@ async def _write_day3_student(
     today: date,
     student_id: str = DEMO_CHILD_ID,
     consent: bool = True,
+    nickname: str = "지우",
 ) -> None:
-    """student_id 학생을 day3로. 체험 세트(명세 4.11)는 consent=False로 약속 화면부터."""
+    """student_id 학생을 day3로. 체험 세트(명세 4.11)는 consent=False로 약속 화면부터.
+    새로 가입한 학생(명세 4.12-5)은 nickname = 가입 이름(프롬프트에는 안 넣는다)."""
     values: dict[str, Any] = {
-        "nickname": "지우",  # 합성 배우(프론트 체험 계정 jiwoo와 같은 이름, 11-11)
+        "nickname": nickname,  # 기본은 합성 배우(프론트 체험 계정 jiwoo와 같은 이름, 11-11)
         "grade_band": "초5-6",
         "style": body.style,
         "honorific": body.honorific,

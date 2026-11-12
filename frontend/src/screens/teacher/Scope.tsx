@@ -20,7 +20,7 @@ export function TeacherScope() {
   return (
     <Frame adult title="범위 지정" exit tabs="teacher"
       actions={<button className="btn btn--primary" disabled={!selected.length || state === 'saving'} onClick={save}>{state === 'saved' ? '저장했어요' : '이번 주 범위 저장'}</button>}>
-      <div className="row"><span className="pill">초등 4학년</span><span className="pill">수학</span></div>
+      <div className="row"><span className="pill">초등 5학년</span><span className="pill">수학</span></div>
       <h2 className="h3">단원 선택</h2>
       {loading && <Thinking label="불러오는 중" />}
       <LoadError error={error} onRetry={reload} />

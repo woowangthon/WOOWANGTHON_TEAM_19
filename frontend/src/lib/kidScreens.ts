@@ -7,9 +7,10 @@ export function isCrisisDay(home: Pick<StudentHome, 'endedInCrisis' | 'session'>
   return home.session?.phase === 'crisis';
 }
 
-/** 시연용 데모 아이(지우, 서버에서는 demo-child-minsu)로 로그인했는지 */
+/** 시연용 데모 아이(지우)로 로그인했는지. 서버 계정 모드(VITE_ORG_MODE=http)에서는 체험 세트마다 jiwoo_<접미사> */
+const DEMO_CHILD_ID = /^jiwoo(_[a-z0-9]+)?$/;
 export function isDemoChild(me: Pick<Me, 'role' | 'loginId'> | null): boolean {
-  return me?.role === 'student' && me.loginId === 'jiwoo';
+  return me?.role === 'student' && DEMO_CHILD_ID.test(me.loginId);
 }
 
 /** 처음부터 다시 체험: http 모드면 서버를 먼저 되돌리고, 그다음 mock(로그인·학원 등)을 되돌린다.

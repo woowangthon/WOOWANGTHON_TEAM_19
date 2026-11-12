@@ -1,51 +1,17 @@
-# WOOWANGTHON_TEAM_19
+# 친구1 (chingu1)
 
-2026 AI 우왕톤 19팀 **재성합니다**의 저장소입니다.
+학원 초·중학생용 AI 멘토. 2026 AI 우왕톤 19팀 「재성합니다」.
 
-> 서비스 한 줄 소개를 여기에 적어 주세요.
+- 무엇을 만드는지, 이미 정한 것, 작업 규칙: `CLAUDE.md`
+- 명세 정본: `docs/spec_v0.4.md` (절 안내는 `.claude/skills/spec/`)
+- 할 일·결정·회의는 노션 팀 허브 v3에만 적는다. 커밋·PR 제목에 `TK-n`.
 
-## 브랜치 구조
-
-하나의 저장소에서 파트별로 브랜치를 나눠 작업합니다.
-
-| 브랜치 | 용도 |
-|---|---|
-| `main` | 최종 결과물 (발표·배포용) |
-| `fe` | 프론트엔드 |
-| `be` | 백엔드 |
-| `ai` | AI |
-
-- 자기 파트 브랜치에서만 작업합니다.
-- 작업 전에 `git pull origin 브랜치이름`으로 최신 상태를 받습니다.
-- `main`에는 직접 push하지 않고, PR(Pull Request)로 합칩니다.
+## 처음 받았을 때
 
 ```bash
-git clone <저장소 주소>
-git checkout fe     # 자기 파트 브랜치로 이동 (be, ai)
-git pull origin fe
+git config core.hooksPath .githooks        # TK 번호 없는 커밋 차단
+cd backend && uv sync && uv run pytest     # 백엔드 (Python 3.12, uv)
+cd frontend                                 # 프론트 (재하)
 ```
 
-## 팀원
-
-| 이름 | 파트 | GitHub |
-|---|---|---|
-|  | FE |  |
-|  | BE |  |
-|  | AI |  |
-
-## 커밋 규칙
-
-```
-<type>: <변경 내용>
-```
-
-| Type | 설명 |
-|---|---|
-| `feat` | 새 기능 |
-| `fix` | 버그 수정 |
-| `docs` | 문서 수정 |
-| `style` | 코드 모양만 변경 |
-| `refactor` | 동작 변화 없는 코드 정리 |
-| `chore` | 설정·라이브러리 등 기타 |
-
-예시: `feat: 로그인 화면 추가`, `fix: 채팅 전송 오류 수정`
+`.env`는 `backend/.env.example`을 복사해 만든다. 키는 커밋하지 않는다.

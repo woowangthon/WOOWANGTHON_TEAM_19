@@ -10,6 +10,7 @@ import { LoadError, Stat, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { mmss } from '../../lib/date';
+import { DEFAULT_ALERTS, normalizeAlerts } from '../../lib/classTimer';
 import { useAuth } from '../../state/auth';
 
 export function OwnerHome() {
@@ -51,6 +52,8 @@ function Dashboard() {
             <button className="btn btn--primary btn--small" style={{ alignSelf: 'flex-start' }} disabled={busy} onClick={() => run(async () => setData(await api.issueEntryCode()))}>{data.entryCode && left > 0 ? '새 코드 만들기' : '코드 만들기'}</button>
           </section>
 
+          <TimerAlertSettings />
+
           <section className="card card--flat stack" style={{ padding: 0 }} aria-label="학습지도자 소속 신청">
             <div className="row between" style={{ padding: '12px 14px 0' }}><strong>학습지도자 소속 신청</strong><span className="pill">{data.pendingTeachers.length}</span></div>
             {data.pendingTeachers.length === 0 ? <p className="small muted" style={{ padding: '0 14px 12px' }}>새 요청이 없어요</p> : (
@@ -86,5 +89,28 @@ function People({ title, rows }: { title: string; rows: { id: string; name: stri
         {rows.length === 0 && <li className="small muted">아직 없어요</li>}
       </ul>
     </details>
+  );
+}
+
+/** 수업 타이머 알림 시점(분 전) — 학원이 정한다. 최대 3개, 학습지도자 강의실 타이머가 이 시점에 알림을 띄운다(11-12) */
+const ALERT_CHOICES = [1, 3, 5, 10, 15, 20, 30];
+function TimerAlertSettings() {
+  const [sel, setSel] = useState<number[] | null>(null);
+  const [saved, setSaved] = useState(false);
+  const { run, busy, error } = useAction();
+  useEffect(() => { api.getTimerAlerts().then((r) => setSel(normalizeAlerts(r?.alertsMin))).catch(() => setSel([...DEFAULT_ALERTS])); }, []);
+  if (!sel) return null;
+  const toggle = (m: number) => { setSaved(false); setSel(sel.includes(m) ? sel.filter((x) => x !== m) : sel.length >= 3 ? sel : [...sel, m]); };
+  return (
+    <section className="card stack" aria-label="수업 타이머 알림">
+      <div className="row between"><strong>수업 타이머 알림</strong><span className="small muted">끝나기 몇 분 전 · 최대 3개</span></div>
+      <div className="chip-row" role="group" aria-label="알림 시점">
+        {ALERT_CHOICES.map((m) => <button key={m} type="button" aria-pressed={sel.includes(m)} disabled={!sel.includes(m) && sel.length >= 3} className={'chip' + (sel.includes(m) ? ' chip--on' : '')} onClick={() => toggle(m)}>{m}분 전</button>)}
+      </div>
+      <p className="small muted">학습지도자가 강의실에서 수업·쉬는 시간을 시작하면, 이 시점과 끝날 때 알림이 잠깐 떴다 사라져요.</p>
+      <LoadError error={error} />
+      <button className="btn btn--primary btn--small" style={{ alignSelf: 'flex-start' }} disabled={busy || sel.length === 0}
+        onClick={() => run(async () => { setSel(normalizeAlerts((await api.saveTimerAlerts(sel)).alertsMin)); setSaved(true); })}>{saved ? '저장했어요 ✓' : '저장'}</button>
+    </section>
   );
 }

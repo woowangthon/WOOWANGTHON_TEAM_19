@@ -1,7 +1,7 @@
 // 학생 "기록" 탭 — 지난 학습을 한 줄씩(서버 기록 그대로). 점수·순위는 보여 주지 않는다.
 import { api } from '../../api';
 import { Frame } from '../../components/Frame';
-import { LoadError, Thinking, Todo } from '../../components/Common';
+import { LoadError, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 
 export function StudentRecords() {
@@ -17,7 +17,6 @@ export function StudentRecords() {
           <div className="small muted num" style={{ marginTop: 4 }}>{r.unit} · {r.solved}/{r.total}문제 · 힌트 {r.hints}번{r.chatted ? ' · 수다함' : ''}</div>
         </article>
       ))}
-      <Todo>내 오개념 카드 자리 (팀 기능 DB: 있으면 좋음 3순위)</Todo>
     </Frame>
   );
 }

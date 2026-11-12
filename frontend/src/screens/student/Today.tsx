@@ -10,14 +10,18 @@ import { LoadError, Thinking, Week } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useMentor } from '../../state/mentor';
 import { routeFor } from '../../state/session';
-import { useAuth } from '../../state/auth';
-import { SeedChip } from '../../components/Seed';
+import { useAuth, useRefreshMeOnMount } from '../../state/auth';
+import { SeedChip, StampChip } from '../../components/Seed';
 import { isCrisisDay, isDemoChild } from '../../lib/kidScreens';
+import { GRADE_NOTE, currentGradeUi, showGradeNote } from '../../lib/gradeUi';
+import { callName } from '../../lib/josa';
 
 export function StudentToday() {
   const nav = useNavigate();
+  const gradeUi = currentGradeUi();
   const { say } = useMentor();
   const { me, enter } = useAuth();
+  useRefreshMeOnMount();
   const { data, error, loading, reload } = useAsync(() => api.getStudentHome());
   const [restarting, setRestarting] = useState(false);
   const [restartError, setRestartError] = useState<string | null>(null);
@@ -57,10 +61,11 @@ export function StudentToday() {
           <section className="hero">
             <div className="hero__text">
               <span className="small muted">{data.dateLabel}</span>
-              <h1 className="h1">{say(`${data.name}야, 안녕!`, `${data.name}, 안녕하세요!`)}</h1>
+              <h1 className="h1">{say(`${callName(data.name)}, 안녕!`, `${data.name}, 안녕하세요!`)}</h1>
               <span className="row" style={{ gap: 6 }}>
                 <span className="pill pill--accent"><Icon name="flame" size={14} fill /> 연속 {data.streakDays}일</span>
                 <SeedChip n={data.seeds} onClick={() => nav('/student/shop')} />
+                <StampChip n={data.stamps ?? 0} onClick={() => nav('/student/shop')} />
               </span>
             </div>
             <Mascot mood={data.doneToday ? (isCrisisDay(data) ? 'calm' : 'cheer') : 'wave'} size={104} variant="face" outfit={me?.outfit} />
@@ -73,6 +78,7 @@ export function StudentToday() {
               <div style={{ minWidth: 0 }}>
                 <div className="h3">{data.task.unit} · {data.task.count}문제 · 약 {data.task.minutes}분</div>
                 <div className="small muted">{data.task.assignedBy}이 정해 줬어요</div>
+                {showGradeNote(gradeUi) && <div className="small muted">{GRADE_NOTE}</div>}
               </div>
             </section>
           ) : !data.doneToday && <div className="notice notice--plain">오늘 할 것이 아직 없어요</div>}

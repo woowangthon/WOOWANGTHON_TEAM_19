@@ -15,19 +15,19 @@ from datetime import datetime
 from functools import lru_cache
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.actors import actor_from_request
+from app.accounts import CurrentAccount, token_sent
+from app.actors import Actor, actor_from_request, instructor_allows
 from app.db import get_db
 from app.errors import ApiError
 from app.llm import LIVE_TIMEOUT_S, LLMAdapter, ReplyRequest, ScriptedAdapter, build_adapter
 from app.models import InstructorNote, Problem, Session, Student
 from app.pii import redact
 from app.timeutil import get_now, seoul_date
-from app.trial import instructor_can_see
 
 log = logging.getLogger(__name__)
 
@@ -49,14 +49,19 @@ TEXT_MAX = 2000
 
 
 async def current_instructor(
+    request: Request,
     db: Db,
+    account: CurrentAccount,
     x_demo_role: Annotated[str | None, Header()] = None,
     x_demo_actor: Annotated[str | None, Header()] = None,
-) -> str:
-    return (await actor_from_request(db, "instructor", x_demo_role, x_demo_actor)).id
+) -> Actor:
+    """학습지도자 신원. 계정이면 allowed(내 강의실 member), 체험 헤더면 scope 규칙 그대로."""
+    return await actor_from_request(
+        db, "instructor", x_demo_role, x_demo_actor, account=account, token_sent=token_sent(request)
+    )
 
 
-Instructor = Annotated[str, Depends(current_instructor)]
+Instructor = Annotated[Actor, Depends(current_instructor)]
 
 
 @lru_cache(maxsize=1)
@@ -72,11 +77,9 @@ def get_draft_adapter() -> LLMAdapter:
 DraftAdapter = Annotated[LLMAdapter, Depends(get_draft_adapter)]
 
 
-async def _student_or_404(
-    db: AsyncSession, student_id: str, instructor_id: str | None = None
-) -> Student:
-    """instructor_id가 체험 학습지도자면 같은 세트 아이가 아닐 때도 404(있는지 알리지 않는다)."""
-    ok = instructor_id is None or instructor_can_see(instructor_id, student_id)
+async def _student_or_404(db: AsyncSession, student_id: str, actor: Actor | None = None) -> Student:
+    """학습지도자 범위 밖 학생도 404(있는지 알리지 않는다). 범위는 instructor_allows 한 곳."""
+    ok = actor is None or instructor_allows(actor, student_id)
     student = await db.get(Student, student_id) if ok else None
     if student is None:
         raise ApiError(404, "student_not_found", "학생을 찾을 수 없어요.")
@@ -271,7 +274,7 @@ class ApproveIn(BaseModel):
 @router.post("/notes/{note_id}/approve")
 async def approve_note(note_id: str, body: ApproveIn, db: Db, actor: Instructor) -> dict[str, str]:
     note = await db.get(InstructorNote, note_id)
-    if note is None or not instructor_can_see(actor, note.student_id):
+    if note is None or not instructor_allows(actor, note.student_id):
         raise ApiError(404, "note_not_found", "코멘트를 찾을 수 없어요.")
     if note.status != "draft":
         raise ApiError(409, "note_closed", "이미 처리한 코멘트예요.")

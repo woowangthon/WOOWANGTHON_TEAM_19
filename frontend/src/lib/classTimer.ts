@@ -1,50 +1,73 @@
-// 강의실 수업 타이머(TK-98) — 화면에서 쓰는 계산만 모은 곳. 시안: GPT-015~018
-import { useEffect, useState } from 'react';
-import type { ClassTimer, ClassTimerKind } from '../types';
+// 수업 타이머(학습지도자 강의실 탭) — 성호 11-12 결정:
+// · 알림 시점은 학원이 정한다(분 전, 기본 [10, 5]). · 상시 카운트다운은 없다. 정한 시점에 알림이 잠깐 떴다 사라진다.
+// · 서버 푸시·백그라운드 큐는 없다(금지 목록) → 열려 있는 화면이 1초마다 확인한다. 학생 화면에는 안 보인다.
+import { load, save } from './storage';
 
-/** 고를 수 있는 길이(분)와 기본값. 회의: 수업·쉬는 시간, 끝나기 3분/5분 전 알림 */
-export const TIMER_LENGTHS: Record<ClassTimerKind, { options: number[]; base: number; warn: number }> = {
-  class: { options: [20, 30, 40, 50], base: 40, warn: 5 },
-  break: { options: [5, 10, 15], base: 10, warn: 3 },
-};
-export const WARN_OPTIONS = [3, 5];
+export type TimerKind = 'class' | 'break';
+/** classId: 어느 강의실 카드에서 켰는지(재하 GPT-015 화면은 강의실 카드마다 타이머 칸). 학습지도자 한 사람이 한 번에 하나 */
+export interface TimerState { kind: TimerKind; startAt: number; endAt: number; alertsMin: number[]; fired: number[]; classId?: string }
+export interface TimerAlert { at: number; text: string; end: boolean }
 
-/** 알림 시점은 길이보다 짧아야 한다(5분 쉬는 시간에 5분 전 알림은 안 됨) */
-export const warnAllowed = (minutes: number, warnMin: number) => warnMin < minutes;
-/** 길이를 바꿨을 때 고른 알림이 안 맞으면 맞는 것 중 가장 늦은 것으로 */
-export function fitWarn(minutes: number, warnMin: number): number {
-  if (warnAllowed(minutes, warnMin)) return warnMin;
-  return [...WARN_OPTIONS].reverse().find((w) => warnAllowed(minutes, w)) ?? WARN_OPTIONS[0];
+export const DEFAULT_ALERTS = [10, 5];
+const MIN = 60_000;
+/** 시점이 이만큼 넘게 지났으면(앱을 닫아 두었던 경우) 띄우지 않는다. 끝 알림은 예외로 1분까지 */
+const LATE_MS = 60_000;
+const NAME: Record<TimerKind, string> = { class: '수업', break: '쉬는 시간' };
+
+/** 학원 설정값: 1~60 정수, 중복 없이 큰 것부터 최대 3개. 남는 게 없으면 기본 [10, 5] */
+export function normalizeAlerts(list: unknown): number[] {
+  const nums = Array.isArray(list) ? list.filter((n): n is number => Number.isInteger(n) && n >= 1 && n <= 60) : [];
+  const out = [...new Set(nums)].sort((a, b) => b - a).slice(0, 3);
+  return out.length ? out : [...DEFAULT_ALERTS];
 }
+
+export function startTimer(kind: TimerKind, minutes: number, alertsMin: number[], now: number, classId?: string): TimerState {
+  return { kind, startAt: now, endAt: now + minutes * MIN, alertsMin: normalizeAlerts(alertsMin), fired: [], ...(classId ? { classId } : {}) };
+}
+
+/** 고를 수 있는 길이(재하 TK-98 시안 값). 알림 시점은 고르지 않고 학원 설정을 쓴다(11-12) */
+export const TIMER_LENGTHS: Record<TimerKind, { options: number[]; base: number }> = {
+  class: { options: [20, 30, 40, 50], base: 40 },
+  break: { options: [5, 10, 15], base: 10 },
+};
+export const KIND_LABEL: Record<TimerKind, string> = { class: '수업', break: '쉬는 시간' };
 
 export type TimerPhase = 'off' | 'running' | 'soon' | 'ended';
-/** 지금 상태와 남은 초. 0 아래로 내려가지 않는다 */
-export function timerState(t: ClassTimer | null | undefined, now: number): { phase: TimerPhase; leftSec: number } {
-  if (!t) return { phase: 'off', leftSec: 0 };
-  const leftSec = Math.max(0, Math.ceil((t.endsAt - now) / 1000));
-  if (leftSec === 0) return { phase: 'ended', leftSec };
-  return { phase: leftSec <= t.warnMin * 60 ? 'soon' : 'running', leftSec };
+/** 카드 상태. 「곧 끝남」은 첫(가장 이른) 알림 시점부터. 상시 카운트다운은 없다 */
+export function timerPhase(t: TimerState | null | undefined, now: number): TimerPhase {
+  if (!t) return 'off';
+  if (now >= t.endAt) return 'ended';
+  const first = alertMessages(t).find((a) => !a.end);
+  return first && now >= first.at ? 'soon' : 'running';
 }
-
-export const KIND_LABEL: Record<ClassTimerKind, string> = { class: '수업', break: '쉬는 시간' };
-
-/** 화면용 문구. 같은 문구가 이어지면 화면낭독기는 다시 읽지 않는다(상태가 바뀔 때만 안내) */
-export function timerStatusText(t: ClassTimer | null | undefined, phase: TimerPhase): string {
+/** 화면 상태 글자(재하 timerStatusText와 같은 문구). 바뀔 때만 화면낭독기가 읽는다 */
+export function timerStatusText(t: TimerState | null | undefined, phase: TimerPhase): string {
   if (!t || phase === 'off') return '꺼짐';
   const k = KIND_LABEL[t.kind];
-  if (phase === 'ended') return `${k}이 끝났어요`; // 「수업이」「쉬는 시간이」
+  if (phase === 'ended') return `${k}이 끝났어요`;
   if (phase === 'soon') return `곧 끝남 · ${k}`;
   return t.kind === 'class' ? '수업 중' : '쉬는 시간 중';
 }
 
-/** 1초마다 지금 시각(타이머가 켜져 있을 때만 돈다) */
-export function useNow(active: boolean): number {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!active) return;
-    setNow(Date.now());
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [active]);
-  return now;
+/** 이 타이머가 띄울 알림 전부(시각 순). 길이보다 긴 「n분 전」은 뺀다. 마지막은 끝 알림 */
+export function alertMessages(t: TimerState): TimerAlert[] {
+  const name = NAME[t.kind];
+  const before = t.alertsMin
+    .filter((m) => t.endAt - m * MIN > t.startAt)
+    .map((m) => ({ at: t.endAt - m * MIN, text: `${name} 끝나기 ${m}분 전이에요`, end: false }));
+  return [...before.sort((a, b) => a.at - b.at), { at: t.endAt, text: t.kind === 'class' ? '수업이 끝났어요' : '쉬는 시간이 끝났어요', end: true }];
+}
+
+/** 지금 띄울 알림 하나(없으면 null). 이미 띄운 것(fired)·1분 넘게 지난 것은 건너뛴다 */
+export function dueAlert(t: TimerState, now: number): TimerAlert | null {
+  return alertMessages(t).find((a) => !t.fired.includes(a.at) && a.at <= now && now - a.at <= LATE_MS) ?? null;
+}
+
+/* ---------- 이 기기에 저장(학습지도자 한 사람이 한 번에 타이머 하나) ---------- */
+const KEY = 'ai-mentor-class-timer';
+export const TIMER_EVENT = 'class-timer-change';
+export function loadTimer(): TimerState | null { return load<TimerState | null>(KEY, null); }
+export function saveTimer(t: TimerState | null) {
+  save(KEY, t);
+  try { window.dispatchEvent(new Event(TIMER_EVENT)); } catch { /* 테스트 등 window 없음 */ }
 }

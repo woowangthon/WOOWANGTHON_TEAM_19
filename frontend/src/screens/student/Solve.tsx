@@ -2,7 +2,7 @@
 // 화면은 입력과 표시만 한다. 정답 판정·힌트 순서·20분 마감은 전부 서버(api)가 정한다.
 // 흐름: 답 확인 → 맞으면 "계속" / 틀리면 다음 힌트가 자동으로 나오고 "다시 해 보기"
 //       힌트 3개를 다 쓰고도 틀리면 「풀이 같이 보기」가 열린다 (답부터 주지 않는다)
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
 import { Frame } from '../../components/Frame';
@@ -99,6 +99,9 @@ function Solve() {
   const lastHint = p && p.hints.length > 0 ? p.hints[p.hints.length - 1] : null;
   const isLast = !!p && p.index + 1 >= p.total;
   const timeUp = isSolveTimeUp(zero ? 0 : (p?.remainingSec ?? 1), !!p, !!solution || !!result?.correct);
+  // 짧은 폰(높이 ~667 이하)에서는 새 힌트·채점 말풍선이 숫자판 뒤에 숨는다 → 새 말이 나오면 맨 아래로 (Chat과 같은 방식)
+  const bottom = useRef<HTMLDivElement>(null);
+  useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }); }, [lastHint, result, solution, timeUp, busy]);
 
   const header = (
     <header className="lessonbar">
@@ -197,6 +200,7 @@ function Solve() {
           ) : (
             <MentorSays mood="think" text={say('천천히 생각해 봐.\n막히면 힌트를 눌러', '천천히 생각해 보세요.\n막히면 힌트를 눌러요')} />
           )}
+          <div ref={bottom} />
         </>
       )}
     </Frame>
