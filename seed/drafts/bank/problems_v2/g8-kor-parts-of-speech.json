@@ -1,0 +1,742 @@
+[
+  {
+    "id": "g8-kor-parts-of-speech-01",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "easy",
+    "problem_type": "문장 속 작은따옴표 낱말의 품사 고르기",
+    "targets_misconception": "'새', '옛' 같은 관형사를 형용사로 고름",
+    "text": "「동생이 '새' 운동화를 신고 나갔다.」에서 '새'의 품사는 무엇일까요?\n① 형용사\n② 관형사\n③ 부사\n④ 명사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "관형사"
+      ]
+    },
+    "hint1": "'새로운'은 '새롭고, 새로워서'처럼 모양이 바뀌어요. '새 운동화'의 '새'도 그렇게 바뀌는지 보세요.",
+    "hint2": "'새'는 모양이 바뀌지 않아요. 이제 '새'가 꾸며 주는 낱말을 찾고, 그 낱말이 체언인지 용언인지 보세요.",
+    "after_hint2": "'운동화'가 체언임을 판단하고, 모양이 바뀌지 않으면서 체언을 꾸미는 품사를 보기에서 고르기",
+    "solution": "'새'는 '새고, 새니'처럼 활용하지 않으니 형용사(①)가 아니에요. 뒤에 오는 체언 '운동화'를 꾸며 주는 말이므로 관형사예요. 답은 ②예요. ③ 부사는 주로 용언을 꾸미고, ④ 명사는 조사가 붙어 문장의 주인 노릇을 하는데 '새'는 그렇지 않아요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-02",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "easy",
+    "problem_type": "문장 속 작은따옴표 낱말의 품사 고르기",
+    "targets_misconception": "수량을 나타내면 무조건 수사라고 봄(관형사 '세' 사람)",
+    "text": "「동생은 구슬을 '여섯'이나 모았다.」에서 '여섯'의 품사는 무엇일까요?\n① 수사\n② 관형사\n③ 대명사\n④ 부사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "수사"
+      ]
+    },
+    "hint1": "'여섯' 뒤에 무엇이 붙어 있는지 보세요. 꾸밀 체언이 뒤에 오나요, 조사가 붙나요?",
+    "hint2": "'여섯' 뒤에 조사 '이나'가 붙었어요. 조사가 붙는 낱말은 어떤 묶음일까요? '여섯 개'처럼 뒤의 말을 꾸밀 때와 견주어 보세요.",
+    "after_hint2": "조사가 붙은 '여섯'을 체언으로 정하고, 체언 가운데 수량을 나타내는 품사를 고르기",
+    "solution": "'여섯'에 조사 '이나'가 붙어 있으니 체언이에요. 수량을 나타내는 체언은 수사예요. 답은 ①이에요. ② 관형사는 '여섯 개'처럼 뒤의 체언을 꾸밀 때이고, ③ 대명사는 가리켜 부르는 말, ④ 부사는 조사가 붙지 않고 용언을 꾸미는 말이에요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-03",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "easy",
+    "problem_type": "문장 속 작은따옴표 낱말의 품사 고르기",
+    "targets_misconception": "형용사도 '-는다'가 붙는다고 생각함(예쁜다)",
+    "text": "「이번 숙제는 꽤 '어렵다'.」에서 '어렵다'의 품사는 무엇일까요?\n① 동사\n② 부사\n③ 형용사\n④ 관형사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "형용사"
+      ]
+    },
+    "hint1": "'어렵다'가 움직임을 나타내는지, 성질이나 상태를 나타내는지 생각해 보세요.",
+    "hint2": "'어렵는다'라고 말할 수 있나요? '어려워라(명령)', '어렵자(청유)'도 해 보세요. 셋 다 어색하면 어떤 품사인지 정할 수 있어요.",
+    "after_hint2": "'어렵는다'·'어려워라'·'어렵자'가 실제로 되는지 스스로 판단해 동사와 형용사 가운데 고르기",
+    "solution": "'어렵다'는 숙제의 상태를 나타내고, '어렵는다'·'어려워라'·'어렵자'가 모두 안 되므로 형용사예요. 답은 ③이에요. ① 동사라면 '-는다'와 명령·청유가 자연스러워야 하고, ② 부사와 ④ 관형사는 모양이 바뀌지 않는데 '어렵다'는 '어렵고, 어려워서'로 바뀌어요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-04",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "easy",
+    "problem_type": "문장 속 작은따옴표 낱말의 품사 고르기",
+    "targets_misconception": "앞말에 붙어 뜻을 더하는 조사(만·도·까지)를 따로 쓰이는 부사로 고름",
+    "text": "「동생'까지' 내 과자를 먹었다.」에서 '까지'의 품사는 무엇일까요?\n① 부사\n② 조사\n③ 형용사\n④ 명사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "조사"
+      ]
+    },
+    "hint1": "'까지'를 앞말 '동생'에서 떼어 내어 혼자 문장에 쓸 수 있는지 해 보세요.",
+    "hint2": "'까지'는 '까지고, 까지니'처럼 모양이 바뀌지 않으니 보기 가운데 용언은 지울 수 있어요. 남은 보기에서는 '까지'가 다른 말을 꾸미는지, 앞말에 기대어 쓰이는지 보세요.",
+    "after_hint2": "'까지'가 혼자 쓰이지 못하고 앞말에 붙어 뜻을 더한다는 것을 판단해 부사·명사·조사 가운데 고르기",
+    "solution": "'까지'는 혼자 쓰이지 못하고 체언 '동생'에 붙어 '그것도 더하여'라는 뜻을 보태 주는 조사(보조사)예요. 답은 ②예요. ① 부사는 혼자 쓰이며 주로 용언을 꾸미는데 '까지'는 혼자 쓰이지 못해요. ③ 형용사는 모양이 바뀌는 용언인데 '까지'는 바뀌지 않아요. ④ 명사는 혼자 쓰이고 뒤에 조사가 붙는 말인데 '까지'는 그 자체가 앞말에 붙어요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-05",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "easy",
+    "problem_type": "문장 속 작은따옴표 낱말의 품사 고르기",
+    "targets_misconception": "'이다'를 동사·형용사로 고름(조사인 서술격 조사)",
+    "text": "「내 꿈은 과학자'이다'.」에서 '이다'의 품사는 무엇일까요?\n① 동사\n② 형용사\n③ 조사\n④ 부사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "조사"
+      ]
+    },
+    "hint1": "'이다'가 혼자 떨어져 쓰일 수 있는지, 앞말에 붙어서만 쓰이는지 보세요.",
+    "hint2": "'이다'는 '이고, 이니'처럼 모양이 바뀌어요. 그런데 '과학자' 없이 혼자 쓸 수 있나요? 혼자 쓰지 못하고 체언 뒤에 붙는 말이 무엇이었는지 떠올려 보세요.",
+    "after_hint2": "'이다'가 혼자 쓰일 수 없음을 판단하고, 모양은 바뀌어도 용언이 아닌 품사를 보기에서 고르기",
+    "solution": "'이다'는 '이고, 이니'로 활용하지만 혼자 쓰이지 못하고 체언 '과학자' 뒤에 붙어 그 말이 서술어가 되게 해요. 그래서 서술격 조사예요. 답은 ③이에요. ①·② 동사·형용사는 혼자 서술어가 될 수 있는 용언이고, ④ 부사는 모양이 바뀌지 않아요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-06",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "easy",
+    "problem_type": "문장 속 작은따옴표 낱말의 품사 고르기",
+    "targets_misconception": "",
+    "text": "「'아이고', 발목을 삐었네.」에서 '아이고'의 품사는 무엇일까요?\n① 감탄사\n② 부사\n③ 명사\n④ 조사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "감탄사"
+      ]
+    },
+    "hint1": "'아이고'가 문장의 다른 낱말을 꾸미거나 다른 낱말과 이어져 있는지 보세요.",
+    "hint2": "'아이고'를 빼도 문장이 그대로 성립해요. 다른 낱말을 꾸미지도, 조사가 붙지도 않고 혼자 쓰이는 말이에요.",
+    "after_hint2": "다른 말과 관계없이 혼자 느낌을 드러내는 말이 보기 가운데 어느 품사인지 정하기",
+    "solution": "'아이고'는 다른 말과 관계없이 혼자 느낌을 나타내는 감탄사예요. 답은 ①이에요. ② 부사는 다른 말을 꾸미고, ③ 명사는 조사가 붙어 문장 속 자리를 맡으며, ④ 조사는 혼자 쓰이지 못해요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-07",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 속 낱말의 품사 이름 한 낱말로 쓰기",
+    "targets_misconception": "꾸미는 말이면 모두 같은 품사로 봄(관형사·부사 혼동)",
+    "text": "「버스가 아주 '천천히' 지나갔다.」에서 '천천히'의 품사 이름을 쓰세요.\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "'천천히': 활용하지 않음, 용언 '지나갔다'를 꾸밈 → 부사 하나. 통용 낱말 목록(규칙 8.1) 밖. 바른 표기는 '부사' 하나.",
+    "answer": {
+      "kind": "text",
+      "value": "부사",
+      "accepted": [
+        "부사"
+      ]
+    },
+    "hint1": "'천천히'는 모양이 바뀌나요? 그리고 문장에서 어떤 낱말을 꾸며 주나요?",
+    "hint2": "'천천히'는 모양이 바뀌지 않고 '지나갔다'를 꾸며요. 꾸밈을 받는 말이 체언인지 용언인지에 따라 품사 이름이 달라져요.",
+    "after_hint2": "'지나갔다'가 용언임을 판단하고, 용언을 꾸미는 품사 이름을 스스로 떠올려 쓰기",
+    "solution": "'천천히'는 형태가 변하지 않고 용언 '지나갔다'를 꾸미므로 부사예요.",
+    "forbidden": [
+      "부사"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-08",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 속 낱말의 품사 이름 한 낱말로 쓰기",
+    "targets_misconception": "가리켜 부르는 말(대명사)과 이름(명사)을 구별하지 못함",
+    "text": "「'저것'은 누가 두고 간 우산일까?」에서 '저것'의 품사 이름을 쓰세요.\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "'저것': 조사 '은'이 붙는 체언, 사물 이름 대신 가리켜 부름 → 대명사(지시 대명사). 바른 표기 '대명사·지시대명사·지시 대명사'를 accepted에.",
+    "answer": {
+      "kind": "text",
+      "value": "대명사",
+      "accepted": [
+        "대명사",
+        "지시대명사",
+        "지시 대명사"
+      ]
+    },
+    "hint1": "'저것'에 조사 '은'이 붙었어요. 그러면 체언인지 아닌지부터 정할 수 있어요.",
+    "hint2": "'저것'은 조사가 붙는 체언이에요. 우산이라는 이름을 직접 말했나요, 다른 방법으로 불렀나요?",
+    "after_hint2": "'저것'이 이름이 아니라 가리켜 부르는 말임을 판단해 체언 가운데 품사 이름 쓰기",
+    "solution": "'저것'은 조사가 붙는 체언이고, 사물 이름 대신 가리켜 부르는 말이므로 대명사예요.",
+    "forbidden": [
+      "대명사"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-09",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 속 낱말의 품사 이름 한 낱말로 쓰기",
+    "targets_misconception": "'새', '옛' 같은 관형사를 형용사로 고름",
+    "text": "「할머니는 '옛' 동네 이야기를 자주 들려주신다.」에서 '옛'의 품사 이름을 쓰세요.\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "'옛': 활용 없음, 기본형 없음, 체언 '동네'를 꾸밈 → 관형사. 통용 낱말 목록 밖. 바른 표기는 '관형사' 하나.",
+    "answer": {
+      "kind": "text",
+      "value": "관형사",
+      "accepted": [
+        "관형사"
+      ]
+    },
+    "hint1": "'옛'에 '-다'로 끝나는 기본형이 있는지, '옛고, 옛니'처럼 바뀌는지 보세요.",
+    "hint2": "'옛'은 모양이 바뀌지 않으니 용언은 아니에요. '옛'이 꾸며 주는 '동네'가 체언인지 용언인지 따져 보세요.",
+    "after_hint2": "'동네'가 체언임을 판단하고, 체언을 꾸미는 품사 이름을 스스로 떠올려 쓰기",
+    "solution": "'옛'은 '-다'로 끝나는 기본형이 없고 '옛고, 옛니'처럼 활용하지도 않아요. 뒤의 체언 '동네'를 꾸미므로 관형사예요.",
+    "forbidden": [
+      "관형사"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "needs_review",
+    "review_note": "[사전] '옛 동네'를 띄어 쓰는 두 낱말(관형사+명사)로 보았음. '옛동네'가 표준국어대사전에 합성어로 올라 있지 않은지 대조 필요(올라 있으면 '옛 사진' 등으로 바꿈)."
+  },
+  {
+    "id": "g8-kor-parts-of-speech-10",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "hard",
+    "problem_type": "같은 낱말이 문장에 따라 품사가 바뀌는 경우(관형사/수사, 부사/명사, 수사/명사) 판단",
+    "targets_misconception": "수량을 나타내면 무조건 수사라고 봄(관형사 '세' 사람)",
+    "text": "(가) 달걀 '일곱'을 삶았다.\n(나) '일곱' 사람이 버스에서 내렸다.\n(가)와 (나)에서 '일곱'은 각각 어떤 품사로 쓰였을까요?\n① (가) 관형사, (나) 수사\n② (가) 수사, (나) 수사\n③ (가) 관형사, (나) 관형사\n④ (가) 수사, (나) 관형사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "(가) 수사, (나) 관형사"
+      ]
+    },
+    "hint1": "두 문장에서 '일곱' 바로 뒤에 무엇이 오는지 각각 찾아보세요. 조사인가요, 다른 낱말인가요?",
+    "hint2": "(가)의 '일곱' 뒤에는 조사 '을'이 붙어 있어요. 조사가 붙은 '일곱'이 어떤 품사인지 정하고, (나)의 '일곱'은 뒤의 어떤 말과 이어지는지 따져 보세요.",
+    "after_hint2": "(가)를 조사가 붙은 체언(수사)으로 정하고, (나)의 '일곱'이 '사람'을 꾸미는지 판단해 짝 고르기",
+    "solution": "(가)의 '일곱'은 조사 '을'이 붙은 체언이라 수사예요. (나)의 '일곱'은 뒤의 명사 '사람'을 꾸미므로 관형사예요. 답은 ④예요. ①은 두 문장을 거꾸로 짝지었고, ②는 (나)에서 꾸미는 '일곱'을, ③은 (가)에서 조사가 붙은 '일곱'을 잘못 보았어요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-11",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "medium",
+    "problem_type": "품사가 다른 하나 고르기(같은 문장 또는 낱말 묶음)",
+    "targets_misconception": "수량을 나타내면 무조건 수사라고 봄(관형사 '세' 사람)",
+    "text": "「귤 '하나'와 배 '둘'을 '세' 바구니에 나누어 담고 감 '넷'을 더 샀다.」에서 품사가 다른 하나는 무엇일까요?\n① 하나\n② 둘\n③ 세\n④ 넷\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "세"
+      ]
+    },
+    "hint1": "네 낱말 모두 수량을 나타내요. 각 낱말 바로 뒤에 조사가 붙는지, 다른 체언이 오는지 보세요.",
+    "hint2": "조사가 붙는 수량 낱말은 체언이에요. 뒤의 명사를 꾸며 주기만 하는 수량 낱말이 하나 있는지 찾아보세요.",
+    "after_hint2": "네 낱말 뒤에 조사가 붙는지 명사가 오는지 하나씩 보고 혼자만 다른 낱말 고르기",
+    "solution": "'하나(와)', '둘(을)', '넷(을)'은 조사가 붙는 수사예요. '세'는 뒤의 '바구니'를 꾸미는 관형사예요. 답은 ③이에요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-12",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "medium",
+    "problem_type": "품사가 다른 하나 고르기(같은 문장 또는 낱말 묶음)",
+    "targets_misconception": "형용사도 '-는다'가 붙는다고 생각함(예쁜다)",
+    "text": "다음 낱말 가운데 품사가 다른 하나는 무엇일까요?\n① 자라다\n② 좁다\n③ 슬프다\n④ 고요하다\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "자라다"
+      ]
+    },
+    "hint1": "네 낱말 모두 모양이 바뀌는 용언이에요. 움직임을 나타내는지, 상태를 나타내는지 나눠 보세요.",
+    "hint2": "각 낱말에 '-는다/-ㄴ다'를 붙여 현재 모습을 말해 보세요. 자연스럽게 되는 것이 하나뿐이에요.",
+    "after_hint2": "네 낱말에 '-는다/-ㄴ다'를 붙여 보고 자연스러운 하나를 스스로 찾기",
+    "solution": "'자란다'는 되지만 '좁는다·슬픈다·고요한다'는 안 돼요. '자라다'만 동사이고 나머지는 형용사예요. 답은 ①이에요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-13",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "hard",
+    "problem_type": "같은 낱말이 문장에 따라 품사가 바뀌는 경우(관형사/수사, 부사/명사, 수사/명사) 판단",
+    "targets_misconception": "같은 낱말은 문장이 달라도 늘 품사가 같다고 봄",
+    "text": "(가) 이모네 '첫째'는 올해 중학생이 되었다.\n(나) 급식 줄에서 내가 '첫째'였다.\n'첫째'가 (가)와 (나)에서 쓰인 품사를 차례대로 바르게 고른 것은 무엇일까요?\n① (가) 명사, (나) 수사\n② (가) 수사, (나) 명사\n③ (가) 명사, (나) 명사\n④ (가) 수사, (나) 수사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "(가) 명사, (나) 수사"
+      ]
+    },
+    "hint1": "두 문장의 '첫째'를 다른 말로 바꿔 보세요. '맏이'로 바꿀 수 있는 쪽과 '맨 앞 차례'로 바꿀 수 있는 쪽이 있는지 보세요.",
+    "hint2": "(가)의 '첫째'는 '맏이'라는 사람을 가리키는 말이에요. (나)의 '첫째'는 사람을 가리키는지, 순서를 나타내는지 따져 보고 두 낱말의 품사를 각각 정해 보세요.",
+    "after_hint2": "(가)가 사람을 가리키는 이름이라 명사임을 정하고, (나)가 차례를 나타내는지 판단해 수사·명사 가운데 정하기",
+    "solution": "(가)의 '첫째'는 '맏이'를 뜻하는 이름이라 명사예요. (나)의 '첫째'는 줄에서의 순서를 나타내므로 수사예요. 답은 ①이에요. ②는 거꾸로 짝지었고, ③은 (나)의 순서를 나타내는 뜻을, ④는 (가)의 사람을 가리키는 뜻을 놓쳤어요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "needs_review",
+    "review_note": "[사전] '첫째'의 명사(맏이)·수사(순서) 뜻풀이를 기억에 기대어 판정함. 표준국어대사전에서 (나) '급식 줄에서 내가 첫째였다'가 수사 뜻(순서가 가장 먼저인 차례)에 드는지, 명사 뜻(무엇보다 앞서는 것)과 겹치지 않는지 대조 필요."
+  },
+  {
+    "id": "g8-kor-parts-of-speech-14",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "medium",
+    "problem_type": "동사·형용사 구별 기준을 적용한 판단 고르기",
+    "targets_misconception": "형용사도 '-는다'가 붙는다고 생각함(예쁜다)",
+    "text": "현재를 나타내는 '-는다/-ㄴ다'를 붙일 수 있는지로 동사와 형용사를 가를 때, 바르게 판단한 것은 무엇일까요?\n① '예쁘다'는 '예쁜다'가 되므로 동사이다.\n② '읽다'는 '읽는다'가 되므로 동사이다.\n③ '춥다'는 '춥는다'가 되므로 동사이다.\n④ '걷다'는 '걷는다'가 안 되므로 형용사이다.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "'읽다'는 '읽는다'가 되므로 동사이다."
+      ]
+    },
+    "hint1": "보기마다 그 낱말을 실제로 소리 내어 말해 보세요. 우리말에서 정말 쓰는 말인지가 기준이에요.",
+    "hint2": "'-는다'가 자연스럽게 붙으면 동사, 어색하면 형용사예요. 보기에 쓰인 말이 자연스러운지와, 내린 결론이 그 기준에 맞는지 둘 다 확인하세요.",
+    "after_hint2": "보기마다 '-는다' 꼴이 실제로 쓰이는지와 결론이 기준에 맞는지 둘 다 스스로 판단하기",
+    "solution": "'예쁜다', '춥는다'는 쓰지 않는 말이라 두 낱말은 형용사예요. '걷는다'는 자연스러우니 '걷다'는 동사예요. '읽는다'가 되어 동사라고 본 판단만 맞아요. 답은 ②예요.",
+    "forbidden": [
+      "②",
+      "'읽다'는 '읽는다'가 되므로 동사이다."
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-15",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "medium",
+    "problem_type": "동사·형용사 구별 기준을 적용한 판단 고르기",
+    "targets_misconception": "형용사도 '-는다'가 붙는다고 생각함(예쁜다)",
+    "text": "'-어라'(명령)나 '-자'(청유)를 붙여 쓸 수 없어서 형용사로 보는 낱말은 무엇일까요?\n① 웃다\n② 씻다\n③ 가르치다\n④ 짧다\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "짧다"
+      ]
+    },
+    "hint1": "보기마다 '~어라', '~자'를 붙여 친구에게 시키거나 함께 하자고 말해 보세요.",
+    "hint2": "남에게 시킬 수 있는 것은 움직임이에요. 시킬 수 없는 상태를 나타내는 낱말을 찾아보세요.",
+    "after_hint2": "네 낱말에 '-어라', '-자'를 직접 붙여 보고 둘 다 안 되는 낱말 고르기",
+    "solution": "'웃어라·씻어라·가르쳐라'는 되지만 '짧아라(명령)·짧자'는 안 돼요. 그래서 '짧다'는 형용사예요. 답은 ④예요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-16",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "medium",
+    "problem_type": "동사·형용사 구별 기준을 적용한 판단 고르기",
+    "targets_misconception": "형용사도 '-는다'가 붙는다고 생각함(예쁜다)",
+    "text": "낱말에 '-는다/-ㄴ다'와 명령의 '-어라/-아라'를 붙여 본 결과를 바르게 적은 것은 무엇일까요?\n① 높다: '높는다' 됨, '높아라' 됨\n② 놀다: '논다' 됨, '놀아라' 안 됨\n③ 닦다: '닦는다' 안 됨, '닦아라' 됨\n④ 둥글다: '둥근다' 안 됨, '둥글어라' 안 됨\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "둥글다: '둥근다' 안 됨, '둥글어라' 안 됨"
+      ]
+    },
+    "hint1": "보기마다 두 말을 '지금 ~', '얼른 ~' 같은 문장에 넣어 소리 내어 말해 보세요.",
+    "hint2": "'높다'는 키나 산의 상태를 나타내서 '높는다'라고 말하지 않아요. 남은 세 보기도 두 말이 정말 되는지 하나씩 따져 보세요.",
+    "after_hint2": "놀다·닦다·둥글다에 '-는다'와 명령 '-어라'를 붙여 보고 결과가 적힌 대로인지 각각 판단하기",
+    "solution": "'둥근다'도 '둥글어라'도 쓰지 않으니 ④가 바르게 적었어요(그래서 '둥글다'는 형용사예요). ① '높는다'와 명령의 '높아라'는 쓰지 않아요. ② '놀아라'는 '밖에서 놀아라'처럼 자연스러워요. ③ '닦는다'는 '이를 닦는다'처럼 자연스러워요. 답은 ④예요.",
+    "forbidden": [
+      "④",
+      "둥글다: '둥근다' 안 됨, '둥글어라' 안 됨"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-17",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "hard",
+    "problem_type": "같은 낱말이 문장에 따라 품사가 바뀌는 경우(관형사/수사, 부사/명사, 수사/명사) 판단",
+    "targets_misconception": "수량을 나타내면 무조건 수사라고 봄(관형사 '세' 사람)",
+    "text": "(가) 시장에서 사과 '다섯' 개를 샀다.\n(나) '다섯'에 셋을 더하면 여덟이다.\n두 문장의 '다섯'의 품사를 바르게 짝지은 것은 무엇일까요?\n① (가) 수사, (나) 수사\n② (가) 관형사, (나) 수사\n③ (가) 수사, (나) 관형사\n④ (가) 관형사, (나) 관형사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "(가) 관형사, (나) 수사"
+      ]
+    },
+    "hint1": "두 문장에서 '다섯' 바로 뒤에 오는 말이 무엇인지 비교해 보세요.",
+    "hint2": "한 문장에서는 뒤의 명사를 꾸며 주고, 다른 문장에서는 조사가 붙어 있어요. 꾸미는 말과 조사가 붙는 말은 품사가 달라요.",
+    "after_hint2": "(가)·(나) 각각 '다섯' 뒤를 보고 꾸미는 쪽과 조사가 붙은 쪽을 가려 짝 고르기",
+    "solution": "(가)의 '다섯'은 단위 명사 '개'를 꾸미므로 관형사, (나)의 '다섯'은 조사 '에'가 붙은 체언이므로 수사예요. 답은 ②예요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-18",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "hard",
+    "problem_type": "같은 낱말이 문장에 따라 품사가 바뀌는 경우(관형사/수사, 부사/명사, 수사/명사) 판단",
+    "targets_misconception": "같은 낱말은 문장이 달라도 늘 품사가 같다고 봄",
+    "text": "(가) '오늘'은 내 생일이다.\n(나) 나는 '오늘' 일찍 잘 거야.\n'오늘'이 (가)와 (나)에서 각각 어떤 품사인지 바르게 짝지은 것은 무엇일까요?\n① (가) 명사, (나) 명사\n② (가) 부사, (나) 부사\n③ (가) 부사, (나) 명사\n④ (가) 명사, (나) 부사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "(가) 명사, (나) 부사"
+      ]
+    },
+    "hint1": "두 문장에서 '오늘' 뒤에 조사가 붙었는지 확인해 보세요.",
+    "hint2": "조사가 붙는 '오늘'과 용언을 꾸미는 '오늘'은 품사가 달라요. 두 문장에서 '오늘'이 각각 어느 쪽인지 가려 보세요.",
+    "after_hint2": "두 문장 가운데 조사가 붙은 쪽과 용언을 꾸미는 쪽을 가려 각각 품사를 정하기",
+    "solution": "(가)의 '오늘'은 조사 '은'이 붙은 명사, (나)의 '오늘'은 용언 '잘'을 꾸미는 부사예요. 답은 ④예요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-19",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "medium",
+    "problem_type": "품사 분류 기준(형태·기능·의미)과 묶음이 바르게 짝지어진 것 고르기",
+    "targets_misconception": "'새', '옛' 같은 관형사를 형용사로 고름",
+    "text": "품사를 '기능'에 따라 나눈 묶음과 그 묶음에 드는 품사가 바르게 짝지어진 것은 무엇일까요?\n① 용언 – 동사, 형용사, 관형사\n② 수식언 – 관형사, 부사, 감탄사\n③ 체언 – 명사, 대명사, 수사\n④ 관계언 – 조사, 부사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "체언 – 명사, 대명사, 수사"
+      ]
+    },
+    "hint1": "보기마다 묶음 이름이 하는 일(서술하기, 꾸미기, 관계 맺기 등)과 그 안의 품사가 맞는지 하나씩 지워 보세요.",
+    "hint2": "보기마다 묶음에 어울리지 않는 품사가 섞여 있는지 보세요. 먼저 관형사가 '-고, -니'로 모양이 바뀌는지부터 따져 보세요.",
+    "after_hint2": "①을 지운 뒤 남은 세 보기의 묶음과 품사를 하나씩 따져 바르게 짝지어진 것 고르기",
+    "solution": "용언은 동사·형용사, 수식언은 관형사·부사, 관계언은 조사, 독립언은 감탄사예요. 문장의 주체가 되는 체언에 명사·대명사·수사가 드는 짝만 맞아요. 답은 ③이에요. ① 관형사는 모양이 바뀌지 않아 용언이 아니고, ② 감탄사는 수식언이 아니라 독립언이며, ④ 부사는 관계언이 아니라 수식언이에요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g8-kor-parts-of-speech-20",
+    "unit_id": "g8-kor-parts-of-speech",
+    "tag": "g8-kor-parts-of-speech",
+    "subject": "korean",
+    "grade": 8,
+    "standard": {
+      "code": "[9국04-03]",
+      "curriculum": "2022",
+      "unit": "낱말을 품사로 나누기"
+    },
+    "difficulty": "medium",
+    "problem_type": "품사 분류 기준(형태·기능·의미)과 묶음이 바르게 짝지어진 것 고르기",
+    "targets_misconception": "",
+    "text": "품사를 나누는 기준과 그 기준으로 나눈 결과가 바르게 짝지어진 것은 무엇일까요?\n① 형태 – 변하는 말, 변하지 않는 말\n② 기능 – 변하는 말, 변하지 않는 말\n③ 의미 – 체언, 용언, 수식언, 관계언, 독립언\n④ 형태 – 뜻에 따라 나눈 아홉 품사\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "형태 – 변하는 말, 변하지 않는 말"
+      ]
+    },
+    "hint1": "세 기준의 뜻을 먼저 떠올리세요. 형태는 '모양', 기능은 '문장에서 하는 일', 의미는 '낱말이 나타내는 뜻'이에요.",
+    "hint2": "'-언'으로 끝나는 묶음은 문장에서 하는 일로 나눈 거예요. 나머지 두 기준은 스스로 짝지어 보세요.",
+    "after_hint2": "형태·의미 기준이 각각 어떤 결과와 짝인지 스스로 정해 남은 보기 가운데 고르기",
+    "solution": "형태로 나누면 변하는 말과 변하지 않는 말, 기능으로 나누면 체언·용언·수식언·관계언·독립언, 의미로 나누면 아홉 품사가 돼요. 답은 ①이에요. ②는 형태로 나눈 결과를 기능에, ③은 기능으로 나눈 결과를 의미에, ④는 의미로 나눈 결과를 형태에 짝지었어요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  }
+]

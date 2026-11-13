@@ -62,6 +62,8 @@ export interface StudentHome {
 }
 
 /** 화면에 보내는 문제. 정답은 절대 포함하지 않는다(판정은 서버). */
+export type AnswerKind = 'fraction' | 'number' | 'choice' | 'text';
+
 export interface ProblemView {
   id: string;
   index: number;             // 0부터
@@ -70,6 +72,10 @@ export interface ProblemView {
   left: Fraction | null;     // 식을 두 분수로 나눌 수 없는 문제는 null → 식은 그리지 않는다
   right: Fraction | null;
   op: '+' | '-' | '÷';
+  /** 답 칸 종류(서버가 정함). 없으면 fraction(분수 칸, 시드). number=숫자 한 칸, choice=보기 버튼, text=낱말 입력 */
+  answerKind?: AnswerKind;
+  choices?: string[] | null; // choice일 때 보기 문구(①부터 순서대로)
+  answerLang?: 'en' | 'ko' | null; // text일 때 답 글자: 영어 낱말 / 한글 낱말
   hints: string[];           // 지금까지 받은 힌트
   hintsLeft: number;         // 남은 힌트(서버가 정함. 지금 서버는 최대 2)
   canShowSolution: boolean;  // 힌트를 다 쓰고도 틀리면 true → 「풀이 같이 보기」

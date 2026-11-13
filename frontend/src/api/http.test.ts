@@ -248,3 +248,25 @@ describe('org http 모드(VITE_API_MODE=http + VITE_ORG_MODE=http, 명세 4.12)'
     expect(calls[1].credentials).toBeUndefined();
   });
 });
+
+describe('답 보내기(분수 칸 / 그 밖의 답 칸)', () => {
+  const bodies = async (send: (h: Awaited<ReturnType<typeof load>>['httpApi']) => Promise<unknown>) => {
+    const sent: unknown[] = [];
+    const http = await load();
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+      if (String(url).endsWith('/answer')) sent.push(JSON.parse(String(init?.body)));
+      return String(url).endsWith('/trial') ? json(200, trialBody(1)) : json(200, { correct: true });
+    }));
+    http.setDemoRole('student');
+    await send(http.httpApi);
+    return sent;
+  };
+
+  it('분수 칸은 지금처럼 numerator·denominator만 보낸다', async () => {
+    expect(await bodies((h) => h.submitAnswer('s1', 'p1', 3, 8))).toEqual([{ problemId: 'p1', numerator: 3, denominator: 8 }]);
+  });
+
+  it('숫자 한 칸·보기·낱말은 answer 글자로 보낸다', async () => {
+    expect(await bodies((h) => h.submitAnswer('s1', 'p1', 0, 0, '②'))).toEqual([{ problemId: 'p1', answer: '②' }]);
+  });
+});
