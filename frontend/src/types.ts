@@ -15,6 +15,8 @@ export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 /** 띠 캐릭터. 띠를 추가하려면 여기와 public/mascot/{이름}/ 폴더만 늘리면 된다 */
 /** 십이지신 12종(11-13, GPT-025~036 추가). 띠는 아이가 고르는 캐릭터일 뿐 — 성격·능력과 연결하지 않고 생년도 묻지 않는다 */
 export type Animal = 'rat' | 'ox' | 'tiger' | 'rabbit' | 'dragon' | 'snake' | 'horse' | 'sheep' | 'monkey' | 'rooster' | 'dog' | 'pig';
+/** 고르는 순서(십이지신) — 캐릭터 고르기·상점 캐릭터 검색이 같이 쓴다 */
+export const ANIMALS: Animal[] = ['rat', 'ox', 'tiger', 'rabbit', 'dragon', 'snake', 'horse', 'sheep', 'monkey', 'rooster', 'dog', 'pig'];
 export const ANIMAL_LABEL: Record<Animal, string> = {
   rat: '쥐띠', ox: '소띠', tiger: '호랑이띠', rabbit: '토끼띠', dragon: '용띠', snake: '뱀띠',
   horse: '말띠', sheep: '양띠', monkey: '원숭이띠', rooster: '닭띠', dog: '개띠', pig: '돼지띠',

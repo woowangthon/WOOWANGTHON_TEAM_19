@@ -16,7 +16,7 @@ import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { useMentor } from '../../state/mentor';
 import { useAuth } from '../../state/auth';
-import { ANIMAL_LABEL, type Animal, type MentorSetting, type MentorStyle, type MentorTitle, type Speech } from '../../types';
+import { ANIMALS, ANIMAL_LABEL, type Animal, type MentorSetting, type MentorStyle, type MentorTitle, type Speech } from '../../types';
 
 const STYLES: { style: MentorStyle; mood: Mood; casual: string; polite: string }[] = [
   { style: '같이 풀어주는', mood: 'cheer', casual: '좋아, 바로 같이 가 보자!', polite: '좋아요, 바로 같이 가 봐요!' },
@@ -24,7 +24,6 @@ const STYLES: { style: MentorStyle; mood: Mood; casual: string; polite: string }
   { style: '짚어주는', mood: 'promise', casual: '오늘은 이것 하나만 짚자.', polite: '오늘은 이것 하나만 짚어요.' },
 ];
 /** 띠를 추가하면 여기와 types.ts Animal에 넣는다 */
-const ANIMALS: Animal[] = ['rat', 'ox', 'tiger', 'rabbit', 'dragon', 'snake', 'horse', 'sheep', 'monkey', 'rooster', 'dog', 'pig']; // 십이지신 순서
 const TITLES: MentorTitle[] = ['형', '언니', '친구'];
 const SPEECHES: Speech[] = ['반말', '존댓말'];
 

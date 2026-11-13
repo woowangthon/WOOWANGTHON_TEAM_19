@@ -12,7 +12,7 @@ import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { useMentor } from '../../state/mentor';
 import { useAuth } from '../../state/auth';
-import type { Cosmetic, ShopItem } from '../../types';
+import { ANIMALS, ANIMAL_LABEL, type Animal, type Cosmetic, type ShopItem } from '../../types';
 
 type Tab = 'academy' | 'deco' | 'history';
 
@@ -26,6 +26,11 @@ export function StudentShop() {
   const wallet = useAsync(() => api.getWallet(), [tab === 'history']);
   const [buy, setBuy] = useState<{ kind: 'item'; item: ShopItem } | { kind: 'deco'; item: Cosmetic } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  // 꾸미기 검색(11-13): 어떤 캐릭터에 입혀 볼지 + 이름. 산 옷·이모티콘은 캐릭터를 바꿔도 그대로다(id 기준)
+  const [look, setLook] = useState<Animal | null>(null);
+  const [q, setQ] = useState('');
+  const preview: Animal = look ?? animal;
+  const match = (c: Cosmetic) => !q.trim() || c.name.replace(/\s/g, '').includes(q.replace(/\s/g, ''));
   const { run, busy, error: actErr, setError } = useAction();
 
   const confirm = () => run(async () => {
@@ -97,14 +102,28 @@ export function StudentShop() {
           )}
 
           {tab === 'deco' && <p className="currency-note"><Icon name="stamp" size={14} />{say('칭찬 도장으로 꾸며', '칭찬 도장으로 꾸며요')}</p>}
-          {tab === 'deco' && (['outfit', 'emote'] as const).map((kind) => (
+          {tab === 'deco' && (
+            <div className="row" style={{ flexWrap: 'wrap', gap: 8 }} role="search" aria-label="꾸미기 찾기">
+              <label className="field" style={{ flex: '1 1 140px', margin: 0 }}>캐릭터
+                <select className="input" value={preview} onChange={(e) => setLook(e.target.value as Animal)}>
+                  {ANIMALS.map((a) => <option key={a} value={a}>{ANIMAL_LABEL[a]}{a === animal ? ' (내 멘토)' : ''}</option>)}
+                </select>
+              </label>
+              <label className="field" style={{ flex: '1 1 140px', margin: 0 }}>이름
+                <input className="input" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={say('예: 모자, 힘내', '예: 모자, 힘내')} />
+              </label>
+            </div>
+          )}
+          {tab === 'deco' && preview !== animal && <p className="small muted">{say(`${ANIMAL_LABEL[preview]}에게 입혀 본 모습이야. 산 옷은 어떤 캐릭터로 바꿔도 그대로 있어.`, `${ANIMAL_LABEL[preview]}에게 입혀 본 모습이에요. 산 옷은 어떤 캐릭터로 바꿔도 그대로 있어요.`)}</p>}
+          {tab === 'deco' && !data.cosmetics.some(match) && <div className="notice notice--plain"><span>{say(`「${q}」 꾸미기가 없어`, `「${q}」 꾸미기가 없어요`)}</span></div>}
+          {tab === 'deco' && (['outfit', 'emote'] as const).filter((kind) => data.cosmetics.some((c) => c.kind === kind && match(c))).map((kind) => (
             <section key={kind} className="stack">
               <h2 className="h3">{kind === 'outfit' ? '옷' : '이모티콘'} <span className="small muted">{kind === 'emote' ? '수다에서 보낼 수 있어' : ''}</span></h2>
               <div className="deco-grid">
-                {data.cosmetics.filter((c) => c.kind === kind).map((c) => { const lack = c.owned ? 0 : c.price - (data.stamps ?? 0); return (
+                {data.cosmetics.filter((c) => c.kind === kind && match(c)).map((c) => { const lack = c.owned ? 0 : c.price - (data.stamps ?? 0); return (
                   <button key={c.id} className={'card deco' + (c.equipped ? ' card--selected' : '')} disabled={lack > 0}
                     onClick={() => (c.owned ? (c.kind === 'outfit' ? run(async () => { setData(await api.equipOutfit(c.equipped ? null : c.id)); await refresh(); }) : undefined) : (setError(null), setBuy({ kind: 'deco', item: c })))}>
-                    <CosmeticArt animal={animal} kind={c.kind} id={c.id} name={c.name} size={64} />
+                    <CosmeticArt animal={preview} kind={c.kind} id={c.id} name={c.name} size={64} />
                     <strong className="small">{c.name}</strong>
                     {c.equipped ? <span className="pill pill--solid">입는 중</span> : c.owned ? <span className="pill pill--mint">{c.kind === 'outfit' ? '입기' : '가짐'}</span> : lack > 0 ? <span className="pill">도장 {lack}개 더</span> : <StampChip n={c.price} />}
                   </button>
@@ -128,7 +147,7 @@ export function StudentShop() {
       {buy && data && (
         <Sheet title={say('이걸로 바꿀까?', '이걸로 바꿀까요?')} onClose={() => setBuy(null)}>
           <div className="row" style={{ gap: 12 }}>
-            {buy.kind === 'deco' ? <CosmeticArt animal={animal} kind={buy.item.kind} id={buy.item.id} name={buy.item.name} size={64} /> : <span className="shop-row__icon"><Icon name="bag" size={22} /></span>}
+            {buy.kind === 'deco' ? <CosmeticArt animal={preview} kind={buy.item.kind} id={buy.item.id} name={buy.item.name} size={64} /> : <span className="shop-row__icon"><Icon name="bag" size={22} /></span>}
             <div><strong>{buy.item.name}</strong><div className="small muted">{buy.kind === 'deco' ? `칭찬 도장 ${data.stamps ?? 0} → ${(data.stamps ?? 0) - buy.item.price}` : `씨앗 ${data.balance} → ${data.balance - buy.item.price}`}</div></div>
           </div>
           {buy.kind === 'item' && <p className="small muted">{say('선생님께 교환 요청이 가. 학원에서 받으면 돼!', '선생님께 교환 요청이 가요. 학원에서 받으면 돼요!')}</p>}
