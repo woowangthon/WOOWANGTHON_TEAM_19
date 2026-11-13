@@ -143,6 +143,50 @@ _OPERAND = r"\(?(\d+)(?:/(\d+))?\)?"
 _EXPR = re.compile(rf"{_OPERAND} / {_OPERAND}")
 
 
+_CHOICE_LINE = re.compile(r"^\s*([①②③④])\s*(.+?)\s*$")
+
+
+def _answer_view(problem: Problem) -> tuple[str, str, list[str] | None]:
+    """(answerKind, 화면에 보일 문제 글, 보기). 정답은 싣지 않는다.
+
+    - fraction: 시드처럼 분수 칸(기존 그대로). value 답이 분수이거나 식을 두 분수로 나눌 수 있을 때
+    - number: value 답이 자연수이고 분수 식이 아닐 때(큰 수 등) → 숫자 한 칸
+    - choice: 문제 글의 ①~④ 줄을 보기 버튼으로 떼어 낸다
+    - text: 낱말 한 개를 쓴다
+    """
+    kind = (problem.answer or {}).get("kind")
+    if kind == "choice":
+        stem, choices = [], []
+        for line in problem.text.split("\n"):
+            m = _CHOICE_LINE.match(line)
+            if m:
+                choices.append(m[2])
+            elif not line.strip().startswith(
+                "(번호"
+            ):  # 「(번호를 … 써 주세요)」 안내는 버튼이 대신한다
+                stem.append(line)
+        if len(choices) >= 2:
+            return "choice", "\n".join(stem).strip(), choices
+        return "choice", problem.text, None
+    if kind == "text":
+        return "text", problem.text, None
+    value = str((problem.answer or {}).get("value", ""))
+    if value.isdigit() and _operands(problem.expr) == (None, None):
+        return "number", problem.text, None
+    return "fraction", problem.text, None
+
+
+def _answer_lang(problem: Problem) -> str | None:
+    """낱말 답의 글자(en = 영어 낱말, ko = 한글 낱말). 화면이 「영어로 써 줘」를 고르게만 쓴다(답 자체는 안 실음)."""
+    words = [str(problem.answer.get("value", "")), *problem.answer.get("accepted", [])]
+    words = [w for w in words if w]
+    if words and all(re.fullmatch(r"[A-Za-z' -]+", w) for w in words):
+        return "en"
+    if words and all(re.search(r"[가-힣]", w) for w in words):
+        return "ko"
+    return None
+
+
 def _tag_name(problem: Problem | None) -> str:
     return TAG_NAME.get(problem.tag, problem.tag) if problem else "오늘 문제"
 
@@ -363,13 +407,19 @@ async def get_problem(session_id: str, db: Db, now: Now, student: Child) -> dict
     if problem is None or _phase(row, solved) != "solve":
         return None  # 풀기 단계가 끝났다
     left, right = _operands(problem.expr)
+    answer_kind, text, choices = _answer_view(problem)
+    if answer_kind != "fraction":
+        left = right = None  # 분수 식 그림은 분수 문제에만
     started = as_utc(row.phase_started_at)
     scale = config.timer_scale()
     return {
         "id": problem.id,
         "index": index,
         "total": total,
-        "text": problem.text,  # 나눗셈 문장제. 프론트 left/op/right 대신 보여야 한다
+        "text": text,  # 나눗셈 문장제. 프론트 left/op/right 대신 보여야 한다. choice면 보기 줄은 뺀다
+        "answerKind": answer_kind,  # fraction / number / choice / text — 화면이 입력 칸을 고른다
+        "choices": choices,  # choice일 때 보기 문구(①부터 순서대로), 아니면 None
+        "answerLang": _answer_lang(problem) if answer_kind == "text" else None,  # en / ko
         "left": left,
         "right": right,
         "op": "÷",
@@ -381,8 +431,16 @@ async def get_problem(session_id: str, db: Db, now: Now, student: Child) -> dict
 
 class AnswerIn(BaseModel):
     problemId: str
-    numerator: int
-    denominator: int
+    numerator: int | None = None  # 분수 칸(시드)
+    denominator: int | None = None
+    answer: str | None = Field(default=None, max_length=40)  # 숫자 한 칸·보기 기호·낱말
+
+    def as_text(self) -> str | None:
+        if self.answer is not None and self.answer.strip():
+            return self.answer.strip()
+        if self.numerator is not None and self.denominator is not None:
+            return f"{self.numerator}/{self.denominator}"
+        return None
 
 
 @router.post("/sessions/{session_id}/answer")
@@ -409,7 +467,9 @@ async def submit_answer(
             "source": None,
             "session": view,
         }
-    text = f"{body.numerator}/{body.denominator}"
+    text = body.as_text()
+    if text is None:
+        raise ApiError(422, "invalid_request", "답을 넣어 주세요.")
     try:
         msg = MessageIn(kind="text", text=text)
     except ValidationError:  # 터무니없이 큰 수(11-12 점검: 500이던 것)
