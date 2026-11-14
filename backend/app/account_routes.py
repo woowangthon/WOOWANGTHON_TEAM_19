@@ -38,6 +38,7 @@ from app.accounts import (
     unique_link_code,
     verify_password,
 )
+from app.class_routes import scrub_student
 from app.compat import _CompatRoute
 from app.demo import ResetBody, _write_day3_student
 from app.demo_world import RESERVED_LOGIN, demo_accounts, ensure_world, seed_key_of, world_id
@@ -54,6 +55,7 @@ from app.models_org import (
     SeedLedger,
     SessionProblem,
 )
+from app.prompts import grade_band_of
 from app.seed import load_seed
 from app.timeutil import seoul_date
 
@@ -187,14 +189,22 @@ async def signup(
     )
     db.add(acc)
     if body.role == "student":
-        # day3와 같은 시작(오개념·오늘 과제)이되 연속 0, 약속 동의 전(명세 4.12-5)
+        # 오늘 과제만 day3와 같고 오개념 0·freezes 0·연속 0, 약속 동의 전(명세 4.12-5, B30 11-14)
         await load_seed(db)
         await _write_day3_student(
-            db, ResetBody(), today, student_id=acc_id, consent=False, nickname=name
+            db,
+            ResetBody(),
+            today,
+            student_id=acc_id,
+            consent=False,
+            nickname=name,
+            misconceptions=False,
         )
         student = await db.get(Student, acc_id)
         assert student is not None
+        student.freezes = 0
         student.streak_days = 0
+        student.grade_band = grade_band_of(body.grade)  # 학년대 말투(명세 부록 D, B11)
         student.last_streak_date = None
         student.created_at = now
     await issue_session(db, request, response, acc, now, remember=True)
@@ -378,6 +388,7 @@ async def _delete_student_data(db: Db, student_id: str) -> None:
     await db.execute(delete(Order).where(Order.student_account_id == student_id))
     await db.execute(delete(Notice).where(Notice.account_id == student_id))
     await db.execute(delete(Student).where(Student.id == student_id))
+    await scrub_student(db, student_id)  # 수업 참여·숙제 다 했어(명세 4.12 5-4)
 
 
 class DeleteIn(BaseModel):

@@ -1,6 +1,6 @@
 // 로그인 · 회원가입(단계형) · 아이디/비밀번호 찾기 · 가입 완료 · 약관 보기
 // 규칙(아이디·비밀번호 형식, 중복, 필수 약관)은 서버(org.ts)가 최종 판단한다. 화면은 미리 알려 주는 역할.
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api, API_MODE, restartDemoAll } from '../../api';
 import { Frame } from '../../components/Frame';
@@ -9,7 +9,7 @@ import { Mascot } from '../../components/Mascot';
 import { LoadError, Sheet } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
-import { signupMissing } from '../../lib/signupHint';
+import { looksLikePhone, signupMissing } from '../../lib/signupHint';
 import { GRADE_NOTE, TONE_NOTE, currentGradeUi, gradeOpen, showToneNote } from '../../lib/gradeUi';
 import { clearJustSignedUp, homeFor, markJustSignedUp, takeLoginExpired, useAuth } from '../../state/auth';
 import { DOCS } from '../../data/docs';
@@ -32,7 +32,7 @@ export function Login() {
 
   return (
     <Frame title="" header={<div style={{ height: 12 }} />}>
-      <div className="login-hero">
+      <div className="login-hero auth-narrow">
         <Mascot mood="wave" size={96} variant="face" />
         <h1 className="h1">AI 멘토</h1>
         <p className="small muted">하루 20분, 같이 푸는 공부 친구</p>
@@ -95,7 +95,7 @@ type Role = SignupBody['role'];
 const ROLES: { role: Role; icon: IconName; title: string; sub: string }[] = [
   { role: 'student', icon: 'book', title: '학생이에요', sub: '매일 20분, 멘토와 같이 풀어요' },
   { role: 'guardian', icon: 'user', title: '보호자예요', sub: '아이와 연결하고 오늘 결과를 봐요' },
-  { role: 'teacher', icon: 'people', title: '학습지도자예요', sub: '학원·학교 선생님 · 원장님도 여기로' },
+  { role: 'teacher', icon: 'people', title: '선생님이에요', sub: '학원·학교 선생님(학습지도자) · 원장님도 여기로' },
 ];
 
 export function Signup() {
@@ -110,12 +110,17 @@ export function Signup() {
   const [level, setLevel] = useState<SchoolLevel | null>(gradeUi === 'b' ? '초' : null);
   const [idOk, setIdOk] = useState<null | boolean>(null);
   const [doc, setDoc] = useState<string | null>(null);
+  const [regrade, setRegrade] = useState(false);   // R2: 학교를 바꿔 학년이 비었으면 한 줄 안내
+  const [showPw, setShowPw] = useState(false);     // R5: 로그인처럼 비밀번호 보기
+  const head = useRef<HTMLHeadingElement>(null);   // R12: 단계가 바뀌면 그 단계 제목으로 포커스
+  const firstStep = useRef(true);
+  useEffect(() => { if (firstStep.current) { firstStep.current = false; return; } head.current?.focus(); }, [step]);
   const { run, busy, error, setError } = useAction();
   const kid = role === 'student';
   const set = (k: keyof typeof f, v: string | number | null) => { setF({ ...f, [k]: v }); if (k === 'loginId') setIdOk(null); };
   const pwOk = PW_RULE.test(f.password);
   const same = f.password.length > 0 && f.password === f.confirm;
-  const infoOk = idOk === true && pwOk && same && f.name.trim() && (kid ? f.grade !== null : /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email));
+  const infoOk = idOk === true && pwOk && same && f.name.trim() && !(kid && looksLikePhone(f.name)) && (kid ? f.grade !== null : /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email));
   const back = () => (step === 0 ? nav('/login') : (setError(null), setStep(step - 1)));
 
   const checkId = () => run(async () => setIdOk(await api.checkLoginId(f.loginId)));
@@ -125,7 +130,7 @@ export function Signup() {
     markJustSignedUp(); await enter(me); nav('/welcome', { replace: true });
   });
 
-  const titles = ['어떤 분인가요?', '약관 동의', '정보 입력'];
+  const titles = ['누가 쓰나요?', '약관 동의', '정보 입력'];
   let action: ReactNode = null;
   if (step === 1) action = <button className="btn btn--primary" disabled={!agree.terms || !agree.privacy} onClick={() => setStep(2)}>다음</button>;
   // 막혔으면 무엇이 빠졌는지 한 줄(R3) — 특히 「중복 확인」을 안 눌러 막히는 경우가 많다
@@ -135,14 +140,14 @@ export function Signup() {
   return (
     <Frame adult={!!role && !kid} title="회원가입" back={false} right={<span className="pill pill--mint">{step + 1}/3</span>}
       header={<header className="topbar"><div className="topbar__side"><button className="icon-btn" aria-label="뒤로" onClick={back}><Icon name="back" /></button></div>
-        <div className="topbar__center"><div className="topbar__title">회원가입</div><div className="topbar__label">{titles[step]}</div></div>
+        <div className="topbar__center"><div className="topbar__title">회원가입</div></div>
         <div className="topbar__side topbar__side--right"><span className="pill pill--mint">{step + 1}/3</span></div></header>}
       actions={action}>
-      <div className="progress progress--thin" aria-hidden><div className="progress__fill" style={{ width: `${((step + 1) / 3) * 100}%` }} /></div>
+      <div className="progress progress--thin auth-narrow" aria-hidden><div className="progress__fill" style={{ width: `${((step + 1) / 3) * 100}%` }} /></div>
+      <h1 className="h2" ref={head} tabIndex={-1}>{titles[step]}</h1>
 
       {step === 0 && (
         <>
-          <h1 className="h2">어떤 분인가요?</h1>
           <div className="stack">
             {ROLES.map((r) => (
               <button key={r.role} className="card path-card" onClick={() => { setRole(r.role); setStep(1); }}>
@@ -152,20 +157,21 @@ export function Signup() {
               </button>
             ))}
           </div>
-          <p className="small muted">학원·학교를 새로 등록하려면 <strong>학습지도자</strong>로 가입한 뒤 설정 → 소속에서 신청해요.</p>
+          <p className="small muted">학원·학교를 새로 등록하려면 <strong>선생님</strong>으로 가입한 뒤 설정 → 소속에서 신청해요.</p>
         </>
       )}
 
       {step === 1 && (
         <>
           <label className="agree agree--all">
-            <input type="checkbox" checked={agree.terms && agree.privacy && agree.marketing} onChange={(e) => setAgree({ terms: e.target.checked, privacy: e.target.checked, marketing: e.target.checked })} />
+            <input type="checkbox" checked={agree.terms && agree.privacy && (kid || agree.marketing)} onChange={(e) => setAgree({ terms: e.target.checked, privacy: e.target.checked, marketing: kid ? false : e.target.checked })} />
             <strong>전체 동의</strong>
           </label>
           <div className="card card--flat" style={{ padding: 0 }}>
             <AgreeRow label="[필수] 이용약관" checked={agree.terms} onChange={(v) => setAgree({ ...agree, terms: v })} onView={() => setDoc('terms')} />
             <AgreeRow label="[필수] 개인정보 수집·이용" checked={agree.privacy} onChange={(v) => setAgree({ ...agree, privacy: v })} onView={() => setDoc('privacy')} />
-            <AgreeRow label="[선택] 이벤트·소식 알림" checked={agree.marketing} onChange={(v) => setAgree({ ...agree, marketing: v })} />
+            {/* R8: 학생에게는 [선택] 소식 알림을 묻지 않는다(이번 범위에 외부 발송 없음) */}
+            {!kid && <AgreeRow label="[선택] 이벤트·소식 알림" checked={agree.marketing} onChange={(v) => setAgree({ ...agree, marketing: v })} />}
           </div>
           {kid && (
             <div className="notice"><span><strong>만 14세 미만이면 보호자 동의가 필요해요.</strong> 가입한 뒤 보호자와 연결하면 보호자가 동의해 줘요. 그 전에는 학원 입장과 수다가 잠겨 있어요.</span></div>
@@ -177,41 +183,46 @@ export function Signup() {
         <>
           <label className="field">아이디
             <div className="row">
-              <input className="input" value={f.loginId} autoCapitalize="none" autoComplete="username" placeholder="영문 소문자로 시작 4~16자" onChange={(e) => set('loginId', e.target.value.toLowerCase())} />
+              <input className="input" value={f.loginId} autoCapitalize="none" autoComplete="username" inputMode="email" placeholder="예: haneul22" onChange={(e) => set('loginId', e.target.value.toLowerCase())} />
               <button className="btn btn--secondary btn--small" style={{ minHeight: 46 }} disabled={!f.loginId || busy} onClick={checkId}>중복 확인</button>
             </div>
             {idOk === true && <span className="hint hint--ok">쓸 수 있는 아이디예요</span>}
             {idOk === false && <span className="hint hint--bad">이미 쓰는 아이디예요</span>}
-            {idOk === null && f.loginId && !ID_RULE.test(f.loginId) && <span className="hint">영문 소문자로 시작, 소문자·숫자·_ 4~16자</span>}
+            {idOk === null && <span className={'hint' + (f.loginId && !ID_RULE.test(f.loginId) ? ' hint--bad' : '')}>영문 소문자로 시작, 소문자·숫자·_ 4~16자</span>}
           </label>
           <label className="field">비밀번호
-            <input className="input" type="password" autoComplete="new-password" value={f.password} placeholder="영문+숫자 8~20자" onChange={(e) => set('password', e.target.value)} />
+            <div className="pw-field">
+              <input className="input" type={showPw ? 'text' : 'password'} autoComplete="new-password" value={f.password} placeholder="영문+숫자 8~20자" onChange={(e) => set('password', e.target.value)} />
+              <button type="button" className="icon-btn pw-field__eye" aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 보기'} onClick={() => setShowPw(!showPw)}><Icon name={showPw ? 'eyeOff' : 'eye'} size={20} /></button>
+            </div>
             {f.password && <span className={'hint ' + (pwOk ? 'hint--ok' : '')}>{pwOk ? '좋아요' : '영문과 숫자를 섞어 8~20자'}</span>}
           </label>
           <label className="field">비밀번호 확인
-            <input className="input" type="password" autoComplete="new-password" value={f.confirm} onChange={(e) => set('confirm', e.target.value)} />
+            <input className="input" type={showPw ? 'text' : 'password'} autoComplete="new-password" value={f.confirm} onChange={(e) => set('confirm', e.target.value)} />
             {f.confirm && <span className={'hint ' + (same ? 'hint--ok' : 'hint--bad')}>{same ? '같아요' : '위와 달라요'}</span>}
           </label>
-          <label className="field">{kid ? '별명 (멘토가 불러 줄 이름)' : '이름'}
-            <input className="input" value={f.name} maxLength={12} placeholder={kid ? '예: 지우' : '예: 김선생님'} onChange={(e) => set('name', e.target.value)} />
+          <label className="field">{kid ? '별명' : '이름'}
+            <input className="input" value={f.name} maxLength={12} placeholder={kid ? '예: 하늘, 별똥별' : '예: 김선생님'} onChange={(e) => set('name', e.target.value)} />
+            {/* R1: 프롬프트에는 별명을 넣지 않고 「너」로 부른다 → 「멘토가 불러 줄 이름」이라 하지 않는다. 진짜 이름·전화번호를 처음부터 덜 받게 */}
+            {kid && (looksLikePhone(f.name) ? <span className="hint hint--bad">전화번호처럼 보여. 별명만 써 줘</span> : <span className="hint">진짜 이름 말고 별명을 써 줘</span>)}
           </label>
           {kid ? (
-            <div className="field">학년 <span className="hint">학년에 맞는 말투로 멘토가 이야기해요</span>
+            <fieldset className="field"><legend>학년 <span className="hint">학년에 맞는 말투로 멘토가 이야기해요</span></legend>
               <div className="chip-row" role="radiogroup" aria-label="학교">
-                {SCHOOL_LEVELS.map((s) => <button key={s.level} type="button" role="radio" aria-checked={level === s.level} disabled={!gradeOpen(gradeUi, toGrade(s.level, s.years)!)} className={'chip' + (level === s.level ? ' chip--on' : '')} onClick={() => { if (level !== s.level) { setLevel(s.level); set('grade', null); } }}>{s.label}{gradeOpen(gradeUi, toGrade(s.level, s.years)!) ? '' : ' · 준비 중'}</button>)}
+                {SCHOOL_LEVELS.map((s) => <button key={s.level} type="button" role="radio" aria-checked={level === s.level} disabled={!gradeOpen(gradeUi, toGrade(s.level, s.years)!)} className={'chip' + (level === s.level ? ' chip--on' : '')} onClick={() => { if (level !== s.level) { setRegrade(f.grade !== null); setLevel(s.level); set('grade', null); } }}>{s.label}{gradeOpen(gradeUi, toGrade(s.level, s.years)!) ? '' : ' · 준비 중'}</button>)}
               </div>
               {level && (
                 <div className="chip-row chip-row--reveal" role="radiogroup" aria-label={`${level} 학년`}>
                   {Array.from({ length: SCHOOL_LEVELS.find((s) => s.level === level)!.years }, (_, i) => i + 1).map((y) => {
                     const g = toGrade(level, y)!;
-                    return <button key={g} type="button" role="radio" aria-checked={f.grade === g} disabled={!gradeOpen(gradeUi, g)} className={'chip' + (f.grade === g ? ' chip--on' : '')} onClick={() => set('grade', g)}>{y}학년</button>;
+                    return <button key={g} type="button" role="radio" aria-checked={f.grade === g} disabled={!gradeOpen(gradeUi, g)} className={'chip' + (f.grade === g ? ' chip--on' : '')} onClick={() => { setRegrade(false); set('grade', g); }}>{y}학년</button>;
                   })}
                 </div>
               )}
+              {regrade && f.grade === null && <span className="hint hint--bad" role="status">학년을 다시 골라 줘</span>}
               {gradeUi === 'b' && <span className="hint">체험에서는 초5·6만 고를 수 있어요 (다른 학년은 준비 중)</span>}
               {showToneNote(gradeUi) && <span className="hint">{GRADE_NOTE}. {TONE_NOTE}</span>}
-              <span className="hint">진짜 이름·전화번호는 적지 마세요</span>
-            </div>
+            </fieldset>
           ) : (
             <label className="field">이메일 <span className="hint">아이디·비밀번호를 찾을 때 써요</span>
               <input className="input" type="email" inputMode="email" autoComplete="email" value={f.email} onChange={(e) => set('email', e.target.value)} />
@@ -287,7 +298,7 @@ export function Welcome() {
         <h1 className="h2">{me.name}{me.role === 'student' ? ', 반가워!' : '님, 환영해요'}</h1>
         <p className="small muted">아이디 <strong>{me.loginId}</strong> · {ROLE_LABEL[me.role]}</p>
       </div>
-      {me.linkCode && <section className="card row between"><span className="small muted">내 연결 코드</span><span className="code-big">{me.linkCode}</span></section>}
+      {me.linkCode && <section className="card row between"><span className="small muted">내 연결 코드</span><span className="row" style={{ gap: 8 }}><span className="code-big">{me.linkCode}</span><CopyButton text={me.linkCode} /></span></section>}
       <section className="card stack">
         <strong>이제 이렇게 해요</strong>
         <ol className="setup">{next[me.role].map((t, i) => <li key={t}><span className="setup__n">{i + 1}</span><span className="small">{t}</span></li>)}</ol>
@@ -324,5 +335,15 @@ export function Find() {
         <p className="small muted">보호자 앱 → <strong>설정 → 자녀 관리 → 비밀번호 재설정</strong>에서 보호자가 새 비밀번호를 정해 줄 수 있어요.</p>
       </section>
     </Frame>
+  );
+}
+
+/** R9: 가입 완료 연결 코드 복사(설정 화면과 같은 동작) */
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button className="btn btn--secondary btn--small" style={{ width: 'auto' }} onClick={async () => { try { await navigator.clipboard.writeText(text); setCopied(true); } catch { setCopied(false); } }}>
+      {copied ? '복사했어 ✓' : '복사'}
+    </button>
   );
 }

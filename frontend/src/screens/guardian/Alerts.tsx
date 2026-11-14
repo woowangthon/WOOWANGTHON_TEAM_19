@@ -30,6 +30,9 @@ function AlertList() {
   // 위쪽 카드: 아직 안 본 것 + 확인은 했지만 닫지 않은 긴급
   const open = data?.filter((a) => a.status === '미확인' || (a.level === '긴급' && a.status === '확인함')) ?? [];
   const history = data?.filter((a) => !open.includes(a)) ?? [];
+  // B5: 아이가 둘 이상일 때만 이름을 붙인다(하나면 생략)
+  const many = new Set((data ?? []).map((a) => a.childName).filter(Boolean)).size > 1;
+  const who = (a: { childName?: string }) => (many && a.childName ? `${a.childName} · ` : '');
 
   return (
     <Frame adult title="안전 알림" exit tabs="guardian">
@@ -40,7 +43,7 @@ function AlertList() {
       {open.map((a) => (
         <article key={a.id} className={a.level === '긴급' ? 'card card--danger' : 'card card--warn'}>
           <div className="row between small"><span className={a.level === '긴급' ? 'pill pill--danger' : 'pill pill--accent'}>{a.level}</span><span className="muted num">{a.at}</span></div>
-          <h2 className="h2" style={{ margin: '8px 0 4px' }}><Icon name="warn" size={20} /> {a.category} · 확인 필요</h2>
+          <h2 className="h2" style={{ margin: '8px 0 4px' }}><Icon name="warn" size={20} /> {who(a)}{a.category} · 확인 필요</h2>
           <p>{a.action}</p>
           {a.excerpt && (
             <section className="card card--flat stack" aria-label="아이가 한 말의 앞뒤 일부">
@@ -59,7 +62,7 @@ function AlertList() {
       {history.length > 0 && <h2 className="h3">이전 알림</h2>}
       {history.map((a) => (
         <div key={a.id} className="card card--flat row between small">
-          <span className="num">{a.at} · {a.level}</span><span className="muted">{a.status}{a.closeReason ? ` · ${a.closeReason}` : ''}</span>
+          <span className="num">{who(a)}{a.at} · {a.level}</span><span className="muted">{a.status}{a.closeReason ? ` · ${a.closeReason}` : ''}</span>
         </div>
       ))}
       <p className="small muted" style={{ textAlign: 'center' }}>평소 수다는 표시하지 않아요. 위험 신호가 있을 때만 그 앞뒤 일부를 보여 드려요</p>

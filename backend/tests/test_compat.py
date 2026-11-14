@@ -577,3 +577,40 @@ async def test_reply_after_chat_deadline_does_not_answer(client, db_session, clo
     r = await call("POST", f"/sessions/{sid}/reply")
     assert r.status_code == 200 and r.json()["reply"] == ""
     assert await mentor_count() == before
+
+
+async def test_homework_reaches_guardian_only_after_approval(client, scripted_draft):
+    # 명세 부록 D: 숙제는 초안 본문이 아니라 사실 칸으로 서버가 카드에 붙인다(11-13 전체 흐름 시험에서 빠짐 발견)
+    url = f"/teacher/students/{DEMO_CHILD_ID}"
+    memo = {**MEMO, "homework": "익힘책 2쪽, 테스트학생 엄마께 010-2222-3333"}
+    await client.put(BASE + f"{url}/memo", headers=INSTRUCTOR, json=memo)
+    before = (await client.get(BASE + "/guardian/today", headers=GUARDIAN)).json()
+    assert before["homework"] is None  # 승인 전에는 보호자에게 아무것도 안 간다
+    await client.post(BASE + f"{url}/draft/approve", headers=INSTRUCTOR)
+    after = (await client.get(BASE + "/guardian/today", headers=GUARDIAN)).json()
+    assert after["homework"].startswith("익힘책 2쪽")
+    assert "테스트학생" in after["homework"] and "[이름]" not in after["homework"]
+    assert "010-2222-3333" not in after["homework"]  # 전화는 계속 가림
+
+
+async def test_draft_says_when_it_is_the_template(client, scripted_draft):
+    # 수정 명세 B33: 초안이 템플릿으로 바뀌어도 응답에 표시가 없어 강사가 AI 초안인지 몰랐다
+    url = f"/teacher/students/{DEMO_CHILD_ID}"
+    await client.put(BASE + f"{url}/memo", headers=INSTRUCTOR, json=MEMO)
+    draft = (await client.post(BASE + f"{url}/draft", headers=INSTRUCTOR)).json()
+    assert draft["source"] == "template"
+
+
+async def test_draft_source_live_when_model_wrote_it():
+    from app.instructor import _draft_body
+    from app.llm import Reply
+
+    class Live:
+        async def reply(self, req):
+            return Reply('{"body": "오늘 분수 나눗셈을 끝까지 풀었습니다."}', "live")
+
+    class Student:
+        style = "EBSP"
+
+    body, source = await _draft_body(Live(), Student(), "분수", "역수", "", [])  # type: ignore[arg-type]
+    assert source == "live" and body.startswith("오늘 분수")

@@ -16,7 +16,7 @@ import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { useMentor } from '../../state/mentor';
 import { useAuth } from '../../state/auth';
-import { ANIMAL_LABEL, type Animal, type MentorSetting, type MentorStyle, type MentorTitle, type Speech } from '../../types';
+import { ANIMALS, ANIMAL_LABEL, type Animal, type MentorSetting, type MentorStyle, type MentorTitle, type Speech } from '../../types';
 
 const STYLES: { style: MentorStyle; mood: Mood; casual: string; polite: string }[] = [
   { style: '같이 풀어주는', mood: 'cheer', casual: '좋아, 바로 같이 가 보자!', polite: '좋아요, 바로 같이 가 봐요!' },
@@ -24,7 +24,6 @@ const STYLES: { style: MentorStyle; mood: Mood; casual: string; polite: string }
   { style: '짚어주는', mood: 'promise', casual: '오늘은 이것 하나만 짚자.', polite: '오늘은 이것 하나만 짚어요.' },
 ];
 /** 띠를 추가하면 여기와 types.ts Animal에 넣는다 */
-const ANIMALS: Animal[] = ['horse', 'monkey'];
 const TITLES: MentorTitle[] = ['형', '언니', '친구'];
 const SPEECHES: Speech[] = ['반말', '존댓말'];
 
@@ -54,7 +53,7 @@ export function StudentCharacter({ editMode = false }: { editMode?: boolean }) {
     <Frame title={editMode ? '내 멘토' : '캐릭터 고르기'} back={editMode ? undefined : '/student/onboarding/promise'} exit={editMode}
       right={editMode ? <button className="icon-btn" aria-label="멘토 말투 설정" onClick={() => setTalkOpen(true)}><Icon name="talk" /></button> : <span className="pill pill--mint">2/2</span>}
       tabs={editMode ? 'student' : undefined}
-      actions={<><LoadError error={error} /><button className="btn btn--primary" disabled={busy} onClick={submit}>{busy ? '저장하는 중…' : savedNow ? say('저장했어 ✓', '저장했어요 ✓') : editMode ? say('이 친구로 바꿀래', '이 친구로 바꿀래요') : say('이 친구로 할래', '이 친구로 할래요')}</button></>}>
+      actions={<><LoadError error={error} /><button className="btn btn--primary" disabled={busy} onClick={submit}>{busy ? '저장하는 중…' : savedNow ? say('저장했어 ✓', '저장했어요 ✓') : editMode ? say('이 친구로 바꿀래', '이 친구로 바꿀래요') : (setting.speech === '존댓말' ? '이 친구로 할래요' : '이 친구로 할래')}</button></>}>
       <Stack index={idx} onMove={go} labels={ANIMALS.map((a) => ANIMAL_LABEL[a])}>
         {ANIMALS.map((a) => (
           <div key={a} className="stack-card__inner">
@@ -65,8 +64,9 @@ export function StudentCharacter({ editMode = false }: { editMode?: boolean }) {
       </Stack>
 
       {!editMode && <TalkPicker setting={setting} onChange={set} />}
-      {editMode && <p className="small muted" style={{ textAlign: 'center' }}>말투는 오른쪽 위 말풍선 버튼에서 바꿀 수 있어요</p>}
-      <Wardrobe preview={!editMode} animal={setting.animal} />
+      {editMode && <p className="small muted" style={{ textAlign: 'center' }}>{say('말투는 오른쪽 위 말풍선 버튼에서 바꿀 수 있어', '말투는 오른쪽 위 말풍선 버튼에서 바꿀 수 있어요')}</p>}
+      {/* 첫 실행에는 잠긴 옷장을 보이지 않는다(R11, 시선 분산) — 「내 멘토」에서만 */}
+      {editMode && <Wardrobe preview={false} animal={setting.animal} />}
       {/* 아직 저장한 멘토가 없으면(체험 계정 등) 화면에 보이는 값을 바탕으로 */}
       {talkOpen && <TalkSheet saved={saved ?? setting} onSave={async (t) => { await save({ ...(saved ?? setting), ...t }); setTalkOpen(false); }} onClose={() => setTalkOpen(false)} />}
     </Frame>
@@ -81,13 +81,18 @@ function TalkPicker({ setting, onChange }: { setting: Talk; onChange: (patch: Pa
   return (
     <>
       <div className="seg" role="radiogroup" aria-label="멘토 스타일">
-        {STYLES.map((s) => <button key={s.style} role="radio" aria-checked={s.style === setting.style} className={'seg__btn' + (s.style === setting.style ? ' seg__btn--on' : '')} onClick={() => onChange({ style: s.style })}>{s.style.replace('주는', '')}</button>)}
+        {STYLES.map((s) => <button key={s.style} role="radio" aria-checked={s.style === setting.style} className={'seg__btn' + (s.style === setting.style ? ' seg__btn--on' : '')} onClick={() => onChange({ style: s.style })}>{s.style.replace('주는', ' 줘')}</button>)}
       </div>
       <div className="bubble" style={{ maxWidth: '100%' }}>“{setting.speech === '존댓말' ? style.polite : style.casual}”</div>
-      <div className="row between">
+      {/* R11: 칩 줄마다 제목(왼쪽) — 360에서도 한 줄씩 */}
+      <div className="row" style={{ gap: 10 }}>
+        <span className="small muted" style={{ minWidth: 92 }}>뭐라고 부를까?</span>
         <div className="chip-row" role="radiogroup" aria-label="호칭">
           {TITLES.map((t) => <button key={t} role="radio" aria-checked={setting.title === t} className={'chip' + (setting.title === t ? ' chip--on' : '')} onClick={() => onChange({ title: t })}>{t}</button>)}
         </div>
+      </div>
+      <div className="row" style={{ gap: 10 }}>
+        <span className="small muted" style={{ minWidth: 92 }}>말투</span>
         <div className="chip-row" role="radiogroup" aria-label="말투">
           {SPEECHES.map((s) => <button key={s} role="radio" aria-checked={setting.speech === s} className={'chip' + (setting.speech === s ? ' chip--on' : '')} onClick={() => onChange({ speech: s })}>{s}</button>)}
         </div>
@@ -99,12 +104,13 @@ function TalkPicker({ setting, onChange }: { setting: Talk; onChange: (patch: Pa
 /** 「내 멘토」 전용 설정 시트. 저장을 눌러야 바뀐다(닫으면 그대로) */
 function TalkSheet({ saved, onSave, onClose }: { saved: MentorSetting; onSave: (t: Talk) => Promise<void>; onClose: () => void }) {
   const [talk, setTalk] = useState<Talk>({ style: saved.style, title: saved.title, speech: saved.speech });
+  const sayT = (c: string, p: string) => (talk.speech === '존댓말' ? p : c); // T2: 시트에서 고르는 말투를 바로 따른다
   const { run, busy, error } = useAction();
   return (
     <Sheet title="멘토 말투 설정" onClose={onClose}>
       <TalkPicker setting={talk} onChange={(p) => setTalk({ ...talk, ...p })} />
       {error && <p className="hint hint--bad">{error}</p>}
-      <button className="btn btn--primary" disabled={busy} onClick={() => run(() => onSave(talk))}>이 말투로 할래</button>
+      <button className="btn btn--primary" disabled={busy} onClick={() => run(() => onSave(talk))}>{sayT('이 말투로 할래', '이 말투로 할래요')}</button>
     </Sheet>
   );
 }

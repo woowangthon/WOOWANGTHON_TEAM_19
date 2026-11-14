@@ -350,7 +350,7 @@ async def ensure_world(db: AsyncSession, trial_id: str, now: datetime) -> bool:
         )
     )
     notices = [
-        ("n1", "g1", (9, 0), "김선생님이 지우의 이번 주 범위를 정했어요: 분수의 덧셈·뺄셈", None),
+        ("n1", "g1", (9, 0), "김선생님이 지우의 이번 주 범위를 정했어요: 분수의 나눗셈", None),
         ("n2", "s1", (9, 0), "보호자가 어제 도장을 찍어 줬어! 씨앗 +2", "/student/shop"),
         ("n3", "own1", (10, 0), "이선생님이 소속을 신청했어요", "/owner"),
         ("n4", "t1", (16, 40), "이민준이 「칭찬 간식 쿠폰」 교환을 요청했어요", "/teacher/seeds"),

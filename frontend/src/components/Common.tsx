@@ -83,7 +83,7 @@ export function Week({ attendance, todayIndex }: { attendance: boolean[]; todayI
   return (
     <div className="week" aria-label="이번 주 출석">
       {days.map((d, i) => (
-        <div key={d} className={'day' + (i === todayIndex ? ' day--today' : '')}>
+        <div key={d} className={'day' + (i === todayIndex ? ' day--today' : '')} aria-current={i === todayIndex ? 'date' : undefined}>
           <span>{d}</span>
           <span className={'dot' + (attendance[i] ? ' dot--on' : '')} aria-label={attendance[i] ? '함' : '안 함'}>{attendance[i] && <Icon name="check" size={14} />}</span>
         </div>

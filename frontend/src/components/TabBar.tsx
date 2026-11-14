@@ -2,6 +2,8 @@
 // 11-11: 선생님·학생 모두 「강의실」 탭 추가. 선생님은 5칸 유지를 위해 「알림」(긴급)을 할 일 화면 오른쪽 위로 옮김
 import { Link, NavLink } from 'react-router-dom';
 import { Icon, type IconName } from './Icon';
+import { useClassLocked } from './ClassSession';
+import { LOCKED_IN_CLASS } from '../lib/classSession';
 
 export type TabSet = 'student' | 'teacher' | 'guardian';
 
@@ -26,6 +28,7 @@ const TABS: Record<TabSet, { to: string; label: string; icon: IconName }[]> = {
 };
 
 export function TabBar({ set }: { set: TabSet }) {
+  const locked = useClassLocked(); // 학생 수업 중: 잠긴 탭은 자물쇠로 보인다(누르면 잠금 안내)
   return (
     <nav className="tabbar" aria-label="하단 탭">
       {/* GPT-019: 태블릿 레일은 얼굴, PC 사이드바는 얼굴+글자. 휴대폰 하단 탭에서는 CSS로 숨김 */}
@@ -33,9 +36,11 @@ export function TabBar({ set }: { set: TabSet }) {
         <img src={`${import.meta.env.BASE_URL}mascot/horse/wave-avatar.png`} alt="" /><span>AI 멘토</span>
       </Link>
       {TABS[set].map((t) => (
-        <NavLink key={t.to} to={t.to} end className={({ isActive }) => 'tab' + (isActive ? ' tab--active' : '')}>
-          <Icon name={t.icon} size={22} />
+        <NavLink key={t.to} to={t.to} end className={({ isActive }) => 'tab' + (isActive ? ' tab--active' : '') + (locked && LOCKED_IN_CLASS.includes(t.to) ? ' tab--locked' : '')}>
+          <Icon name={locked && LOCKED_IN_CLASS.includes(t.to) ? 'lock' : t.icon} size={22} />
           {t.label}
+          {/* GPT-044: 눌러도 된다(잠금 안내로 감) — disabled로 막지 않는다 */}
+          {locked && LOCKED_IN_CLASS.includes(t.to) && <span className="tab__lock-note">잠김</span>}
         </NavLink>
       ))}
     </nav>

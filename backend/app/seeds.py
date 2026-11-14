@@ -48,6 +48,15 @@ COSMETICS: list[tuple[str, str, str, int]] = [
     ("thanks", "emote", "고마워", 1),
     ("sleepy", "emote", "졸려", 1),
     ("best", "emote", "최고야", 2),
+    # 11-13 재하 추가(fe-android 05f4a58, TK-108 4절 요청)
+    ("cap", "outfit", "야구 모자", 2),
+    ("backpack", "outfit", "새 책가방", 3),
+    ("headphones", "outfit", "집중 헤드폰", 3),
+    ("hanbok", "outfit", "색동 한복", 5),
+    ("cheer", "emote", "힘내", 1),
+    ("question", "emote", "궁금해", 1),
+    ("idea", "emote", "알았다!", 1),
+    ("sorry", "emote", "미안해", 1),
 ]
 ONCE_A_DAY = (STUDY_DONE, STAMP)  # once_key를 붙이는 출처
 UNITS_KEY = "units"  # accounts.settings 안 학습지도자 단원 선택(태그 목록)

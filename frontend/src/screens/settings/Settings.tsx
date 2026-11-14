@@ -13,6 +13,7 @@ import { homeFor, useAuth, useRefreshMeOnMount } from '../../state/auth';
 import { ROLE_LABEL, type AcademyForm, type Me, type NotifySettings } from '../../types';
 import { PW_RULE } from '../../api/org';
 import { gradeLabel } from '../../lib/grade';
+import { useMentor } from '../../state/mentor';
 
 export const APP_VERSION = '0.5.0';
 
@@ -175,18 +176,12 @@ export function SettingsNotify() {
   return (
     <Frame adult={me.role !== 'student'} title="알림 설정" back="/settings">
       <Group title="알림">
-        {me.role === 'student' && (
-          <div className="set-item set-item--static">
-            <span className="set-item__label">매일 공부 알림<span className="small muted">이 시간에 멘토가 불러 줘</span></span>
-            <select className="input" style={{ width: 110, minHeight: 40 }} value={s.studyReminder ?? ''} onChange={(e) => save({ studyReminder: e.target.value || null })}>
-              <option value="">끄기</option>{['15:00', '16:00', '17:00', '18:00', '19:00', '20:00'].map((t) => <option key={t}>{t}</option>)}
-            </select>
-          </div>
-        )}
+        {/* B17: 매일 공부 알림은 저장만 되고 실제 알림(푸시)은 후속 → 없는 기능을 약속하지 않게 숨김 */}
         {me.role === 'guardian' && <Toggle label="아이 학습 완료" sub="오늘 공부를 끝내면 알려 드려요" on={s.learnDone} onChange={(v) => save({ learnDone: v })} />}
         <Toggle label="활동 알림" sub={me.role === 'teacher' ? '소속 신청·참여 요청·교환 요청' : '연결·초대·승인·씨앗'} on={s.activity} onChange={(v) => save({ activity: v })} />
         {me.role === 'guardian' && <Toggle label="안전 알림" sub="위험 신호가 있으면 항상 알려요(끌 수 없음)" on locked />}
-        <Toggle label="이벤트·소식 [선택]" on={s.marketing} onChange={(v) => save({ marketing: v })} />
+        {/* R8과 같게: 학생에게는 [선택] 소식 알림을 묻지 않는다 */}
+        {me.role !== 'student' && <Toggle label="이벤트·소식 [선택]" on={s.marketing} onChange={(v) => save({ marketing: v })} />}
       </Group>
       <p className="small muted">시연 버전은 앱 안 알림함에만 쌓여요. 휴대폰 푸시는 앱 출시 때 연결해요.</p>
       <LoadError error={error} />
@@ -227,6 +222,7 @@ export function SettingsFamily() {
   const [consentFor, setConsentFor] = useState<{ kind: 'code'; code: string } | { kind: 'confirm'; id: string; name: string } | null>(null);
   const [resetFor, setResetFor] = useState<{ id: string; name: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const { say } = useMentor(); // T2: 아이 화면 고정 문구는 고른 말투(어른 화면은 존댓말 그대로)
   const [done, setDone] = useState<string | null>(null);
   const { run, busy, error } = useAction();
   if (!me) return null;
@@ -236,7 +232,7 @@ export function SettingsFamily() {
     <Frame adult={!kid} title={kid ? '보호자 연결' : '자녀 관리'} back="/settings">
       {done && <div className="notice" role="status"><span>{done}</span><Icon name="check" size={18} /></div>}
       <section className="card stack">
-        <div className="small muted">내 연결 코드 {kid ? '(보호자에게 알려 줘)' : '(아이 앱에 넣어도 돼요)'}</div>
+        <div className="small muted">내 연결 코드 {kid ? say('(보호자에게 알려 줘)', '(보호자에게 알려 주세요)') : '(아이 앱에 넣어도 돼요)'}</div>
         <div className="row between">
           <span className="code-big">{me.linkCode}</span>
           <button className="btn btn--secondary btn--small" onClick={async () => { try { await navigator.clipboard.writeText(me.linkCode ?? ''); setCopied(true); } catch { /* 복사 막힘 */ } }}><Icon name="copy" size={16} />{copied ? '복사됨' : '복사'}</button>
@@ -325,13 +321,14 @@ function FamilyOrg() {
   const { me, enter } = useAuth();
   useRefreshMeOnMount();
   const [entry, setEntry] = useState('');
+  const { say } = useMentor();
   const [done, setDone] = useState(false);
   const { run, busy, error } = useAction();
   if (!me) return null;
   const kid = me.role === 'student';
   return (
     <Frame adult={!kid} title={kid ? '학원·강의실' : '학원'} back="/settings">
-      {done && <div className="notice" role="status"><span>학원에 등록했어요. 연결된 가족도 함께 등록됐어요.</span><Icon name="check" size={18} /></div>}
+      {done && <div className="notice" role="status"><span>{me.role === 'student' ? say('학원에 등록했어. 연결된 가족도 함께 등록됐어.', '학원에 등록했어요. 연결된 가족도 함께 등록됐어요.') : '학원에 등록했어요. 연결된 가족도 함께 등록됐어요.'}</span><Icon name="check" size={18} /></div>}
       {me.academy ? (
         <section className="card row between"><span><span className="small muted" style={{ display: 'block' }}>내 학원</span><strong className="h3">{me.academy.name}</strong></span><span className="pill pill--mint">등록됨</span></section>
       ) : (

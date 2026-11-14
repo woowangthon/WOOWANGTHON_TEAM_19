@@ -29,7 +29,7 @@ function Done() {
   };
   return (
     <Frame title="학습 완료" actions={<>
-      <button className="btn btn--primary" disabled={busy || restricted} onClick={() => choose('chat')}>{restricted ? '수다는 보호자 연결 후에' : '수다 할래'}</button>
+      <button className="btn btn--primary" disabled={busy || restricted} onClick={() => choose('chat')}>{restricted ? '수다는 보호자 연결 후에' : say('수다 할래', '수다 할래요')}</button>
       <button className="btn btn--secondary" disabled={busy} onClick={() => choose('skip')}>오늘은 끝</button>
     </>}>
       <section className="celebrate">

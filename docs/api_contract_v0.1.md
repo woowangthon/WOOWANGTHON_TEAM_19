@@ -337,7 +337,7 @@
 빈 카드:
 
 ```json
-{ "alert": null, "child_line": null, "quiz": null, "instructor_comment": null }
+{ "alert": null, "child_line": null, "quiz": null, "instructor_comment": null, "homework": null }
 ```
 
 다 찬 카드:
@@ -347,7 +347,8 @@
   "alert": { "created_at": "2026-11-09T21:00:00+00:00", "excerpt": "(±2턴 치환본, 300자 이하)", "hotlines": ["109", "1388"] },
   "child_line": "오늘 분수 ÷ 자연수를 다시 풀었어요.",
   "quiz": { "text": "3/4 ÷ 2 를 계산해 보세요." },
-  "instructor_comment": "(강사가 승인한 문장)"
+  "instructor_comment": "(강사가 승인한 문장)",
+  "homework": "(숙제 칸 그대로, 치환본에서 이름만 되돌림)"
 }
 ```
 
@@ -355,6 +356,7 @@
 - `alert`: 그 학생의 오늘 🔴 알림 중 가장 최근 1건. 있으면 카드 맨 위 빨간 줄. 발췌(`excerpt`)를 싣는다(결정 11-10·11-11).
 - `child_line`: 오늘 세션이 `ended`(정상 종료)일 때만 보호자 한 줄. 진행 중·`crisis`면 `null`.
 - `quiz`: 아이가 고른 퀴즈 문제의 `text`. 정답은 오지 않는다.
+- `homework`(11-13): 오늘 강사 노트가 `published`일 때 사실 칸의 숙제(부록 D). 승인 전·빈 칸은 `null`.
 - `instructor_comment`: 오늘 강사 노트가 `published`일 때 승인본. 초안·건너뜀·노트 없음은 `null` → 프론트가 **"선생님이 확인하면 여기에 와요"**를 보여 준다.
 - 대화 내용은 어떤 경우에도 오지 않는다(명세 3.3).
 - 오류: 헤더 없음 401 `no_actor`, 역할이 `guardian`이 아님 403 `forbidden`, 대응표에 없는 보호자 404 `guardian_not_found`, 리셋 전이라 학생 행이 없음 404 `student_not_found`.

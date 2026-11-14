@@ -29,10 +29,15 @@ export function StudentPromise() {
         <h2 className="h3">안 하는 것</h2>
         <ul className="list muted">{DONT.map((t) => <li key={t}><span className="tick tick--no"><Icon name="close" size={12} /></span>{t}</li>)}</ul>
       </section>
+      {/* B6 · 결정: AI 사용 고지는 첫 실행 약속 화면에서 1회 */}
+      <div className="notice notice--plain" style={{ justifyContent: 'flex-start' }}>
+        <Icon name="talk" size={20} />
+        <span>{say('나는 사람이 아니라 AI 멘토야. 가끔 틀릴 수 있으니, 이상하면 선생님께 물어봐.', '저는 사람이 아니라 AI 멘토예요. 가끔 틀릴 수 있으니, 이상하면 선생님께 물어봐요.')}</span>
+      </div>
       <div className="notice" style={{ justifyContent: 'flex-start' }}>
         <Icon name="shield" size={20} />
         {/* TK-74 #13 · 결정(11-11): 평소 수다는 안 보내고, 🔴일 때만 앞뒤 일부가 보호자에게 간다 */}
-        <span>{say('평소 수다는 보호자께 안 보내. 다만 너를 해칠 수 있는 걱정되는 얘기가 나오면, 그 말과 앞뒤 몇 마디를 보호자께 알려 줄게.', '평소 수다는 보호자께 보내지 않아요. 다만 스스로를 해칠 수 있는 걱정되는 얘기가 나오면, 그 말과 앞뒤 몇 마디를 보호자께 알려 드려요.')}</span>
+        <span>{say('보호자께는 오늘 배운 것과 퀴즈만 가. 평소 수다는 안 보내. 다만 너를 해칠 수 있는 걱정되는 얘기가 나오면, 그 말과 앞뒤 몇 마디를 보호자께 알려 줄게.', '보호자께는 오늘 배운 것과 퀴즈만 가요. 평소 수다는 보내지 않아요. 다만 스스로를 해칠 수 있는 걱정되는 얘기가 나오면, 그 말과 앞뒤 몇 마디를 보호자께 알려 드려요.')}</span>
       </div>
     </Frame>
   );

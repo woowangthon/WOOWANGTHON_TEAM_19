@@ -13,7 +13,7 @@ export function StudentRecords() {
       {data?.length === 0 && <div className="notice notice--plain">아직 기록이 없어요. 오늘 첫 공부를 시작해 봐요.</div>}
       {data?.map((r) => (
         <article key={r.date} className="card">
-          <div className="row between"><strong>{r.date}</strong><span className="pill pill--mint">{r.difficulty}</span></div>
+          <div className="row between"><strong>{r.date}</strong></div>{/* B16: 난이도 늘 「중급」이라 표시하지 않음 */}
           <div className="small muted num" style={{ marginTop: 4 }}>{r.unit} · {r.solved}/{r.total}문제 · 힌트 {r.hints}번{r.chatted ? ' · 수다함' : ''}</div>
         </article>
       ))}

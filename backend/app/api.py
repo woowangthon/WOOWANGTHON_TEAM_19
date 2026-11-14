@@ -37,9 +37,9 @@ from app.models import (
     Session,
     Student,
 )
-from app.models_org import SessionProblem
+from app.models_org import Account, SessionProblem
 from app.pii import redact
-from app.prompts import PROMPT_VERSION, PromptInput, build_prompt
+from app.prompts import PROMPT_VERSION, PromptInput, build_prompt, grade_band_now
 from app.safety import check as red_keyword
 from app.state_machine import (
     ACTIVE,
@@ -367,7 +367,7 @@ async def start_session(db: Db, now: Now, student: Child) -> dict[str, Any]:
 CRISIS_REPLY = "지금 한 말이 걱정돼서, 어른에게 알릴게"  # 부록 E. LLM 없이 고정
 HOTLINES = ["109", "1388"]  # 자살예방상담 · 청소년상담
 EXCERPT_TURNS = 3  # 🔴 문장 + 앞 2턴(뒤 턴은 아직 없다)
-RECENT_TURNS = 6  # 프롬프트에 넘기는 최근 턴 수
+RECENT_TURNS = 20  # 프롬프트에 넘기는 최근 턴 수. 6이면 수다 중 첫 이야기를 잊었다(11-13 시험)
 ROLE_LABEL = {"child": "아이", "mentor": "친구1"}
 
 
@@ -695,6 +695,14 @@ async def _mentor_last_hour(db: AsyncSession, now: datetime) -> int:
     return count or 0
 
 
+async def _grade_band_now(db: AsyncSession, student: Student, now: datetime) -> str:
+    """가입 계정이면 학년도만큼 올린 학년대(명세 4.12-5 UG1), 체험 세트면 학생 행 그대로."""
+    acc = await db.get(Account, student.id)
+    if acc is None:
+        return student.grade_band
+    return grade_band_now(acc.grade, acc.created_at, now, student.grade_band)
+
+
 async def _reply(
     db: AsyncSession, now: datetime, student: Student, llm: LLMAdapter, claim: _Claimed
 ) -> dict[str, Any]:
@@ -717,7 +725,7 @@ async def _reply(
     prompt = build_prompt(
         PromptInput(
             phase=phase,
-            grade_band=student.grade_band,
+            grade_band=await _grade_band_now(db, student, now),
             honorific=student.honorific,
             style=student.style,
             polite=student.polite,
@@ -728,6 +736,12 @@ async def _reply(
             hint_level=row.hint_level,
             judge=verdict,
             turns=history,
+            # 수다 마감까지 남은 초(명세 부록 D 「수다 끝 무렵」). 판정은 서버, 모델은 문장만
+            chat_left_sec=(
+                int((deadline - now).total_seconds())
+                if phase == State.CHAT.value and (deadline := as_utc(row.deadline_at)) is not None
+                else None
+            ),
         )
     )
     req = ReplyRequest(
@@ -738,6 +752,9 @@ async def _reply(
         system=prompt.system,
         turns=prompt.turns,
         judge=verdict,
+        polite=student.polite,
+        session_id=row.id,
+        tail_system=prompt.tail,
     )
     # 남용 상한(명세 4.11-5): 오늘 세션 또는 서버 전체 최근 1시간 멘토 답이 상한이면 그 턴은 대본.
     # DB에서 센다. LLM 호출 전 트랜잭션 안에서 세어 두고 커밋한다(호출 중 연결을 쥐지 않게)
@@ -745,6 +762,8 @@ async def _reply(
         await _mentor_last_hour(db, now) >= AI_HOURLY_MAX
     )
     await db.commit()  # 읽기만 했다. LLM을 기다리는 동안 연결·잠금을 쥐지 않는다
+    if over_cap:  # 폴백이 실패를 가리지 않게 이유를 남긴다(수정 명세 B31, 원문 없이)
+        log.warning("llm fallback session=%s phase=%s reason=over_cap", row.id, phase)
     started = time.monotonic()
     try:
         reply = await (_scripted() if over_cap else llm).reply(req)
@@ -883,7 +902,8 @@ TAG_NAME = {
     "frac-div-frac-diff": "분모가 다른 분수의 나눗셈",
 }
 QUIZ_COUNT = 3
-STUCK_FALLBACK = "막힌 곳 기록 없음"  # 부록 E 요약 ② 실패 시
+STUCK_FALLBACK = "막힌 곳 기록 없음"  # 부록 E 요약 ②: 문제가 없을 때
+STUCK_FAILED = "막힌 곳 요약을 만들지 못했어요"  # 요약을 만들지 못함(실패가 「기록 없음」으로 읽히지 않게, B32)
 STUCK_NO_WRONG = "틀린 답 없음"  # 요약 ② 오답 0건(풀이 보기로 넘어간 경우도 맞는 말)
 SUMMARY_PHASE = "summary"  # 대본에 없는 단계 → scripted는 FIXED_REPLY → 템플릿
 
@@ -1042,13 +1062,23 @@ async def _stuck_phrase(
             )
         )
     except Exception as exc:  # 원문·응답은 로그에 남기지 않는다
-        log.warning("summary fallback session=%s err=%s", row.id, type(exc).__name__)
-        return STUCK_FALLBACK
+        log.warning("summary fallback session=%s reason=%s", row.id, type(exc).__name__)
+        return STUCK_FAILED
     lines = out.text.strip().splitlines()
     phrase = lines[0].strip() if lines else ""
     leaks = [str(answer.get("value", "")), *answer.get("accepted", [])]
-    if not phrase or phrase == FIXED_REPLY or any(s and s in phrase for s in leaks):
-        return STUCK_FALLBACK
+    reason = (
+        "empty"
+        if not phrase
+        else "fixed"
+        if phrase == FIXED_REPLY
+        else "leak"
+        if any(s and s in phrase for s in leaks)
+        else None
+    )
+    if reason is not None:
+        log.warning("summary fallback session=%s reason=%s", row.id, reason)
+        return STUCK_FAILED
     return phrase
 
 

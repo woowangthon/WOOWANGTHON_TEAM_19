@@ -40,8 +40,9 @@ from app.accounts import (
     unique_serial,
 )
 from app.compat import _CompatRoute
+from app.models import Student
 from app.models_org import Academy, AcademyApplication, Account, Link, Room, RoomPerson
-from app.timeutil import as_utc, seoul_date
+from app.timeutil import as_utc, current_grade, get_now, seoul_date
 
 router = APIRouter(prefix="/compat", route_class=_CompatRoute)
 
@@ -82,6 +83,15 @@ async def _row(db: AsyncSession, account_id: str, sub: str | None = None) -> dic
     if sub is not None:
         out["sub"] = sub
     return out
+
+
+async def kid_or_adult_text(db: AsyncSession, account_id: str, banmal: str, polite: str) -> str:
+    """알림 말투(명세 4.12, 11-14 UT2): 학생이면 고른 반말/존댓말, 보호자·학습지도자는 존댓말."""
+    acc = await db.get(Account, account_id)
+    if acc is None or acc.role != "student":
+        return polite
+    student = await db.get(Student, acc.student_id or account_id)
+    return polite if student is not None and student.polite else banmal
 
 
 async def _notify_id(db: AsyncSession, account_id: str, text: str, to: str | None, now: datetime):
@@ -280,7 +290,10 @@ async def link_with(body: LinkIn, db: Db, now: Now, account: CurrentAccount) -> 
                 )
             )
         await _sync_linked_pair(db, other, me, now)
-        notify(db, other, f"{me.name}님과 연결됐어!", now=now)
+        text = await kid_or_adult_text(
+            db, other.id, f"{me.name}님과 연결됐어!", f"{me.name}님과 연결됐어요!"
+        )
+        notify(db, other, text, now=now)
     elif ex is None:
         db.add(
             Link(
@@ -320,7 +333,13 @@ async def confirm_link(
     if link is None or link.status != "대기" or s is None:
         fail("연결 요청을 찾지 못했어요.", 404, "not_found")
     link.status, link.consent_at = "연결됨", seoul_date(now)
-    notify(db, s, f"{g.name}님이 동의해서 연결됐어! 이제 학원에 들어갈 수 있어.", now=now)
+    text = await kid_or_adult_text(
+        db,
+        s.id,
+        f"{g.name}님이 동의해서 연결됐어! 이제 학원에 들어갈 수 있어.",
+        f"{g.name}님이 동의해서 연결됐어요! 이제 학원에 들어갈 수 있어요.",
+    )
+    notify(db, s, text, now=now)
     await _sync_linked_pair(db, s, g, now)
     await db.commit()
     return await me_view(db, g)
@@ -511,6 +530,7 @@ async def _owner_dash(db: AsyncSession, o: Account, ac: Academy, now: datetime) 
             "id": r.id,
             "name": r.name,
             "teacherName": await _name(db, r.teacher_id),
+            "teacherId": r.teacher_id,
             "count": len(await _people(db, r.id, "member")),
         }
         for r in rooms
@@ -526,7 +546,7 @@ async def _owner_dash(db: AsyncSession, o: Account, ac: Academy, now: datetime) 
                     other = await db.get(Room, rid)
                     if other is not None:
                         names.append(other.name)
-            sub = f"{grade_label(u.grade)} · {', '.join(names) or '강의실 없음'}"
+            sub = f"{grade_label(current_grade(u.grade, u.created_at, get_now()))} · {', '.join(names) or '강의실 없음'}"
             students.append(await _row(db, u.id, sub))
     return {
         "academy": {"id": ac.id, "name": ac.name, "serial": ac.serial, "orgType": ac.org_type},
@@ -545,6 +565,67 @@ async def _owner_dash(db: AsyncSession, o: Account, ac: Academy, now: datetime) 
 @router.get("/owner/dashboard")
 async def get_owner_dashboard(db: Db, now: Now, account: CurrentAccount) -> dict[str, Any]:
     o, ac = await _must_owner(db, account)
+    return await _owner_dash(db, o, ac, now)
+
+
+class OwnerRoomIn(BaseModel):
+    name: str
+    plan: str = ""
+    teacherId: str
+
+
+class TeacherIdIn(BaseModel):
+    teacherId: str
+
+
+async def _academy_teacher(db: AsyncSession, ac: Academy, teacher_id: str) -> Account:
+    t = await db.get(Account, teacher_id)
+    if t is None or t.role != "teacher" or t.academy_id != ac.id or t.teacher_status != "승인됨":
+        fail("우리 학원 학습지도자를 골라 주세요.", 422)
+    return t
+
+
+@router.post("/owner/classrooms")
+async def owner_create_classroom(
+    body: OwnerRoomIn, db: Db, now: Now, account: CurrentAccount
+) -> dict[str, Any]:
+    """원장이 강의실을 만들고 담당 학습지도자를 정한다(명세 4.12 5-4, org.ts ownerCreateClassroom)."""
+    o, ac = await _must_owner(db, account)
+    name = body.name.strip()
+    if not name:
+        fail("강의실 이름을 적어 주세요.", 422)
+    t = await _academy_teacher(db, ac, body.teacherId)
+    db.add(
+        Room(
+            id=_new_id("c"),
+            academy_id=ac.id,
+            teacher_id=t.id,
+            name=name[:60],
+            plan=body.plan.strip()[:120],
+            trial_id=ac.trial_id,
+            created_at=now,
+        )
+    )
+    if t.id != o.id:
+        notify(db, t, f"「{name[:60]}」 강의실을 맡게 됐어요", "/teacher/classes", now=now)
+    await db.commit()
+    return await _owner_dash(db, o, ac, now)
+
+
+@router.put("/owner/classrooms/{class_id}/teacher")
+async def owner_set_teacher(
+    class_id: str, body: TeacherIdIn, db: Db, now: Now, account: CurrentAccount
+) -> dict[str, Any]:
+    o, ac = await _must_owner(db, account)
+    room = await db.get(Room, class_id)
+    if room is None or room.academy_id != ac.id:
+        fail("강의실을 찾지 못했어요.", 404, "not_found")
+    t = await _academy_teacher(db, ac, body.teacherId)
+    if room.teacher_id != t.id:
+        room.teacher_id = t.id
+        if t.id != o.id:
+            notify(db, t, f"「{room.name}」 강의실을 맡게 됐어요", "/teacher/classes", now=now)
+    await db.commit()
     return await _owner_dash(db, o, ac, now)
 
 
@@ -709,7 +790,9 @@ async def _teacher_classes(db: AsyncSession, t: Account) -> dict[str, Any]:
             {
                 "id": u.id,
                 "name": u.name,
-                "sub": "내 강의실" if u.id in in_any else grade_label(u.grade),
+                "sub": "내 강의실"
+                if u.id in in_any
+                else grade_label(current_grade(u.grade, u.created_at, get_now())),
             }
             for u in studs
         ]
@@ -808,7 +891,10 @@ async def answer_request(
         fail("요청을 찾지 못했어요.", 404, "not_found")
     if body.accept:
         place.state = "member"
-        await _notify_id(db, student_id, f"「{room.name}」에 들어왔어!", "/student", now)
+        text = await kid_or_adult_text(
+            db, student_id, f"「{room.name}」에 들어왔어!", f"「{room.name}」에 들어왔어요!"
+        )
+        await _notify_id(db, student_id, text, "/student", now)
     else:
         await db.delete(place)
     await db.commit()

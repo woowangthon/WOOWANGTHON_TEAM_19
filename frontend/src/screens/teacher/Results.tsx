@@ -12,6 +12,7 @@ import type { StudentResult } from '../../types';
 
 const REPEAT_FLAG = 3; // 연속 초급 선택이 이 횟수 이상이면 표시
 
+// B29: 난이도는 서버 고정값(늘 「중급」)이라 학생별 값처럼 보이지 않게 표에서 뺀다(B16과 같게)
 export function TeacherResults() {
   const { data, error, loading, reload } = useAsync(() => api.getResults());
   const [talk, setTalk] = useState<StudentResult | null>(null);
@@ -27,7 +28,7 @@ export function TeacherResults() {
       <LoadError error={error} onRetry={reload} />
       {wide && sorted.length > 0 && (
         <table className="table table--results">
-          <thead><tr><th>학생</th><th>상태</th><th>단원</th><th>문제</th><th>난이도</th><th>힌트</th><th>실수</th><th>어려운 점</th><th>연속</th><th></th></tr></thead>
+          <thead><tr><th>학생</th><th>상태</th><th>단원</th><th>문제</th><th>힌트</th><th>실수</th><th>어려운 점</th><th>연속</th><th></th></tr></thead>
           <tbody>
             {sorted.map((s) => (
               <tr key={s.id}>
@@ -39,7 +40,6 @@ export function TeacherResults() {
                   <>
                     <td>{s.unit}</td>
                     <td className="num">{s.solved}/{s.total}</td>
-                    <td>{s.difficulty}</td>
                     <td className="num">{s.hints}번</td>
                     <td>{s.mistake || '-'}</td>
                     <td>{s.hardPoint || '-'}</td>
@@ -61,7 +61,7 @@ export function TeacherResults() {
           </div>
           {s.done ? (
             <>
-              <div className="small num" style={{ margin: '6px 0 2px' }}>{s.unit} · {s.solved}/{s.total}문제 · {s.difficulty} · 연속 {s.streak}일</div>
+              <div className="small num" style={{ margin: '6px 0 2px' }}>{s.unit} · {s.solved}/{s.total}문제 · 연속 {s.streak}일</div>
               <div className="small muted num">힌트 {s.hints}번{s.mistake ? ` · 실수: ${s.mistake}` : ''}</div>
               {s.hardPoint && <div className="small">학생이 고른 어려운 점: {s.hardPoint}</div>}
             </>

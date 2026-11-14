@@ -18,3 +18,12 @@ describe('부르는 말(아/야)', () => {
     expect(callName(' 새봄 ')).toBe('새봄아');
   });
 });
+
+describe('josa', () => {
+  it('받침에 맞는 조사', async () => {
+    const { josa } = await import('./josa');
+    expect(josa('지우', '이', '가')).toBe('지우가');
+    expect(josa('새봄', '은', '는')).toBe('새봄은');
+    expect(josa('Jay', '이', '가')).toBe('Jay이(가)');
+  });
+});

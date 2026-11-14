@@ -13,8 +13,16 @@ export type Speech = '반말' | '존댓말';
 /** 학년 1~12 (초1=1 … 초6=6, 중1=7 … 중3=9, 고1=10 … 고3=12). 표시는 lib/grade의 gradeLabel */
 export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 /** 띠 캐릭터. 띠를 추가하려면 여기와 public/mascot/{이름}/ 폴더만 늘리면 된다 */
-export type Animal = 'horse' | 'monkey';
-export const ANIMAL_LABEL: Record<Animal, string> = { horse: '말띠', monkey: '원숭이띠' };
+/** 십이지신 12종(11-13, GPT-025~036 추가). 띠는 아이가 고르는 캐릭터일 뿐 — 성격·능력과 연결하지 않고 생년도 묻지 않는다 */
+export type Animal = 'rat' | 'ox' | 'tiger' | 'rabbit' | 'dragon' | 'snake' | 'horse' | 'sheep' | 'monkey' | 'rooster' | 'dog' | 'pig';
+/** 고르는 순서(십이지신) — 캐릭터 고르기·상점 캐릭터 검색이 같이 쓴다 */
+export const ANIMALS: Animal[] = ['rat', 'ox', 'tiger', 'rabbit', 'dragon', 'snake', 'horse', 'sheep', 'monkey', 'rooster', 'dog', 'pig'];
+export const ANIMAL_LABEL: Record<Animal, string> = {
+  rat: '쥐띠', ox: '소띠', tiger: '호랑이띠', rabbit: '토끼띠', dragon: '용띠', snake: '뱀띠',
+  horse: '말띠', sheep: '양띠', monkey: '원숭이띠', rooster: '닭띠', dog: '개띠', pig: '돼지띠',
+};
+/** 표정(think·cheer·promise·calm·read)과 옷·이모티콘 그림까지 다 있는 동물. 나머지는 인사(wave) 그림만 있다(11-13) */
+export const FULL_ART_ANIMALS: Animal[] = ['horse', 'monkey'];
 export interface MentorSetting { style: MentorStyle; title: MentorTitle; speech: Speech; animal: Animal; }
 
 /* ---------- 학생: 하루 세션 ---------- */
@@ -62,6 +70,8 @@ export interface StudentHome {
 }
 
 /** 화면에 보내는 문제. 정답은 절대 포함하지 않는다(판정은 서버). */
+export type AnswerKind = 'fraction' | 'number' | 'choice' | 'text';
+
 export interface ProblemView {
   id: string;
   index: number;             // 0부터
@@ -70,6 +80,10 @@ export interface ProblemView {
   left: Fraction | null;     // 식을 두 분수로 나눌 수 없는 문제는 null → 식은 그리지 않는다
   right: Fraction | null;
   op: '+' | '-' | '÷';
+  /** 답 칸 종류(서버가 정함). 없으면 fraction(분수 칸, 시드). number=숫자 한 칸, choice=보기 버튼, text=낱말 입력 */
+  answerKind?: AnswerKind;
+  choices?: string[] | null; // choice일 때 보기 문구(①부터 순서대로)
+  answerLang?: 'en' | 'ko' | null; // text일 때 답 글자: 영어 낱말 / 한글 낱말
   hints: string[];           // 지금까지 받은 힌트
   hintsLeft: number;         // 남은 힌트(서버가 정함. 지금 서버는 최대 2)
   canShowSolution: boolean;  // 힌트를 다 쓰고도 틀리면 true → 「풀이 같이 보기」
@@ -117,6 +131,8 @@ export interface Draft {
   scope: string; amount: string; mode: string; // 사실 칸: 기록에서 자동으로 채움(AI가 쓰지 않음)
   comment: string;                              // 코멘트: 초안 → 학습지도자가 고쳐서 승인
   status: '승인 대기' | '승인됨';
+  /** B33: 초안 문장 출처 — live(AI) / template(기본 문장, AI가 안 됐을 때) / null(예전 노트). 서버 50b2591 */
+  source?: 'live' | 'template' | null;
 }
 export interface StudentResult {
   id: string; name: string; done: boolean;
@@ -134,6 +150,8 @@ export type AlertCategory = '마음' | '관계' | '안전';
 export interface SafetyAlert {
   id: string; at: string; level: AlertLevel; category: AlertCategory;
   action: string; status: '미확인' | '확인함' | '닫음'; closeReason?: string;
+  /** B5: 연결된 아이가 여럿이면 어느 아이 알림인지(서버 afea4a2) */
+  childName?: string;
   /** 🔴일 때만: 걱정된 말의 앞뒤 ±2턴(개인정보 가린 본), 최대 300자. 결정 11-11 「안전 알림 전달 수준」 */
   excerpt?: string | null;
 }
@@ -144,6 +162,8 @@ export interface GuardianToday {
   attendance: boolean[]; todayIndex: number;
   /** 오늘 🔴로 끝났을 때 첫 화면 안내(서버가 문구를 준다, 11-11). 없으면 평소 화면 */
   alertNotice?: string | null;
+  /** 승인된 강사 노트의 숙제(사실 칸, 11-13). 승인 전·없음은 null */
+  homework?: string | null;
 }
 
 /* ---------- 시연 ---------- */
@@ -214,7 +234,7 @@ export interface OwnerDashboard {
   entryCode: EntryCode | null;
   pendingTeachers: PersonRow[];
   teachers: PersonRow[];
-  classrooms: { id: string; name: string; teacherName: string; count: number }[];
+  classrooms: { id: string; name: string; teacherName: string; teacherId?: string; count: number }[];
   students: PersonRow[];
 }
 

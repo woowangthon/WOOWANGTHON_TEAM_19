@@ -81,6 +81,15 @@ export const COSMETICS: CosmeticDef[] = [
   { id: 'thanks', kind: 'emote', name: '고마워', price: 1 },
   { id: 'sleepy', kind: 'emote', name: '졸려', price: 1 },
   { id: 'best', kind: 'emote', name: '최고야', price: 2 },
+  // 11-13 추가(재하 요청): 공부·학원 생활에 어울리는 옷, 수다에서 마음을 표현하는 이모티콘. 그림은 GPT 요청서(GPT-049~), 서버 목록(seeds.py)은 성호 님께 요청
+  { id: 'cap', kind: 'outfit', name: '야구 모자', price: 2 },
+  { id: 'backpack', kind: 'outfit', name: '새 책가방', price: 3 },
+  { id: 'headphones', kind: 'outfit', name: '집중 헤드폰', price: 3 },
+  { id: 'hanbok', kind: 'outfit', name: '색동 한복', price: 5 },
+  { id: 'cheer', kind: 'emote', name: '힘내', price: 1 },
+  { id: 'question', kind: 'emote', name: '궁금해', price: 1 },
+  { id: 'idea', kind: 'emote', name: '알았다!', price: 1 },
+  { id: 'sorry', kind: 'emote', name: '미안해', price: 1 },
 ];
 
 /** 시연 계정 비밀번호(모두 같음) — 체험 계정 시트에 표시 */
@@ -140,6 +149,9 @@ function seed(): OrgDB {
       { id: 'i2', teacherId: 't1', name: '자리 고르기권', price: 15, stock: null, visible: true, note: '다음 수업 자리를 내가 골라요' },
       { id: 'i3', teacherId: 't1', name: '보드게임 10분', price: 25, stock: 5, visible: true, note: '금요일 수업 끝에' },
       { id: 'i4', teacherId: 't1', name: '겨울방학 특별 선물', price: 40, stock: 3, visible: false, note: '12월에 공개 예정' },
+      { id: 'i5', teacherId: 't1', name: '칭찬 스티커', price: 5, stock: null, visible: true, note: '공책에 붙이는 스티커 1장' },
+      { id: 'i6', teacherId: 't1', name: '책갈피', price: 10, stock: 15, visible: true, note: '학원 이름이 들어간 책갈피' },
+      { id: 'i7', teacherId: 't1', name: '쉬는 시간 게임 고르기권', price: 12, stock: null, visible: true, note: '다음 쉬는 시간에 반 게임을 내가 골라요' },
     ],
     orders: [{ id: 'o1', studentId: 's2', teacherId: 't1', itemName: '칭찬 간식 쿠폰', price: 20, at: stampLabel(d(0).setHours(16, 40)), status: '교환 요청' }],
     owned: { s1: ['glasses'] },
@@ -162,6 +174,12 @@ function rand(n: number, chars = CODE_CHARS) {
   const a = new Uint32Array(n);
   try { crypto.getRandomValues(a); } catch { for (let i = 0; i < n; i++) a[i] = Math.floor(Math.random() * 1e9); }
   return Array.from(a, (x) => chars[x % chars.length]).join('');
+}
+/** 새 id(TK-76): 시각만 쓰면 같은 ms에 만든 두 개가 겹친다 → 랜덤 4자리를 붙이고, 이미 있으면 다시 뽑는다 */
+function newId(prefix: string, taken: (id: string) => boolean): string {
+  let id = '';
+  do id = prefix + Date.now().toString(36) + rand(4, 'abcdefghijkmnpqrstuvwxyz23456789'); while (taken(id));
+  return id;
 }
 function uniqueLinkCode() { let c = rand(6); while (db.users.some((u) => u.linkCode === c)) c = rand(6); return c; }
 function uniqueSerial() { let c = `${rand(4)}-${rand(4)}`; while (db.academies.some((a) => a.serial === c)) c = `${rand(4)}-${rand(4)}`; return c; }
@@ -312,7 +330,7 @@ function ownerDash(o: User): OwnerDashboard {
     entryCode: code,
     pendingTeachers: inAc.filter((u) => u.role === 'teacher' && u.teacherStatus === '승인 대기').map((u) => row(u.id, '소속 신청')),
     teachers: inAc.filter((u) => u.role === 'teacher' && u.teacherStatus === '승인됨').map((u) => row(u.id, `${u.id === o.id ? '원장 · ' : ''}강의실 ${roomsOfTeacher(u.id).length}개`)),
-    classrooms: db.rooms.filter((r) => r.academyId === ac.id).map((r) => ({ id: r.id, name: r.name, teacherName: nameOf(r.teacherId), count: r.members.length })),
+    classrooms: db.rooms.filter((r) => r.academyId === ac.id).map((r) => ({ id: r.id, name: r.name, teacherName: nameOf(r.teacherId), teacherId: r.teacherId, count: r.members.length })),
     students: inAc.filter((u) => u.role === 'student').map((u) => row(u.id, `${gradeLabel(u.grade)} · ${roomsOfStudent(u.id).map((r) => r.name).join(', ') || '강의실 없음'}`)),
   };
 }
@@ -346,7 +364,7 @@ export const orgApi = {
     if (name.length > 12) fail('이름은 12자까지 쓸 수 있어요.');
     if (body.role === 'student' && !isGrade(body.grade)) fail('학년을 골라 주세요.');
     if (body.role !== 'student' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email ?? '')) fail('이메일을 바르게 적어 주세요. 아이디·비밀번호를 찾을 때 써요.');
-    const id = body.role[0] + Date.now().toString(36);
+    const id = newId(body.role[0], (x) => db.users.some((u) => u.id === x));
     const u: User = {
       id, role: body.role, name, loginId, pw: hash(body.password), linkCode: null, academyId: null,
       settings: { ...DEFAULT_SETTINGS, marketing: body.agreements.marketing, studyReminder: body.role === 'student' ? '17:00' : null },
@@ -446,7 +464,7 @@ export const orgApi = {
     if (!f.academyName.trim()) fail('이름을 적어 주세요.');
     if (f.orgType === '학원' && !/^\d{3}-?\d{2}-?\d{5}$/.test(f.bizNo.trim())) fail('사업자등록번호는 숫자 10자리예요 (예: 123-45-67890).');
     if (!f.ceo.trim() || !f.phone.trim()) fail('대표자와 연락처를 적어 주세요.');
-    const appId = 'app' + Date.now().toString(36);
+    const appId = newId('app', (x) => db.applications.some((a) => a.id === x));
     db.applications.push({ id: appId, ownerId: t.id, ownerName: t.name, ...f, academyName: f.academyName.trim(), status: '심사 중', appliedAt: stampLabel(Date.now()), serial: null, rejectReason: null });
     t.applicationId = appId; commit();
     return meView(t);
@@ -508,6 +526,28 @@ export const orgApi = {
     commit();
     return ownerDash(o);
   },
+  /** 11-13: 강의실은 원장이 만들고 담당 학습지도자를 정한다(서버는 아직 — http.ts에 주소 제안) */
+  async ownerCreateClassroom(name: string, plan: string, teacherId: string): Promise<OwnerDashboard> {
+    const o = mustOwner();
+    const ac = ownedAcademy(o)!;
+    if (!name.trim()) fail('강의실 이름을 적어 주세요.');
+    const t = userById(teacherId);
+    if (!t || t.role !== 'teacher' || t.academyId !== ac.id || t.teacherStatus !== '승인됨') fail('우리 학원 학습지도자를 골라 주세요.');
+    db.rooms.push({ id: newId('c', (x) => db.rooms.some((r) => r.id === x)), academyId: ac.id, teacherId, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
+    if (teacherId !== o.id) notify(teacherId, `「${name.trim()}」 강의실을 맡게 됐어요`, '/teacher/classes');
+    commit();
+    return ownerDash(o);
+  },
+  async ownerSetTeacher(classId: string, teacherId: string): Promise<OwnerDashboard> {
+    const o = mustOwner();
+    const ac = ownedAcademy(o)!;
+    const r = db.rooms.find((x) => x.id === classId && x.academyId === ac.id) ?? fail('강의실을 찾지 못했어요.');
+    const t = userById(teacherId);
+    if (!t || t.role !== 'teacher' || t.academyId !== ac.id || t.teacherStatus !== '승인됨') fail('우리 학원 학습지도자를 골라 주세요.');
+    if (r.teacherId !== teacherId) { r.teacherId = teacherId; if (teacherId !== o.id) notify(teacherId, `「${r.name}」 강의실을 맡게 됐어요`, '/teacher/classes'); }
+    commit();
+    return ownerDash(o);
+  },
   /** 수업 타이머 알림 시점(분 전, 학원마다). 읽기 = 학원 소속 학습지도자, 쓰기 = 원장. 기본 [10, 5] (11-12) */
   async getTimerAlerts(): Promise<{ alertsMin: number[] }> {
     const t = must('teacher');
@@ -543,7 +583,7 @@ export const orgApi = {
       notify(app.ownerId, `${app.academyName} 등록이 반려됐어요: ${app.rejectReason}`, '/settings/org');
     } else {
       app.status = '승인'; app.serial = uniqueSerial();
-      const acId = 'a' + Date.now().toString(36);
+      const acId = newId('a', (x) => db.academies.some((a) => a.id === x));
       db.academies.push({ id: acId, name: app.academyName, orgType: app.orgType, serial: app.serial, ownerId: app.ownerId, entryCode: null });
       const owner = userById(app.ownerId); if (owner) { owner.academyId = acId; owner.teacherStatus = '승인됨'; }
       notify(app.ownerId, `${app.academyName} 등록이 승인됐어요. 일련번호 ${app.serial}`, '/owner');
@@ -566,7 +606,7 @@ export const orgApi = {
     const t = must('teacher');
     if (!t.academyId || t.teacherStatus !== '승인됨') fail('소속 학원·학교의 승인을 받은 뒤에 강의실을 열 수 있어요.');
     if (!name.trim()) fail('강의실 이름을 적어 주세요.');
-    db.rooms.push({ id: 'c' + Date.now().toString(36), academyId: t.academyId!, teacherId: t.id, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
+    db.rooms.push({ id: newId('c', (x) => db.rooms.some((r) => r.id === x)), academyId: t.academyId!, teacherId: t.id, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
     commit();
     return orgApi.getTeacherClasses();
   },
@@ -635,7 +675,7 @@ export const orgApi = {
     if (balanceOf(s.id) < it.price) fail('씨앗이 모자라요.');
     if (it.stock !== null) it.stock -= 1;
     addSeed(s.id, -it.price, '상점 구매', it.name, s.id);
-    db.orders.push({ id: 'o' + Date.now().toString(36), studentId: s.id, teacherId: it.teacherId, itemName: it.name, price: it.price, at: stampLabel(Date.now()), status: '교환 요청' });
+    db.orders.push({ id: newId('o', (x) => db.orders.some((o) => o.id === x)), studentId: s.id, teacherId: it.teacherId, itemName: it.name, price: it.price, at: stampLabel(Date.now()), status: '교환 요청' });
     notify(it.teacherId, `${s.name} 학생이 「${it.name}」 교환을 요청했어요`, '/teacher/seeds');
     commit();
     return studentShop(s);
@@ -694,7 +734,7 @@ export const orgApi = {
     if (item.id) {
       const it = db.items.find((i) => i.id === item.id && i.teacherId === t.id) ?? fail('상품을 찾지 못했어요.');
       Object.assign(it, { ...item, name: item.name.trim() });
-    } else db.items.push({ ...item, name: item.name.trim(), id: 'i' + Date.now().toString(36), teacherId: t.id });
+    } else db.items.push({ ...item, name: item.name.trim(), id: newId('i', (x) => db.items.some((i) => i.id === x)), teacherId: t.id });
     commit();
     return seedBoard(t);
   },

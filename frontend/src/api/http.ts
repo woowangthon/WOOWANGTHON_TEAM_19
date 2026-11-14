@@ -3,6 +3,7 @@
 import type { MentorApi } from './client';
 import type { AccountRole } from '../types';
 import { slowWatch } from '../lib/slowServer';
+import { serverErrorText } from '../lib/serverError';
 
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:8000';
 
@@ -52,7 +53,7 @@ function dropTrial() {
 
 async function errorMessage(res: Response): Promise<string> {
   const detail = await res.json().then((j) => (j?.message ?? j?.detail) as string | undefined).catch(() => undefined);
-  return detail ?? `서버 오류가 났어요 (${res.status})`;
+  return detail ?? serverErrorText(res.status, demoRole === 'child'); // D11: 다음에 할 일까지
 }
 
 /** 저장된 세트를 쓰고, 없으면 POST /trial(본문·헤더 없음)로 받아 둔다. 429(과부하)면 서버 문구 그대로 오류 */
@@ -145,6 +146,11 @@ async function callOrg<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: strin
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
 
+/** 강의실 수업 진행·공지/숙제(명세 4.12 5-4) — lib/classSession·classBoard가 org http 모드에서 부른다 */
+export function classLiveCall<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T> {
+  return call<T>(method, path, body);
+}
+
 export const httpApi: MentorApi = {
   getStudentHome: () => call('GET', '/student/home'),
   acceptPromise: () => call('POST', '/student/promise'),
@@ -155,7 +161,8 @@ export const httpApi: MentorApi = {
   getActiveSession: () => (demoRole === 'child' ? call('GET', '/sessions/active') : Promise.resolve(null)),
   startSession: (difficulty) => call('POST', '/sessions', { difficulty }),
   getProblem: (id) => call('GET', `/sessions/${id}/problem`),
-  submitAnswer: (id, problemId, numerator, denominator) => call('POST', `/sessions/${id}/answer`, { problemId, numerator, denominator }),
+  submitAnswer: (id, problemId, numerator, denominator, answer) => call('POST', `/sessions/${id}/answer`,
+    answer !== undefined ? { problemId, answer } : { problemId, numerator, denominator }),
   requestHint: (id, problemId) => call('POST', `/sessions/${id}/hint`, { problemId }),
   showSolution: (id, problemId) => call('POST', `/sessions/${id}/solution`, { problemId }),
   afterStudy: (id, choice) => call('POST', `/sessions/${id}/after-study`, { choice }),
@@ -209,6 +216,9 @@ export const httpApi: MentorApi = {
   joinAcademy: (code) => call('POST', '/academy/join', { code }),
   getOwnerDashboard: () => call('GET', '/owner/dashboard'),
   issueEntryCode: () => call('POST', '/owner/entry-code'),
+  // 11-13 원장 강의실 관리: 서버 주소 제안(아직 서버에 없음 — org http 모드 화면은 이 버튼을 숨긴다)
+  ownerCreateClassroom: (name, plan, teacherId) => call('POST', '/owner/classrooms', { name, plan, teacherId }),
+  ownerSetTeacher: (classId, teacherId) => call('PUT', `/owner/classrooms/${classId}/teacher`, { teacherId }),
   getTimerAlerts: () => call('GET', '/academy/timer-alerts'),
   saveTimerAlerts: (alertsMin) => call('PUT', '/academy/timer-alerts', { alertsMin }),
   approveTeachers: (ids) => call('POST', '/owner/teachers/approve', { ids }),

@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
 from app import config, errors
 from app.account_routes import router as account_router
 from app.api import health_router, router
+from app.class_routes import router as class_router
 from app.compat import router as compat_router
 from app.db import get_engine
 from app.demo import ensure_demo_actors
@@ -112,6 +113,7 @@ def create_app() -> FastAPI:
     app.include_router(account_router, prefix="/api/v1")  # 계정(명세 4.12), 같은 /compat 아래
     app.include_router(org_router, prefix="/api/v1")  # 연결·학원·강의실(명세 4.12)
     app.include_router(seed_router, prefix="/api/v1")  # 씨앗·상점·도장·기록(명세 4.12)
+    app.include_router(class_router, prefix="/api/v1")  # 강의실 수업 진행·공지/숙제(명세 4.12 5-4)
     # 프론트 빌드를 같은 주소에서 서빙(배포만, FRONTEND_DIST). 라우터 뒤에 마운트해 API가 먼저.
     # 앱은 해시 라우팅이라 index.html 폴백은 두지 않는다. 폴더가 없으면 아무것도 안 한다.
     dist = config.frontend_dist()

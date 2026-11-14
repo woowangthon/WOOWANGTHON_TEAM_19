@@ -17,7 +17,13 @@ NOW = datetime(2026, 11, 9, 21, 0, tzinfo=UTC)
 SEOUL_TODAY = date(2026, 11, 10)
 URL = "/api/v1/guardian/today"
 GUARDIAN = {"X-Demo-Role": "guardian", "X-Demo-Actor": DEMO_GUARDIAN_ID}
-EMPTY = {"alert": None, "child_line": None, "quiz": None, "instructor_comment": None}
+EMPTY = {
+    "alert": None,
+    "child_line": None,
+    "quiz": None,
+    "instructor_comment": None,
+    "homework": None,
+}
 
 
 @pytest_asyncio.fixture

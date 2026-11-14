@@ -2,15 +2,15 @@
 import { describe, expect, it } from 'vitest';
 import { gradeOpen, parseGradeUi, showGradeNote, showToneNote } from './gradeUi';
 
-describe('parseGradeUi — 주소의 grade-ui 값을 읽고 없으면 저장값, 그것도 없으면 A', () => {
+describe('parseGradeUi — 주소의 grade-ui 값을 읽고 없으면 저장값, 그것도 없으면 C(11-14 성호 결정)', () => {
   it('주소 ?grade-ui=b 를 읽는다 (해시 앞·뒤 모두)', () => {
     expect(parseGradeUi('?grade-ui=b', '', null)).toBe('b');
     expect(parseGradeUi('', '#/signup?grade-ui=c', null)).toBe('c');
   });
-  it('이상한 값은 무시하고 저장값 → 기본 A', () => {
+  it('이상한 값은 무시하고 저장값 → 기본 C', () => {
     expect(parseGradeUi('?grade-ui=z', '', 'c')).toBe('c');
-    expect(parseGradeUi('', '', null)).toBe('a');
-    expect(parseGradeUi('', '', 'x')).toBe('a');
+    expect(parseGradeUi('', '', null)).toBe('c');
+    expect(parseGradeUi('', '', 'x')).toBe('c');
   });
 });
 

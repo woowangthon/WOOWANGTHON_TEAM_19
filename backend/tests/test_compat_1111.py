@@ -212,3 +212,45 @@ async def test_chat_view_restores_own_nickname(client, db_session, clock, spy):
     # LLM에 간 글에도 별명이 없다
     sent = " ".join(req.system + " ".join(t["text"] for t in req.turns) for req in seen)
     assert "테스트학생" not in sent and "[이름]" in sent
+
+
+# --- 11-14 점검 B4: 다리 놓기 「어려웠던 점 직접 쓰기」도 🔴 검사 -------------------------
+
+
+async def test_wrap_hard_point_red_goes_to_crisis(client, db_session, clock):
+    sid = await _to_chat(client, clock)
+    await _post(client, f"/sessions/{sid}/chat/end")
+    r = await _post(client, f"/sessions/{sid}/wrap", json={"hardPoint": RED})
+    assert r.status_code == 200 and r.json()["phase"] == "crisis"
+    db_session.expire_all()
+    alerts = await db_session.scalar(
+        select(func.count()).select_from(Alert).where(Alert.session_id == sid)
+    )
+    assert alerts == 1
+
+
+async def test_wrap_plain_hard_point_still_ends(client, clock):
+    sid = await _to_chat(client, clock)
+    await _post(client, f"/sessions/{sid}/chat/end")
+    r = await _post(client, f"/sessions/{sid}/wrap", json={"hardPoint": "분모가 헷갈렸어"})
+    assert r.json()["phase"] == "done"
+
+
+async def test_chat_near_deadline_tells_model_to_wrap_up(client, clock, spy):
+    # 명세 부록 D 「수다 끝 무렵」: 남은 시간이 90초 이하면 서버가 마무리 지시를 붙인다
+    seen = []
+    inner = spy.inner
+
+    class Cap:
+        async def reply(self, req):
+            seen.append(req.system + "\n" + (req.tail_system or ""))
+            return await inner.reply(req)
+
+    spy.inner = Cap()
+    sid = await _to_chat(client, clock)
+    await _post(client, f"/sessions/{sid}/chat", json={"text": PLAIN})
+    clock.tick(9 * 60)  # 남은 시간 약 1분
+    await _post(client, f"/sessions/{sid}/chat", json={"text": PLAIN})
+    chat = [x for x in seen if "10분 동안 가볍게" in x]  # 같이 풀기 답 호출은 빼고 수다만
+    assert len(chat) == 2
+    assert "곧 수다 시간이 끝난다" not in chat[0] and "곧 수다 시간이 끝난다" in chat[1]

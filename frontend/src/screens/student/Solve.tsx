@@ -18,6 +18,10 @@ import { RequirePhase, useSession } from '../../state/session';
 import type { AnswerResult, ProblemView, Solution } from '../../types';
 
 type Field = 'num' | 'den';
+const CIRCLED = ['①', '②', '③', '④'];
+const NUMBER_MAX = 12; // 숫자 한 칸: 큰 수(억 단위)까지
+// 분수 밖 문제(문장이 긴 국어·영어·큰 수) 읽기 쉽게: 낱말 단위 줄바꿈, 넉넉한 줄 간격. 시드 분수 문제 화면은 그대로
+const READABLE: React.CSSProperties = { wordBreak: 'keep-all', overflowWrap: 'anywhere', lineHeight: 1.65 };
 
 export function StudentSolve() {
   return <RequirePhase phase="solve"><Solve /></RequirePhase>;
@@ -31,6 +35,7 @@ function Solve() {
   const [p, setP] = useState<ProblemView | null>(null);
   const [num, setNum] = useState('');
   const [den, setDen] = useState('');
+  const [ans, setAns] = useState(''); // 분수 밖 답 칸(숫자 한 칸·보기 기호·낱말)
   const [field, setField] = useState<Field>('num');
   const [result, setResult] = useState<AnswerResult | null>(null);
   const [solution, setSolution] = useState<Solution | null>(null);
@@ -42,7 +47,7 @@ function Solve() {
     try {
       const next = await api.getProblem(id);
       if (!next) { await refresh(); return; } // 풀기 단계가 끝남(다 풀었거나 시간 끝) → 서버 단계에 맞는 화면으로
-      setP(next); setNum(''); setDen(''); setField('num'); setResult(null); setSolution(null);
+      setP(next); setNum(''); setDen(''); setAns(''); setField('num'); setResult(null); setSolution(null);
     } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
   }, [id, refresh]);
   useEffect(() => { load(); }, [load]);
@@ -56,11 +61,20 @@ function Solve() {
     try { await fn(); } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
   };
 
-  const type = (d: number) => (field === 'num' ? setNum : setDen)((v) => (v.length >= 2 ? v : v + d));
-  const del = () => (field === 'num' ? setNum : setDen)((v) => v.slice(0, -1));
+  const kind = p?.answerKind ?? 'fraction';
+  const type = (d: number) => kind === 'number'
+    ? setAns((v) => (v.length >= NUMBER_MAX || (v === '' && d === 0) ? v : v + d))
+    : (field === 'num' ? setNum : setDen)((v) => (v.length >= 2 ? v : v + d));
+  const del = () => (kind === 'number' ? setAns : field === 'num' ? setNum : setDen)((v) => v.slice(0, -1));
+  const ready = kind === 'fraction' ? !!num && !!den : ans.trim() !== '';
+  const lang = kind === 'text' ? p?.answerLang ?? null : null;
+  // 영어 낱말 문제에 한글(또는 그 반대)을 쓰면 채점하지 않고 다시 쓰게 한다
+  const wrongScript = !!lang && (lang === 'en' ? /[ㄱ-ㅎㅏ-ㅣ가-힣]/ : /[A-Za-z]/).test(ans);
 
-  const check = () => p && act('answer', async () => {
-    const r = await api.submitAnswer(id, p.id, Number(num), Number(den));
+  const check = () => p && !wrongScript && act('answer', async () => {
+    const r = kind === 'fraction'
+      ? await api.submitAnswer(id, p.id, Number(num), Number(den))
+      : await api.submitAnswer(id, p.id, 0, 0, ans.trim());
     if (r.queued) { // 서버가 앞 답을 만드는 중: 화면을 넘기지 않고 「생각 중」으로 기다렸다가 서버 상태로 다시 읽는다
       await new Promise((ok) => setTimeout(ok, 1500));
       await load(); return;
@@ -78,6 +92,7 @@ function Solve() {
   const toChat = () => act('hint', async () => { sync(await api.afterStudy(id, 'chat')); });
   const retry = () => {
     if (!result) return;
+    if (kind !== 'fraction') { setAns(''); setResult(null); return; }
     if (!result.numeratorOk) setNum('');
     if (!result.denominatorOk) setDen('');
     setField(!result.numeratorOk ? 'num' : 'den');
@@ -142,13 +157,13 @@ function Solve() {
     // GPT-008: 키패드를 먼저, 힌트·답 확인을 맨 아래(엄지 영역)에 둔다 — 320×568에서 문제 카드와 겹치지 않게
     actions = (
       <>
-        <Keypad onDigit={type} onDelete={del} disabled={!!busy} />
+        {(kind === 'fraction' || kind === 'number') && <Keypad onDigit={type} onDelete={del} disabled={!!busy} />}
         <div className="btn-row">
           <button className="btn btn--secondary" disabled={!!busy || p.hintsLeft === 0} onClick={askHint}>
             <Icon name="bulb" size={18} /> 힌트 {p.hintsLeft}개 남음
           </button>
           {/* 분자·분모를 다 넣기 전에는 누를 수 없다 */}
-          <button className="btn btn--primary" disabled={!num || !den || !!busy} onClick={check}>답 확인</button>
+          <button className="btn btn--primary" disabled={!ready || wrongScript || !!busy} onClick={check}>답 확인</button>
         </div>
       </>
     );
@@ -168,8 +183,37 @@ function Solve() {
             </span>
           </div>
           <section className="card problem">
-            {p.text && <p>{p.text}</p>}
-            <div className="equation">
+            {p.text && <p style={kind === 'fraction' ? { whiteSpace: 'pre-line' } : { ...READABLE, whiteSpace: 'pre-line', fontSize: 17, width: '100%' }}>{p.text}</p>}
+            {kind === 'number' && !solution && (
+              <button className={'answer-box' + (result ? (result.correct ? ' answer-box--ok' : ' answer-box--retry') : ' answer-box--focus')}
+                style={{ width: 'auto', minWidth: 160, padding: '0 14px' }} disabled={!!result} aria-label={`답 입력${ans ? ': ' + ans : ''}`}>{ans}</button>
+            )}
+            {kind === 'choice' && p.choices && ( /* 풀이를 볼 때도 보기를 남겨 둔다(풀이가 ①~④를 가리킨다) */
+              <div role="radiogroup" aria-label="보기" style={{ display: 'grid', gap: 8, width: '100%' }}>
+                {p.choices.map((c, i) => (
+                  <button key={c} role="radio" aria-checked={ans === CIRCLED[i]} disabled={!!result || !!busy || !!solution}
+                    className={'btn ' + (ans === CIRCLED[i] ? (result && !result.correct ? 'btn--accent' : 'btn--primary') : 'btn--secondary')}
+                    style={{ ...READABLE, justifyContent: 'flex-start', alignItems: 'baseline', textAlign: 'left', fontWeight: 500, fontSize: 16, lineHeight: 1.45 }} onClick={() => setAns(CIRCLED[i])}>
+                    <b style={{ fontWeight: 800, flex: 'none' }}>{CIRCLED[i]}</b> <span>{c}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {(kind === 'text' || (kind === 'choice' && !p.choices)) && !solution && (
+              <input className="input" value={ans} maxLength={20} disabled={!!result || !!busy}
+                autoComplete="off" autoCapitalize="none" spellCheck={false} enterKeyHint="done"
+                lang={lang ?? undefined}
+                placeholder={kind === 'choice' ? say('번호를 써 줘 (예: 2)', '번호를 써 주세요 (예: 2)')
+                  : lang === 'en' ? say('영어 낱말로 써 줘', '영어 낱말로 써 주세요')
+                  : lang === 'ko' ? say('한글 낱말로 써 줘', '한글 낱말로 써 주세요')
+                  : say('답을 낱말로 써 줘', '답을 낱말로 써 주세요')}
+                aria-label="답 입력" onChange={(e) => setAns(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && ans.trim() && !busy && !result) check(); }} />
+            )}
+            {wrongScript && !result && (
+              <p className="small" role="alert">{lang === 'en' ? say('영어로 써 줘', '영어로 써 주세요') : say('한글로 써 줘', '한글로 써 주세요')}</p>
+            )}
+            {kind === 'fraction' && <div className="equation">
               {/* 기호는 서버가 준 op 그대로. 식을 두 분수로 나눌 수 없는 문제(left·right가 null)는 식을 생략하고 답 칸만 */}
               {p.left && p.right && <><FractionView value={p.left} /> {p.op === '-' ? '−' : p.op} <FractionView value={p.right} /> ={' '}</>}
               {solution ? '?' : (
@@ -179,8 +223,8 @@ function Solve() {
                   <button className={boxClass('den')} disabled={!!result} onClick={() => setField('den')} aria-label={`분모 입력${den ? ': ' + den : ''}`}>{den}</button>
                 </span>
               )}
-            </div>
-            {!solution && <p className="small muted">{say('답이 자연수면 분모에 1을 넣어 (3 → 3/1)', '답이 자연수면 분모에 1을 넣어요 (3 → 3/1)')}</p>}
+            </div>}
+            {!solution && kind === 'fraction' && <p className="small muted">{say('답이 자연수면 분모에 1을 넣어 (3 → 3/1)', '답이 자연수면 분모에 1을 넣어요 (3 → 3/1)')}</p>}
           </section>
           {solution ? (
             <>
@@ -196,7 +240,7 @@ function Solve() {
           ) : lastHint ? (
             <MentorSays mood={wrong ? 'calm' : 'think'} label={`힌트 ${p.hints.length}`} text={lastHint} />
           ) : wrong ? (
-            <MentorSays mood="calm" text={say('표시된 칸만 다시 생각해 봐', '표시된 칸만 다시 생각해 보세요')} />
+            <MentorSays mood="calm" text={kind === 'fraction' ? say('표시된 칸만 다시 생각해 봐', '표시된 칸만 다시 생각해 보세요') : say('다시 한번 생각해 봐', '다시 한번 생각해 보세요')} />
           ) : (
             <MentorSays mood="think" text={say('천천히 생각해 봐.\n막히면 힌트를 눌러', '천천히 생각해 보세요.\n막히면 힌트를 눌러요')} />
           )}

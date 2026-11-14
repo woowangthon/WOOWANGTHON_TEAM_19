@@ -34,7 +34,7 @@ from app.models_org import (
     Link,
     Notice,
 )
-from app.timeutil import SEOUL, as_utc, get_now
+from app.timeutil import SEOUL, as_utc, current_grade, get_now
 
 COOKIE = "cm_session"
 REMEMBER_TTL = timedelta(days=30)
@@ -363,7 +363,7 @@ async def me_view(db: AsyncSession, u: Account) -> dict[str, Any]:
         "name": u.name,
         "loginId": u.login_id,
         "email": None,
-        "grade": u.grade,
+        "grade": current_grade(u.grade, u.created_at, get_now()),  # 학년 자동 올림(4.12-5 UG1)
         "linkCode": u.link_code,
         "linked": await _people(db, await connected_ids(db, u)),
         "pendingLinks": await _people(db, pending),

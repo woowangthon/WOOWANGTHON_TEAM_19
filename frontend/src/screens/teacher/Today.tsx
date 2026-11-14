@@ -135,12 +135,14 @@ function StudentSheet({ student, view, onChange, onClose, inline }: { student: S
 
           {draft && (
             <section ref={draftCard} className="card card--flat stack">
-              <div className="row between"><span className="pill pill--mint">초안</span><span className={draft.status === '승인됨' ? 'pill pill--solid' : 'pill pill--accent'}>{draft.status}</span></div>
+              <div className="row between"><span className="row" style={{ gap: 6 }}><span className="pill pill--mint">초안</span>{draft.source === 'template' && <span className="pill" title="AI 초안을 만들지 못해 기본 문장으로 채웠어요">기본 문장</span>}</span><span className={draft.status === '승인됨' ? 'pill pill--solid' : 'pill pill--accent'}>{draft.status}</span></div>
               <dl className="kv">
                 <dt>학습</dt><dd>{draft.scope}</dd>
                 <dt>문제</dt><dd>{draft.amount}</dd>
                 <dt>진행</dt><dd>{draft.mode}</dd>
               </dl>
+              {/* B33: 폴백을 숨기지 않는다 — 기본 문장이면 한 줄로 알린다 */}
+              {draft.source === 'template' && <p className="small muted">AI 초안을 만들지 못해 기본 문장으로 채웠어요. 아이에 맞게 고쳐서 승인해 주세요.</p>}
               <label className="field">보호자에게 보일 코멘트
                 <textarea id="draft-comment" className="input" value={comment} onChange={(e) => setComment(e.target.value)} />
               </label>

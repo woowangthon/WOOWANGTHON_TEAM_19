@@ -5,6 +5,7 @@
 
 from datetime import UTC, datetime, timedelta
 
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import delete, func, select
@@ -680,3 +681,57 @@ async def test_guardian_delete_keeps_child_records(client, db_session):
     assert r.status_code == 204
     db_session.expire_all()
     assert await _rows_of(db_session, kid["id"]) == before
+
+
+async def test_signup_student_starts_without_trial_misconceptions(client, db_session):
+    # 수정 명세 B30(성호 승인 11-14, 명세 4.12-5): 공부한 적 없는 아이에게 체험용 미해결 오개념이
+    # 다리 놓기 요약·강사 화면에 실제 기록처럼 나왔다 → 오개념 0·freezes 0. 오늘 과제는 있다
+    from sqlalchemy import func, select
+
+    from app.models import Misconception
+
+    _, me = await _signup(client)
+    student = await db_session.get(Student, me["id"])
+    assert student is not None
+    count = await db_session.scalar(
+        select(func.count()).select_from(Misconception).where(Misconception.student_id == me["id"])
+    )
+    assert count == 0
+    assert student.freezes == 0 and student.streak_days == 0
+    assert student.today_task_problem_id is not None
+
+
+@pytest.mark.parametrize(
+    ("grade", "band"),
+    [(1, "초1-2"), (4, "초3-4"), (6, "초5-6"), (8, "중1-3"), (11, "고1-3")],
+)
+async def test_signup_grade_sets_grade_band(client, db_session, grade, band):
+    # 11-14 B11(명세 부록 D 「학년대 말투」): 가입 학년이 서버 말투에 안 갔다 → 늘 초5-6
+    _, me = await _signup(client, grade=grade)
+    student = await db_session.get(Student, me["id"])
+    assert student is not None and student.grade_band == band
+
+
+async def test_me_grade_rolls_over_after_school_year(client, db_session):
+    # 명세 4.12-5 UG1: 가입 학년도가 지나면 학년이 계산으로 올라간다(6 → 중1 = 7)
+    from datetime import UTC, datetime
+
+    from app.models_org import Account
+
+    token, me = await _signup(client, grade=6)
+    acc = await db_session.get(Account, me["id"])
+    assert acc is not None
+    acc.created_at = datetime(2020, 11, 14, tzinfo=UTC)  # 오래전 가입 → 고3에서 멈춤
+    await db_session.commit()
+    r = await client.get(f"{BASE}/me", headers={"Authorization": f"Bearer {token}"})
+    assert r.json()["grade"] == 12
+
+
+def test_grade_band_now_uses_rolled_grade():
+    from datetime import UTC, datetime
+
+    from app.prompts import grade_band_now
+
+    signup = datetime(2026, 11, 14, tzinfo=UTC)
+    assert grade_band_now(6, signup, datetime(2027, 3, 2, tzinfo=UTC), "초5-6") == "중1-3"
+    assert grade_band_now(None, signup, datetime(2027, 3, 2, tzinfo=UTC), "초5-6") == "초5-6"

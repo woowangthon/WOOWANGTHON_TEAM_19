@@ -1,6 +1,6 @@
 // 가입 정보 입력 — 「가입하기」가 왜 막혔는지 한 줄(R3)
 import { describe, expect, it } from 'vitest';
-import { signupMissing } from './signupHint';
+import { looksLikePhone, signupMissing } from './signupHint';
 
 const ok = { loginId: 'haneul01', idOk: true as boolean | null, pwOk: true, same: true, name: '하늘', kid: true, grade: 5 as number | null, emailOk: false };
 
@@ -21,5 +21,19 @@ describe('signupMissing — 위에서부터 첫 번째로 빠진 것 하나', ()
     expect(signupMissing({ ...ok, kid: false, name: '' })).toBe('이름을 넣어 주세요');
     expect(signupMissing({ ...ok, grade: null })).toBe('학년을 골라 주세요');
     expect(signupMissing({ ...ok, kid: false, grade: null, emailOk: false })).toBe('이메일 주소를 확인해 주세요');
+  });
+});
+
+describe('별명에 전화번호(R1)', () => {
+  const base = { loginId: 'haneul1', idOk: true, pwOk: true, same: true, kid: true, grade: 5, emailOk: false };
+  it('숫자가 4개 넘게 이어지면(띄어쓰기·하이픈 무시) 막는다', () => {
+    expect(looksLikePhone('하늘 010-1234')).toBe(true);
+    expect(looksLikePhone('별똥별2026')).toBe(true);
+    expect(looksLikePhone('하늘3')).toBe(false);
+    expect(signupMissing({ ...base, name: '김하늘 010-1234' })).toBe('별명에 전화번호는 넣지 말아 줘');
+    expect(signupMissing({ ...base, name: '하늘' })).toBeNull();
+  });
+  it('어른 이름 칸은 검사하지 않는다', () => {
+    expect(signupMissing({ ...base, kid: false, emailOk: true, name: '김선생님1234' })).toBeNull();
   });
 });

@@ -4,7 +4,7 @@
 // 그림체가 바뀌어도 같은 이름으로 파일만 교체하면 된다.
 import { useState } from 'react';
 import { useMentor } from '../state/mentor';
-import type { Animal } from '../types';
+import { FULL_ART_ANIMALS, type Animal } from '../types';
 import { hasCosmeticArt } from './Seed';
 
 export type Mood = 'wave' | 'think' | 'cheer' | 'promise' | 'calm' | 'read';
@@ -23,7 +23,9 @@ export function Mascot({ mood = 'wave', size = 72, animal, variant, outfit }: { 
   const [broken, setBroken] = useState(false);
   const [outfitBroken, setOutfitBroken] = useState<string | null>(null);
   const base = `${import.meta.env.BASE_URL}mascot/${a}/`;
-  const plain = `${base}${mood}${v === 'full' ? '' : '-' + v}.png`;
+  // 새 띠 10종은 인사(wave) 그림만 있다 → 다른 표정은 인사 그림으로(없는 파일을 요청하지 않게, 11-13)
+  const m: Mood = FULL_ART_ANIMALS.includes(a) ? mood : 'wave';
+  const plain = `${base}${m}${v === 'full' ? '' : '-' + v}.png`;
   // 옷 그림이 있는 것만 요청(없으면 맨 캐릭터) — 404 없이(11-12)
   const dressed = outfit && v !== 'avatar' && hasCosmeticArt(a, 'outfit', outfit) ? `${base}outfit-${outfit}${v === 'full' ? '' : '-' + v}.png` : null;
   const src = dressed && outfitBroken !== dressed ? dressed : plain;

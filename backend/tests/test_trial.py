@@ -356,3 +356,17 @@ async def test_trial_only_blocks_public_demo_actors(client, monkeypatch):
         r = await client.get(f"{BASE}{path}", headers=_h(role, a["actors"][role]))
         assert r.status_code == 200, r.text
     assert (await client.post(f"{BASE}/trial")).status_code == 200
+
+
+async def test_over_cap_fallback_is_logged_with_reason(client, db_session, clock, spy, caplog):
+    # 수정 명세 B31: 남용 상한으로 대본이 될 때 이유가 로그에 없었다(원문 없이 세션·단계·이유)
+    import logging
+
+    sid = await _to_chat(client, clock)
+    await _fill_mentor(db_session, sid, AI_DAILY_MAX, clock.now)
+    with caplog.at_level(logging.WARNING, logger="app.api"):
+        await client.post(f"{BASE}/sessions/{sid}/chat", headers=CHILD, json={"text": PLAIN})
+    lines = [r.getMessage() for r in caplog.records if "fallback" in r.getMessage()]
+    assert len(lines) == 1
+    assert f"session={sid}" in lines[0] and "reason=over_cap" in lines[0]
+    assert PLAIN not in lines[0]

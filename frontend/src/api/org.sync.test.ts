@@ -5,12 +5,10 @@ import type { SignupBody } from '../types';
 
 const as = (id: string) => api.demoLogin(id);
 const AGREE = { terms: true, privacy: true, marketing: false };
-// 가입 id가 Date.now() 기반이라 같은 ms에 같은 역할로 가입하면 겹친다 → 가입 전에 잠깐 쉰다
-const tick = () => new Promise((r) => setTimeout(r, 3));
 const kidBody = (loginId: string): SignupBody => ({ role: 'student', loginId, password: 'abcd1234', name: loginId, grade: 5, agreements: AGREE });
 const momBody = (loginId: string): SignupBody => ({ role: 'guardian', loginId, password: 'abcd1234', name: loginId, email: `${loginId}@ex.com`, agreements: AGREE });
-async function signupKid(loginId: string) { await tick(); const me = await api.signup(kidBody(loginId)); await api.logout(); return me; }
-async function signupMom(loginId: string) { await tick(); const me = await api.signup(momBody(loginId)); await api.logout(); return me; }
+async function signupKid(loginId: string) { const me = await api.signup(kidBody(loginId)); await api.logout(); return me; }
+async function signupMom(loginId: string) { const me = await api.signup(momBody(loginId)); await api.logout(); return me; }
 
 /** 우왕수학학원(a1) 입장 코드 */
 async function codeA() { await as('own1'); const c = (await api.issueEntryCode()).entryCode!.code; await api.logout(); return c; }

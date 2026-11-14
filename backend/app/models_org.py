@@ -14,6 +14,7 @@ from typing import Any
 
 from sqlalchemy import (
     JSON,
+    BigInteger,
     Boolean,
     Date,
     DateTime,
@@ -215,3 +216,48 @@ class SessionProblem(_Stamped, Base):
     hint_level: Mapped[int] = mapped_column(Integer, default=0)  # 끝낼 때의 힌트 단계
     finished: Mapped[bool] = mapped_column(Boolean, default=False)
     assisted: Mapped[bool] = mapped_column(Boolean, default=False)  # 정답 없이 풀이 보기로 끝냄
+
+
+# --- 강의실 수업 진행·공지/숙제(명세 4.12 5-4, 재하 시나리오 11-13) ------------------------
+# 시각은 화면과 같은 epoch 밀리초(BigInteger). 학생 목록은 저장하지 않고 room_people에서 그때그때 읽는다.
+
+
+class ClassLive(_Stamped, Base):
+    """강의실마다 지금(또는 마지막) 수업 한 줄. 새 수업을 시작하면 같은 행을 덮어쓴다."""
+
+    __tablename__ = "class_live"
+
+    class_id: Mapped[str] = mapped_column(String(40), primary_key=True)  # rooms.id
+    academy_id: Mapped[str] = mapped_column(String(40), index=True)
+    phase: Mapped[str] = mapped_column(String(10))  # class / break
+    start_at: Mapped[int] = mapped_column(BigInteger)
+    end_at: Mapped[int] = mapped_column(BigInteger)
+    closed_at: Mapped[int | None] = mapped_column(BigInteger)
+    joined: Mapped[list[Any]] = mapped_column(JSON, default=list)  # [{id, at}]
+    removed: Mapped[list[Any]] = mapped_column(JSON, default=list)  # [학생 id]
+
+
+class ClassLiveSetting(_Stamped, Base):
+    """학원별 수업 기본값과 강의실 장소."""
+
+    __tablename__ = "class_live_settings"
+
+    academy_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    defaults: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    places: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)  # {class_id: 장소}
+
+
+class ClassPost(_Stamped, Base):
+    """강의실 공지·숙제. 댓글·1:1 채팅은 없다(아이 안전)."""
+
+    __tablename__ = "class_posts"
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    class_id: Mapped[str] = mapped_column(String(40), index=True)
+    academy_id: Mapped[str] = mapped_column(String(40), index=True)
+    kind: Mapped[str] = mapped_column(String(10))  # notice / homework
+    title: Mapped[str] = mapped_column(String(40))
+    body: Mapped[str] = mapped_column(Text, default="")
+    due: Mapped[str | None] = mapped_column(String(10))  # YYYY-MM-DD
+    at: Mapped[int] = mapped_column(BigInteger)
+    done: Mapped[list[Any]] = mapped_column(JSON, default=list)  # 「다 했어」 누른 학생 id

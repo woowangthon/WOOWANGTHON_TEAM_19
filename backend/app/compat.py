@@ -24,7 +24,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import config
-from app.accounts import CurrentAccount, is_restricted
+from app.accounts import CurrentAccount, connected_ids, is_restricted
 from app.actors import Actor
 from app.api import (
     FINISHED,
@@ -82,7 +82,7 @@ from app.instructor import (
     update_draft_body,
 )
 from app.models import MESSAGE_TTL, Alert, InstructorNote, Message, Problem, Session, Student
-from app.models_org import Room
+from app.models_org import Account, Room
 from app.pii import unredact_name
 from app.safety import check as red_keyword
 from app.seed import load_seed
@@ -141,6 +141,50 @@ STYLE_LABEL = {"EBSP": "같이 풀어주는", "EQLC": "들어주는", "DQSC": "�
 TITLE_LABEL = {"hyung": "형", "unni": "언니", "friend": "친구"}
 _OPERAND = r"\(?(\d+)(?:/(\d+))?\)?"
 _EXPR = re.compile(rf"{_OPERAND} / {_OPERAND}")
+
+
+_CHOICE_LINE = re.compile(r"^\s*([①②③④])\s*(.+?)\s*$")
+
+
+def _answer_view(problem: Problem) -> tuple[str, str, list[str] | None]:
+    """(answerKind, 화면에 보일 문제 글, 보기). 정답은 싣지 않는다.
+
+    - fraction: 시드처럼 분수 칸(기존 그대로). value 답이 분수이거나 식을 두 분수로 나눌 수 있을 때
+    - number: value 답이 자연수이고 분수 식이 아닐 때(큰 수 등) → 숫자 한 칸
+    - choice: 문제 글의 ①~④ 줄을 보기 버튼으로 떼어 낸다
+    - text: 낱말 한 개를 쓴다
+    """
+    kind = (problem.answer or {}).get("kind")
+    if kind == "choice":
+        stem, choices = [], []
+        for line in problem.text.split("\n"):
+            m = _CHOICE_LINE.match(line)
+            if m:
+                choices.append(m[2])
+            elif not line.strip().startswith(
+                "(번호"
+            ):  # 「(번호를 … 써 주세요)」 안내는 버튼이 대신한다
+                stem.append(line)
+        if len(choices) >= 2:
+            return "choice", "\n".join(stem).strip(), choices
+        return "choice", problem.text, None
+    if kind == "text":
+        return "text", problem.text, None
+    value = str((problem.answer or {}).get("value", ""))
+    if value.isdigit() and _operands(problem.expr) == (None, None):
+        return "number", problem.text, None
+    return "fraction", problem.text, None
+
+
+def _answer_lang(problem: Problem) -> str | None:
+    """낱말 답의 글자(en = 영어 낱말, ko = 한글 낱말). 화면이 「영어로 써 줘」를 고르게만 쓴다(답 자체는 안 실음)."""
+    words = [str(problem.answer.get("value", "")), *problem.answer.get("accepted", [])]
+    words = [w for w in words if w]
+    if words and all(re.fullmatch(r"[A-Za-z' -]+", w) for w in words):
+        return "en"
+    if words and all(re.search(r"[가-힣]", w) for w in words):
+        return "ko"
+    return None
 
 
 def _tag_name(problem: Problem | None) -> str:
@@ -363,13 +407,19 @@ async def get_problem(session_id: str, db: Db, now: Now, student: Child) -> dict
     if problem is None or _phase(row, solved) != "solve":
         return None  # 풀기 단계가 끝났다
     left, right = _operands(problem.expr)
+    answer_kind, text, choices = _answer_view(problem)
+    if answer_kind != "fraction":
+        left = right = None  # 분수 식 그림은 분수 문제에만
     started = as_utc(row.phase_started_at)
     scale = config.timer_scale()
     return {
         "id": problem.id,
         "index": index,
         "total": total,
-        "text": problem.text,  # 나눗셈 문장제. 프론트 left/op/right 대신 보여야 한다
+        "text": text,  # 나눗셈 문장제. 프론트 left/op/right 대신 보여야 한다. choice면 보기 줄은 뺀다
+        "answerKind": answer_kind,  # fraction / number / choice / text — 화면이 입력 칸을 고른다
+        "choices": choices,  # choice일 때 보기 문구(①부터 순서대로), 아니면 None
+        "answerLang": _answer_lang(problem) if answer_kind == "text" else None,  # en / ko
         "left": left,
         "right": right,
         "op": "÷",
@@ -381,8 +431,16 @@ async def get_problem(session_id: str, db: Db, now: Now, student: Child) -> dict
 
 class AnswerIn(BaseModel):
     problemId: str
-    numerator: int
-    denominator: int
+    numerator: int | None = None  # 분수 칸(시드)
+    denominator: int | None = None
+    answer: str | None = Field(default=None, max_length=40)  # 숫자 한 칸·보기 기호·낱말
+
+    def as_text(self) -> str | None:
+        if self.answer is not None and self.answer.strip():
+            return self.answer.strip()
+        if self.numerator is not None and self.denominator is not None:
+            return f"{self.numerator}/{self.denominator}"
+        return None
 
 
 @router.post("/sessions/{session_id}/answer")
@@ -409,7 +467,9 @@ async def submit_answer(
             "source": None,
             "session": view,
         }
-    text = f"{body.numerator}/{body.denominator}"
+    text = body.as_text()
+    if text is None:
+        raise ApiError(422, "invalid_request", "답을 넣어 주세요.")
     try:
         msg = MessageIn(kind="text", text=text)
     except ValidationError:  # 터무니없이 큰 수(11-12 점검: 500이던 것)
@@ -664,7 +724,7 @@ async def get_wrap(session_id: str, db: Db, now: Now, student: Child, llm: Llm) 
 
 
 class WrapIn(BaseModel):
-    hardPoint: str | None = Field(default=None, max_length=30)  # 저장 칸이 없어 버린다
+    hardPoint: str | None = Field(default=None, max_length=30)  # 저장 칸이 없어 버린다(🔴 검사 뒤)
     quiz: str | None = None
 
 
@@ -672,6 +732,13 @@ class WrapIn(BaseModel):
 async def submit_wrap(
     session_id: str, body: WrapIn, db: Db, now: Now, student: Child, llm: Llm
 ) -> dict[str, Any]:
+    # 11-14 점검 B4: 아이가 직접 쓴 「어려웠던 점」도 입력이다 → 키워드 1회. 걸리면 수다와 같은 위기 경로
+    # (치환본 저장·세션 crisis·보호자 알림). 안 걸리면 지금처럼 버린다. 원문은 메모리에서만
+    if body.hardPoint and body.hardPoint.strip() and red_keyword(body.hardPoint):
+        await _bridge_chat(
+            db, session_id, MessageIn(kind="text", text=body.hardPoint), student, now
+        )
+        return await _session_view(db, session_id, student, now)
     quiz_id = None
     if body.quiz is not None:  # 프론트는 문장으로 고른다 → 같은 태그 퀴즈 후보에서 id로
         row = await _owned_session(db, session_id, student, now)
@@ -688,8 +755,21 @@ async def submit_wrap(
 
 
 @router.get("/guardian/today")
-async def get_guardian_today(db: Db, now: Now, student: GuardianChild) -> dict[str, Any]:
+async def get_guardian_today(
+    db: Db, now: Now, student: GuardianChild, account: CurrentAccount
+) -> dict[str, Any]:
     card = await guardian_today(db, now, student)
+    # 첫 화면 🔴 안내는 연결된 아이 누구든 오늘 🔴이면(11-14 점검 B5). 카드 내용은 첫 아이 그대로
+    kids = await _guardian_children(db, student, account)
+    red_today = await db.scalar(
+        select(Session.id)
+        .where(
+            Session.student_id.in_(kids),
+            Session.date == seoul_date(now),
+            Session.state == State.CRISIS.value,
+        )
+        .limit(1)
+    )
     session = await db.scalar(
         select(Session).where(Session.student_id == student.id, Session.date == seoul_date(now))
     )
@@ -706,20 +786,36 @@ async def get_guardian_today(db: Db, now: Now, student: GuardianChild) -> dict[s
         "line": card["child_line"],
         "quiz": card["quiz"]["text"] if card["quiz"] else None,
         "teacherComment": card["instructor_comment"],
+        "homework": card["homework"],  # 승인된 강사 노트의 사실 칸(명세 부록 D)
         "attendance": _attendance(student, now),
         "todayIndex": seoul_date(now).weekday(),
         # 오늘 🔴로 끝났으면 첫 화면에 「공부 전」 대신 이 안내(알림 탭으로)
-        "alertNotice": GUARDIAN_ALERT_NOTICE
-        if session is not None and session.state == State.CRISIS.value
-        else None,
+        "alertNotice": GUARDIAN_ALERT_NOTICE if red_today is not None else None,
     }
 
 
+async def _guardian_children(
+    db: AsyncSession, student: Student, account: Account | None
+) -> dict[str, str]:
+    """🔴 알림을 볼 아이들 {학생 id: 별명}. 카드는 「연결된 첫 아이」(설계 §9-13)지만 알림은 연결된 모든 아이 —
+    11-14 점검 B5: 둘째 아이 🔴이 보호자에게 안 보였다. 학생 계정 id = students.id(models_org)."""
+    kids = {student.id: student.nickname}
+    if account is not None and account.role == "guardian":
+        for sid in await connected_ids(db, account):
+            row = await db.get(Student, sid)
+            if row is not None:
+                kids.setdefault(row.id, row.nickname)
+    return kids
+
+
 @router.get("/guardian/alerts")
-async def get_alerts(db: Db, student: GuardianChild) -> list[dict[str, Any]]:
-    """🔴 알림 목록. 발췌 ±2턴·300자를 싣는다(결정 11-10·11-11, 🔴일 때만)."""
+async def get_alerts(
+    db: Db, student: GuardianChild, account: CurrentAccount
+) -> list[dict[str, Any]]:
+    """🔴 알림 목록. 발췌 ±2턴·300자를 싣는다(결정 11-10·11-11, 🔴일 때만). 연결된 모든 아이 것."""
+    kids = await _guardian_children(db, student, account)
     alerts = await db.scalars(
-        select(Alert).where(Alert.student_id == student.id).order_by(Alert.created_at.desc())
+        select(Alert).where(Alert.student_id.in_(kids)).order_by(Alert.created_at.desc())
     )
     out = []
     for a in alerts:
@@ -736,6 +832,7 @@ async def get_alerts(db: Db, student: GuardianChild) -> list[dict[str, Any]]:
                 "status": "확인함" if a.guardian_seen else "미확인",
                 "excerpt": a.excerpt,
                 "hotlines": list(HOTLINES),
+                "childName": kids.get(a.student_id),  # 아이가 둘 이상이면 누구 알림인지
             }
         )
     return out
@@ -843,6 +940,8 @@ async def _draft_out(
         )
         or "",
         "status": "승인됨" if published else "승인 대기",
+        # 초안 출처(수정 명세 B33): live = AI 초안, template = 기본 문장. 예전 노트는 알 수 없어 None
+        "source": (note.facts or {}).get("draft_source"),
     }
 
 
@@ -985,7 +1084,9 @@ async def create_trial(db: Db, now: Now) -> dict[str, Any]:
     trial_id = new_trial_id()
     child_id = f"{trial_id}-child"
     await load_seed(db)
-    await _write_day3_student(db, ResetBody(), today, student_id=child_id, consent=False)
+    await _write_day3_student(
+        db, ResetBody(), today, student_id=child_id, consent=False, past_days=True
+    )
     child = await db.get(Student, child_id)
     assert child is not None
     child.created_at = now

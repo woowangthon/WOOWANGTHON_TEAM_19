@@ -159,7 +159,7 @@ async def test_student_shop_shape(client):
         "owned": True,
         "equipped": False,
     }
-    assert len(shop["cosmetics"]) == 8
+    assert len(shop["cosmetics"]) == 16  # 11-13 재하 추가 옷 4·이모티콘 4 포함
     assert shop["orders"] == []
 
 
@@ -467,11 +467,14 @@ async def test_home_header_path_keeps_in_class(client):
 async def test_records_shape(client, clock):
     t = await _trial(client)
     kid = _b(await _login(client, t, "s1"))
-    assert (await client.get(f"{BASE}/student/records", headers=kid)).json() == []
+    # 체험 지우는 「연속 3일」과 맞게 지난 이틀 기록이 있다(11-14 점검 U1)
+    before = (await client.get(f"{BASE}/student/records", headers=kid)).json()
+    assert [r["date"] for r in before] == ["11월 9일 (월)", "11월 8일 (일)"]
     await client.post(f"{BASE}/student/promise", headers=kid)
     await _finish_study(client, clock, kid)
     recs = (await client.get(f"{BASE}/student/records", headers=kid)).json()
-    assert recs == [
+    assert recs[1:] == before  # 오늘 기록이 맨 위
+    assert recs[:1] == [
         {
             "date": "11월 10일 (화)",
             "unit": "분수 ÷ 자연수",
@@ -687,6 +690,15 @@ async def test_two_currencies_in_wallet_home_shop(client):
         "thanks": 1,
         "sleepy": 1,
         "best": 2,
+        # 11-13 재하 추가(fe-android 05f4a58, org.ts COSMETICS와 같은 값)
+        "cap": 2,
+        "backpack": 3,
+        "headphones": 3,
+        "hanbok": 5,
+        "cheer": 1,
+        "question": 1,
+        "idea": 1,
+        "sorry": 1,
     }
 
 

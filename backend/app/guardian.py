@@ -83,8 +83,8 @@ async def guardian_today(db: Db, now: Now, student: GuardianChild) -> dict[str, 
         if session.quiz_problem_id:
             problem = await db.get(Problem, session.quiz_problem_id)
             quiz = {"text": problem.text} if problem is not None else None
-    comment = await db.scalar(
-        select(InstructorNote.final_body)
+    note = await db.scalar(
+        select(InstructorNote)
         .where(
             InstructorNote.student_id == student.id,
             InstructorNote.date == today,
@@ -92,10 +92,13 @@ async def guardian_today(db: Db, now: Now, student: GuardianChild) -> dict[str, 
         )
         .limit(1)
     )
+    # 숙제는 초안 본문이 아니라 사실 칸(구조화 필드)에서 붙인다(명세 부록 D). 승인된 노트만
+    homework = (note.facts or {}).get("homework") if note is not None else None
     return {
         "alert": await _today_alert(db, student, now),
         "child_line": child_line,
         "quiz": quiz,
         # 저장본은 치환본. 보호자 화면에 보이기 직전에만 별명으로 되돌린다(11-11 A6)
-        "instructor_comment": unredact_name(comment, student.nickname),
+        "instructor_comment": unredact_name(note.final_body if note else None, student.nickname),
+        "homework": unredact_name(homework, student.nickname) or None,
     }
