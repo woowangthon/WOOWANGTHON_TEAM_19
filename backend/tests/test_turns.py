@@ -354,7 +354,7 @@ async def test_judge_reaches_live_adapter_through_fallback(app_parts):
     body = (await _send(c, student, sid, kind="text", texts=["3/4", "3/8"])).json()
     assert body["source"] == "live"
     assert seen[0].judge == "correct"
-    assert "정답(아이가 맞혔다)" in seen[0].system  # 프롬프트 판정 문장도 같은 칸에서
+    assert "정답(방금 낸 답이 맞았다)" in seen[0].system  # 프롬프트 판정 문장도 같은 칸에서
 
 
 async def test_answer_never_in_prompt_or_reply(app_parts):

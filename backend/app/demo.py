@@ -8,7 +8,7 @@
 
 import hmac
 import logging
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Body, Depends, Header
@@ -91,10 +91,14 @@ async def _write_day3_student(
     today: date,
     student_id: str = DEMO_CHILD_ID,
     consent: bool = True,
+    nickname: str = "지우",
+    past_days: bool = False,
+    misconceptions: bool = True,
 ) -> None:
-    """student_id 학생을 day3로. 체험 세트(명세 4.11)는 consent=False로 약속 화면부터."""
+    """student_id 학생을 day3로. 체험 세트(명세 4.11)는 consent=False로 약속 화면부터.
+    새로 가입한 학생(명세 4.12-5)은 nickname = 가입 이름(프롬프트에는 안 넣는다)."""
     values: dict[str, Any] = {
-        "nickname": "지우",  # 합성 배우(프론트 체험 계정 jiwoo와 같은 이름, 11-11)
+        "nickname": nickname,  # 기본은 합성 배우(프론트 체험 계정 jiwoo와 같은 이름, 11-11)
         "grade_band": "초5-6",
         "style": body.style,
         "honorific": body.honorific,
@@ -115,7 +119,8 @@ async def _write_day3_student(
         for key, value in values.items():
             setattr(student, key, value)
     await db.flush()
-    for tag, status, days_ago in DAY3_MISCONCEPTIONS:
+    # 가입 학생(명세 4.12-5, B30)은 오개념 없이 — 체험용 기록이 실제 기록처럼 보이지 않게
+    for tag, status, days_ago in DAY3_MISCONCEPTIONS if misconceptions else []:
         db.add(
             Misconception(
                 student_id=student_id,
@@ -124,7 +129,38 @@ async def _write_day3_student(
                 first_wrong_date=today - timedelta(days=days_ago),
             )
         )
+    if past_days:  # 체험 세트만: 「연속 3일」과 맞게 지난 이틀 기록(11-14 점검 U1). 가입 학생에게는 지어내지 않는다
+        await _write_past_sessions(db, student_id, today)
     await db.flush()
+
+
+# 지난 이틀: 오개념 「열림」 날짜(DAY3_MISCONCEPTIONS)와 같은 단원
+PAST_DAYS = [(2, "frac-div-nat", 2), (1, "frac-div-frac-diff", 1)]  # (며칠 전, 태그, 쓴 힌트)
+
+
+async def _write_past_sessions(db: AsyncSession, student_id: str, today: date) -> None:
+    for days_ago, tag, hints in PAST_DAYS:
+        problem_id = await db.scalar(
+            select(Problem.id).where(Problem.tag == tag).order_by(Problem.id).limit(1)
+        )
+        if problem_id is None:
+            continue
+        day = today - timedelta(days=days_ago)
+        at = datetime(day.year, day.month, day.day, 9, 0, tzinfo=UTC)  # 서울 18시
+        db.add(
+            Session(
+                student_id=student_id,
+                date=day,
+                state="ended",
+                hint_level=hints,
+                problem_id=problem_id,
+                phase_started_at=at,
+                streak_applied=True,
+                end_reason="normal",
+                ended_at=at,
+                study_sec=15 * 60,
+            )
+        )
 
 
 async def ensure_demo_actors(db: AsyncSession, now: datetime) -> bool:

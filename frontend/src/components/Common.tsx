@@ -1,23 +1,42 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from './Icon';
+import { useServerWaking } from '../lib/slowServer';
+import { useAuth } from '../state/auth';
+import { useMentor } from '../state/mentor';
 import { isSessionGone } from '../lib/kidScreens';
 import { useSession } from '../state/session';
 
 /** "생각 중" 로딩 (팀 명세: 비스트리밍 + 로딩 표시) */
 export function Thinking({ label = '생각 중' }: { label?: string }) {
   return (
-    <span className="thinking-row" role="status">
-      <span className="thinking"><span /><span /><span /></span>{label}
-    </span>
+    <>
+      <span className="thinking-row" role="status">
+        <span className="thinking"><span /><span /><span /></span>{label}
+      </span>
+      <WakeNotice />
+    </>
   );
+}
+
+/** 첫 접속 지연 안내: 잠든 무료 서버를 깨우느라 요청이 5초를 넘을 때만 한 줄(lib/slowServer). 학생은 멘토 말투, 어른은 존댓말 */
+export function WakeNotice() {
+  const waking = useServerWaking();
+  const { me } = useAuth();
+  const { say } = useMentor();
+  if (!waking) return null;
+  const text = me?.role === 'student'
+    ? say('서버를 깨우는 중이야. 처음엔 1분쯤 걸릴 수 있어.', '서버를 깨우는 중이에요. 처음엔 1분쯤 걸릴 수 있어요.')
+    : '서버를 깨우는 중이에요. 처음엔 1분쯤 걸릴 수 있어요.';
+  return <div className="notice notice--plain" role="status">{text}</div>;
 }
 
 /** 불러오기 실패: 무슨 일인지 + 다시 시도 */
 export function LoadError({ error, onRetry }: { error: string | null; onRetry?: () => void }) {
   if (!error) return null;
   return (
-    <div className="notice notice--danger" role="alert">
+    // 통신 실패는 일반 안내(빨강은 긴급 안전 알림에만, DESIGN.md 4장 · GPT 전달 메모 1)
+    <div className="notice notice--plain" role="alert">
       <span>{error}</span>
       {isSessionGone(error) ? <GoHome /> : onRetry && <button className="btn btn--secondary btn--small" onClick={onRetry}><Icon name="refresh" size={16} /> 다시 시도</button>}
     </div>
@@ -64,7 +83,7 @@ export function Week({ attendance, todayIndex }: { attendance: boolean[]; todayI
   return (
     <div className="week" aria-label="이번 주 출석">
       {days.map((d, i) => (
-        <div key={d} className={'day' + (i === todayIndex ? ' day--today' : '')}>
+        <div key={d} className={'day' + (i === todayIndex ? ' day--today' : '')} aria-current={i === todayIndex ? 'date' : undefined}>
           <span>{d}</span>
           <span className={'dot' + (attendance[i] ? ' dot--on' : '')} aria-label={attendance[i] ? '함' : '안 함'}>{attendance[i] && <Icon name="check" size={14} />}</span>
         </div>

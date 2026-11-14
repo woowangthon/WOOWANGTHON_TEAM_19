@@ -10,14 +10,19 @@ import { LoadError, Thinking, Week } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useMentor } from '../../state/mentor';
 import { routeFor } from '../../state/session';
-import { useAuth } from '../../state/auth';
-import { SeedChip } from '../../components/Seed';
+import { useAuth, useRefreshMeOnMount } from '../../state/auth';
+import { SeedChip, StampChip } from '../../components/Seed';
+import { StudentHomeworkCard } from '../../components/ClassBoard';
 import { isCrisisDay, isDemoChild } from '../../lib/kidScreens';
+import { GRADE_NOTE, currentGradeUi, showGradeNote } from '../../lib/gradeUi';
+import { callName } from '../../lib/josa';
 
 export function StudentToday() {
   const nav = useNavigate();
+  const gradeUi = currentGradeUi();
   const { say } = useMentor();
   const { me, enter } = useAuth();
+  useRefreshMeOnMount();
   const { data, error, loading, reload } = useAsync(() => api.getStudentHome());
   const [restarting, setRestarting] = useState(false);
   const [restartError, setRestartError] = useState<string | null>(null);
@@ -36,7 +41,7 @@ export function StudentToday() {
     const inProgress = data.session && !['done', 'crisis'].includes(data.session.phase);
     // 위기(🔴)로 끝난 날은 축하하지 않고 차분하게. 문구는 임시(성호 확인 대상)
     if (data.doneToday && isCrisisDay(data)) { cta = { label: '오늘은 여기까지' }; line = say('오늘은 여기까지 할게.\n믿을 수 있는 어른과 꼭 이야기해 줘', '오늘은 여기까지 할게요.\n믿을 수 있는 어른과 꼭 이야기해 주세요'); }
-    else if (data.doneToday) { cta = { label: '오늘은 끝! 내일 봐' }; line = say('오늘도 해냈어!\n내일 또 만나자', '오늘도 해냈어요!\n내일 또 만나요'); }
+    else if (data.doneToday) { cta = { label: say('오늘은 끝! 내일 봐', '오늘은 끝! 내일 봐요') }; line = say('오늘도 해냈어!\n내일 또 만나자', '오늘도 해냈어요!\n내일 또 만나요'); }
     else if (inProgress) { cta = { label: '이어서 하기', to: routeFor(data.session) }; line = say('하던 데서\n이어서 하자', '하던 데서\n이어서 해요'); }
     else if (!data.task) { cta = { label: '오늘은 쉬는 날' }; line = say('오늘은 선생님이 정한\n공부가 없어. 푹 쉬어!', '오늘은 선생님이 정한\n공부가 없어요. 푹 쉬어요!'); }
     else if (data.needsOnboarding) cta = { label: '시작하기', to: '/student/onboarding/promise' };
@@ -57,14 +62,17 @@ export function StudentToday() {
           <section className="hero">
             <div className="hero__text">
               <span className="small muted">{data.dateLabel}</span>
-              <h1 className="h1">{say(`${data.name}야, 안녕!`, `${data.name}, 안녕하세요!`)}</h1>
+              <h1 className="h1">{say(`${callName(data.name)}, 안녕!`, `${data.name}, 안녕하세요!`)}</h1>
               <span className="row" style={{ gap: 6 }}>
                 <span className="pill pill--accent"><Icon name="flame" size={14} fill /> 연속 {data.streakDays}일</span>
                 <SeedChip n={data.seeds} onClick={() => nav('/student/shop')} />
+                <StampChip n={data.stamps ?? 0} onClick={() => nav('/student/shop', { state: { tab: 'deco' } })} />
               </span>
             </div>
             <Mascot mood={data.doneToday ? (isCrisisDay(data) ? 'calm' : 'cheer') : 'wave'} size={104} variant="face" outfit={me?.outfit} />
           </section>
+          <p className="wallet-help">씨앗: 학원 학습 완료 +3 · 선생님 칭찬 / 도장: 보호자와 이야기한 날 하루 1번</p>
+          <StudentHomeworkCard />
           <div className="week week--lift" style={{ display: 'contents' }}><Week attendance={data.attendance} todayIndex={data.todayIndex} /></div>
           <div className="bubble" style={{ maxWidth: '100%' }}>{line}</div>
           {setup ? <SetupSteps linked={!data.restricted} academy={!!me?.academy} inClass={data.inClass} code={me?.linkCode ?? null} /> : data.task ? (
@@ -72,7 +80,8 @@ export function StudentToday() {
               <div className="mission__icon"><Icon name="book" size={26} /></div>
               <div style={{ minWidth: 0 }}>
                 <div className="h3">{data.task.unit} · {data.task.count}문제 · 약 {data.task.minutes}분</div>
-                <div className="small muted">{data.task.assignedBy}이 정해 줬어요</div>
+                <div className="small muted">{say(`${data.task.assignedBy}이 정해 줬어`, `${data.task.assignedBy}이 정해 줬어요`)}</div>
+                {showGradeNote(gradeUi) && <div className="small muted">{say('체험 문제는 초5~6 분수 나눗셈이야', GRADE_NOTE)}</div>}
               </div>
             </section>
           ) : !data.doneToday && <div className="notice notice--plain">오늘 할 것이 아직 없어요</div>}

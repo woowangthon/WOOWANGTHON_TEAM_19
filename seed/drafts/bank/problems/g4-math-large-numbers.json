@@ -1,0 +1,662 @@
+[
+  {
+    "id": "g4-math-large-numbers-01",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-01]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "수에서 특정 숫자가 나타내는 값 구하기(예: 어느 자리 숫자 7이 나타내는 값)",
+    "targets_misconception": "세 자리 쉼표와 만 단위 네 자리 끊기를 섞어 자리 이름을 틀림",
+    "text": "58274163에서 숫자 7이 나타내는 값은 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "7*10000",
+    "answer": {
+      "kind": "value",
+      "value": "70000",
+      "accepted": [
+        "70000"
+      ]
+    },
+    "hint1": "오른쪽 끝부터 일, 십, 백, 천, 만… 하고 자리 이름을 붙여 보세요.",
+    "hint2": "숫자 7이 어느 자리에 있는지 찾았다면, 그 자리의 크기만큼 0을 붙여서 써요. 예를 들어 백의 자리라면 0이 두 개 붙어요.",
+    "solution": "5827|4163으로 오른쪽부터 네 자리씩 끊으면 7은 만의 자리 숫자예요. 그래서 7이 나타내는 값은 70000이에요.",
+    "forbidden": [
+      "70000"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-02",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-01]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "수에서 특정 숫자가 나타내는 값 구하기(예: 어느 자리 숫자 7이 나타내는 값)",
+    "targets_misconception": "세 자리 쉼표와 만 단위 네 자리 끊기를 섞어 자리 이름을 틀림",
+    "text": "어떤 책에 큰 수가 세 자리마다 쉼표를 찍어 2,948,503,617로 적혀 있어요. 이 수에서 숫자 9가 나타내는 값은 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "9*100000000",
+    "answer": {
+      "kind": "value",
+      "value": "900000000",
+      "accepted": [
+        "900000000"
+      ]
+    },
+    "hint1": "쉼표는 세 자리마다 찍혀 있지만, 우리말 자리 이름(만, 억)은 네 자리씩 끊어서 붙여요.",
+    "hint2": "쉼표를 지우고 2948503617로 쓴 다음 오른쪽부터 네 자리씩 끊어 보세요. 9가 억이 있는 묶음의 어느 자리인지 보세요.",
+    "solution": "쉼표를 지우면 2948503617이고, 네 자리씩 끊으면 29|4850|3617이에요. 9는 억의 자리 숫자라서 9가 나타내는 값은 900000000이에요.",
+    "forbidden": [
+      "900000000"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-03",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-01]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "수에서 특정 숫자가 나타내는 값 구하기(예: 어느 자리 숫자 7이 나타내는 값)",
+    "targets_misconception": "세 자리 쉼표와 만 단위 네 자리 끊기를 섞어 자리 이름을 틀림",
+    "text": "53조 6047억 2918만 3500에서 숫자 1이 나타내는 값은 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "1*100000",
+    "answer": {
+      "kind": "value",
+      "value": "100000",
+      "accepted": [
+        "100000"
+      ]
+    },
+    "hint1": "1이 '조', '억', '만' 중 어느 묶음 안에 있는지 먼저 찾아보세요.",
+    "hint2": "1은 '2918만' 묶음 안에 있어요. 이 묶음에서 1이 천만, 백만, 십만, 만 중 어느 자리인지 보세요.",
+    "solution": "2918만에서 2는 천만, 9는 백만, 1은 십만, 8은 만의 자리예요. 그래서 1이 나타내는 값은 십만, 즉 100000이에요.",
+    "forbidden": [
+      "100000"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-04",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-01]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "수에서 특정 숫자가 나타내는 값 구하기(예: 어느 자리 숫자 7이 나타내는 값)",
+    "targets_misconception": "세 자리 쉼표와 만 단위 네 자리 끊기를 섞어 자리 이름을 틀림",
+    "text": "803624519에서 백만의 자리 숫자가 나타내는 값은 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "3*1000000",
+    "answer": {
+      "kind": "value",
+      "value": "3000000",
+      "accepted": [
+        "3000000"
+      ]
+    },
+    "hint1": "오른쪽부터 네 자리씩 끊으면 만과 억의 경계가 보여요.",
+    "hint2": "8|0362|4519로 끊어 보세요. 가운데 묶음은 '만' 묶음이고, 그 안에서 왼쪽부터 천만, 백만, 십만, 만의 자리예요.",
+    "solution": "8|0362|4519에서 가운데 묶음 0362는 천만 0, 백만 3, 십만 6, 만 2예요. 백만의 자리 숫자는 3이고, 나타내는 값은 3000000이에요.",
+    "forbidden": [
+      "3000000"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-05",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-01]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "한글로 쓴 큰 수를 숫자로 쓰기(예: 이억 오천만 삼백)",
+    "targets_misconception": "'삼억 이천만'을 쓸 때 0의 개수를 빠뜨리거나 더 씀",
+    "text": "칠억 사천만 육백을 숫자로 써 보세요. (쉼표 없이 숫자만 써 주세요)",
+    "expr": "7*100000000+4*10000000+600",
+    "answer": {
+      "kind": "value",
+      "value": "740000600",
+      "accepted": [
+        "740000600"
+      ]
+    },
+    "hint1": "억, 만, 일 세 묶음으로 나누고, 만 묶음과 일 묶음은 각각 네 자리를 채워서 써요.",
+    "hint2": "'사천만'은 만 묶음 네 자리가 4000이 되고, '육백'은 일 묶음 네 자리가 0600이 돼요. 비어 있는 자리는 0으로 채워요.",
+    "solution": "억 묶음 7, 만 묶음 4000, 일 묶음 0600을 이어 쓰면 740000600이에요.",
+    "forbidden": [
+      "740000600"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-06",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-01]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "한글로 쓴 큰 수를 숫자로 쓰기(예: 이억 오천만 삼백)",
+    "targets_misconception": "'삼억 이천만'을 쓸 때 0의 개수를 빠뜨리거나 더 씀",
+    "text": "구천육십만 이천팔을 숫자로 써 보세요. (쉼표 없이 숫자만 써 주세요)",
+    "expr": "9060*10000+2008",
+    "answer": {
+      "kind": "value",
+      "value": "90602008",
+      "accepted": [
+        "90602008"
+      ]
+    },
+    "hint1": "'만'이 나오는 곳에서 끊어서 만 묶음과 일 묶음으로 나눠 보세요.",
+    "hint2": "만 묶음은 '구천육십'을 네 자리로, 일 묶음은 '이천팔'을 네 자리로 써요. 십의 자리나 백의 자리가 비면 0을 넣어요.",
+    "solution": "만 묶음 구천육십은 9060, 일 묶음 이천팔은 2008이에요. 이어 쓰면 90602008이에요.",
+    "forbidden": [
+      "90602008"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-07",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-01]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "한글로 쓴 큰 수를 숫자로 쓰기(예: 이억 오천만 삼백)",
+    "targets_misconception": "'삼억 이천만'을 쓸 때 0의 개수를 빠뜨리거나 더 씀",
+    "text": "이십삼억 오백만 칠십을 숫자로 써 보세요. (쉼표 없이 숫자만 써 주세요)",
+    "expr": "23*100000000+500*10000+70",
+    "answer": {
+      "kind": "value",
+      "value": "2305000070",
+      "accepted": [
+        "2305000070"
+      ]
+    },
+    "hint1": "억 묶음, 만 묶음, 일 묶음으로 나눠서 묶음마다 네 자리씩 써 보세요(맨 앞 묶음만 네 자리보다 짧아도 돼요).",
+    "hint2": "'오백만'의 만 묶음은 네 자리로 0500, '칠십'의 일 묶음은 네 자리로 0070이에요.",
+    "solution": "억 묶음 23, 만 묶음 0500, 일 묶음 0070을 이어 쓰면 2305000070이에요.",
+    "forbidden": [
+      "2305000070"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-08",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "10만씩·1억씩 등 일정하게 뛰어 센 n번째 수 구하기",
+    "targets_misconception": "뛰어 세기에서 받아올림이 생기는 자리를 놓침",
+    "text": "4500000에서 시작해서 100000씩 6번 뛰어 센 수는 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "4500000+6*100000",
+    "answer": {
+      "kind": "value",
+      "value": "5100000",
+      "accepted": [
+        "5100000"
+      ]
+    },
+    "hint1": "100000씩 뛰어 세면 십만의 자리 숫자만 1씩 커져요.",
+    "hint2": "십만의 자리 숫자가 9를 넘으면 백만의 자리로 받아올림해요. 처음 십만의 자리 숫자에 6번 더한 뒤 받아올림이 생기는지 보세요.",
+    "solution": "십만의 자리 숫자 5가 6번 커지면 11이 되므로 백만의 자리로 1을 받아올려요. 4500000 → 4600000 → … → 5100000이에요.",
+    "forbidden": [
+      "5100000"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-09",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "10만씩·1억씩 등 일정하게 뛰어 센 n번째 수 구하기",
+    "targets_misconception": "뛰어 세기에서 받아올림이 생기는 자리를 놓침",
+    "text": "8억 2000만에서 시작해서 1억씩 5번 뛰어 센 수는 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "820000000+5*100000000",
+    "answer": {
+      "kind": "value",
+      "value": "1320000000",
+      "accepted": [
+        "1320000000"
+      ]
+    },
+    "hint1": "1억씩 뛰어 세면 억의 자리 숫자가 1씩 커져요.",
+    "hint2": "억의 자리 숫자가 9를 넘으면 십억의 자리로 받아올림해요. 만 묶음(2000만)은 그대로예요.",
+    "solution": "억의 자리 8이 5번 커지면 13이 되어 13억 2000만이에요. 숫자로 쓰면 1320000000이에요.",
+    "forbidden": [
+      "1320000000"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-10",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "10만씩·1억씩 등 일정하게 뛰어 센 n번째 수 구하기",
+    "targets_misconception": "뛰어 세기에서 받아올림이 생기는 자리를 놓침",
+    "text": "60300000에서 시작해서 10000000씩 거꾸로 4번 뛰어 센 수는 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "60300000-4*10000000",
+    "answer": {
+      "kind": "value",
+      "value": "20300000",
+      "accepted": [
+        "20300000"
+      ]
+    },
+    "hint1": "10000000은 천만이에요. 천만씩 거꾸로 뛰어 세면 천만의 자리 숫자가 1씩 작아져요.",
+    "hint2": "천만의 자리 숫자에서 4번 1씩 빼 보세요. 나머지 자리 숫자는 그대로 두면 돼요.",
+    "solution": "천만의 자리 숫자 6이 4번 작아지면 2가 되어 20300000이에요.",
+    "forbidden": [
+      "20300000"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-11",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "10만씩·1억씩 등 일정하게 뛰어 센 n번째 수 구하기",
+    "targets_misconception": "뛰어 세기에서 받아올림이 생기는 자리를 놓침",
+    "text": "297000에서 시작해서 10000씩 5번 뛰어 센 수는 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "297000+5*10000",
+    "answer": {
+      "kind": "value",
+      "value": "347000",
+      "accepted": [
+        "347000"
+      ]
+    },
+    "hint1": "10000씩 뛰어 세면 만의 자리 숫자가 1씩 커져요.",
+    "hint2": "만의 자리 숫자가 9에서 다음으로 넘어갈 때 십만의 자리로 받아올림이 생겨요. 한 번씩 차례로 적어 보세요.",
+    "solution": "297000 → 307000 → 317000 → 327000 → 337000 → 347000이에요. 첫 번째에서 받아올림이 생겨 십만의 자리가 3이 돼요.",
+    "forbidden": [
+      "347000"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-12",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "10만씩·1억씩 등 일정하게 뛰어 센 n번째 수 구하기",
+    "targets_misconception": "뛰어 세기에서 받아올림이 생기는 자리를 놓침",
+    "text": "어떤 규칙으로 뛰어 센 수가 52600000, 53100000, 53600000, …으로 이어져요. 같은 규칙으로 52600000부터 8번 뛰어 센 수는 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "52600000+8*500000",
+    "answer": {
+      "kind": "value",
+      "value": "56600000",
+      "accepted": [
+        "56600000"
+      ]
+    },
+    "hint1": "이웃한 두 수가 얼마씩 커지는지 먼저 찾아보세요. 어느 자리 숫자가 바뀌는지 보면 알 수 있어요.",
+    "hint2": "한 번에 500000(오십만)씩 커져요. 오십만씩 두 번이면 백만이 된다는 걸 이용해 보세요.",
+    "solution": "한 번에 500000씩 커지므로 8번이면 4000000이 커져요. 52600000 + 4000000 = 56600000이에요.",
+    "forbidden": [
+      "56600000"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-13",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "□ 안에 들어갈 수 있는 숫자 중 가장 큰(작은) 것 구하기로 크기 비교",
+    "targets_misconception": "자릿수가 다른 두 수를 맨 앞 숫자만 보고 비교함",
+    "text": "73□4105 < 7352000일 때, □ 안에 들어갈 수 있는 숫자 중 가장 큰 숫자는 무엇인가요? (□에는 한 자리 숫자가 들어가요) (쉼표 없이 숫자만 써 주세요)",
+    "expr": "4",
+    "answer": {
+      "kind": "value",
+      "value": "4",
+      "accepted": [
+        "4"
+      ]
+    },
+    "hint1": "두 수의 자릿수가 같은지 먼저 세어 보고, 높은 자리부터 차례로 비교해 보세요.",
+    "hint2": "앞의 두 자리(73)는 같아요. □에 7352000의 만의 자리 숫자와 같은 숫자를 넣으면, 그 아래 4105와 2000 중 어느 쪽이 큰지 보고 조건이 맞는지 확인해요.",
+    "solution": "□에 5를 넣으면 7354105 > 7352000이라 안 돼요. 5보다 작은 숫자는 모두 되므로 가장 큰 숫자는 4예요.",
+    "forbidden": [
+      "4"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-14",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "□ 안에 들어갈 수 있는 숫자 중 가장 큰(작은) 것 구하기로 크기 비교",
+    "targets_misconception": "자릿수가 다른 두 수를 맨 앞 숫자만 보고 비교함",
+    "text": "6□28193 > 6527000일 때, □ 안에 들어갈 수 있는 숫자 중 가장 작은 숫자는 무엇인가요? (□에는 한 자리 숫자가 들어가요) (쉼표 없이 숫자만 써 주세요)",
+    "expr": "5",
+    "answer": {
+      "kind": "value",
+      "value": "5",
+      "accepted": [
+        "5"
+      ]
+    },
+    "hint1": "두 수 모두 일곱 자리예요. 맨 앞 자리부터 같은지 다른지 차례로 보세요.",
+    "hint2": "□는 십만의 자리예요. □에 6527000의 십만의 자리 숫자와 같은 숫자를 넣었을 때, 아랫자리 28193과 27000을 비교해서 조건이 맞는지 확인해요.",
+    "solution": "□에 5를 넣으면 6528193 > 6527000이 되어 조건이 맞아요. 4 이하를 넣으면 6527000보다 작아지므로 가장 작은 숫자는 5예요.",
+    "forbidden": [
+      "5"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-15",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "□ 안에 들어갈 수 있는 숫자 중 가장 큰(작은) 것 구하기로 크기 비교",
+    "targets_misconception": "자릿수가 다른 두 수를 맨 앞 숫자만 보고 비교함",
+    "text": "□3901256 > 75000000일 때, □ 안에 들어갈 수 있는 숫자 중 가장 작은 숫자는 무엇인가요? (□에는 한 자리 숫자가 들어가요) (쉼표 없이 숫자만 써 주세요)",
+    "expr": "8",
+    "answer": {
+      "kind": "value",
+      "value": "8",
+      "accepted": [
+        "8"
+      ]
+    },
+    "hint1": "맨 앞 숫자만 보지 말고, 두 수의 자릿수가 같은지부터 확인해 보세요.",
+    "hint2": "두 수 모두 여덟 자리예요. □에 75000000의 맨 앞 숫자와 같은 숫자를 넣으면 아랫자리 3901256과 5000000 중 어느 쪽이 큰지 보세요. 안 되면 그보다 하나 큰 숫자를 생각해요.",
+    "solution": "□에 7을 넣으면 73901256 < 75000000이라 안 돼요. 8을 넣으면 83901256 > 75000000이므로 가장 작은 숫자는 8이에요.",
+    "forbidden": [
+      "8"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-16",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "□ 안에 들어갈 수 있는 숫자 중 가장 큰(작은) 것 구하기로 크기 비교",
+    "targets_misconception": "자릿수가 다른 두 수를 맨 앞 숫자만 보고 비교함",
+    "text": "5□2700000 < 536000000일 때, □ 안에 들어갈 수 있는 숫자 중 가장 큰 숫자는 무엇인가요? (□에는 한 자리 숫자가 들어가요) (쉼표 없이 숫자만 써 주세요)",
+    "expr": "3",
+    "answer": {
+      "kind": "value",
+      "value": "3",
+      "accepted": [
+        "3"
+      ]
+    },
+    "hint1": "두 수 모두 아홉 자리예요. 억의 자리부터 차례로 비교해 보세요.",
+    "hint2": "□는 천만의 자리예요. □에 536000000의 천만의 자리 숫자와 같은 숫자를 넣으면 아랫자리 2700000과 6000000 중 어느 쪽이 작은지 보세요.",
+    "solution": "□에 3을 넣으면 532700000 < 536000000이 되어 조건이 맞아요. 4를 넣으면 더 커지므로 가장 큰 숫자는 3이에요.",
+    "forbidden": [
+      "3"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-17",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-01]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "hard",
+    "problem_type": "숫자 카드를 한 번씩 써서 조건에 맞는 가장 큰(작은) 수 또는 두 번째로 큰 수 만들기",
+    "targets_misconception": "자릿수가 다른 두 수를 맨 앞 숫자만 보고 비교함",
+    "text": "숫자 카드 3, 0, 8, 5, 1, 6, 9, 4를 한 번씩 모두 써서 여덟 자리 수를 만들려고 해요. 만들 수 있는 가장 작은 수는 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "10345689",
+    "answer": {
+      "kind": "value",
+      "value": "10345689",
+      "accepted": [
+        "10345689"
+      ]
+    },
+    "hint1": "가장 작은 수를 만들려면 높은 자리에 작은 숫자를 놓아요. 그런데 맨 앞자리에 놓을 수 없는 숫자가 있어요.",
+    "hint2": "맨 앞자리에는 0을 뺀 숫자 중 가장 작은 것을 놓고, 그다음 자리부터 남은 숫자를 작은 순서대로 놓아 보세요.",
+    "solution": "맨 앞에 0을 놓으면 여덟 자리 수가 안 되므로 1을 놓고, 남은 0, 3, 4, 5, 6, 8, 9를 작은 순서대로 놓아 10345689예요.",
+    "forbidden": [
+      "10345689"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-18",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "hard",
+    "problem_type": "숫자 카드를 한 번씩 써서 조건에 맞는 가장 큰(작은) 수 또는 두 번째로 큰 수 만들기",
+    "targets_misconception": "자릿수가 다른 두 수를 맨 앞 숫자만 보고 비교함",
+    "text": "숫자 카드 2, 7, 0, 5, 9, 4, 8을 한 번씩 모두 써서 일곱 자리 수를 만들려고 해요. 만들 수 있는 수 중 두 번째로 큰 수는 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "9875402",
+    "answer": {
+      "kind": "value",
+      "value": "9875402",
+      "accepted": [
+        "9875402"
+      ]
+    },
+    "hint1": "먼저 가장 큰 수를 만들어 보세요. 두 번째로 큰 수는 가장 큰 수에서 아주 조금만 바꾼 수예요.",
+    "hint2": "가장 큰 수에서 높은 자리는 그대로 두고, 가장 낮은 두 자리(십의 자리와 일의 자리)의 숫자만 바꿔 보세요.",
+    "solution": "가장 큰 수는 9875420이에요. 십의 자리와 일의 자리 숫자를 바꾸면 두 번째로 큰 수 9875402가 돼요.",
+    "forbidden": [
+      "9875402"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-19",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-01]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "hard",
+    "problem_type": "숫자 카드를 한 번씩 써서 조건에 맞는 가장 큰(작은) 수 또는 두 번째로 큰 수 만들기",
+    "targets_misconception": "세 자리 쉼표와 만 단위 네 자리 끊기를 섞어 자리 이름을 틀림",
+    "text": "숫자 카드 1, 3, 5, 6, 7, 8, 0, 2, 4를 한 번씩 모두 써서 아홉 자리 수를 만들려고 해요. 만의 자리 숫자가 3인 수 중 가장 큰 수는 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "876534210",
+    "answer": {
+      "kind": "value",
+      "value": "876534210",
+      "accepted": [
+        "876534210"
+      ]
+    },
+    "hint1": "아홉 자리 수에서 만의 자리가 오른쪽에서 몇 번째 자리인지 먼저 찾아보세요.",
+    "hint2": "만의 자리는 오른쪽에서 다섯 번째 자리예요. 그 자리에 정해진 카드를 놓고, 남은 카드는 높은 자리부터 큰 숫자 순서로 놓아 보세요.",
+    "solution": "만의 자리(오른쪽에서 다섯 번째)에 3을 놓고, 남은 8, 7, 6, 5, 4, 2, 1, 0을 큰 순서대로 나머지 자리에 놓으면 8765|3|4210, 즉 876534210이에요.",
+    "forbidden": [
+      "876534210"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g4-math-large-numbers-20",
+    "unit_id": "g4-math-large-numbers",
+    "tag": "g4-math-large-numbers",
+    "subject": "math",
+    "grade": 4,
+    "standard": {
+      "code": "[4수01-02]",
+      "curriculum": "2022",
+      "unit": "큰 수 읽고 쓰고 비교하기"
+    },
+    "difficulty": "hard",
+    "problem_type": "숫자 카드를 한 번씩 써서 조건에 맞는 가장 큰(작은) 수 또는 두 번째로 큰 수 만들기",
+    "targets_misconception": "자릿수가 다른 두 수를 맨 앞 숫자만 보고 비교함",
+    "text": "숫자 카드 5, 0, 8, 2, 6, 1, 3을 한 번씩 모두 써서 일곱 자리 수를 만들려고 해요. 만들 수 있는 수 중 두 번째로 작은 수는 얼마인가요? (쉼표 없이 숫자만 써 주세요)",
+    "expr": "1023586",
+    "answer": {
+      "kind": "value",
+      "value": "1023586",
+      "accepted": [
+        "1023586"
+      ]
+    },
+    "hint1": "먼저 가장 작은 수를 만들어 보세요. 맨 앞자리에 0은 올 수 없어요.",
+    "hint2": "가장 작은 수에서 높은 자리는 그대로 두고, 가장 낮은 두 자리의 숫자만 바꿔 보세요.",
+    "solution": "가장 작은 수는 1023568이에요. 십의 자리와 일의 자리 숫자를 바꾸면 두 번째로 작은 수 1023586이 돼요.",
+    "forbidden": [
+      "1023586"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  }
+]

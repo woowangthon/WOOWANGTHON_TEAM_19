@@ -22,7 +22,8 @@ export interface MentorApi extends AccountApi {
   getActiveSession(): Promise<SessionView | null>;            // 새로고침해도 이어서 할 수 있게
   startSession(difficulty: Difficulty): Promise<SessionView>;
   getProblem(sessionId: string): Promise<ProblemView | null>; // null이면 풀기 단계가 끝난 것
-  submitAnswer(sessionId: string, problemId: string, numerator: number, denominator: number): Promise<AnswerResult>;
+  /** 분수 칸은 numerator·denominator, 그 밖의 답 칸(숫자 한 칸·보기·낱말)은 answer 글자로 보낸다 */
+  submitAnswer(sessionId: string, problemId: string, numerator: number, denominator: number, answer?: string): Promise<AnswerResult>;
   requestHint(sessionId: string, problemId: string): Promise<HintResult>;
   showSolution(sessionId: string, problemId: string): Promise<Solution>;
   afterStudy(sessionId: string, choice: 'chat' | 'skip'): Promise<SessionView>; // 수다 할래 / 오늘은 끝

@@ -11,7 +11,7 @@ body {
 button { font: inherit; color: inherit; }
 input, textarea, select { font: inherit; color: inherit; }
 h1, h2, h3, p { margin: 0; }
-:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--color-text); outline-offset: 2px; } /* D3: 머스터드는 크림 위 2.11 → 글자색(3:1 이상) */
 .icon { flex: none; display: block; }
 
 /* ============ 폰 프레임 (기준 360×640) ============ */
@@ -46,7 +46,7 @@ h1, h2, h3, p { margin: 0; }
 .lessonbar { display: flex; align-items: center; gap: 10px; padding: 6px 14px 0 6px; min-height: 52px; }
 .progress { flex: 1; height: 14px; border-radius: var(--radius-pill); background: var(--color-surface-muted); overflow: hidden; }
 .progress__fill { height: 100%; min-width: 14px; border-radius: var(--radius-pill); background: var(--color-primary); transition: width .35s ease; }
-@media (prefers-reduced-motion: reduce) { .progress__fill { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .progress__fill { transition: none; } .btn, .key { transition: none; } .btn:active, .key:active { transform: none; } } /* D6 */
 
 /* ============ 하단 탭 ============ */
 .tabbar { display: flex; gap: 4px; padding: 6px 10px 10px; background: var(--color-surface); border-top: 1.5px solid var(--color-border); }
@@ -84,7 +84,7 @@ h1, h2, h3, p { margin: 0; }
 .card { background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; box-shadow: var(--shadow-card); }
 .card--flat { box-shadow: none; }
 .card--selected { border-color: var(--color-primary); background: var(--color-primary-soft); box-shadow: 0 2px 0 var(--color-primary); }
-.card--warn { border-color: var(--color-accent); box-shadow: 0 2px 0 var(--color-accent); }
+.card--warn { border-color: var(--color-accent-line); box-shadow: 0 2px 0 var(--color-accent-line); }
 .card--danger { border-color: var(--color-danger); background: var(--color-danger-soft); box-shadow: 0 2px 0 var(--color-danger); }
 button.card { text-align: left; cursor: pointer; width: 100%; }
 .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; white-space: nowrap; background: var(--color-surface-muted); color: var(--color-text-muted); }
@@ -95,8 +95,15 @@ button.card { text-align: left; cursor: pointer; width: 100%; }
 .chip-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .chip-row--scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--space-4)); padding: 0 var(--space-4); }
 .chip-row--scroll::-webkit-scrollbar { display: none; }
+/* 학교급을 고르면 학년 칩이 아래에서 살짝 올라오며 나타난다(가입 학년 선택) */
+/* 문장이 긴 선택지(마무리 퀴즈): 한 줄에 하나씩, 줄바꿈 허용 — 폰에서 화면 밖으로 잘리지 않게 */
+.chip-row--stack .chip { flex: 1 1 100%; min-width: 0; text-align: left; border-radius: var(--radius-sm); padding: 10px 14px; line-height: 1.4; }
+.chip-row--reveal { margin-top: var(--space-2); animation: chip-reveal .22s ease-out; }
+@keyframes chip-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .chip-row--reveal { animation: none; } }
 .chip { flex: none; min-height: 40px; padding: 6px 14px; border: 2px solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); font-size: 14px; font-weight: 600; cursor: pointer; }
 .chip--on { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary-strong); }
+.chip:disabled { opacity: .45; cursor: default; }
 .notice { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--color-accent-soft); font-size: 14px; }
 .notice--danger { background: var(--color-danger-soft); color: var(--color-danger); }
 .notice--plain { background: var(--color-surface-muted); color: var(--color-text-muted); }
@@ -111,6 +118,11 @@ button.card { text-align: left; cursor: pointer; width: 100%; }
 .input:focus { outline: none; border-color: var(--color-primary); }
 textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 700; color: var(--color-text-muted); }
+/* 칸 안 글자는 라벨(13px 회색 굵게)을 물려받지 않게 — 로그인 칸과 같은 16px 보통 글씨(R4). 16px은 아이폰에서 누를 때 확대되지 않는 크기 */
+.field .input { font-size: 16px; font-weight: 400; color: var(--color-text); }
+/* R2: 학년 칩 묶음은 fieldset+legend — 다른 칸 제목과 같은 모양, 가운데 정렬(R10)을 덮지 않게 margin-block만 */
+fieldset.field { border: 0; padding: 0; margin-block: 0; min-inline-size: 0; }
+fieldset.field > legend { padding: 0; margin-bottom: 4px; font: inherit; color: inherit; }
 .check-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 50px; padding: 0 14px; border-bottom: 1.5px solid var(--color-border); cursor: pointer; }
 .check-row:last-child { border-bottom: 0; }
 .check-row input { width: 20px; height: 20px; accent-color: var(--color-primary); }
@@ -138,7 +150,7 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; }
 .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 10px 8px; background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-card); }
 .week--lift { margin-top: -34px; }
 .day { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px 0; border-radius: 12px; font-size: 13px; font-weight: 700; color: var(--color-text-muted); }
-.day--today { background: var(--color-accent-soft); color: var(--color-accent-strong); }
+.day--today { background: var(--color-accent-soft); color: var(--color-accent-strong); box-shadow: inset 0 -3px 0 var(--color-accent-strong); } /* D4: 색 말고 밑줄도 */
 .dot { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--color-surface-muted); color: #fff; }
 .dot--on { background: var(--color-primary); }
 .mission { display: flex; gap: 12px; align-items: center; }
@@ -154,10 +166,15 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; }
 .answer-box { width: 76px; height: 46px; display: grid; place-items: center; border: 2.5px solid var(--color-border); border-radius: 12px; background: var(--color-surface); font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; cursor: pointer; }
 .answer-box--focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-soft); }
 .answer-box--ok { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary-strong); }
-.answer-box--retry { border-color: var(--color-accent); background: var(--color-accent-soft); color: var(--color-accent-strong); }
+.answer-box--retry { border-color: var(--color-accent-line); background: var(--color-accent-soft); color: var(--color-accent-strong); }
+/* D4: 색만으로 맞음·다시를 나누지 않게 모서리에 표시 하나 */
+.answer-box--ok, .answer-box--retry { position: relative; }
+.answer-box--ok::after, .answer-box--retry::after { position: absolute; top: -9px; right: -9px; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; color: #fff; }
+.answer-box--ok::after { content: '✓'; background: var(--color-primary); }
+.answer-box--retry::after { content: '!'; background: var(--color-accent-strong); }
 .hint-dots { display: inline-flex; align-items: center; gap: 4px; }
 .hint-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--color-surface-muted); border: 1.5px solid var(--color-border); }
-.hint-dots i.on { background: var(--color-accent); border-color: var(--color-accent); }
+.hint-dots i.on { background: var(--color-accent-line); border-color: var(--color-accent-line); }
 .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .key { min-height: 46px; display: grid; place-items: center; border: 2px solid var(--color-border); border-radius: 12px; background: var(--color-surface); box-shadow: 0 2px 0 var(--color-border); font-size: var(--font-size-keypad); font-weight: 800; font-variant-numeric: tabular-nums; cursor: pointer; }
 .key:active { transform: translateY(2px); box-shadow: none; }
@@ -228,13 +245,21 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; }
 .setup li.done strong { color: var(--color-text-muted); text-decoration: line-through; }
 
 /* 씨앗: 민트 새싹 + 머스터드 테두리 */
-.seed-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px 2px 3px; border: 2px solid var(--color-accent); border-radius: var(--radius-pill); background: var(--color-surface); font-size: 13px; font-weight: 800; color: var(--color-text); cursor: default; }
+.seed-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px 2px 3px; border: 2px solid var(--color-accent-line); border-radius: var(--radius-pill); background: var(--color-surface); font-size: 13px; font-weight: 800; color: var(--color-text); cursor: default; }
 button.seed-chip { cursor: pointer; }
+.seed-chip--stamp { border-color: var(--color-primary); }
+.seed-dot--stamp { background: var(--color-accent-soft); color: var(--color-accent-strong); }
 .seed-dot { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--color-primary-soft); color: var(--color-primary); }
 .seed-link { display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; font-size: 13px; font-weight: 700; color: var(--color-text-muted); cursor: pointer; }
-.seed-hero { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: var(--radius-md); background: var(--color-primary-soft); border: 2px solid var(--color-accent); }
+.seed-hero { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: var(--radius-md); background: var(--color-primary-soft); border: 2px solid var(--color-accent-line); }
 .seed-hero__n { display: flex; align-items: center; gap: 6px; font-size: 30px; font-weight: 800; color: var(--color-primary-strong); }
 .seed-hero__how { text-align: right; color: var(--color-text-muted); line-height: 1.5; }
+/* 두 재화를 나란히(좁으면 위아래). 도장 카드는 머스터드 바탕으로 구분 */
+.wallet-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-2); }
+.wallet-pair .seed-hero { flex-direction: column; align-items: flex-start; gap: 4px; }
+.wallet-pair .seed-hero__how { text-align: left; }
+.seed-hero--stamp { background: var(--color-accent-soft); border-color: var(--color-primary); }
+.seed-hero--stamp .seed-hero__n { color: var(--color-accent-strong); }
 .plus { color: var(--color-primary-strong); }
 .minus { color: var(--color-text-muted); }
 
@@ -247,7 +272,7 @@ button.seed-chip { cursor: pointer; }
 .shop-row { display: flex; align-items: center; gap: 12px; }
 .shop-row--hidden { opacity: .6; border-style: dashed; }
 .shop-row__icon { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--color-accent-soft); color: var(--color-accent-strong); }
-.price-btn { flex: none; min-width: 64px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 12px; border: 2px solid var(--color-accent); border-radius: 12px; background: var(--color-surface); font-weight: 800; box-shadow: 0 3px 0 var(--color-accent); cursor: pointer; }
+.price-btn { flex: none; min-width: 64px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 12px; border: 2px solid var(--color-accent-line); border-radius: 12px; background: var(--color-surface); font-weight: 800; box-shadow: 0 3px 0 var(--color-accent); cursor: pointer; }
 .price-btn:active { transform: translateY(3px); box-shadow: none; }
 .price-btn:disabled { border-color: var(--color-border); box-shadow: none; color: var(--color-text-muted); font-size: 13px; cursor: not-allowed; }
 .deco-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -265,13 +290,14 @@ button.seed-chip { cursor: pointer; }
 .stepper .icon-btn { width: 40px; height: 40px; font-size: 20px; font-weight: 800; }
 
 /* 보호자 도장 */
-.stamp-card { display: flex; align-items: center; gap: 12px; border-color: var(--color-accent); }
-.stamp-card__mark { flex: none; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; border: 2.5px dashed var(--color-accent); color: var(--color-accent-strong); }
+.stamp-card { display: flex; align-items: center; gap: 12px; border-color: var(--color-accent-line); }
+.stamp-card__mark { flex: none; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; border: 2.5px dashed var(--color-accent-line); color: var(--color-accent-strong); }
 .stamp-card--done { border-color: var(--color-border); }
 .stamp-card--done .stamp-card__mark { border-style: solid; background: var(--color-accent-soft); transform: rotate(-12deg); }
 
 /* 캐릭터: 앞뒤로 겹친 카드 넘기기 */
 .stack3 { position: relative; height: 212px; touch-action: pan-y; outline: none; }
+.stack3:focus-visible { outline: 3px solid var(--color-text); outline-offset: 4px; border-radius: 16px; } /* D3: 키보드로 넘길 때 보이게 */
 .stack-card { position: absolute; top: 0; left: 50%; width: 62%; height: 196px; margin-left: -31%; display: grid; place-items: center;
   border: 2px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); box-shadow: var(--shadow-card);
   transition: transform .28s ease, opacity .28s ease; cursor: pointer; user-select: none; }
@@ -312,7 +338,7 @@ button.seed-chip { cursor: pointer; }
 .link-row button { border: 0; background: none; padding: 8px 2px; color: var(--color-text-muted); cursor: pointer; }
 .link-row button.strong { color: var(--color-primary-strong); font-weight: 800; }
 .link-row i { width: 1px; height: 12px; background: var(--color-border); }
-.hint { font-size: 12px; font-weight: 600; color: var(--color-text-muted); }
+.hint { font-size: 13px; font-weight: 600; color: var(--color-text-muted); } /* 학생 화면 글자 하한 13px(DESIGN-RULES) */
 .hint--ok { color: var(--color-primary-strong); }
 .hint--bad { color: var(--color-accent-strong); }
 .agree { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 50px; padding: 0 14px; border-bottom: 1.5px solid var(--color-border); }
@@ -345,8 +371,85 @@ button.seed-chip { cursor: pointer; }
 .bell__n { position: absolute; top: 4px; right: 2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--color-accent); color: #3B2A00; font-size: 11px; font-weight: 800; display: grid; place-items: center; }
 .notice-item { display: flex; align-items: center; gap: 10px; }
 .notice-item:disabled { cursor: default; color: inherit; }
-.notice-item__dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent); }
+.notice-item__dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent-line); }
 .screen-body > .progress, .progress--thin { flex: none !important; height: 6px; }
+
+/* =====================================================================
+   11-11 휴대폰·태블릿·PC 틀 + 움직임
+   - 휴대폰(~599px): 지금 그대로 꽉 찬 한 줄 화면 + 하단 탭
+   - 태블릿(600~1023px): 화면을 꽉 채우고 하단 탭 → 왼쪽 아이콘 레일. 내용은 가운데(아이 720px · 어른 960px)
+   - PC(1024px~): 레일 → 이름이 붙은 사이드바. 선생님 목록은 카드 격자
+   - 주소에 ?frame=phone 을 붙이면 예전처럼 휴대폰 모형(360×640)으로 본다(영상 촬영용, main.tsx)
+   ===================================================================== */
+.card-grid { display: flex; flex-direction: column; gap: var(--space-3); }
+
+@media (min-width: 600px) {
+  :root:not([data-frame="phone"]) .frame {
+    max-width: none; height: 100dvh; margin: 0; border-radius: 0; box-shadow: none;
+    --content-max: 720px;
+  }
+  :root:not([data-frame="phone"]) .frame--adult { --content-max: 960px; }
+  /* 탭이 있는 화면: 왼쪽 칸 = 레일, 오른쪽 칸 = 상단바·내용·하단 버튼 */
+  :root:not([data-frame="phone"]) .frame--tabs {
+    display: grid; grid-template-columns: 92px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  :root:not([data-frame="phone"]) .frame--tabs > * { grid-column: 2; }
+  :root:not([data-frame="phone"]) .frame--tabs > .tabbar {
+    grid-column: 1; grid-row: 1 / -1; flex-direction: column; justify-content: flex-start; gap: 6px;
+    padding: 20px 10px; border-top: 0; border-right: 1.5px solid var(--color-border);
+  }
+  :root:not([data-frame="phone"]) .frame--tabs .tab { flex: none; min-height: 66px; font-size: 12.5px; }
+  /* 내용 폭: 넓은 화면에서도 한 줄 길이가 너무 길어지지 않게 가운데로 모은다 */
+  :root:not([data-frame="phone"]) .screen-body,
+  :root:not([data-frame="phone"]) .bottom-actions { padding-inline: max(var(--space-5), calc((100% - var(--content-max)) / 2)); }
+  :root:not([data-frame="phone"]) .topbar { padding-inline: 16px; }
+  /* 시트: 아래에서 올라오는 판 → 가운데 대화상자 */
+  :root:not([data-frame="phone"]) .sheet-backdrop { align-items: center; justify-content: center; padding: var(--space-5); }
+  :root:not([data-frame="phone"]) .sheet { max-width: 560px; max-height: 80%; border-radius: var(--radius-lg); }
+  :root:not([data-frame="phone"]) .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  /* 휴대폰에서 양옆까지 번지던 학생 첫 화면 머리 → 넓은 화면에선 둥근 카드로 */
+  :root:not([data-frame="phone"]) .hero { margin: 0; padding: 12px var(--space-5) 24px; border-radius: 28px; }
+}
+
+@media (min-width: 1024px) {
+  :root:not([data-frame="phone"]) .frame--tabs { grid-template-columns: 220px minmax(0, 1fr); }
+  :root:not([data-frame="phone"]) .frame--tabs > .tabbar { padding: 24px 14px; gap: 4px; }
+  :root:not([data-frame="phone"]) .frame--tabs > .tabbar::before {
+    content: 'AI 멘토'; display: block; padding: 0 14px 18px; font-size: 18px; font-weight: 800; color: var(--color-primary-strong);
+  }
+  :root:not([data-frame="phone"]) .frame--tabs .tab {
+    min-height: 48px; flex-direction: row; justify-content: flex-start; gap: 12px; padding: 0 14px; font-size: 15px;
+  }
+  :root:not([data-frame="phone"]) .card-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+}
+
+/* ---- 움직임: 끊겨 보이지 않게 짧고(0.15~0.25초) 작게 ---- */
+/* 화면이 바뀌면 내용이 살짝 떠오르며 나타난다(탭·상단바는 그대로 두고 내용만) */
+.screen-body { animation: screen-in .22s ease-out; }
+@keyframes screen-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+/* 시트: 뒤 배경은 서서히, 판은 아래에서(휴대폰) / 살짝 커지며(태블릿·PC) */
+.sheet-backdrop { animation: fade-in .18s ease-out; }
+.sheet { animation: sheet-up .24s cubic-bezier(.2, .8, .2, 1); }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheet-up { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+@media (min-width: 600px) {
+  :root:not([data-frame="phone"]) .sheet { animation-name: sheet-pop; }
+  @keyframes sheet-pop { from { transform: scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+/* 탭: 선택 배경이 툭 바뀌지 않게 */
+.tab { transition: background-color .18s ease, color .18s ease; }
+/* 마우스가 있는 기기(PC)에서만: 누를 수 있는 카드·탭에 올리면 살짝 떠오름 */
+@media (hover: hover) and (pointer: fine) {
+  button.card { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  button.card:hover { transform: translateY(-2px); border-color: var(--color-primary); box-shadow: 0 4px 0 var(--color-border); }
+  .tab:not(.tab--active):hover { background: var(--color-surface-muted); }
+}
+/* 동작 줄이기를 켠 사람에게는 움직임을 모두 끈다 */
+@media (prefers-reduced-motion: reduce) {
+  .screen-body, .sheet-backdrop, .sheet { animation: none; }
+  .tab, button.card { transition: none; }
+  button.card:hover { transform: none; }
+}
 
 /* ============ 학습지도자 화면 (학습지도자만, lib/wide.ts) ============ */
 /* 학습지도자는 어느 폭에서도 폰 모양 틀 없이 창 전체를 쓴다(최대 폭 없음). 2열·표는 1024px 이상에서만 */
@@ -360,3 +463,293 @@ button.seed-chip { cursor: pointer; }
 .teacher-split__panel { position: sticky; top: 0; display: flex; flex-direction: column; gap: var(--space-3); }
 /* 「결과」 표 */
 .table--results td { vertical-align: top; }
+
+/* ============ 수업 타이머 알림 (학습지도자, 11-12) — 위에서 살짝 내려왔다 4초 뒤 사라짐. 화면을 가리지 않게 작게 ============ */
+.timer-toast { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 60px); left: 50%; transform: translateX(-50%); z-index: 1000; max-width: calc(100vw - 32px); white-space: nowrap;
+  display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: var(--radius-pill);
+  background: var(--color-text); color: var(--color-surface); font-size: 14px; font-weight: 700; box-shadow: 0 6px 20px rgba(0, 0, 0, .18);
+  pointer-events: none; animation: timer-toast-in .3s ease-out both; }
+.timer-toast--leave { animation: timer-toast-out .4s ease-in both; }
+@keyframes timer-toast-in { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes timer-toast-out { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -12px); } }
+@media (prefers-reduced-motion: reduce) { .timer-toast, .timer-toast--leave { animation: none; } .timer-toast--leave { opacity: 0; } }
+
+/* =====================================================================
+   11-12 GPT 디자인 전달본(GPT-001~022) 병합 — 원본: AI-Mentor-Design-GPT-2026-11-12/styles/global.patch.css
+   ===================================================================== */
+/* 2026-11-12 독립 디자인 전달본. 기존 global.css 맨 끝에 병합.
+ * 원본 클래스 유지. 새 클래스의 쓰는 곳은 HANDOFF.md / MARKUP.md 참조. */
+
+/* GPT-001 A1: 짧은 칩은 둥글게, 긴 문장은 폭 안에서 여러 줄 */
+.chip { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 44px; min-height: 44px; max-width: 100%; height: auto; white-space: normal; overflow-wrap: anywhere; word-break: keep-all; line-height: 1.45; text-align: start; }
+.chip-row { min-width: 0; }
+.chip-row--scroll > .chip { max-width: min(280px, 85vw); }
+.quiz-chips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
+.quiz-chips .chip { flex: 0 1 auto; }
+
+/* GPT-002 A2: 안전 영역을 가장 바깥쪽 컨트롤에 한 번만 적용 */
+.topbar { padding-top: calc(4px + env(safe-area-inset-top, 0px)); flex-shrink: 0; }
+.lessonbar { padding-top: calc(6px + env(safe-area-inset-top, 0px)); flex-shrink: 0; }
+.bottom-actions { flex-shrink: 0; padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)); }
+.tabbar { flex-shrink: 0; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+.frame--tabs > .bottom-actions { padding-bottom: var(--space-3); }
+
+/* GPT-003 A3: 터치 영역 및 입력 크기 */
+.btn--small, .seg__btn, .price-btn, .exit-btn, .seed-link, button.seed-chip, a.seed-chip,
+.agree__view, .link-row button, .check-inline { min-width: 44px; min-height: 44px; }
+.answer-box { min-width: 46px; min-height: 46px; height: 46px; }
+.stack3__arrow, .stepper .icon-btn { width: 44px; height: 44px; }
+.price-btn { width: auto; height: auto; white-space: normal; }
+.input, select, textarea { min-height: 46px; font-size: var(--font-size-body); }
+.seg__btn { display: inline-flex; justify-content: center; align-items: center; gap: 6px; }
+.btn { text-decoration: none; }
+.set-item:has(.switch) { min-height: 48px; }
+/* switch 시각은 46x28 유지, 48px 이상 label.set-item 전체가 터치 영역이어야 함 */
+
+/* GPT-004 A4: 밝은 색상 고정 + 키보드가 줄인 화면에서 내용만 스크롤 */
+:root { color-scheme: only light; }
+html, body, #root { min-width: 0; }
+body { font-variant-numeric: tabular-nums; }
+:root:not([data-frame="phone"]) .frame { max-width: none; height: 100vh; height: 100dvh; margin: 0; border-radius: 0; box-shadow: none; }
+:root:not([data-frame="phone"]) .frame:has(.chat-log) { height: var(--chat-viewport-height, 100dvh); }
+.frame:has(.chat-log) .screen-body { min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; scroll-padding-block: 12px; }
+.chat-log { min-width: 0; padding-bottom: 8px; }
+.mentor { min-width: 0; }
+.bubble { min-width: 0; max-width: min(80%, 520px); overflow-wrap: anywhere; }
+/* U10: 긴 답을 낱말 단위로 꺾고 줄 간격을 넓혀 읽기 쉽게(아주 긴 영문·숫자만 anywhere로) */
+.chat-log .bubble { word-break: keep-all; line-height: 1.55; }
+.chat-form { align-items: end; min-width: 0; }
+.chat-form .input { flex: 1; min-width: 0; font-size: var(--font-size-body); }
+.chat-form .btn { width: 52px; min-height: 46px; }
+.frame:has(.chat-log) .bottom-actions { background: var(--color-bg); border-top: 1px solid var(--color-border); }
+@media (max-height: 480px) {
+  .frame:has(.chat-log) .bottom-actions { gap: 4px; padding-top: 4px; }
+  .frame:has(.chat-log) .bottom-actions > .chip-row { display: none; }
+}
+
+/* GPT-005~007: 이미지 프레임. 실제 PNG는 public/ 아래 */
+.brand-logo { display: flex; gap: 8px; align-items: center; min-height: 44px; color: var(--color-primary-strong); font-size: 20px; font-weight: 800; text-decoration: none; }
+.brand-logo img { width: 36px; height: 36px; object-fit: contain; }
+.outfit-preview { width: 100%; max-width: 192px; aspect-ratio: 1; object-fit: contain; }
+.emote-preview { width: 72px; height: 72px; object-fit: contain; }
+
+/* GPT-008 A8: 키패드는 흐름 안에 유지. 긴 문제·풀이만 스크롤 */
+.frame:has(.lessonbar) .screen-body { min-height: 0; overflow-y: auto; padding-bottom: 16px; scroll-padding-bottom: 16px; }
+.frame:has(.lessonbar) .bottom-actions { position: static; background: var(--color-bg); gap: 8px; }
+.problem { min-width: 0; }
+.equation { flex-wrap: wrap; max-width: 100%; }
+.keypad { flex: none; }
+@media (max-width: 359px), (max-height: 600px) {
+  .frame:has(.lessonbar) .screen-body { padding: 8px 12px 16px; gap: 8px; }
+  .frame:has(.lessonbar) .bottom-actions { padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
+  .frame:has(.lessonbar) .keypad { gap: 4px; }
+  .frame:has(.lessonbar) .key { min-height: 44px; }
+  .frame:has(.lessonbar) .btn { min-height: 44px; padding: 8px; font-size: 16px; }
+  .problem { padding: 12px 10px; gap: 8px; }
+  .equation { gap: 6px; font-size: 24px; }
+}
+
+/* GPT-009 B1: DoorStamp 칩. 씨앗은 새싹, 도장은 사각 손도장 */
+.door-stamp { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 6px 10px; border: 2px solid var(--color-accent-line); border-radius: var(--radius-sm); background: var(--color-accent-soft); color: var(--color-text); font-size: 13px; font-weight: 800; text-decoration: none; }
+.door-stamp .icon { color: var(--color-accent-strong); }
+.seed-chip .icon { color: var(--color-primary); }
+.seed-chip { text-decoration: none; }
+
+/* GPT-010 B2: 오늘의 두 잔액과 획득 방법 */
+.wallet-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.wallet-help { font-size: var(--font-size-caption); color: var(--color-text-muted); line-height: 1.5; }
+
+/* GPT-011 B3: 재화별 목적이 함께 보이는 잔액 */
+.seed-hero--dual { display: grid; grid-template-columns: 1fr; gap: 12px; align-items: stretch; }
+.wallet-account { min-width: 0; display: grid; gap: 4px; }
+.wallet-account + .wallet-account { padding-top: 12px; border-top: 1px solid var(--color-border); }
+.wallet-account__head { display: flex; gap: 6px; align-items: center; font-weight: 800; }
+.seed-hero--dual .seed-hero__how { text-align: left; font-size: 13px; }
+.shop-row > .stack { min-width: 0; flex: 1; }
+.shop-row .price-btn { min-width: 80px; }
+.currency-note { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--color-text-muted); }
+.shop-detail { display: grid; gap: 8px; }
+
+/* GPT-012 B4: 보호자 도장. 이야기 내용은 요구하지 않음 */
+.stamp-card { align-items: flex-start; flex-wrap: wrap; }
+.stamp-card__body { flex: 1; min-width: 160px; display: grid; gap: 8px; }
+.stamp-card--done .stamp-card__mark { transform: none; }
+
+/* GPT-013 B5: 획득 알림은 자동으로 사라지지 않는 정적 상태. 진입만 .2s */
+.reward-feedback { display: flex; gap: 10px; align-items: center; padding: 12px; border: 2px solid var(--color-accent-line); border-radius: var(--radius-md); background: var(--color-accent-soft); animation: reward-in .2s ease-out both; }
+.reward-feedback > .stack { flex: 1; min-width: 0; }
+@keyframes reward-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* GPT-014 B6 */
+.academy-currency { display: flex; align-items: flex-start; gap: 10px; }
+
+/* GPT-015 C1: 카드 상태는 아이콘+문자+시간 */
+.timer-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.timer-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.timer { display: grid; gap: 8px; padding: 12px; background: var(--color-surface-muted); border-radius: var(--radius-sm); }
+.timer__status { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; }
+.timer__time { font-size: var(--font-size-hero); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.25; }
+.timer__end { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; } /* 끝나는 시각만(숫자 카운트다운 없음, 11-12) */
+.timer--class { background: var(--color-primary-soft); }
+.timer--break { background: var(--color-bg); }
+.timer--soon { background: var(--color-accent-soft); border: 2px solid var(--color-accent-line); }
+.timer .notice { padding: 0; }
+.timer-card .btn { margin-top: auto; }
+
+/* GPT-016 C2 */
+.timer-setup { display: grid; gap: 16px; }
+.timer-setup fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.timer-setup legend { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+.timer-setup .chip--on { box-shadow: inset 0 0 0 1px var(--color-primary); }
+.sheet__actions { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; }
+
+/* GPT-017 C3 */
+.student-timer { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; padding: 8px 10px; background: var(--color-surface-muted); border-radius: var(--radius-sm); }
+.student-timer time { font-variant-numeric: tabular-nums; font-weight: 800; }
+
+/* GPT-018~021 C4 / D1~3 */
+.brand-logo--nav { display: none; }
+.tab--active { box-shadow: inset 0 -3px 0 var(--color-primary); font-weight: 800; }
+.teacher-split { grid-template-columns: minmax(0, 1fr); }
+.teacher-split__list, .teacher-split__panel { min-width: 0; }
+.teacher-split__panel { position: static; }
+.sheet { width: 100%; padding: 20px 16px calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--color-surface); border-radius: 24px 24px 0 0; box-shadow: 0 -8px 32px rgba(22,61,51,.14); max-height: calc(100dvh - 24px); overflow-y: auto; }
+.sheet-backdrop { position: fixed; }
+.sheet h2 { font-size: var(--font-size-title); }
+@media (min-width: 600px) {
+  :root:not([data-frame="phone"]) .frame--tabs > .tabbar { padding-top: calc(20px + env(safe-area-inset-top, 0px)); padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
+  :root:not([data-frame="phone"]) .frame--tabs > .bottom-actions { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  :root:not([data-frame="phone"]) .frame--tabs .tab { font-size: 13px; }
+  :root:not([data-frame="phone"]) .tab--active { box-shadow: inset 3px 0 0 var(--color-primary); }
+  :root:not([data-frame="phone"]) .brand-logo--nav { display: flex; justify-content: center; margin-bottom: 16px; }
+  :root:not([data-frame="phone"]) .brand-logo--nav span { display: none; }
+  :root:not([data-frame="phone"]) .card-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+  :root:not([data-frame="phone"]) .seed-hero--dual { grid-template-columns: 1fr 1fr; }
+  :root:not([data-frame="phone"]) .wallet-account + .wallet-account { padding: 0 0 0 16px; border-top: 0; border-left: 1px solid var(--color-border); }
+  :root:not([data-frame="phone"]) .sheet { max-width: 560px; max-height: min(80dvh, 820px); border-radius: var(--radius-lg); border: 1px solid var(--color-border); padding: 24px; box-shadow: 0 16px 48px rgba(22,61,51,.18), 0 2px 8px rgba(22,61,51,.08); }
+}
+@media (min-width: 1024px) {
+  :root:not([data-frame="phone"]) .frame--tabs > .tabbar::before { content: none; }
+  :root:not([data-frame="phone"]) .brand-logo--nav { justify-content: flex-start; padding-inline: 12px; }
+  :root:not([data-frame="phone"]) .brand-logo--nav span { display: inline; }
+  :root:not([data-frame="phone"]) .frame--wide .screen-body { padding-inline: max(24px, calc((100% - 960px) / 2)); }
+  :root:not([data-frame="phone"]) .teacher-split { grid-template-columns: minmax(240px, .9fr) minmax(0, 1.4fr); gap: 24px; }
+  :root:not([data-frame="phone"]) .teacher-split__panel { position: sticky; top: 0; }
+  /* 초안이 길어 오른쪽 칸을 내려도 왼쪽 학생 목록이 화면에 남게(11-13 실측: 1280에서 목록이 위로 사라짐) */
+  :root:not([data-frame="phone"]) .teacher-split__list { position: sticky; top: 0; }
+}
+
+/* GPT-022: 학생 최저 13px / 본문16 / 제목20. 기존 작은 글자 선택자 보완 */
+.topbar__title { font-size: var(--font-size-title); }
+.topbar__label, .tab, .pill, .bubble__label, .stat__label, .flow-steps li, .hint,
+.mascot__fallback, .cosmetic-art__ph, .ward__art, .bell__n { font-size: var(--font-size-caption); }
+.btn, .chip, .seg__btn, .notice { font-size: var(--font-size-body); }
+.btn--small { font-size: var(--font-size-caption); }
+.pill--accent, .hint--bad, .answer-box--retry { color: var(--color-accent-strong); }
+.progress__fill { transition-duration: .2s; }
+.thinking span { animation: none; opacity: .65; }
+.input:focus-visible { outline: 3px solid var(--color-text); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .btn:active, .key:active, .price-btn:active, button.card:hover { transform: none; }
+}
+
+/* 강의실 수업 진행(11-13): 학생 화면 위 「수업 중 · 쉬는 시간」 띠 — 기존 .notice 위에 글자만 조정. 정식 모양은 GPT 요청서 */
+.class-ribbon { justify-content: flex-start; gap: 6px; font-size: 13px; font-weight: 700; }
+
+/* =====================================================================
+   11-13 GPT 디자인 전달본(GPT-037~048) 강의실 수업 진행 — 원본: AI-Mentor-Design-GPT-2026-11-13/styles/global.patch.css
+   ===================================================================== */
+/* GPT-037~048. Append after current global.css. No token renames/changes. */
+/* GPT-037: ClassDefaultsCard */
+.class-defaults fieldset {border:0;padding:0;margin:20px 0;min-width:0}
+.class-defaults legend {font-weight:700;margin-bottom:8px}
+.class-defaults .chip-row {flex-wrap:wrap;gap:8px}
+.class-defaults .chip {min-height:44px;min-width:64px}
+.session-setting {display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;padding:12px 0;border-bottom:1px solid var(--color-border);cursor:pointer}
+.session-setting__label {display:grid;gap:4px;flex:1}
+.session-setting__state {font-size:13px;color:var(--color-text-muted)}
+/* GPT-038: OwnerClassrooms, create Sheet */
+.classroom-meta {display:grid;gap:12px;margin-top:16px}
+.classroom-meta label,.classroom-form label {display:grid;gap:6px}
+.classroom-meta input,.classroom-meta select,.classroom-form input,.classroom-form select {min-height:46px;width:100%;min-width:0;font:inherit;border:1px solid var(--color-border);border-radius:10px;padding:10px;background:var(--color-surface);color:var(--color-text)}
+.classroom-form {display:grid;gap:16px}
+.classroom-empty {padding:28px 16px;text-align:center;display:grid;justify-items:center;gap:12px}
+/* GPT-039/040: TeacherSessionPanel */
+.timer {padding:20px;border-radius:20px;border:1px solid var(--color-border);display:grid;gap:14px}
+.timer__status {display:flex;gap:8px;align-items:center;font-size:16px;font-weight:700}
+.timer__end {font-size:24px;font-weight:800;line-height:1.35;font-variant-numeric:tabular-nums}
+.timer__end small {display:block;font-size:13px;font-weight:400;margin-top:4px}
+.timer--class {background:var(--color-primary-soft)}
+.timer--break {background:var(--color-surface)}
+.timer--soon {background:var(--color-accent-soft);border-color:var(--color-accent-line)}
+.session-start {width:100%;min-height:48px}
+.card-grid > .session-room:not(:first-child) .session-start {background:var(--color-surface);color:var(--color-text);border:1px solid var(--color-border);box-shadow:0 4px 0 var(--color-border)}
+.student-session > .session-start {min-height:48px}
+.session-adjust {display:flex;flex-wrap:wrap;gap:8px}
+.session-adjust .chip {min-width:88px;min-height:44px}
+.session-actions {display:grid;gap:12px}
+.session-actions .btn {min-height:44px;white-space:normal}
+.session-end {border-top:1px solid var(--color-border);padding-top:12px;margin-top:4px;display:flex;justify-content:flex-end}
+.session-end .btn {min-height:44px}
+/* GPT-041: JoinedList */
+.joined-list {margin-top:20px}
+.joined-list summary {min-height:44px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.joined-list ul {list-style:none;padding:0;margin:8px 0 0;max-height:360px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.joined-row {display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 0;border-bottom:1px solid var(--color-border)}
+.joined-row__person {display:grid;gap:5px;min-width:0}
+.joined-row__state {display:flex;align-items:center;gap:6px;font-size:13px;color:var(--color-text-muted)}
+.joined-row .btn {min-height:44px;flex-shrink:0;padding:8px;width:auto}
+.joined-row__person {flex:1}
+/* GPT-042/043: StudentSessionCard / ClassRibbon */
+.student-timer {display:grid;gap:12px;padding:16px;border-radius:20px}
+.student-timer .btn {min-height:48px;width:100%}
+.class-ribbon {display:flex;align-items:center;gap:8px;padding:8px 12px;min-height:44px;font-size:13px;line-height:1.5;margin-bottom:16px}
+.class-ribbon > span {flex:1;min-width:0;overflow-wrap:anywhere}
+.class-ribbon a {min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+/* GPT-044: preserve NavLink and route gate; never disable locked links */
+.tab--locked {position:relative}
+.tab__lock-note {font-size:13px;line-height:1.2;color:var(--color-text-muted)}
+.tab--locked .tab__lock-note {display:block}
+/* GPT-045: Locked */
+.locked-mentor {display:grid;justify-items:center;text-align:center;gap:16px;padding:16px 0}
+.locked-mentor img {width:128px;height:128px;object-fit:contain}
+.locked-mentor h2 {font-size:20px;line-height:1.4;margin:0}
+.locked-mentor p {font-size:16px;line-height:1.65;margin:0;max-width:32ch}
+.safety-link {display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border:1px solid var(--color-primary);border-radius:14px;padding:10px 12px;text-decoration:underline;font-size:13px;color:var(--color-primary-strong)}
+/* GPT-046: Games presentation only */
+.game-list {display:grid;gap:12px}
+.game-choice {min-height:88px;display:flex;align-items:center;gap:16px;text-align:left;color:var(--color-text);text-decoration:none}
+.game-choice span {display:grid;gap:4px}
+.game-choice small {font-size:13px}
+.pairs-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pairs-card {min-height:64px;aspect-ratio:1;border:1px solid var(--color-border);border-radius:16px;background:var(--color-surface);color:var(--color-primary-strong);display:grid;place-items:center}
+.pairs-card--open {background:var(--color-primary-soft);border:2px solid var(--color-primary)}
+.pairs-card--done {background:var(--color-accent-soft);border:2px solid var(--color-accent-line)}
+.pairs-card__done {font-size:13px}
+.guess-form {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.guess-form input {min-height:46px;width:100%;min-width:0;font:inherit;font-size:22px;font-variant-numeric:tabular-nums}
+.guess-log {display:grid;gap:12px;padding:16px;list-style:none}
+.reaction-pad {min-height:240px;width:100%;border:2px solid var(--color-border);border-radius:24px;display:grid;place-content:center;justify-items:center;gap:16px;font:inherit;font-size:24px;font-weight:700;background:var(--color-surface);color:var(--color-text)}
+.reaction-pad--go {background:var(--color-primary);color:white;border-color:var(--color-primary-strong)}
+.reaction-pad--early {background:var(--color-accent-soft);border-color:var(--color-accent-line)}
+/* GPT-047: GuardianClassCard */
+.guardian-session {display:grid;gap:12px}
+.guardian-session__time {font-size:24px;line-height:1.4;font-weight:800;font-variant-numeric:tabular-nums}
+.guardian-session__state {display:flex;align-items:center;gap:8px;font-weight:700}
+.guardian-session__note {font-size:13px;line-height:1.6;color:var(--color-text-muted)}
+/* GPT-048: SessionToasts (noninteractive, keep existing timing) */
+.timer-toast {max-width:min(440px,calc(100vw - 32px));width:max-content;white-space:normal;overflow-wrap:anywhere;display:flex;align-items:flex-start;gap:10px;background:var(--color-accent-soft);color:var(--color-text);border:1px solid var(--color-accent-line);border-radius:16px;padding:14px 16px;box-shadow:0 8px 24px #163d331a;pointer-events:none;font-size:16px;line-height:1.5;animation:session-toast-in .2s ease-out}
+.timer-toast svg {flex-shrink:0;margin-top:2px}
+.timer__end .small {display:block;font-size:13px;font-weight:400;margin-top:4px}
+.timer-toast--leave {animation:session-toast-out .2s ease-in forwards}
+@keyframes session-toast-in {from {opacity:0;margin-top:-6px}to {opacity:1;margin-top:0}}
+@keyframes session-toast-out {to {opacity:0;margin-top:-4px}}
+@media (min-width:600px) {.session-actions {grid-template-columns:1fr}.joined-list ul {max-height:440px}.locked-mentor {padding:40px 0}.pairs-grid {max-width:480px;margin-inline:auto}.sheet {border-radius:24px;box-shadow:0 24px 64px #163d3329}}
+@media (prefers-reduced-motion:reduce) {.timer-toast,.timer-toast--leave {animation:none}.timer-toast--leave {opacity:0}}
+
+/* GPT-037 보정(Claude): .check-row input(20px)이 .switch 크기를 덮어써서 스위치가 찌그러짐 → 원래 46×28로 */
+.session-setting .switch { width: 46px; height: 28px; accent-color: initial; }
+
+/* R10: 가입·로그인은 넓은 화면(태블릿 820·PC)에서도 칸을 420px로 묶는다(빈칸·멀어진 「가입하기」 없이) */
+.frame:has(.auth-narrow) .screen-body > *, .frame:has(.auth-narrow) .bottom-actions { width: 100%; max-width: 420px; margin-inline: auto; }

@@ -192,3 +192,8 @@ class Alert(Base):
             created_at=now,
             expires_at=now + ALERT_TTL,
         )
+
+
+# 계정·학원·씨앗 테이블 12개(명세 4.12)를 같은 Base에 올린다 → create_all·RLS가 함께 만든다.
+# 순환 import지만 models_org는 위에서 정의된 Base만 쓴다.
+from app import models_org as _models_org  # noqa: E402, F401

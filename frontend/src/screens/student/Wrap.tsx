@@ -43,7 +43,7 @@ function Wrap() {
             <h2 className="h3">오늘 푼 것</h2>
             <dl className="kv" style={{ marginTop: 8 }}>
               <dt>단원</dt><dd>{data.unit}</dd>
-              <dt>문제</dt><dd className="num">{data.solved}/{data.total}문제 · {data.difficulty}</dd>
+              <dt>문제</dt><dd className="num">{data.solved}/{data.total}문제</dd>{/* B16: 난이도는 서버가 고른 값을 저장하지 않아 늘 「중급」 → 표시하지 않음 */}
               <dt>시간</dt><dd className="num">학습 {data.studyMin}분{data.chatMin > 0 ? ` · 수다 ${data.chatMin}분` : ''}</dd>
               <dt>연속</dt><dd className="num">{data.streakDays}일</dd>
             </dl>
@@ -51,7 +51,7 @@ function Wrap() {
           <section className="stack">
             <div className="row between"><h2 className="h3">보호자께 보낼 한 줄</h2><span className="pill pill--mint">미리보기</span></div>
             <div className="mentor"><Mascot mood="wave" size={40} /><div className="bubble">{data.aiLine}</div></div>
-            <p className="small muted">수다 내용은 보내지 않아요.</p>
+            <p className="small muted">{say('수다 내용은 보내지 않아.', '수다 내용은 보내지 않아요.')}</p>
           </section>
           {data.hardChips.length > 0 && <section className="stack">
             <h2 className="h3">오늘 어려웠던 건? <span className="small muted">(선택)</span></h2>
@@ -64,7 +64,8 @@ function Wrap() {
           </section>}{/* 서버는 어려웠던 점 칩을 빈 목록으로 준다 → 비면 섹션을 숨긴다 */}
           <section className="stack">
             <h2 className="h3">보호자께 낼 퀴즈 하나 <span className="small muted">(선택)</span></h2>
-            <div className="chip-row">
+            {/* GPT-001: 긴 퀴즈 문장도 화면 안에서 줄바꿈 */}
+            <div className="chip-row quiz-chips">
               {data.quizOptions.map((q) => (
                 <button key={q} className={'chip' + (quiz === q ? ' chip--on' : '')} aria-pressed={quiz === q} onClick={() => setQuiz(quiz === q ? null : q)}>{q}</button>
               ))}

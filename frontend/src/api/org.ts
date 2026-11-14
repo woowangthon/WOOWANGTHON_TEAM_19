@@ -2,17 +2,22 @@
 // · 학습(문제·수다)은 mock.ts, 사람·조직·재화는 이 파일. 둘 다 "서버가 판단할 규칙"을 그대로 담고 있다.
 // · 백엔드(성호님)는 이 파일의 규칙(throw 하는 곳)을 그대로 서버 검증으로 옮기면 된다.
 // · 한계: User.academyId가 하나라 보호자는 학원 1곳에만 속한다(아이 둘이 서로 다른 학원이면 보호자는 먼저 들어간 곳). 자세한 건 enrollLinked 위 주석.
-import type {
-  AcademyApplication, AcademyForm, AccountRole, AppNotice, Classroom, Cosmetic, EntryCode, Me, NotifySettings, Order, OrgType, OwnerDashboard, PersonRow,
+import type { Currency,
+  AcademyApplication, AcademyForm, AccountRole, AppNotice, Classroom, Cosmetic, EntryCode, Grade, Me, NotifySettings, Order, OrgType, OwnerDashboard, PersonRow,
   SeedBoard, SeedEntry, SeedSource, ShopItem, SignupBody, StampState, StudentClasses, StudentShop, TeacherClasses, Wallet,
 } from '../types';
 import { ymd, stampLabel, weekKeys } from '../lib/date';
 import { load, save } from '../lib/storage';
+import { gradeLabel } from '../lib/grade';
+import { normalizeAlerts } from '../lib/classTimer';
+
+/** 학년 값 검사: 1~12 정수만 (가짜 서버도 진짜 서버처럼 입력을 믿지 않는다) */
+const isGrade = (g: unknown): g is Grade => Number.isInteger(g) && (g as number) >= 1 && (g as number) <= 12;
 
 /* ================= 규칙 숫자 (한곳에서 조정) ================= */
 export const SEED_RULES = {
   studyDone: 3,          // 하루 학습 완료 (하루 1번)
-  guardianStamp: 2,      // 보호자 도장 (하루 1번, 아이 1명당)
+  guardianStamp: 1,      // 보호자 도장 → 칭찬 도장 +1 (하루 1번, 아이 1명당). 11-12 두 재화: 도장은 앱 재화, 옷에 쓴다
   teacherMax: 5,         // 학습지도자 칭찬 1번에 최대
   teacherDailyCap: 10,   // 학습지도자 칭찬 학생 1명 하루 최대
   entryCodeMin: 10,      // 학원 입장 코드 유효 시간(분)
@@ -29,17 +34,19 @@ interface User {
   email?: string;
   settings: NotifySettings;
   agreedAt?: string; marketing?: boolean;
-  grade?: 4 | 5 | 6;
+  grade?: Grade;
   linkCode: string | null;
   academyId: string | null;
   teacherStatus?: '승인 대기' | '승인됨';
   applicationId?: string;
 }
 interface Link { studentId: string; guardianId: string; status: '대기' | '연결됨'; consentAt: string | null; }
-interface Academy { id: string; name: string; orgType: OrgType; serial: string; ownerId: string; entryCode: EntryCode | null; }
+interface Academy { id: string; name: string; orgType: OrgType; serial: string; ownerId: string; entryCode: EntryCode | null; timerAlertsMin?: number[]; }
 interface Notice { id: string; userId: string; at: string; text: string; to: string | null; read: boolean; }
 interface Room { id: string; academyId: string; teacherId: string; name: string; plan: string; members: string[]; invited: string[]; requests: string[]; }
 interface Ledger { id: string; studentId: string; date: string; at: string; amount: number; source: SeedSource; note: string; by: string; }
+/** 두 재화(11-12): 보호자 도장·꾸미기는 칭찬 도장, 그 밖(학습 완료·학원 상점·선생님 칭찬)은 씨앗 */
+const currencyOf = (l: Pick<Ledger, 'source'>): Currency => (l.source === '보호자 도장' || l.source === '꾸미기 구매' ? 'stamp' : 'seed');
 interface Item extends ShopItem { teacherId: string; }
 interface OrderRow { id: string; studentId: string; teacherId: string; itemName: string; price: number; at: string; status: Order['status']; }
 interface CosmeticDef { id: string; kind: Cosmetic['kind']; name: string; price: number; }
@@ -65,14 +72,24 @@ const KEY = 'aimentor:org';
 
 /** 우리가 파는 꾸미기(옷·이모티콘). 그림은 public/mascot/{animal}/outfit-{id}.png · emote-{id}.png (GPT 제작 예정) */
 export const COSMETICS: CosmeticDef[] = [
-  { id: 'glasses', kind: 'outfit', name: '공부 안경', price: 10 },
-  { id: 'raincoat', kind: 'outfit', name: '노란 우비', price: 15 },
-  { id: 'scarf', kind: 'outfit', name: '겨울 목도리', price: 20 },
-  { id: 'cape', kind: 'outfit', name: '별 망토', price: 25 },
-  { id: 'thumbs', kind: 'emote', name: '엄지 척', price: 8 },
-  { id: 'thanks', kind: 'emote', name: '고마워', price: 8 },
-  { id: 'sleepy', kind: 'emote', name: '졸려', price: 8 },
-  { id: 'best', kind: 'emote', name: '최고야', price: 12 },
+  // 값 = 칭찬 도장 개수(성호 11-12: 옷 1·2·3·5, 이모티콘 1·1·1·2 — 서버와 같은 값)
+  { id: 'glasses', kind: 'outfit', name: '공부 안경', price: 1 },
+  { id: 'raincoat', kind: 'outfit', name: '노란 우비', price: 2 },
+  { id: 'scarf', kind: 'outfit', name: '겨울 목도리', price: 3 },
+  { id: 'cape', kind: 'outfit', name: '별 망토', price: 5 },
+  { id: 'thumbs', kind: 'emote', name: '엄지 척', price: 1 },
+  { id: 'thanks', kind: 'emote', name: '고마워', price: 1 },
+  { id: 'sleepy', kind: 'emote', name: '졸려', price: 1 },
+  { id: 'best', kind: 'emote', name: '최고야', price: 2 },
+  // 11-13 추가(재하 요청): 공부·학원 생활에 어울리는 옷, 수다에서 마음을 표현하는 이모티콘. 그림은 GPT 요청서(GPT-049~), 서버 목록(seeds.py)은 성호 님께 요청
+  { id: 'cap', kind: 'outfit', name: '야구 모자', price: 2 },
+  { id: 'backpack', kind: 'outfit', name: '새 책가방', price: 3 },
+  { id: 'headphones', kind: 'outfit', name: '집중 헤드폰', price: 3 },
+  { id: 'hanbok', kind: 'outfit', name: '색동 한복', price: 5 },
+  { id: 'cheer', kind: 'emote', name: '힘내', price: 1 },
+  { id: 'question', kind: 'emote', name: '궁금해', price: 1 },
+  { id: 'idea', kind: 'emote', name: '알았다!', price: 1 },
+  { id: 'sorry', kind: 'emote', name: '미안해', price: 1 },
 ];
 
 /** 시연 계정 비밀번호(모두 같음) — 체험 계정 시트에 표시 */
@@ -92,7 +109,7 @@ function seed(): OrgDB {
     me: null, remember: true,
     notices: [
       { id: 'n1', userId: 'g1', at: stampLabel(new Date().setHours(9, 0)), text: '김선생님이 지우의 이번 주 범위를 정했어요: 분수의 덧셈·뺄셈', to: null, read: false },
-      { id: 'n2', userId: 's1', at: stampLabel(new Date().setHours(9, 0)), text: '보호자가 어제 도장을 찍어 줬어! 씨앗 +2', to: '/student/shop', read: false },
+      { id: 'n2', userId: 's1', at: stampLabel(new Date().setHours(9, 0)), text: '보호자가 어제 도장을 찍어 줬어! 칭찬 도장 +1', to: '/student/shop', read: false },
       { id: 'n3', userId: 'own1', at: stampLabel(new Date().setHours(10, 0)), text: '이선생님이 소속을 신청했어요', to: '/owner', read: false },
       { id: 'n4', userId: 't1', at: stampLabel(new Date().setHours(16, 40)), text: '이민준이 「칭찬 간식 쿠폰」 교환을 요청했어요', to: '/teacher/seeds', read: false },
     ],
@@ -103,10 +120,10 @@ function seed(): OrgDB {
       U('t1', 'teacher', '김선생님', 'kim_teacher', { academyId: 'a1', teacherStatus: '승인됨', email: 'kim@example.com' }),
       U('t2', 'teacher', '이선생님', 'lee_teacher', { academyId: 'a1', teacherStatus: '승인 대기', email: 'lee@example.com' }),
       U('t3', 'teacher', '정선생님', 'jung_teacher', { email: 'jung@example.com' }),
-      U('s1', 'student', '지우', 'jiwoo', { grade: 4, linkCode: 'JW4K7P', academyId: 'a1' }),
-      U('s2', 'student', '이민준', 'minjun', { grade: 4, linkCode: 'MJ8Q2X', academyId: 'a1' }),
-      U('s3', 'student', '박서연', 'seoyeon', { grade: 4, linkCode: 'SY3N6R', academyId: 'a1' }),
-      U('s4', 'student', '최하린', 'harin', { grade: 4, linkCode: 'HR5T9W', academyId: 'a1' }),
+      U('s1', 'student', '지우', 'jiwoo', { grade: 5, linkCode: 'JW4K7P', academyId: 'a1' }),
+      U('s2', 'student', '이민준', 'minjun', { grade: 5, linkCode: 'MJ8Q2X', academyId: 'a1' }),
+      U('s3', 'student', '박서연', 'seoyeon', { grade: 5, linkCode: 'SY3N6R', academyId: 'a1' }),
+      U('s4', 'student', '최하린', 'harin', { grade: 5, linkCode: 'HR5T9W', academyId: 'a1' }),
       U('g1', 'guardian', '지우 보호자', 'jiwoo_mom', { linkCode: 'PG2M8C', academyId: 'a1', email: 'mom@example.com' }),
     ],
     links: [{ studentId: 's1', guardianId: 'g1', status: '연결됨', consentAt: ymd(d(20)) }],
@@ -116,13 +133,13 @@ function seed(): OrgDB {
     ],
     academies: [{ id: 'a1', name: '우왕수학학원', orgType: '학원', serial: 'WW7K-3P9Q', ownerId: 'own1', entryCode: null }],
     rooms: [
-      { id: 'c1', academyId: 'a1', teacherId: 't1', name: '4학년 A반', plan: '분수의 덧셈·뺄셈 (11월)', members: ['s1', 's2', 's3'], invited: [], requests: [] },
-      { id: 'c2', academyId: 'a1', teacherId: 't1', name: '4학년 심화반', plan: '분수 응용 문제', members: [], invited: [], requests: ['s4'] },
+      { id: 'c1', academyId: 'a1', teacherId: 't1', name: '5학년 A반', plan: '분수의 나눗셈 (11월)', members: ['s1', 's2', 's3'], invited: [], requests: [] },
+      { id: 'c2', academyId: 'a1', teacherId: 't1', name: '5학년 심화반', plan: '분수 응용 문제', members: [], invited: [], requests: ['s4'] },
     ],
     ledger: [
-      L(3, 3, '학습 완료', '분수의 덧셈', 'system', 1), L(3, 2, '보호자 도장', '오늘 이야기를 나눴어요', 'g1', 2),
+      L(3, 3, '학습 완료', '분수의 덧셈', 'system', 1), L(3, 1, '보호자 도장', '오늘 이야기를 나눴어요', 'g1', 2),
       L(2, 3, '학습 완료', '분수의 덧셈', 'system', 3), L(2, 5, '학습지도자 칭찬', '단원평가 100점', 't1', 4),
-      L(1, 3, '학습 완료', '분수의 덧셈', 'system', 5), L(1, 2, '보호자 도장', '오늘 이야기를 나눴어요', 'g1', 6),
+      L(1, 3, '학습 완료', '분수의 덧셈', 'system', 5), L(1, 1, '보호자 도장', '오늘 이야기를 나눴어요', 'g1', 6), L(4, 4, '학습지도자 칭찬', '숙제를 다 해 왔어요', 't1', 12),
       { id: 'l7', studentId: 's2', date: ymd(d(1)), at: stampLabel(d(1).getTime()), amount: 24, source: '학습 완료', note: '지난 기록', by: 'system' },
       { id: 'l8', studentId: 's2', date: ymd(d(0)), at: stampLabel(d(0).getTime()), amount: -20, source: '상점 구매', note: '칭찬 간식 쿠폰', by: 's2' },
       { id: 'l9', studentId: 's3', date: ymd(d(1)), at: stampLabel(d(1).getTime()), amount: 11, source: '학습 완료', note: '지난 기록', by: 'system' },
@@ -132,6 +149,9 @@ function seed(): OrgDB {
       { id: 'i2', teacherId: 't1', name: '자리 고르기권', price: 15, stock: null, visible: true, note: '다음 수업 자리를 내가 골라요' },
       { id: 'i3', teacherId: 't1', name: '보드게임 10분', price: 25, stock: 5, visible: true, note: '금요일 수업 끝에' },
       { id: 'i4', teacherId: 't1', name: '겨울방학 특별 선물', price: 40, stock: 3, visible: false, note: '12월에 공개 예정' },
+      { id: 'i5', teacherId: 't1', name: '칭찬 스티커', price: 5, stock: null, visible: true, note: '공책에 붙이는 스티커 1장' },
+      { id: 'i6', teacherId: 't1', name: '책갈피', price: 10, stock: 15, visible: true, note: '학원 이름이 들어간 책갈피' },
+      { id: 'i7', teacherId: 't1', name: '쉬는 시간 게임 고르기권', price: 12, stock: null, visible: true, note: '다음 쉬는 시간에 반 게임을 내가 골라요' },
     ],
     orders: [{ id: 'o1', studentId: 's2', teacherId: 't1', itemName: '칭찬 간식 쿠폰', price: 20, at: stampLabel(d(0).setHours(16, 40)), status: '교환 요청' }],
     owned: { s1: ['glasses'] },
@@ -154,6 +174,12 @@ function rand(n: number, chars = CODE_CHARS) {
   const a = new Uint32Array(n);
   try { crypto.getRandomValues(a); } catch { for (let i = 0; i < n; i++) a[i] = Math.floor(Math.random() * 1e9); }
   return Array.from(a, (x) => chars[x % chars.length]).join('');
+}
+/** 새 id(TK-76): 시각만 쓰면 같은 ms에 만든 두 개가 겹친다 → 랜덤 4자리를 붙이고, 이미 있으면 다시 뽑는다 */
+function newId(prefix: string, taken: (id: string) => boolean): string {
+  let id = '';
+  do id = prefix + Date.now().toString(36) + rand(4, 'abcdefghijkmnpqrstuvwxyz23456789'); while (taken(id));
+  return id;
 }
 function uniqueLinkCode() { let c = rand(6); while (db.users.some((u) => u.linkCode === c)) c = rand(6); return c; }
 function uniqueSerial() { let c = `${rand(4)}-${rand(4)}`; while (db.academies.some((a) => a.serial === c)) c = `${rand(4)}-${rand(4)}`; return c; }
@@ -249,7 +275,7 @@ export const childOf = (guardianId: string) => { const g = userById(guardianId);
 export const roomsOfTeacher = (teacherId: string) => db.rooms.filter((r) => r.teacherId === teacherId);
 export const roomsOfStudent = (studentId: string) => db.rooms.filter((r) => r.members.includes(studentId));
 export const teacherOfStudent = (studentId: string) => { const r = roomsOfStudent(studentId)[0]; return r ? nameOf(r.teacherId) : null; };
-export const balanceOf = (studentId: string) => db.ledger.filter((l) => l.studentId === studentId).reduce((a, b) => a + b.amount, 0);
+export const balanceOf = (studentId: string, cur: Currency = 'seed') => db.ledger.filter((l) => l.studentId === studentId && currencyOf(l) === cur).reduce((a, b) => a + b.amount, 0);
 const earnedOn = (studentId: string, source: SeedSource, date = today()) =>
   db.ledger.filter((l) => l.studentId === studentId && l.source === source && l.date === date).reduce((a, b) => a + b.amount, 0);
 function addSeed(studentId: string, amount: number, source: SeedSource, note: string, by: string) {
@@ -276,8 +302,8 @@ function seedBoard(t: User): SeedBoard {
   const week = new Set(weekKeys());
   return {
     students: ids.map((id) => ({
-      id, name: nameOf(id), balance: balanceOf(id),
-      earnedWeek: db.ledger.filter((l) => l.studentId === id && l.amount > 0 && week.has(l.date)).reduce((a, b) => a + b.amount, 0),
+      id, name: nameOf(id), balance: balanceOf(id), stamps: balanceOf(id, 'stamp'),
+      earnedWeek: db.ledger.filter((l) => l.studentId === id && l.amount > 0 && week.has(l.date) && currencyOf(l) === 'seed').reduce((a, b) => a + b.amount, 0),
       grantedToday: earnedOn(id, '학습지도자 칭찬'),
     })),
     orders: db.orders.filter((o) => o.teacherId === t.id).sort((a, b) => (a.status === b.status ? b.id.localeCompare(a.id) : a.status === '교환 요청' ? -1 : 1)).map(orderView),
@@ -289,6 +315,7 @@ function studentShop(s: User): StudentShop {
   const owned = db.owned[s.id] ?? [];
   return {
     balance: balanceOf(s.id),
+    stamps: balanceOf(s.id, 'stamp'),
     academyItems: db.items.filter((i) => teacherIds.has(i.teacherId) && i.visible).map(({ teacherId: _t, ...i }) => i),
     cosmetics: COSMETICS.map((c) => ({ ...c, owned: owned.includes(c.id), equipped: db.equipped[s.id] === c.id })),
     orders: db.orders.filter((o) => o.studentId === s.id).sort((a, b) => b.id.localeCompare(a.id)).map(orderView),
@@ -303,8 +330,8 @@ function ownerDash(o: User): OwnerDashboard {
     entryCode: code,
     pendingTeachers: inAc.filter((u) => u.role === 'teacher' && u.teacherStatus === '승인 대기').map((u) => row(u.id, '소속 신청')),
     teachers: inAc.filter((u) => u.role === 'teacher' && u.teacherStatus === '승인됨').map((u) => row(u.id, `${u.id === o.id ? '원장 · ' : ''}강의실 ${roomsOfTeacher(u.id).length}개`)),
-    classrooms: db.rooms.filter((r) => r.academyId === ac.id).map((r) => ({ id: r.id, name: r.name, teacherName: nameOf(r.teacherId), count: r.members.length })),
-    students: inAc.filter((u) => u.role === 'student').map((u) => row(u.id, `${u.grade ?? '-'}학년 · ${roomsOfStudent(u.id).map((r) => r.name).join(', ') || '강의실 없음'}`)),
+    classrooms: db.rooms.filter((r) => r.academyId === ac.id).map((r) => ({ id: r.id, name: r.name, teacherName: nameOf(r.teacherId), teacherId: r.teacherId, count: r.members.length })),
+    students: inAc.filter((u) => u.role === 'student').map((u) => row(u.id, `${gradeLabel(u.grade)} · ${roomsOfStudent(u.id).map((r) => r.name).join(', ') || '강의실 없음'}`)),
   };
 }
 
@@ -335,9 +362,9 @@ export const orgApi = {
     if (!PW_RULE.test(body.password)) fail('비밀번호는 영문과 숫자를 섞어 8~20자로 만들어 주세요.');
     if (!name) fail('이름을 적어 주세요.');
     if (name.length > 12) fail('이름은 12자까지 쓸 수 있어요.');
-    if (body.role === 'student' && !body.grade) fail('학년을 골라 주세요.');
+    if (body.role === 'student' && !isGrade(body.grade)) fail('학년을 골라 주세요.');
     if (body.role !== 'student' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email ?? '')) fail('이메일을 바르게 적어 주세요. 아이디·비밀번호를 찾을 때 써요.');
-    const id = body.role[0] + Date.now().toString(36);
+    const id = newId(body.role[0], (x) => db.users.some((u) => u.id === x));
     const u: User = {
       id, role: body.role, name, loginId, pw: hash(body.password), linkCode: null, academyId: null,
       settings: { ...DEFAULT_SETTINGS, marketing: body.agreements.marketing, studyReminder: body.role === 'student' ? '17:00' : null },
@@ -437,7 +464,7 @@ export const orgApi = {
     if (!f.academyName.trim()) fail('이름을 적어 주세요.');
     if (f.orgType === '학원' && !/^\d{3}-?\d{2}-?\d{5}$/.test(f.bizNo.trim())) fail('사업자등록번호는 숫자 10자리예요 (예: 123-45-67890).');
     if (!f.ceo.trim() || !f.phone.trim()) fail('대표자와 연락처를 적어 주세요.');
-    const appId = 'app' + Date.now().toString(36);
+    const appId = newId('app', (x) => db.applications.some((a) => a.id === x));
     db.applications.push({ id: appId, ownerId: t.id, ownerName: t.name, ...f, academyName: f.academyName.trim(), status: '심사 중', appliedAt: stampLabel(Date.now()), serial: null, rejectReason: null });
     t.applicationId = appId; commit();
     return meView(t);
@@ -499,6 +526,40 @@ export const orgApi = {
     commit();
     return ownerDash(o);
   },
+  /** 11-13: 강의실은 원장이 만들고 담당 학습지도자를 정한다(서버는 아직 — http.ts에 주소 제안) */
+  async ownerCreateClassroom(name: string, plan: string, teacherId: string): Promise<OwnerDashboard> {
+    const o = mustOwner();
+    const ac = ownedAcademy(o)!;
+    if (!name.trim()) fail('강의실 이름을 적어 주세요.');
+    const t = userById(teacherId);
+    if (!t || t.role !== 'teacher' || t.academyId !== ac.id || t.teacherStatus !== '승인됨') fail('우리 학원 학습지도자를 골라 주세요.');
+    db.rooms.push({ id: newId('c', (x) => db.rooms.some((r) => r.id === x)), academyId: ac.id, teacherId, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
+    if (teacherId !== o.id) notify(teacherId, `「${name.trim()}」 강의실을 맡게 됐어요`, '/teacher/classes');
+    commit();
+    return ownerDash(o);
+  },
+  async ownerSetTeacher(classId: string, teacherId: string): Promise<OwnerDashboard> {
+    const o = mustOwner();
+    const ac = ownedAcademy(o)!;
+    const r = db.rooms.find((x) => x.id === classId && x.academyId === ac.id) ?? fail('강의실을 찾지 못했어요.');
+    const t = userById(teacherId);
+    if (!t || t.role !== 'teacher' || t.academyId !== ac.id || t.teacherStatus !== '승인됨') fail('우리 학원 학습지도자를 골라 주세요.');
+    if (r.teacherId !== teacherId) { r.teacherId = teacherId; if (teacherId !== o.id) notify(teacherId, `「${r.name}」 강의실을 맡게 됐어요`, '/teacher/classes'); }
+    commit();
+    return ownerDash(o);
+  },
+  /** 수업 타이머 알림 시점(분 전, 학원마다). 읽기 = 학원 소속 학습지도자, 쓰기 = 원장. 기본 [10, 5] (11-12) */
+  async getTimerAlerts(): Promise<{ alertsMin: number[] }> {
+    const t = must('teacher');
+    const ac = db.academies.find((a) => a.id === t.academyId);
+    return { alertsMin: normalizeAlerts(ac?.timerAlertsMin) };
+  },
+  async saveTimerAlerts(alertsMin: number[]): Promise<{ alertsMin: number[] }> {
+    const ac = ownedAcademy(mustOwner())!;
+    ac.timerAlertsMin = normalizeAlerts(alertsMin);
+    commit();
+    return { alertsMin: ac.timerAlertsMin };
+  },
   async approveTeachers(ids: string[]): Promise<OwnerDashboard> {
     const o = mustOwner();
     const ac = ownedAcademy(o)!;
@@ -522,7 +583,7 @@ export const orgApi = {
       notify(app.ownerId, `${app.academyName} 등록이 반려됐어요: ${app.rejectReason}`, '/settings/org');
     } else {
       app.status = '승인'; app.serial = uniqueSerial();
-      const acId = 'a' + Date.now().toString(36);
+      const acId = newId('a', (x) => db.academies.some((a) => a.id === x));
       db.academies.push({ id: acId, name: app.academyName, orgType: app.orgType, serial: app.serial, ownerId: app.ownerId, entryCode: null });
       const owner = userById(app.ownerId); if (owner) { owner.academyId = acId; owner.teacherStatus = '승인됨'; }
       notify(app.ownerId, `${app.academyName} 등록이 승인됐어요. 일련번호 ${app.serial}`, '/owner');
@@ -538,14 +599,14 @@ export const orgApi = {
     const inAny = new Set(rooms.flatMap((r) => [...r.members]));
     return {
       classrooms: rooms.map(classroomView),
-      academyStudents: t.teacherStatus !== '승인됨' ? [] : db.users.filter((u) => u.role === 'student' && u.academyId === t.academyId).map((u) => row(u.id, inAny.has(u.id) ? '내 강의실' : `${u.grade ?? '-'}학년`)),
+      academyStudents: t.teacherStatus !== '승인됨' ? [] : db.users.filter((u) => u.role === 'student' && u.academyId === t.academyId).map((u) => row(u.id, inAny.has(u.id) ? '내 강의실' : gradeLabel(u.grade))),
     };
   },
   async createClassroom(name: string, plan: string): Promise<TeacherClasses> {
     const t = must('teacher');
     if (!t.academyId || t.teacherStatus !== '승인됨') fail('소속 학원·학교의 승인을 받은 뒤에 강의실을 열 수 있어요.');
     if (!name.trim()) fail('강의실 이름을 적어 주세요.');
-    db.rooms.push({ id: 'c' + Date.now().toString(36), academyId: t.academyId!, teacherId: t.id, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
+    db.rooms.push({ id: newId('c', (x) => db.rooms.some((r) => r.id === x)), academyId: t.academyId!, teacherId: t.id, name: name.trim(), plan: plan.trim(), members: [], invited: [], requests: [] });
     commit();
     return orgApi.getTeacherClasses();
   },
@@ -602,8 +663,8 @@ export const orgApi = {
   async getWallet(): Promise<Wallet> {
     const s = must('student');
     const history: SeedEntry[] = db.ledger.filter((l) => l.studentId === s.id).sort((a, b) => b.id.localeCompare(a.id))
-      .map((l) => ({ id: l.id, at: l.at, amount: l.amount, source: l.source, note: l.note }));
-    return { balance: balanceOf(s.id), history };
+      .map((l) => ({ id: l.id, at: l.at, amount: l.amount, source: l.source, note: l.note, currency: currencyOf(l) }));
+    return { balance: balanceOf(s.id), stamps: balanceOf(s.id, 'stamp'), history };
   },
   async getStudentShop(): Promise<StudentShop> { return studentShop(must('student')); },
   async buyAcademyItem(itemId: string): Promise<StudentShop> {
@@ -614,7 +675,7 @@ export const orgApi = {
     if (balanceOf(s.id) < it.price) fail('씨앗이 모자라요.');
     if (it.stock !== null) it.stock -= 1;
     addSeed(s.id, -it.price, '상점 구매', it.name, s.id);
-    db.orders.push({ id: 'o' + Date.now().toString(36), studentId: s.id, teacherId: it.teacherId, itemName: it.name, price: it.price, at: stampLabel(Date.now()), status: '교환 요청' });
+    db.orders.push({ id: newId('o', (x) => db.orders.some((o) => o.id === x)), studentId: s.id, teacherId: it.teacherId, itemName: it.name, price: it.price, at: stampLabel(Date.now()), status: '교환 요청' });
     notify(it.teacherId, `${s.name} 학생이 「${it.name}」 교환을 요청했어요`, '/teacher/seeds');
     commit();
     return studentShop(s);
@@ -624,8 +685,8 @@ export const orgApi = {
     const c = COSMETICS.find((x) => x.id === id) ?? fail('상품을 찾지 못했어요.');
     const owned = db.owned[s.id] ?? [];
     if (owned.includes(id)) fail('이미 가지고 있어요.');
-    if (balanceOf(s.id) < c.price) fail('씨앗이 모자라요.');
-    addSeed(s.id, -c.price, '상점 구매', c.name, s.id);
+    if (balanceOf(s.id, 'stamp') < c.price) fail(`도장이 ${c.price - balanceOf(s.id, 'stamp')}개 더 필요해요.`);
+    addSeed(s.id, -c.price, '꾸미기 구매', c.name, s.id);
     db.owned[s.id] = [...owned, id];
     if (c.kind === 'outfit') db.equipped[s.id] = id; // 사면 바로 입어 본다
     commit();
@@ -642,14 +703,14 @@ export const orgApi = {
   async getStampState(): Promise<StampState> {
     const g = must('guardian');
     const child = childOf(g.id);
-    return { stampedToday: !!child && earnedOn(child, '보호자 도장') > 0, balance: child ? balanceOf(child) : 0 };
+    return { stampedToday: !!child && earnedOn(child, '보호자 도장') > 0, balance: child ? balanceOf(child) : 0, stamps: child ? balanceOf(child, 'stamp') : 0 };
   },
   async stamp(): Promise<StampState> {
     const g = must('guardian');
     const child = childOf(g.id) ?? fail('먼저 아이와 연결해 주세요.');
     if (earnedOn(child, '보호자 도장') > 0) fail('오늘 도장은 이미 찍었어요. 내일 또 찍어 주세요.');
     addSeed(child, SEED_RULES.guardianStamp, '보호자 도장', '오늘 이야기를 나눴어요', g.id);
-    notify(child, `보호자가 도장을 찍어 줬어! 씨앗 +${SEED_RULES.guardianStamp}`, '/student/shop'); commit();
+    notify(child, `보호자가 도장을 찍어 줬어! 도장 +${SEED_RULES.guardianStamp}`, '/student/shop'); commit();
     return orgApi.getStampState();
   },
 
@@ -673,7 +734,7 @@ export const orgApi = {
     if (item.id) {
       const it = db.items.find((i) => i.id === item.id && i.teacherId === t.id) ?? fail('상품을 찾지 못했어요.');
       Object.assign(it, { ...item, name: item.name.trim() });
-    } else db.items.push({ ...item, name: item.name.trim(), id: 'i' + Date.now().toString(36), teacherId: t.id });
+    } else db.items.push({ ...item, name: item.name.trim(), id: newId('i', (x) => db.items.some((i) => i.id === x)), teacherId: t.id });
     commit();
     return seedBoard(t);
   },

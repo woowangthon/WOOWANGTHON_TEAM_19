@@ -27,6 +27,11 @@ export function TeacherSeeds() {
 
   return (
     <Frame adult title="씨앗" exit tabs="teacher" right={tab === 'shop' && <button className="icon-btn" aria-label="상품 추가" onClick={() => { setError(null); setEdit({ ...EMPTY }); }}><Icon name="plus" /></button>}>
+      <section className="card academy-currency">
+        <Icon name="seed" size={24} />
+        <div><strong>학원 씨앗 관리</strong><div className="small muted">학원 상품에만 써요 · 학습 완료 +3과 선생님 칭찬으로 모아요</div></div>
+      </section>
+      <div className="notice notice--plain"><span>칭찬 도장은 보호자가 주는 따로 된 꾸미기 재화예요. 여기서 다루지 않아요.</span></div>
       <div className="seg" role="tablist">
         {([['students', '학생별'], ['shop', '상점 관리'], ['orders', `교환 요청${waiting ? ` ${waiting}` : ''}`]] as [Tab, string][]).map(([k, l]) => (
           <button key={k} role="tab" aria-selected={tab === k} className={'seg__btn' + (tab === k ? ' seg__btn--on' : '')} onClick={() => setTab(k)}>{l}</button>
@@ -37,15 +42,16 @@ export function TeacherSeeds() {
 
       {data && tab === 'students' && (
         <>
-          <p className="small muted">학생은 학습 완료 +3, 보호자 도장 +2로 씨앗을 모아요. 칭찬할 일이 있으면 직접 줄 수 있어요(한 번 1~5, 하루 10까지).</p>
+          <p className="small muted">씨앗(학원 재화)은 학습 완료 +3과 선생님 칭찬으로 모아 학원 상품에 써요(칭찬 한 번 1~5, 하루 10까지). 칭찬 도장(보호자 도장)은 따로 모아 캐릭터 옷에 써요.</p>
           <table className="table">
-            <thead><tr><th>학생</th><th>잔액</th><th>이번 주</th><th /></tr></thead>
+            <thead><tr><th>학생</th><th>씨앗</th><th>이번 주</th><th>도장</th><th /></tr></thead>
             <tbody>
               {data.students.map((s) => (
                 <tr key={s.id}>
                   <td><strong>{s.name}</strong></td>
                   <td className="num">{s.balance}</td>
                   <td className="num muted">+{s.earnedWeek}</td>
+                  <td className="num">{s.stamps ?? 0}</td>
                   <td style={{ textAlign: 'right' }}><button className="btn btn--secondary btn--small" disabled={s.grantedToday >= 10}
                     onClick={() => { setError(null); setAmount(2); setGrant({ id: s.id, name: s.name, left: 10 - s.grantedToday }); }}>칭찬</button></td>
                 </tr>

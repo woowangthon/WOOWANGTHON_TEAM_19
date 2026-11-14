@@ -21,10 +21,34 @@ EXPECTED_TABLES = {
 }
 
 
+# 계정·학원·씨앗 테이블 12개(명세 4.12, 11-12) — 학습 테이블 7개는 그대로
+ORG_TABLES = {
+    "accounts",
+    "auth_tokens",
+    "links",
+    "academies",
+    "academy_applications",
+    "rooms",
+    "room_people",
+    "seed_ledger",
+    "shop_items",
+    "orders",
+    "cosmetics_owned",
+    "notices",
+}
+
+
 async def test_seven_tables_are_created(engine):
     async with engine.connect() as conn:
         names = await conn.run_sync(lambda c: set(inspect(c).get_table_names()))
-    assert names == EXPECTED_TABLES
+    # session_problems: 한 세션 여러 문제(SESSION_PROBLEMS, 11-12). 기본 1이면 비어 있다
+    # class_live·class_live_settings·class_posts: 강의실 수업 진행·공지/숙제(명세 4.12 5-4, 11-13)
+    assert names == EXPECTED_TABLES | ORG_TABLES | {
+        "session_problems",
+        "class_live",
+        "class_live_settings",
+        "class_posts",
+    }
 
 
 async def test_student_has_no_real_name_column(engine):

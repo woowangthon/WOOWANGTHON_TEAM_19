@@ -1,10 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["icn1"],
   "services": {
     "frontend": {
       "root": "frontend",
       "framework": "vite",
-      "buildCommand": "VITE_API_MODE=http VITE_API_BASE=/api/v1/compat npm run build",
+      "buildCommand": "VITE_API_MODE=http VITE_ORG_MODE=http VITE_API_BASE=/api/v1/compat npm run build",
       "outputDirectory": "dist"
     },
     "backend": {
