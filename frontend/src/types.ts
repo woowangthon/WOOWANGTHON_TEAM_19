@@ -21,8 +21,9 @@ export const ANIMAL_LABEL: Record<Animal, string> = {
   rat: '쥐띠', ox: '소띠', tiger: '호랑이띠', rabbit: '토끼띠', dragon: '용띠', snake: '뱀띠',
   horse: '말띠', sheep: '양띠', monkey: '원숭이띠', rooster: '닭띠', dog: '개띠', pig: '돼지띠',
 };
-/** 표정(think·cheer·promise·calm·read)과 옷·이모티콘 그림까지 다 있는 동물. 나머지는 인사(wave) 그림만 있다(11-13) */
-export const FULL_ART_ANIMALS: Animal[] = ['horse', 'monkey'];
+/** 표정(think·cheer·promise·calm·read) 그림이 다 있는 동물 — 11-14 GPT-049로 12종 모두. 없으면 인사(wave) 그림으로 대신한다.
+ *  옷·이모티콘은 이것과 따로 components/Seed.tsx의 COSMETIC_ART(파일 단위)로 판단한다 */
+export const FULL_ART_ANIMALS: Animal[] = [...ANIMALS];
 export interface MentorSetting { style: MentorStyle; title: MentorTitle; speech: Speech; animal: Animal; }
 
 /* ---------- 학생: 하루 세션 ---------- */

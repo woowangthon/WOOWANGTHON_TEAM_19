@@ -90,6 +90,9 @@ export const COSMETICS: CosmeticDef[] = [
   { id: 'question', kind: 'emote', name: '궁금해', price: 1 },
   { id: 'idea', kind: 'emote', name: '알았다!', price: 1 },
   { id: 'sorry', kind: 'emote', name: '미안해', price: 1 },
+  // 11-14 그림 도착(GPT-053) — 재하 요청 「이모티콘 캐릭터당 10개」. 서버 목록은 성호 님께
+  { id: 'hello', kind: 'emote', name: '반가워', price: 1 },
+  { id: 'congrats', kind: 'emote', name: '축하해', price: 1 },
 ];
 
 /** 시연 계정 비밀번호(모두 같음) — 체험 계정 시트에 표시 */

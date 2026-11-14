@@ -103,19 +103,28 @@ export function StudentShop() {
 
           {tab === 'deco' && <p className="currency-note"><Icon name="stamp" size={14} />{say('칭찬 도장으로 꾸며', '칭찬 도장으로 꾸며요')}</p>}
           {tab === 'deco' && (
-            <div className="row" style={{ flexWrap: 'wrap', gap: 8 }} role="search" aria-label="꾸미기 찾기">
-              <label className="field" style={{ flex: '1 1 140px', margin: 0 }}>캐릭터
-                <select className="input" value={preview} onChange={(e) => setLook(e.target.value as Animal)}>
-                  {ANIMALS.map((a) => <option key={a} value={a}>{ANIMAL_LABEL[a]}{a === animal ? ' (내 멘토)' : ''}</option>)}
-                </select>
-              </label>
-              <label className="field" style={{ flex: '1 1 140px', margin: 0 }}>이름
-                <input className="input" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={say('예: 모자, 힘내', '예: 모자, 힘내')} />
+            <div className="deco-search" role="search" aria-label="꾸미기 찾기">
+              <strong>캐릭터에 입혀 보기</strong>
+              <div className="deco-animals" role="group" aria-label="미리 볼 캐릭터">
+                {ANIMALS.map((a) => (
+                  <button key={a} type="button" className="deco-animal" aria-pressed={preview === a} onClick={() => setLook(a)}>
+                    <img src={`${import.meta.env.BASE_URL}mascot/${a}/wave-avatar.png`} alt="" />
+                    <span>{ANIMAL_LABEL[a]}</span>
+                    <span className="deco-animal__mine">{a === animal ? '내 멘토' : preview === a ? '선택됨' : ''}</span>
+                  </button>
+                ))}
+              </div>
+              <label className="field">이름으로 찾기
+                <input className="input" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="예: 모자, 힘내" />
               </label>
             </div>
           )}
-          {tab === 'deco' && preview !== animal && <p className="small muted">{say(`${ANIMAL_LABEL[preview]}에게 입혀 본 모습이야. 산 옷은 어떤 캐릭터로 바꿔도 그대로 있어.`, `${ANIMAL_LABEL[preview]}에게 입혀 본 모습이에요. 산 옷은 어떤 캐릭터로 바꿔도 그대로 있어요.`)}</p>}
-          {tab === 'deco' && !data.cosmetics.some(match) && <div className="notice notice--plain"><span>{say(`「${q}」 꾸미기가 없어`, `「${q}」 꾸미기가 없어요`)}</span></div>}
+          {tab === 'deco' && preview !== animal && <p className="deco-preview-note"><Icon name="eye" size={20} />{say('사지 않아도 보기만 할 수 있어. 내 멘토는 바뀌지 않아.', '사지 않아도 보기만 할 수 있어요. 내 멘토는 바뀌지 않아요.')}</p>}
+          {tab === 'deco' && !data.cosmetics.some(match) && (
+            <div className="notice notice--plain deco-search-empty"><span>{say(`「${q}」 꾸미기가 없어`, `「${q}」 꾸미기가 없어요`)}</span>
+              <button className="btn btn--ghost btn--small" onClick={() => setQ('')}>검색어 지우기</button>
+            </div>
+          )}
           {tab === 'deco' && (['outfit', 'emote'] as const).filter((kind) => data.cosmetics.some((c) => c.kind === kind && match(c))).map((kind) => (
             <section key={kind} className="stack">
               <h2 className="h3">{kind === 'outfit' ? '옷' : '이모티콘'} <span className="small muted">{kind === 'emote' ? '수다에서 보낼 수 있어' : ''}</span></h2>

@@ -8,7 +8,6 @@ import { LoadError, Stat } from '../../components/Common';
 import { useMentor } from '../../state/mentor';
 import { RequirePhase, useSession } from '../../state/session';
 import { useAsync } from '../../lib/useAsync';
-import { SeedChip } from '../../components/Seed';
 
 export function StudentDone() {
   return <RequirePhase phase="transition"><Done /></RequirePhase>;
@@ -49,7 +48,16 @@ function Done() {
           <span key={i} className={'tick' + (i < s.solved ? '' : ' tick--no')}><Icon name="check" size={14} /></span>
         ))}
       </div>
-      {!!home.data?.earnedToday && <div className="row" style={{ justifyContent: 'center' }}><SeedChip n={home.data.earnedToday} plus /><span className="small muted">{say('씨앗을 받았어', '씨앗을 받았어요')}</span></div>}
+      {/* GPT-054: 서버가 준 「오늘 받은 씨앗」을 보여 주기만 한다(화면에 들어올 때 지급하지 않음) */}
+      {!!home.data?.earnedToday && (
+        <div className="reward-feedback" role="status" aria-live="polite">
+          <Icon name="seed" size={24} />
+          <span className="reward-feedback__copy">
+            <strong>{say(`씨앗 ${home.data.earnedToday}개를 받았어`, `씨앗 ${home.data.earnedToday}개를 받았어요`)}</strong>
+            <small>학원 하루 학습 완료 · 학원 상품에 써요</small>
+          </span>
+        </div>
+      )}
       {s.assisted > 0 && <p className="small muted" style={{ textAlign: 'center' }}>{s.assisted}문제는 풀이를 같이 봤어요</p>}
       <LoadError error={error} />
     </Frame>
