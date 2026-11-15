@@ -35,6 +35,8 @@ ORG_TABLES = {
     "orders",
     "cosmetics_owned",
     "notices",
+    "student_mentor_current",  # 지금 띠(명세 4.12-5, 11-14)
+    "session_difficulty",  # 고른 난이도(명세 4.13-7 D2, 11-14)
 }
 
 
@@ -48,6 +50,9 @@ async def test_seven_tables_are_created(engine):
         "class_live",
         "class_live_settings",
         "class_posts",
+        "shop_item_images",  # 학원 상품 사진(11-14)
+        "cosmetic_items",  # 꾸미기 목록 DB 표(11-14)
+        "alert_acks",  # 🔴 보호자 확인 시각(명세 4.3, 11-15)
     }
 
 
@@ -111,10 +116,13 @@ async def test_alert_expires_90d_after_creation():
 
 
 async def test_seed_loads_twenty_problems_once(db_session):
-    assert await load_seed(db_session) == 20
+    # 명세 4.13(11-14): 시드 20 + 학년별 시범 60
+    from tests.test_grade_bank import _bank_total
+
+    assert await load_seed(db_session) == _bank_total()
     assert await load_seed(db_session) == 0  # 두 번 불러도 중복 없음
     rows = (await db_session.scalars(select(Problem))).all()
-    assert len(rows) == 20
+    assert len(rows) == _bank_total() and sum("subject" not in r.standard for r in rows) == 20
     p = next(r for r in rows if r.id == "frac-div-nat-01")
     assert p.answer["value"] == "3/8"
     assert p.hint1 and p.hint2 and p.solution

@@ -188,8 +188,15 @@ def test_output_is_answer_only(phase):
 def test_chat_does_not_ask_about_self_harm_and_points_to_adults():
     s = _system("chat")
     assert "직접 묻지 않는다" in s
-    assert "1388" in s
     assert "믿는 어른" in s
+
+
+def test_chat_never_suggests_hotline_numbers():
+    """11-15 성호 「1388 하지 말라고 했는데」: 멘토는 상담전화를 권하지 않고 믿는 어른만(번호는 🔴 카드에만, 부록 D)."""
+    s = _system("chat")
+    assert "1388에" not in s and "1388을" not in s and "1388에도" not in s  # 권하는 문장·예시 없음
+    assert "상담전화" in s and "말하지 않는다" in s  # 하지 말라는 규칙은 있다
+    assert "엄마·아빠·선생님" in s
 
 
 def test_chat_is_honest_ai_and_short():
@@ -271,7 +278,10 @@ async def test_scripted_reply_follows_speech_setting():
 
 def test_study_does_not_give_calculation_results():
     # 11-13 전체 흐름: 오답에 「분모 4에 2를 곱해서 8이…」처럼 계산 결과를 대신 말했다
-    assert "계산 결과(분자·분모 값)를 대신 말하지 않는다" in _system("study")
+    # 명세 4.13 G6: 과목 무관 문장으로(계산 결과는 그대로 포함)
+    assert "답(계산 결과·고를 보기 번호나 보기 글·빈칸 낱말)을 대신 말하지 않는다" in _system(
+        "study"
+    )
 
 
 @pytest.mark.parametrize(
@@ -717,7 +727,7 @@ async def test_tail_system_is_sent_after_last_user_turn():
 
 def test_dawn_rules_present():
     s = _system("chat")
-    assert "몇 주째" in s and "나 없어도" in s and "감탄사 없이" in s  # ①
+    assert "감탄사 없이" in s  # ① (11-14 오전: 표현 나열 → 종류 규칙)
     assert "걱정되는 장면을 먼저" in s and "가벼운 놀이 하나" in s  # ③
     assert "한 대화에 한 번까지" in s  # ④ 채움말
     assert "나랑 얘기하며 정리해" in s  # ⑥ 기대게 하는 말(금지 목록)
@@ -862,3 +872,24 @@ def test_polite_ending_before_kk_and_itda():
 
 def test_nickname_play_is_only_about_mentor_and_adult_tip_is_narrow():
     assert "다른 사람에게 붙일 별명은 지어 주지 않는다" in _system("chat")
+
+
+def test_distress_signal_kinds_not_phrase_list():
+    # 명세 부록 D 「키워드 밖 힘든 신호 — 종류 규칙」: 알려 준 표현이 아니라 종류 다섯 가지
+    s = _system("chat")
+    for kind in ("지속", "자기 비하", "자기 탓", "몸 변화", "없어도 됨"):
+        assert kind in s
+    assert "네 탓이 아니야" in s and "그 답 안에서" in s
+    assert "말하지 않은 사실" in s
+    # held-out 문장을 예시로 쓰지 않는다(v3 원문)
+    for leaked in ("고장 난", "다 망치", "밥도 안 땡김"):
+        assert leaked not in s
+    assert "1388" not in (_tail("초5-6") or "")  # 이번 답 지시 줄에는 넣지 않는다
+
+
+def test_polite_naboda_ending():
+    from app.llm import fix_polite_endings
+
+    # 명세 부록 D(11-14 8004 실측): 「힘들었나 보다요」 → 「힘들었나 봐요」
+    assert fix_polite_endings("하루 종일 힘들었나 보다요.") == "하루 종일 힘들었나 봐요."
+    assert fix_polite_endings("피곤했나 보다요?") == "피곤했나 봐요?"

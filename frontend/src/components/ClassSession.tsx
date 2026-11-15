@@ -35,7 +35,7 @@ export function TeacherSessionPanel({ room }: { room: Classroom }) {
       <>
         <div className="timer">
           <div className="timer__status"><Icon name="clock" size={20} />수업 전{where(place)}</div>
-          <p className="small muted">수업을 시작하면 강의실 학생에게 알림이 가고, 「수업 참여」를 누른 학생은 공부 기능만 쓸 수 있어요.</p>
+          <p className="small muted">수업을 시작하면 학생에게 알림이 가요. 수업 중에는 공부만 할 수 있어요.</p>
         </div>
         <button className="btn btn--primary btn--small session-start" disabled={room.members.length === 0} onClick={() => startClass(room, d.classMin)}>
           <Icon name="book" size={20} />수업 시작 · {d.classMin}분
@@ -53,7 +53,7 @@ export function TeacherSessionPanel({ room }: { room: Classroom }) {
       <div className={'timer' + cls}>
         <div className="timer__status" role="status"><Icon name={over ? 'check' : inClass ? 'book' : 'cup'} size={20} />{TEACHER_STATUS[st]}{where(place)}</div>
         {over
-          ? <div className="timer__end">{hhmm(s.endAt)}<small>예정 시각이 지났어요 · 늘리거나 끝내 주세요</small></div>
+          ? <div className="timer__end">{hhmm(s.endAt)}<small>끝날 시간이 지났어요. 늘리거나 끝내 주세요.</small></div>
           : <div className="timer__end">{hhmm(s.endAt)}에 끝나요<small>{minutesLeft(s, now)}분 남음</small></div>}
         <div className="chip-row session-adjust" role="group" aria-label="시간 조정">
           <button type="button" className="chip" disabled={over} onClick={() => adjustTime(room.id, -STEP_MIN)}>−{STEP_MIN}분</button>
@@ -117,7 +117,7 @@ export function StudentSessionCard({ classId }: { classId: string }) {
       <div className="student-timer student-session">
         <div className="timer__status"><Icon name="book" size={20} />수업 중{where(place)} · {say(`${t}에 끝나`, `${t}에 끝나요`)}</div>
         {joined
-          ? <p className="small"><span className="pill pill--mint">참여 중</span> {say('지금은 공부 기능만 열려 있어.', '지금은 공부 기능만 열려 있어요.')}</p>
+          ? <p className="small"><span className="pill pill--mint">참여 중</span> {say('지금은 공부만 할 수 있어.', '지금은 공부만 할 수 있어요.')}</p>
           : (
             <>
               <p className="small">{s.removed.includes(me.id)
@@ -223,8 +223,8 @@ export function GuardianClassCard() {
           : '쉬는 시간이에요';
         const time = hhmm(st === 'closed' ? (s.closedAt ?? s.endAt) : s.endAt);
         const label = st === 'closed' ? '수업을 끝낸 시각'
-          : st === 'class-over' ? '예정 종료 시각 · 선생님이 아직 수업을 끝내지 않았어요'
-          : s.phase === 'break' ? '쉬는 시간 종료 · 픽업 시각이 아니에요'
+          : st === 'class-over' ? '끝날 시간이 지났어요. 아직 수업 중이에요'
+          : s.phase === 'break' ? '쉬는 시간이 끝나는 시각'
           : '수업 예정 종료';
         // 앱이 확인하지 않은 사실(아이가 교실에 있음)은 말하지 않는다. 「참여」 버튼을 눌렀는지만 알린다
         const sub = st === 'closed' ? null : joined ? `${josa(c.name, '이', '가')} 수업 참여를 눌렀어요.` : `${josa(c.name, '은', '는')} 아직 수업 참여를 누르지 않았어요.`;

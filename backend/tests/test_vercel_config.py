@@ -13,3 +13,10 @@ VERCEL_JSON = Path(__file__).resolve().parents[2] / "vercel.json"
 def test_functions_run_in_seoul_next_to_db():
     conf = json.loads(VERCEL_JSON.read_text(encoding="utf-8"))
     assert conf.get("regions") == ["icn1"]
+
+
+def test_build_copies_problem_bank():
+    # 명세 4.13 G5: 배포 함수에는 저장소 seed/가 없다 → 빌드 때 은행 파일도 app/_seed/bank로
+    conf = json.loads(VERCEL_JSON.read_text(encoding="utf-8"))
+    cmd = conf["services"]["backend"]["buildCommand"]
+    assert "seed/drafts/bank/problems_v2" in cmd and "app/_seed/bank" in cmd

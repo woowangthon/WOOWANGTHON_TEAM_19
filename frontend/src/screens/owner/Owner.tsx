@@ -11,10 +11,11 @@ import { LoadError, Sheet, Stat, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { mmss } from '../../lib/date';
-import { BREAK_LENGTHS, CLASS_LENGTHS, refreshClassLive, saveDefaults, savePlace, useClassSessions, type ClassDefaults } from '../../lib/classSession';
+import { BREAK_LENGTHS, CLASS_LENGTHS, patchDefaults, refreshClassLive, savePlace, useClassSessions, type ClassDefaults } from '../../lib/classSession';
 import { DEFAULT_ALERTS, normalizeAlerts } from '../../lib/classTimer';
 import type { OwnerDashboard } from '../../types';
 import { useAuth } from '../../state/auth';
+import { LiveSaveError } from '../../components/ClassBoard';
 
 export function OwnerHome() {
   const { me } = useAuth();
@@ -120,9 +121,9 @@ function TimerAlertSettings() {
   );
 }
 
-function ClassDefaultsCard() {
+export function ClassDefaultsCard() {
   const { defaults: d } = useClassSessions();
-  const set = (p: Partial<ClassDefaults>) => saveDefaults({ ...d, ...p });
+  const set = (p: Partial<ClassDefaults>) => patchDefaults(p); // #9: 연달아 눌러도 앞 값이 되돌아가지 않게
   const Toggle = ({ k, label, sub }: { k: 'games' | 'notifyGuardian' | 'showPlace'; label: string; sub: string }) => (
     <label className="check-row session-setting">
       <span className="session-setting__label"><strong>{label}</strong><span className="small muted">{sub}</span>
@@ -150,6 +151,7 @@ function ClassDefaultsCard() {
         <Toggle k="showPlace" label="강의실 장소 표시" sub="큰 학원이라면 켜서 「302호」처럼 보여 주세요" />
       </div>
       <p className="small muted">알림은 끝나기 5분 전과 끝날 때 학습지도자·보호자 화면에 잠깐 떠요(고정). 학습지도자가 시간을 늘리고 줄일 수 있어요.</p>
+      <LiveSaveError />
     </section>
   );
 }
@@ -191,6 +193,7 @@ function OwnerClassrooms({ data, onChange }: { data: OwnerDashboard; onChange: (
         ))}
       </ul>
       <LoadError error={error} />
+      <LiveSaveError />{/* 장소 저장(savePlace) 실패 */}
       {canEdit
         ? <button className="btn btn--secondary btn--small" style={{ alignSelf: 'flex-start' }} disabled={!data.teachers.length} onClick={() => setCreate(true)}><Icon name="plus" size={16} />강의실 만들기</button>
         : <p className="small muted">강의실 만들기·담당 바꾸기는 서버 연결 뒤에 열려요. 지금은 학습지도자가 강의실 탭에서 만들어요.</p>}

@@ -9,8 +9,9 @@ export type GradeUi = 'a' | 'b' | 'c';
 const KEY = 'chingu1.gradeUi.v2';
 const isGradeUi = (v: unknown): v is GradeUi => v === 'a' || v === 'b' || v === 'c';
 
-export const GRADE_NOTE = '체험 문제는 초5~6 분수 나눗셈이에요';
-export const TONE_NOTE = '다른 학년은 말투만 바뀌어요';
+// 11-14 학년별 문제 시범(명세 4.13): 초4 수학·중2 국어·고1 영어 단원이 생김. 그 밖 학년은 분수 시드
+export const GRADE_NOTE = '시범 문제는 초4 수학·초5~6 분수·중2 국어·고1 영어예요';
+export const TONE_NOTE = '다른 학년은 초5~6 분수 문제가 나와요';
 
 /** 주소(해시 앞 ?·해시 뒤 ?) → 저장값 → 기본 C(성호 결정 11-14) 순서로 고른다 */
 export function parseGradeUi(search: string, hash: string, stored: unknown): GradeUi {

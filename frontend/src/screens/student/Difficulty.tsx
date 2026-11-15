@@ -8,11 +8,13 @@ import { LoadError } from '../../components/Common';
 import { useMentor } from '../../state/mentor';
 import { routeFor, useSession } from '../../state/session';
 import type { Difficulty } from '../../types';
+import { needsPromise } from '../../lib/apiError';
 
-const LEVELS: { d: Difficulty; sub: string; h: number }[] = [
+// polite: 존댓말을 고른 아이에게 보이는 글(반말 「도전해 봐」가 섞이던 것, 11-14 실측)
+const LEVELS: { d: Difficulty; sub: string; polite?: string; h: number }[] = [
   { d: '초급', sub: '천천히', h: 96 },
   { d: '중급', sub: '차근차근', h: 128 },
-  { d: '고급', sub: '도전해 봐', h: 160 },
+  { d: '고급', sub: '도전해 봐', polite: '도전해 봐요', h: 160 },
 ];
 
 export function StudentDifficulty() {
@@ -27,7 +29,8 @@ export function StudentDifficulty() {
   const start = async () => {
     setBusy(true); setError(null);
     try { sync(await api.startSession(pick)); nav('/student/solve'); }
-    catch (e) { setError((e as Error).message); setBusy(false); }
+    // #5(11-14): 약속(AI 고지·보호자 알림 고지)을 안 하고 들어오면 서버가 409 needs_promise → 약속 화면으로(약속하면 다시 난이도로 온다)
+    catch (e) { if (needsPromise(e)) { nav('/student/onboarding/promise', { replace: true }); return; } setError((e as Error).message); setBusy(false); }
   };
 
   return (
@@ -39,7 +42,7 @@ export function StudentDifficulty() {
       <div className="stairs" role="radiogroup" aria-label="난이도">
         {LEVELS.map((l) => (
           <button key={l.d} role="radio" aria-checked={pick === l.d} className={'card stair' + (pick === l.d ? ' card--selected' : '')} style={{ height: l.h }} onClick={() => setPick(l.d)}>
-            <strong>{l.d}</strong><span className="small muted">{l.sub}</span>
+            <strong>{l.d}</strong><span className="small muted">{say(l.sub, l.polite ?? l.sub)}</span>
           </button>
         ))}
       </div>

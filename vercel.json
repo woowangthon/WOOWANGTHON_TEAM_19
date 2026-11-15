@@ -12,7 +12,7 @@
       "root": "backend",
       "framework": "fastapi",
       "entrypoint": "app.main:app",
-      "buildCommand": "mkdir -p app/_seed && cp ../seed/seed_v0.1.json app/_seed/seed_v0.1.json"
+      "buildCommand": "mkdir -p app/_seed/bank && cp ../seed/seed_v0.1.json app/_seed/seed_v0.1.json && cp ../seed/drafts/bank/problems_v2/*.json app/_seed/bank/ && cp ../seed/drafts/bank/seed_difficulty_v0.1.json app/_seed/bank/"
     }
   },
   "rewrites": [

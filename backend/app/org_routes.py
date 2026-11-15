@@ -365,10 +365,11 @@ async def join_academy(
     # 영역: 자기 영역 학원. 실제 가입 계정은 「이 브라우저의 체험 세트(X-Trial-Id)」 학원도 — 심사위원이
     # 새로 가입한 아이도 체험 학원 코드로 들어가 공부까지 가게(성호 11-12). 계정 영역은 그대로(None),
     # 연결 코드·일련번호는 여전히 같은 영역끼리만. 다른 세트·헤더 없음은 404.
+    # 실제 가입 계정은 모든 체험 세트 학원도(브라우저의 세트와 상관없이, 명세 4.12 5-1 성호 11-14).
+    # 입장 코드는 발급 때 살아 있는 코드끼리 전역으로 안 겹친다(issue_entry_code). 체험 계정은 자기 세트만
     realm = same_realm(Academy.trial_id, me.trial_id)
-    browser_trial = trial_id_from(request) if me.trial_id is None else None
-    if browser_trial is not None:
-        realm = or_(realm, Academy.trial_id == browser_trial)
+    if me.trial_id is None:
+        realm = or_(realm, Academy.trial_id.is_not(None))
     # 같은 숫자가 다른 학원의 지난 코드로 남아 있을 수 있어 가장 늦게 끝나는 것을 고른다
     ac = (
         await db.scalar(
@@ -411,9 +412,12 @@ async def request_membership(
         fail("이미 소속이 있어요. 옮기려면 지금 소속을 먼저 나가 주세요.", 409)
     raw = _norm(body.serial)
     serial = f"{raw[:4]}-{raw[4:]}" if len(raw) == 8 else raw
-    ac = await db.scalar(
-        select(Academy).where(Academy.serial == serial, same_realm(Academy.trial_id, t.trial_id))
-    )
+    # 실제 가입 선생님은 모든 체험 세트 학원 일련번호도(입장 코드와 같음, 명세 4.12 5-1 성호 11-14).
+    # 소속은 그 학원 원장이 승인해야 생긴다. 체험 계정은 자기 세트만
+    realm = same_realm(Academy.trial_id, t.trial_id)
+    if t.trial_id is None:
+        realm = or_(realm, Academy.trial_id.is_not(None))
+    ac = await db.scalar(select(Academy).where(Academy.serial == serial, realm).limit(1))
     if ac is None:
         fail("일련번호를 찾지 못했어요. 원장님께 다시 확인해 주세요.", 404, "not_found")
     t.academy_id, t.teacher_status = ac.id, "승인 대기"
@@ -860,7 +864,11 @@ async def invite_student(
     if place is not None and place.state == "member":
         fail("이미 들어와 있어요.", 409)
     if place is not None and place.state == "requested":
-        place.state = "member"  # 요청이 있었으면 바로 입장
+        place.state = "member"  # 요청이 있었으면 바로 입장 → 아이에게도 알린다(11-14)
+        text = await kid_or_adult_text(
+            db, s.id, f"「{room.name}」에 들어왔어!", f"「{room.name}」에 들어왔어요!"
+        )
+        notify(db, s, text, "/student", now=now)
     elif place is None:
         db.add(
             RoomPerson(
@@ -871,7 +879,13 @@ async def invite_student(
                 created_at=now,
             )
         )
-        notify(db, s, f"{t.name}이 「{room.name}」에 초대했어!", "/student/classes", now=now)
+        text = await kid_or_adult_text(
+            db,
+            s.id,
+            f"{t.name}이 「{room.name}」에 초대했어!",
+            f"{t.name}이 「{room.name}」에 초대했어요!",
+        )
+        notify(db, s, text, "/student/classes", now=now)
     await db.commit()
     return await _teacher_classes(db, t)
 
@@ -897,6 +911,14 @@ async def answer_request(
         await _notify_id(db, student_id, text, "/student", now)
     else:
         await db.delete(place)
+        # 거절도 알린다(요청이 말없이 사라지지 않게, 11-14). 다시 요청할 수 있다
+        text = await kid_or_adult_text(
+            db,
+            student_id,
+            f"「{room.name}」 참여 요청이 이번엔 받아지지 않았어. 궁금하면 선생님께 물어봐",
+            f"「{room.name}」 참여 요청이 이번엔 받아지지 않았어요. 궁금하면 선생님께 여쭤봐요",
+        )
+        await _notify_id(db, student_id, text, "/student/classes", now)
     await db.commit()
     return await _teacher_classes(db, t)
 
@@ -962,16 +984,21 @@ async def request_join(class_id: str, db: Db, now: Now, account: CurrentAccount)
 
 @router.post("/student/classes/{class_id}/invite")
 async def accept_invite(
-    class_id: str, body: AcceptIn, db: Db, account: CurrentAccount
+    class_id: str, body: AcceptIn, db: Db, now: Now, account: CurrentAccount
 ) -> dict[str, Any]:
     s = require_account(account, "student")
     place = await _place(db, class_id, s.id)
-    if place is None or place.state != "invited":
+    room = await db.get(Room, class_id)
+    if place is None or place.state != "invited" or room is None:
         fail("초대를 찾지 못했어요.", 404, "not_found")
     if body.accept:
         place.state = "member"
+        text = f"{s.name} 학생이 「{room.name}」에 들어왔어요"
     else:
         await db.delete(place)
+        text = f"{s.name} 학생이 「{room.name}」 초대에 「나중에」를 골랐어요"
+    # 초대한 선생님이 답을 안다(11-14). 강의실 탭으로
+    await _notify_id(db, room.teacher_id, text, "/teacher/classes", now)
     await db.commit()
     return await _student_classes(db, s)
 

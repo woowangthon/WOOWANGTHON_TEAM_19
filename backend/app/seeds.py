@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.actors import Actor
 from app.api import TAG_NAME
-from app.models_org import Account, Room, RoomPerson, SeedLedger
+from app.models_org import Account, CosmeticItem, Room, RoomPerson, SeedLedger
 from app.timeutil import seoul_date
 
 SEED_RULES = {
@@ -38,7 +38,8 @@ COSMETIC_BUY = "꾸미기 구매"
 SEED, STAMP_CUR = "seed", "stamp"
 STAMP_SOURCES = (STAMP, COSMETIC_BUY)
 
-# (id, kind, name, price) — org.ts COSMETICS 순서 그대로. price = 칭찬 도장 개수(11-12, 1~5)
+# (id, kind, name, price) — 꾸미기 기본값. 상점은 DB 표 cosmetic_items를 읽고, 이 목록은 빠진 줄만
+# 채운다(ensure_cosmetics, 11-14). price = 칭찬 도장 개수(11-12, 1~5)
 COSMETICS: list[tuple[str, str, str, int]] = [
     ("glasses", "outfit", "공부 안경", 1),
     ("raincoat", "outfit", "노란 우비", 2),
@@ -57,6 +58,9 @@ COSMETICS: list[tuple[str, str, str, int]] = [
     ("question", "emote", "궁금해", 1),
     ("idea", "emote", "알았다!", 1),
     ("sorry", "emote", "미안해", 1),
+    # 11-14 재하 그림 3차(12띠 그림 있음, 명세 4.12 5-2-1-0)
+    ("hello", "emote", "반가워", 1),
+    ("congrats", "emote", "축하해", 1),
 ]
 ONCE_A_DAY = (STUDY_DONE, STAMP)  # once_key를 붙이는 출처
 UNITS_KEY = "units"  # accounts.settings 안 학습지도자 단원 선택(태그 목록)
@@ -214,3 +218,28 @@ async def selected_unit_names(db: AsyncSession, actor: Actor) -> list[str]:
 def save_selected_tags(account: Account, tags: list[str]) -> None:
     """JSON 열은 새 dict를 넣어야 바뀐 것으로 잡힌다."""
     account.settings = {**(account.settings or {}), UNITS_KEY: [t for t in TAG_NAME if t in tags]}
+
+
+# --- 꾸미기 목록(DB 표, 11-14) ---------------------------------------------------------------
+COSMETIC_KINDS = ("outfit", "emote")
+
+
+async def ensure_cosmetics(db: AsyncSession) -> None:
+    """기본 꾸미기 중 표에 없는 것만 넣는다. 이미 있는 줄(값·이름·내림)은 손대지 않는다."""
+    have = set(await db.scalars(select(CosmeticItem.id)))
+    for i, (cid, kind, name, price) in enumerate(COSMETICS):
+        if cid not in have:
+            db.add(CosmeticItem(id=cid, kind=kind, name=name, price=price, sort=(i + 1) * 10))
+    await db.flush()
+
+
+async def cosmetic_catalog(db: AsyncSession) -> list[CosmeticItem]:
+    """상점에 보낼 수 있는 줄 전부(내린 것 포함, 정렬). 종류·값이 틀린 줄은 뺀다(손 입력 실수).
+    표가 비어 있으면(기동 전·테스트) 기본값을 채운다."""
+    rows = list(await db.scalars(select(CosmeticItem).order_by(CosmeticItem.sort, CosmeticItem.id)))
+    if not rows:
+        await ensure_cosmetics(db)
+        rows = list(
+            await db.scalars(select(CosmeticItem).order_by(CosmeticItem.sort, CosmeticItem.id))
+        )
+    return [r for r in rows if r.kind in COSMETIC_KINDS and r.price >= 1 and r.name.strip()]

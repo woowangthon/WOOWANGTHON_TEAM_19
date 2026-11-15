@@ -1,4 +1,5 @@
-// 학생 ⑤ 마무리 — 오늘 요약 + 보호자께 보낼 한 줄(미리보기) + 어려웠던 점 + 보호자께 낼 퀴즈
+// 학생 ⑤ 마무리 — 오늘 요약 + 보호자께 보낼 한 줄(미리보기) + 어려웠던 점
+// 11-15 성호 05:30: 「보호자께 낼 퀴즈」는 화면에서 뺐다(퀴즈는 보내지 않음, quiz=null)
 // 요약 숫자와 칩은 서버가 오늘 기록에서 만든다(지어내지 않는다).
 import { useState } from 'react';
 import { api } from '../../api';
@@ -22,13 +23,12 @@ function Wrap() {
   const { data, error, reload } = useAsync(() => api.getWrap(id), [id]);
   const [hard, setHard] = useState<string | null>(null);
   const [custom, setCustom] = useState('');
-  const [quiz, setQuiz] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
 
   const send = async () => {
     setBusy(true); setSendError(null);
-    try { sync(await api.submitWrap(id, { hardPoint: hard === CUSTOM ? custom.trim() || null : hard, quiz })); } // done → 오늘 화면으로
+    try { sync(await api.submitWrap(id, { hardPoint: hard === CUSTOM ? custom.trim() || null : hard, quiz: null })); } // done → 오늘 화면으로
     catch (e) { setSendError((e as Error).message); setBusy(false); }
   };
 
@@ -43,7 +43,9 @@ function Wrap() {
             <h2 className="h3">오늘 푼 것</h2>
             <dl className="kv" style={{ marginTop: 8 }}>
               <dt>단원</dt><dd>{data.unit}</dd>
-              <dt>문제</dt><dd className="num">{data.solved}/{data.total}문제</dd>{/* B16: 난이도는 서버가 고른 값을 저장하지 않아 늘 「중급」 → 표시하지 않음 */}
+              <dt>문제</dt><dd className="num">{data.solved}/{data.total}문제</dd>
+              {/* D4(11-14): 서버가 실제 난이도를 준다 → B16 숨김 풂 */}
+              {data.difficulty && <><dt>난이도</dt><dd>{data.difficulty}</dd></>}
               <dt>시간</dt><dd className="num">학습 {data.studyMin}분{data.chatMin > 0 ? ` · 수다 ${data.chatMin}분` : ''}</dd>
               <dt>연속</dt><dd className="num">{data.streakDays}일</dd>
             </dl>
@@ -62,15 +64,6 @@ function Wrap() {
             </div>
             {hard === CUSTOM && <input id="wrap-custom" className="input" aria-label="어려웠던 점 직접 쓰기" maxLength={30} placeholder="한 줄로 써 줘 (30자까지)" value={custom} onChange={(e) => setCustom(e.target.value)} />}
           </section>}{/* 서버는 어려웠던 점 칩을 빈 목록으로 준다 → 비면 섹션을 숨긴다 */}
-          <section className="stack">
-            <h2 className="h3">보호자께 낼 퀴즈 하나 <span className="small muted">(선택)</span></h2>
-            {/* GPT-001: 긴 퀴즈 문장도 화면 안에서 줄바꿈 */}
-            <div className="chip-row quiz-chips">
-              {data.quizOptions.map((q) => (
-                <button key={q} className={'chip' + (quiz === q ? ' chip--on' : '')} aria-pressed={quiz === q} onClick={() => setQuiz(quiz === q ? null : q)}>{q}</button>
-              ))}
-            </div>
-          </section>
           <LoadError error={sendError} />
         </>
       )}

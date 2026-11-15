@@ -1,11 +1,14 @@
 // 진짜 서버(FastAPI)에 붙는 구현.
 // 경로는 임시 이름이다. 성호님 명세의 API 이름이 확정되면 여기 경로만 바꾸면 된다(화면 코드는 그대로).
 import type { MentorApi } from './client';
+import { ApiError } from '../lib/apiError';
 import type { AccountRole } from '../types';
 import { slowWatch } from '../lib/slowServer';
 import { serverErrorText } from '../lib/serverError';
 
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:8000';
+/** 상품 사진 주소의 앞부분(서버가 주는 imagePath는 API 주소 뒤에 붙인다, TK-97) */
+export const API_BASE = BASE;
 
 // 시연 서버의 「누구인지」 헤더(로그인 서버화 전 임시). 로그인한 계정의 역할을 state/auth.tsx가 알려 준다.
 // 누구 id를 쓸지는 방문자별 체험 세트(명세 4.11 2)가 정한다: 처음 서버를 쓸 때 POST /trial로 받아 localStorage에 둔다.
@@ -24,8 +27,15 @@ function readRole(): DemoRole | null {
 // 새로고침 직후 getMe보다 먼저 나가는 요청(오늘 세션·멘토)도 헤더를 달도록 마지막 역할을 기억해 둔다
 let demoRole: DemoRole | null = readRole();
 
+// 로그인 세대: 로그인·로그아웃·체험 세트 바꿈 때마다 +1. 요청을 보낸 뒤 세대가 바뀌었으면 그 요청의 401은 옛 로그인 이야기라
+// 지금 로그인을 지우지 않는다(「처음부터 다시 체험」이 쿠키를 지운 사이 5초 폴링이 401을 받아 새 로그인을 지우던 것, dev round2 #15)
+let loginGen = 0;
+
 /** 로그인·getMe·로그아웃 때 부른다. student→child, guardian→guardian, teacher→instructor, 그 밖·로그아웃은 null. 바뀌었으면 true */
+/** 이 기기에 로그인했던 역할이 저장돼 있는지(#17: 앱을 열 때 연결이 끊겨도 로그아웃으로 다루지 않으려고) */
+export const hasStoredRole = () => demoRole !== null;
 export function setDemoRole(role: AccountRole | null): boolean {
+  loginGen++;
   const before = demoRole;
   demoRole = role === 'student' ? 'child' : role === 'guardian' ? 'guardian' : role === 'teacher' ? 'instructor' : null;
   try { if (demoRole) localStorage.setItem(ROLE_KEY, demoRole); else localStorage.removeItem(ROLE_KEY); } catch { /* 저장이 막혀도 이번 실행은 메모리로 */ }
@@ -51,9 +61,28 @@ function dropTrial() {
   try { localStorage.removeItem(TRIAL_KEY); } catch { /* 메모리만 비운다 */ }
 }
 
-async function errorMessage(res: Response): Promise<string> {
-  const detail = await res.json().then((j) => (j?.message ?? j?.detail) as string | undefined).catch(() => undefined);
-  return detail ?? serverErrorText(res.status, demoRole === 'child'); // D11: 다음에 할 일까지
+
+/** 서버 오류 → ApiError(상태 번호·코드 붙임, dev round3 #17·#5) */
+async function failOf(res: Response): Promise<ApiError> {
+  const j = (await res.json().catch(() => null)) as { code?: unknown; message?: string; detail?: string } | null;
+  const detail = j?.message ?? j?.detail;
+  // 서버 내부 오류(500·internal_error)와 없는 경로(http_error: 「Not Found」 등 영어)는 서버 문구 대신 D11 안내(다음에 할 일까지)
+  const generic = res.status >= 500 || j?.code === 'internal_error' || j?.code === 'http_error';
+  const msg = !generic && typeof detail === 'string' && detail ? detail : serverErrorText(res.status, demoRole === 'child');
+  return new ApiError(msg, res.status, typeof j?.code === 'string' ? j.code : undefined);
+}
+
+/** POST /trial(본문·헤더 없음)로 새 세트를 받기만 한다(저장은 부르는 쪽이). 429(과부하)면 서버 문구 그대로 오류 */
+async function requestTrial(): Promise<Trial> {
+  let res: Response;
+  try { res = await fetch(BASE + '/trial', { method: 'POST' }); }
+  catch { throw new ApiError('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.', 0); }
+  if (!res.ok) throw await failOf(res);
+  return (await res.json()) as Trial;
+}
+function keepTrial(t: Trial) {
+  trial = t;
+  try { localStorage.setItem(TRIAL_KEY, JSON.stringify(t)); } catch { /* 메모리로 */ }
 }
 
 /** 저장된 세트를 쓰고, 없으면 POST /trial(본문·헤더 없음)로 받아 둔다. 429(과부하)면 서버 문구 그대로 오류 */
@@ -61,13 +90,8 @@ function ensureTrial(): Promise<Trial> {
   if (trial) return Promise.resolve(trial);
   if (trialPending) return trialPending;
   trialPending = (async () => {
-    let res: Response;
-    try { res = await fetch(BASE + '/trial', { method: 'POST' }); }
-    catch { throw new Error('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.'); }
-    if (!res.ok) throw new Error(await errorMessage(res));
-    const t = (await res.json()) as Trial;
-    trial = t;
-    try { localStorage.setItem(TRIAL_KEY, JSON.stringify(t)); } catch { /* 메모리로 */ }
+    const t = await requestTrial();
+    keepTrial(t);
     return t;
   })().finally(() => { trialPending = null; });
   return trialPending;
@@ -75,12 +99,16 @@ function ensureTrial(): Promise<Trial> {
 
 /** 「처음부터 다시 체험」: 지금 세트를 버리고 새 세트를 받는다(이전 세트는 서버에 그대로 두고 버린다). 로그인 전에도 부를 수 있다 */
 export async function startNewTrial(): Promise<void> {
-  // org http: 옛 세트의 로그인 쿠키를 먼저 끊는다(실패해도 계속). 뒤이은 demoLogin(옛 id)은 서버가 새 세트의 같은 계정으로 바꿔 준다
-  if (ORG_HTTP && trial) {
-    await fetch(BASE + '/auth/logout', { method: 'POST', credentials: 'include', headers: { 'X-Trial-Id': trial.trialId } }).catch(() => undefined);
+  // 새 세트를 먼저 받는다: 실패하면(끊김·429) 옛 세트·로그인 쿠키를 그대로 두고 오류만 넘긴다(dev round2 #16)
+  const old = trial;
+  const next = await requestTrial();
+  // org http: 그다음 옛 세트의 로그인 쿠키를 끊는다(실패해도 계속). 뒤이은 demoLogin(옛 id)은 서버가 새 세트의 같은 계정으로 바꿔 준다
+  if (ORG_HTTP && old) {
+    loginGen++; // 이 사이에 나가 있던 요청이 받는 401은 옛 로그인 이야기
+    await fetch(BASE + '/auth/logout', { method: 'POST', credentials: 'include', headers: { 'X-Trial-Id': old.trialId } }).catch(() => undefined);
   }
-  dropTrial();
-  await ensureTrial();
+  keepTrial(next);
+  loginGen++;
 }
 
 /** 세트가 서버에 없을 때(DB가 바뀜)의 404. 학습지도자의 student_not_found는 주소 속 학생 이야기라 제외하고,
@@ -89,22 +117,26 @@ const isTrialGone = (role: DemoRole, code: unknown) =>
   code === 'trial_not_found' ||
   (role === 'child' && code === 'student_not_found') || (role === 'guardian' && (code === 'student_not_found' || code === 'guardian_not_found'));
 
+/** 수다 묶음·답 더 받기는 화면이 닫혀도 끝까지 가게(keepalive, 명세 3.2 e885683 — 1.5초 안 앱 종료 때 🔴 검사가 빠지던 것) */
+export const keepaliveFor = (method: string, path: string) => method === 'POST' && /^\/sessions\/[^/]+\/(chat|reply)$/.test(path);
+
 async function call<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown, retried = false): Promise<T> {
   if (ORG_HTTP) return callOrg<T>(method, path, body, retried);
   // 로그인 전에는 서버가 누구인지 알 수 없어 401이 난다 → 보내지 않는다(화면은 오류를 받아 null로 둔다)
   const role = demoRole;
-  if (!role) throw new Error('로그인이 필요해요.');
+  if (!role) throw new ApiError('로그인이 필요해요.', 401);
   const t = await ensureTrial();
   let res: Response;
   try {
     // slowWatch: 잠든 서버를 깨우느라 5초를 넘기면 화면에 「깨우는 중」 안내(lib/slowServer)
     res = await slowWatch.track(fetch(BASE + path, {
       method,
+      keepalive: keepaliveFor(method, path),
       headers: { 'X-Demo-Role': role, 'X-Demo-Actor': t.actors[role], ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}) },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     }));
   } catch {
-    throw new Error('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.');
+    throw new ApiError('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.', 0);
   }
   if (res.status === 404 && !retried) {
     const j = await res.clone().json().catch(() => null);
@@ -114,35 +146,38 @@ async function call<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, 
       return call<T>(method, path, body, true);
     }
   }
-  if (!res.ok) throw new Error(await errorMessage(res));
+  if (!res.ok) throw await failOf(res);
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
 
 /** org http 모드의 call: 역할 확인 없이(로그인 전 경로도) 쿠키 + X-Trial-Id만 보낸다 */
 async function callOrg<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body: unknown, retried: boolean): Promise<T> {
+  const gen = loginGen; // 보낸 때의 로그인 세대
   const t = await ensureTrial();
   let res: Response;
   try {
     res = await slowWatch.track(fetch(BASE + path, {
       method,
       credentials: 'include',
+      keepalive: keepaliveFor(method, path),
       headers: { 'X-Trial-Id': t.trialId, ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}) },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     }));
   } catch {
-    throw new Error('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.');
+    throw new ApiError('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.', 0);
   }
   if (res.status === 401 || res.status === 404) {
     const code = (await res.clone().json().catch(() => null))?.code;
     // 로그인이 끊김(로그아웃·만료) 또는 내 학생 행이 사라짐 → 앱 로그인 상태를 지우고 로그인 화면으로
-    if ((res.status === 401 && (code === 'not_logged_in' || code === 'no_actor')) || (code === 'student_not_found' && demoRole === 'child')) onLoggedOut?.();
+    // 보낸 뒤 로그인이 바뀌었으면(다시 로그인·로그아웃·새 체험 세트) 옛 로그인의 401이라 지금 로그인을 지우지 않는다
+    if ((res.status === 401 && (code === 'not_logged_in' || code === 'no_actor')) || (code === 'student_not_found' && demoRole === 'child')) { if (gen === loginGen) onLoggedOut?.(); }
     // 세트가 서버에 없을 때만 새 세트로 한 번 다시(not_linked 등은 세트와 상관없음)
     else if (code === 'trial_not_found' && !retried) {
       if (trial?.trialId === t.trialId) dropTrial();
       return callOrg<T>(method, path, body, true);
     }
   }
-  if (!res.ok) throw new Error(await errorMessage(res));
+  if (!res.ok) throw await failOf(res);
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
 
@@ -156,7 +191,8 @@ export const httpApi: MentorApi = {
   acceptPromise: () => call('POST', '/student/promise'),
   // 앱 시작 때 역할과 상관없이 불리는 두 함수: 학생이 아니면 mock처럼 null(서버는 403)
   getMentor: () => (demoRole === 'child' ? call('GET', '/student/mentor') : Promise.resolve(null)),
-  saveMentor: (s) => call('PUT', '/student/mentor', s),
+  saveMentor: (s) => call('PUT', '/student/mentor', { style: s.style, title: s.title, speech: s.speech, animal: s.animal }),
+  buyAnimal: (animal) => call('POST', `/student/shop/animals/${animal}/buy`),
 
   getActiveSession: () => (demoRole === 'child' ? call('GET', '/sessions/active') : Promise.resolve(null)),
   startSession: (difficulty) => call('POST', '/sessions', { difficulty }),
@@ -177,7 +213,8 @@ export const httpApi: MentorApi = {
   getUnits: () => call('GET', '/teacher/units'),
   saveUnits: (selectedIds) => call('PUT', '/teacher/units', { selectedIds }),
   getTeacherToday: () => call('GET', '/teacher/today'),
-  assignTask: (studentId, unit) => call('PUT', `/teacher/students/${studentId}/task`, { unit }),
+  assignTask: (studentId, unit, opts) => call('PUT', `/teacher/students/${studentId}/task`, { unit, ...opts }),
+  assignTasks: (studentIds, unit, opts) => call('PUT', '/teacher/tasks', { studentIds, unit, ...opts }),
   getMemo: (studentId) => call('GET', `/teacher/students/${studentId}/memo`),
   saveMemo: (studentId, memo) => call('PUT', `/teacher/students/${studentId}/memo`, memo),
   createDraft: (studentId) => call('POST', `/teacher/students/${studentId}/draft`),

@@ -1,0 +1,22 @@
+[
+  {"id": "frac-div-nat-01", "tag": "frac-div-nat", "difficulty": "easy", "steps": 1, "why": "(분수)÷(자연수)를 ×1/자연수로 바꿔 분모끼리 곱하는 한 번 적용"},
+  {"id": "frac-div-nat-02", "tag": "frac-div-nat", "difficulty": "easy", "steps": 1, "why": "분자가 자연수로 나누어떨어져 분자만 나누면 끝나는 한 번 적용"},
+  {"id": "frac-div-nat-03", "tag": "frac-div-nat", "difficulty": "medium", "steps": 2, "why": "문장에서 (분수)÷(자연수) 식 세우기 + ×1/자연수 계산"},
+  {"id": "frac-div-nat-04", "tag": "frac-div-nat", "difficulty": "hard", "steps": 3, "why": "문장에서 식 세우기 + 계산 + 기약분수 조건(×1/자연수로 풀면 약분이 필요), 조건 둘"},
+  {"id": "frac-div-nat-05", "tag": "frac-div-nat", "difficulty": "medium", "steps": 2, "why": "문장에서 식 세우기 + 분자가 안 나누어떨어져 ×1/자연수로 계산"},
+  {"id": "nat-div-nat-01", "tag": "nat-div-nat", "difficulty": "easy", "steps": 1, "why": "1÷(자연수)를 단위분수로 나타내는 한 번 적용"},
+  {"id": "nat-div-nat-02", "tag": "nat-div-nat", "difficulty": "medium", "steps": 2, "why": "문장에서 나누는 수·나뉘는 수 정해 식 세우기 + 몫을 분수로"},
+  {"id": "nat-div-nat-03", "tag": "nat-div-nat", "difficulty": "medium", "steps": 2, "why": "문장에서 식 세우기 + 몫을 분수로, 몫이 1보다 커서 분자·분모를 뒤집는 함정"},
+  {"id": "nat-div-nat-04", "tag": "nat-div-nat", "difficulty": "easy", "steps": 1, "why": "(자연수)÷(자연수)를 분수로 쓰는 한 번 적용(대분수 변환은 선택)"},
+  {"id": "nat-div-nat-05", "tag": "nat-div-nat", "difficulty": "hard", "steps": 3, "why": "문장에서 식 세우기 + 몫을 분수로 + 기약분수로 약분, 분자·분모 뒤집기 함정도 있음"},
+  {"id": "frac-div-frac-same-01", "tag": "frac-div-frac-same", "difficulty": "easy", "steps": 1, "why": "분모가 같아 분자끼리 나누면 바로 자연수 몫이 나오는 한 번 적용"},
+  {"id": "frac-div-frac-same-02", "tag": "frac-div-frac-same", "difficulty": "medium", "steps": 2, "why": "문장(도막 수)에서 포함제 식 세우기 + 분자끼리 나누기"},
+  {"id": "frac-div-frac-same-03", "tag": "frac-div-frac-same", "difficulty": "medium", "steps": 2, "why": "분자끼리 나누기 + 나누어떨어지지 않는 (자연수)÷(자연수)를 분수로"},
+  {"id": "frac-div-frac-same-04", "tag": "frac-div-frac-same", "difficulty": "hard", "steps": 3, "why": "「몇 배」에서 무엇을 무엇으로 나눌지 판단(방향 함정) + 분자끼리 나누기 + 1보다 작은 몫을 분수로"},
+  {"id": "frac-div-frac-same-05", "tag": "frac-div-frac-same", "difficulty": "medium", "steps": 2, "why": "분자끼리 나누기 + 나누어떨어지지 않는 몫을 분수로"},
+  {"id": "frac-div-frac-diff-01", "tag": "frac-div-frac-diff", "difficulty": "easy", "steps": 1, "why": "나누는 분수의 역수를 곱하는 규칙 한 번 적용(약분은 판정에서 요구하지 않음)"},
+  {"id": "frac-div-frac-diff-02", "tag": "frac-div-frac-diff", "difficulty": "hard", "steps": 3, "why": "1시간당 거리(단위량) 개념 결합 + 거리÷시간 방향 판단 함정 + 역수 곱"},
+  {"id": "frac-div-frac-diff-03", "tag": "frac-div-frac-diff", "difficulty": "medium", "steps": 2, "why": "문장에서 (자연수)÷(분수) 식 세우기 + 역수 곱"},
+  {"id": "frac-div-frac-diff-04", "tag": "frac-div-frac-diff", "difficulty": "medium", "steps": 2, "why": "대분수를 가분수로 바꾸기 + 역수 곱, 자연수 부분만 따로 나누는 함정"},
+  {"id": "frac-div-frac-diff-05", "tag": "frac-div-frac-diff", "difficulty": "medium", "steps": 2, "why": "역수 곱 + 기약분수로 약분(큰 공약수 찾기)"}
+]

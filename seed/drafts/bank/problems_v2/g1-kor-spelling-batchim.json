@@ -1,0 +1,738 @@
+[
+ {
+  "id": "g1-kor-spelling-batchim-01",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-01]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "easy",
+  "problem_type": "뜻을 보고 받침을 바르게 쓴 낱말 고르기",
+  "targets_misconception": "받침을 소리가 비슷한 다른 받침으로 씀(꽃 → 꼳·꼿)",
+  "text": "봄에 들판에 피어요.\n향기가 좋아요.\n이것을 바르게 쓴 낱말은 무엇일까요?\n① 꼳\n② 꼿\n③ 꽃\n④ 꽂\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "③",
+   "accepted": [
+    "③",
+    "3",
+    "3번",
+    "꽃"
+   ]
+  },
+  "hint1": "이 낱말 뒤에 '이'를 붙여 소리 내 보세요. 받침 소리가 뒤 글자로 넘어가요.",
+  "hint2": "'이'를 붙여 읽으면 [시] 소리는 나지 않아요. 그래서 ②는 아니에요. 어떤 소리가 나는지 듣고 그 소리를 내는 받침을 찾아보세요.",
+  "after_hint2": "'이'를 붙인 소리 [꼬치]를 듣고 [치]를 내는 받침 ㅊ이 있는 보기를 고르기",
+  "solution": "'이'를 붙이면 [꼬치]로 소리 나요. [치] 소리를 내는 받침은 ㅊ이라서 바르게 쓰면 '꽃'이에요. 답은 ③이에요. ① '꼳'에 '이'를 붙이면 [꼬지], ② '꼿'은 [꼬시]로 소리 나요. ④ '꽂'도 [꼬지]로 소리 나고, 봄에 피는 것을 쓴 낱말이 아니에요.",
+  "forbidden": [
+   "③"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-02",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-01]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "easy",
+  "problem_type": "뜻을 보고 받침을 바르게 쓴 낱말 고르기",
+  "targets_misconception": "받침을 소리가 비슷한 다른 받침으로 씀(꽃 → 꼳·꼿)",
+  "text": "밥과 반찬을 만드는 곳이에요.\n바르게 쓴 낱말은 무엇일까요?\n① 부억\n② 부엌\n③ 부엇\n④ 부얻\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "②",
+   "accepted": [
+    "②",
+    "2",
+    "2번",
+    "부엌"
+   ]
+  },
+  "hint1": "뒤에 '에'를 붙여 '○○에서 놀아요'처럼 말해 보세요. 마지막 받침 소리가 '에'로 넘어가요.",
+  "hint2": "'에'를 붙여 말하면 [게]로 들리지 않아요. 그러니 ①은 아니에요. 넘어간 소리가 [세]·[데]·[케] 가운데 무엇인지 들어 보세요.",
+  "after_hint2": "'에'를 붙인 소리 [부어케]를 듣고 [케]를 내는 받침이 있는 보기를 고르기",
+  "solution": "'에'를 붙이면 [부어케서]처럼 [케] 소리가 나요. 그래서 받침은 ㅋ이고 '부엌'이 맞아요. 답은 ②예요. ① '부억'은 [부어게], ③ '부엇'은 [부어세], ④ '부얻'은 [부어데]로 소리 나서 틀려요.",
+  "forbidden": [
+   "②"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-03",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-01]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "easy",
+  "problem_type": "뜻을 보고 받침을 바르게 쓴 낱말 고르기",
+  "targets_misconception": "받침을 소리가 비슷한 다른 받침으로 씀(꽃 → 꼳·꼿)",
+  "text": "나무가 많이 모여 있는 곳이에요.\n바르게 쓴 낱말은 무엇일까요?\n① 숩\n② 숫\n③ 숟\n④ 숲\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "④",
+   "accepted": [
+    "④",
+    "4",
+    "4번",
+    "숲"
+   ]
+  },
+  "hint1": "'○이 커요'라고 소리 내 보세요. 받침 소리가 '이'에 붙어 나와요.",
+  "hint2": "'이'를 붙인 소리는 [수시]도 [수지]도 아니에요. 그래서 ②와 ③은 아니에요. 남은 둘 가운데 [비]와 [피] 어느 소리인지 들어 보세요.",
+  "after_hint2": "'이'를 붙인 소리 [수피]를 듣고 [피]를 내는 받침이 있는 보기를 고르기",
+  "solution": "'이'를 붙이면 [수피]로 소리 나요. [피]를 내는 받침은 ㅍ이라서 '숲'이 맞아요. 답은 ④예요. ① '숩'은 [수비], ② '숫'은 [수시], ③ '숟'은 [수지]로 소리 나서 틀려요.",
+  "forbidden": [
+   "④"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-04",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-01]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "easy",
+  "problem_type": "뜻을 보고 받침을 바르게 쓴 낱말 고르기",
+  "targets_misconception": "받침을 소리가 비슷한 다른 받침으로 씀(꽃 → 꼳·꼿)",
+  "text": "해가 떠서 밝은 때예요.\n밤과 반대인 말이에요.\n바르게 쓴 낱말은 무엇일까요?\n① 낮\n② 낟\n③ 낫\n④ 낚\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "①",
+   "accepted": [
+    "①",
+    "1",
+    "1번",
+    "낮"
+   ]
+  },
+  "hint1": "'○에 놀아요'처럼 뒤에 '에'를 붙여 읽어 보세요. 받침이 무슨 소리인지 들려요.",
+  "hint2": "'에'를 붙이면 [나데]나 [나께]로 소리 나지 않아요. 그래서 ②와 ④는 아니에요. [제]와 [세] 가운데 어느 소리가 나는지 들어 보세요.",
+  "after_hint2": "'에'를 붙인 소리 [나제]를 듣고 [제]를 내는 받침이 있는 보기를 고르기",
+  "solution": "'에'를 붙이면 [나제]로 소리 나요. [제]를 내는 받침은 ㅈ이라서 '낮'이 맞아요. 답은 ①이에요. ② '낟'은 [나데], ④ '낚'은 [나께]로 소리 나요. ③ '낫'은 [나세]로 소리 나고, 풀을 베는 연장을 뜻하는 다른 낱말이에요.",
+  "forbidden": [
+   "①"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-05",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-01]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "easy",
+  "problem_type": "뜻과 소리를 보고 받침이 있는 낱말 바르게 쓰기",
+  "targets_misconception": "받침을 소리가 비슷한 다른 받침으로 씀(꽃 → 꼳·꼿)",
+  "text": "'집 ○에 나가 놀아요.'\n○는 '바깥'이라는 뜻이고 [박]으로 소리 나요.\n○에 들어갈 한 글자를 바르게 써 보세요.\n(한 낱말로 써 주세요)",
+  "verify": "manual",
+  "verify_note": "한 글자이고 [박]으로 소리 나는 '바깥'이라는 뜻의 낱말은 '밖' 하나. '바깥'은 두 글자이고 소리가 달라 맞지 않음. 표기 변형 없음.",
+  "answer": {
+   "kind": "text",
+   "value": "밖",
+   "accepted": [
+    "밖"
+   ]
+  },
+  "hint1": "○ 뒤에 '에'를 붙여 소리 내 보세요. 받침 소리가 '에'로 넘어가요.",
+  "hint2": "'에'를 붙이면 [바게]보다 더 센 소리가 나요. 그러니 받침이 ㄱ은 아니에요. 그 센 소리를 내는 받침이 무엇인지 떠올려 보세요.",
+  "after_hint2": "[바께]의 센 소리를 듣고 ㅋ이 아니라 ㄲ 받침을 골라 한 글자로 쓰기",
+  "solution": "'에'를 붙이면 [바께]로 소리 나요. [께]를 내는 받침은 ㄲ이라서 '밖'이라고 써요. '박'은 [바게], '밬'은 [바케]로 소리 나서 틀려요. 답은 '밖'이에요.",
+  "forbidden": [
+   "밖"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-06",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-01]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "easy",
+  "problem_type": "뜻과 소리를 보고 받침이 있는 낱말 바르게 쓰기",
+  "targets_misconception": "받침을 소리가 비슷한 다른 받침으로 씀(꽃 → 꼳·꼿)",
+  "text": "다리 가운데 굽혀지는 곳이에요.\n[무릅]으로 소리 나요.\n이 낱말을 바르게 써 보세요.\n(한 낱말로 써 주세요)",
+  "verify": "manual",
+  "verify_note": "다리의 굽혀지는 곳이면서 [무릅]으로 소리 나는 낱말은 '무릎' 하나. 바른 표기는 하나.",
+  "answer": {
+   "kind": "text",
+   "value": "무릎",
+   "accepted": [
+    "무릎"
+   ]
+  },
+  "hint1": "뒤에 '을'을 붙여 '○○을 굽혀요'라고 말해 보세요. 받침 소리가 '을'로 넘어가요.",
+  "hint2": "'을'을 붙이면 [무르블]로 소리 나지 않아요. 그러니 받침이 ㅂ은 아니에요. 넘어간 소리를 듣고 그 소리를 내는 받침을 찾아보세요.",
+  "after_hint2": "[무르플]의 [플] 소리를 듣고 받침 ㅍ을 정해 두 글자로 쓰기",
+  "solution": "'을'을 붙이면 [무르플]로 소리 나요. [플]을 내는 받침은 ㅍ이라서 '무릎'이라고 써요. '무릅'은 [무르블]로 소리 나서 틀려요. 답은 '무릎'이에요.",
+  "forbidden": [
+   "무릎"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-07",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "medium",
+  "problem_type": "문장 속 [소리]로 적힌 낱말을 바르게 쓴 것 고르기",
+  "targets_misconception": "[치]·[지]로 소리 나면 받침 없이 '치·지'로 씀(같이 → 가치)",
+  "text": "'친구와 [가치] 놀아요.'\n[가치]를 바르게 쓴 것은 무엇일까요?\n① 가치\n② 갇이\n③ 갗이\n④ 같이\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "④",
+   "accepted": [
+    "④",
+    "4",
+    "4번",
+    "같이"
+   ]
+  },
+  "hint1": "[가치]는 '함께'라는 뜻이에요. 받침이 있는 글자가 '이'를 만나 소리가 바뀐 말이에요.",
+  "hint2": "[치]는 받침 ㅌ이나 ㅊ이 '이'를 만날 때 나는 소리예요. 받침 ㄷ은 '이'를 만나면 [지]로 소리 나니 ②는 아니에요.",
+  "after_hint2": "'함께'라는 뜻의 낱말이 받침 ㅌ과 ㅊ 가운데 무엇을 쓰는지 정하고, 받침 없이 쓴 ①과 견주어 고르기",
+  "solution": "'함께'라는 뜻의 [가치]는 '같다'와 같은 받침 ㅌ을 써서 '같이'라고 써요. ㅌ이 '이'를 만나 [치]로 소리 나요. 답은 ④예요. ① '가치'는 소리 나는 대로 받침을 빼고 쓴 것이고, ② '갇이'는 [가지], ③ '갗이'는 받침을 ㅊ으로 잘못 썼어요('갗'이라는 낱말은 없어요).",
+  "forbidden": [
+   "④"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-08",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "medium",
+  "problem_type": "문장 속 [소리]로 적힌 낱말을 바르게 쓴 것 고르기",
+  "targets_misconception": "[치]·[지]로 소리 나면 받침 없이 '치·지'로 씀(같이 → 가치)",
+  "text": "'새해 첫날 [해도지]를 봐요.'\n[해도지]를 바르게 쓴 것은 무엇일까요?\n① 해도지\n② 해돋이\n③ 해돚이\n④ 해돗이\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "②",
+   "accepted": [
+    "②",
+    "2",
+    "2번",
+    "해돋이"
+   ]
+  },
+  "hint1": "해가 산 위로 올라오는 것을 '해가 ○다'라고도 해요. 그 ○ 글자의 받침을 떠올려 보세요.",
+  "hint2": "받침 ㄷ도 ㅈ도 뒤에 '이'가 오면 [지]로 소리 나요. 그래서 소리만 듣고는 정하지 못해요. 받침을 아예 쓰지 않은 ①은 아니에요.",
+  "after_hint2": "'해가 ○다'의 낱말을 떠올려 받침이 ㄷ인지 ㅈ인지 정하고 보기를 고르기",
+  "solution": "해가 올라오는 것을 '해가 돋다'라고 해요. '돋-'의 받침 ㄷ이 '이'를 만나 [지]로 소리 나서 [해도지]가 돼요. 그래서 '해돋이'라고 써요. 답은 ②예요. ① '해도지'는 소리 나는 대로 쓴 것이고, ③ '해돚이'는 받침을 ㅈ으로, ④ '해돗이'는 ㅅ으로 잘못 썼어요('해돗이'는 [해도시]로 소리 나요).",
+  "forbidden": [
+   "②"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-09",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "medium",
+  "problem_type": "문장 속 [소리]로 적힌 낱말을 바르게 쓴 것 고르기",
+  "targets_misconception": "[치]·[지]로 소리 나면 받침 없이 '치·지'로 씀(같이 → 가치)",
+  "text": "'우리 [바치] 아주 커요.'\n[바치]를 바르게 쓴 것은 무엇일까요?\n① 바치\n② 밫이\n③ 밭이\n④ 받이\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "③",
+   "accepted": [
+    "③",
+    "3",
+    "3번",
+    "밭이"
+   ]
+  },
+  "hint1": "[바치]는 채소를 심어 기르는 땅에 '이'가 붙은 말이에요. 그 땅을 부르는 한 글자 낱말을 먼저 떠올려 보세요.",
+  "hint2": "'이' 말고 '에'를 붙여 소리 내면 받침 소리가 그대로 들려요. 받침 ㄷ을 쓰면 '이' 앞에서 [지]로 소리 나니 ④는 아니에요.",
+  "after_hint2": "그 땅을 부르는 낱말에 '에'를 붙여 [바테]를 듣고 받침 ㅌ을 정해 고르기",
+  "solution": "채소를 기르는 땅은 '밭'이에요. '에'를 붙이면 [바테]로 받침 ㅌ이 들리고, ㅌ이 '이'를 만나 [치]로 소리 나요. 그래서 '밭이'라고 써요. 답은 ③이에요. ① '바치'는 소리 나는 대로 쓴 것이고, ② '밫이'는 받침을 ㅊ으로 잘못 썼어요('밫'이라는 낱말은 없어요). ④ '받이'는 [바지]로 소리 나서 틀려요.",
+  "forbidden": [
+   "③"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-10",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "medium",
+  "problem_type": "문장 속 [소리]로 적힌 낱말을 바르게 쓴 것 고르기",
+  "targets_misconception": "받침을 뒤 글자로 넘겨 소리 나는 대로 씀(웃어요 → 우서요)",
+  "text": "'동생이 크게 [우서요].'\n[우서요]를 바르게 쓴 것은 무엇일까요?\n① 웃어요\n② 우서요\n③ 웃서요\n④ 욷어요\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "①",
+   "accepted": [
+    "①",
+    "1",
+    "1번",
+    "웃어요"
+   ]
+  },
+  "hint1": "기쁠 때 하는 이 일을 '○다'처럼 '-다'로 끝나게 바꾸어 말해 보세요. 받침이 어느 글자에 있는지 보여요.",
+  "hint2": "다른 예로 '접어요'는 [저버요]로 소리 나도 받침을 앞 글자에 써요. 받침을 앞에 쓰고 뒤 글자에 또 'ㅅ'을 쓰지는 않으니 ③은 아니에요.",
+  "after_hint2": "'-다' 꼴의 받침이 ㅅ인지 ㄷ인지 정하고, 받침을 빼고 쓴 보기와 견주어 고르기",
+  "solution": "기쁠 때 하는 일은 '웃다'예요. 받침 ㅅ이 뒤의 '어'로 넘어가 [우서요]로 소리 나지만, 쓸 때는 받침을 앞 글자에 두어 '웃어요'라고 써요. 답은 ①이에요. ② '우서요'는 소리 나는 대로 쓴 것이고, ③ '웃서요'는 ㅅ을 두 번 썼어요. ④ '욷어요'는 받침을 ㄷ으로 잘못 써서 [우더요]로 소리 나요.",
+  "forbidden": [
+   "①"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-11",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "medium",
+  "problem_type": "문장에서 소리 나는 대로 쓴 낱말을 바르게 고쳐 쓰기",
+  "targets_misconception": "받침을 뒤 글자로 넘겨 소리 나는 대로 씀(웃어요 → 우서요)",
+  "text": "'고양이가 생선을 머거요.'\n소리 나는 대로 써서 틀린 낱말이 하나 있어요.\n그 낱말을 바르게 고쳐 써 보세요.\n(한 낱말로 써 주세요)",
+  "verify": "manual",
+  "verify_note": "문장에서 소리 나는 대로 쓴 낱말은 '머거요' 하나('고양이가', '생선을'은 바름). 바른 꼴은 '먹어요' 하나. 띄어쓰기·마침표 붙은 입력은 채점기 정규화에 맡김.",
+  "answer": {
+   "kind": "text",
+   "value": "먹어요",
+   "accepted": [
+    "먹어요"
+   ]
+  },
+  "hint1": "세 낱말 가운데 '-다'로 끝나게 바꾸어 말할 수 있는 낱말을 찾아보세요.",
+  "hint2": "그 낱말을 '-다'로 바꾸어 말하면 첫 글자에 받침이 생겨요. 받침은 앞 글자에 쓰고, 뒤 글자는 'ㅇ'으로 시작해요.",
+  "after_hint2": "'-다' 꼴의 첫 글자 받침이 ㄱ임을 찾고, 받침을 앞 글자에 둔 꼴로 고쳐 쓰기",
+  "solution": "틀린 낱말은 '머거요'예요. '-다'로 바꾸면 '먹다'이니 받침 ㄱ이 첫 글자에 있어요. 받침을 앞에 두고 뒤 글자를 'ㅇ'으로 시작해 '먹어요'라고 써요. 답은 '먹어요'예요.",
+  "forbidden": [
+   "먹어요"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-12",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "medium",
+  "problem_type": "문장에서 소리 나는 대로 쓴 낱말을 바르게 고쳐 쓰기",
+  "targets_misconception": "받침을 뒤 글자로 넘겨 소리 나는 대로 씀(웃어요 → 우서요)",
+  "text": "'이 사과는 정말 마시써요.'\n소리 나는 대로 써서 틀린 낱말이 하나 있어요.\n그 낱말을 바르게 고쳐 써 보세요.\n(한 낱말로 써 주세요)",
+  "verify": "manual",
+  "verify_note": "문장에서 소리 나는 대로 쓴 낱말은 '마시써요' 하나('이', '사과는', '정말'은 바름). 바른 꼴은 '맛있어요' 하나.",
+  "answer": {
+   "kind": "text",
+   "value": "맛있어요",
+   "accepted": [
+    "맛있어요"
+   ]
+  },
+  "hint1": "틀리게 쓴 낱말을 찾고, 두 말이 붙어서 된 낱말인지 생각해 보세요.",
+  "hint2": "앞쪽은 음식을 먹을 때 혀로 느끼는 것을 뜻하는 한 글자 낱말이에요. 뒤쪽은 '-다'로 바꾸어 말해 받침을 찾아보세요.",
+  "after_hint2": "앞쪽 한 글자 낱말의 받침 ㅅ과 뒤쪽 '-다' 꼴의 받침 ㅆ을 각각 정해 네 글자로 고쳐 쓰기",
+  "solution": "틀린 낱말은 '마시써요'예요. 앞쪽은 혀로 느끼는 '맛'(받침 ㅅ)이고, 뒤쪽은 '있다'(받침 ㅆ)예요. 두 받침을 앞 글자에 두어 '맛있어요'라고 써요. 답은 '맛있어요'예요.",
+  "forbidden": [
+   "맛있어요"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-13",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "medium",
+  "problem_type": "네 문장 가운데 바르게 쓴 문장 고르기",
+  "targets_misconception": "받침을 뒤 글자로 넘겨 소리 나는 대로 씀(웃어요 → 우서요)",
+  "text": "바르게 쓴 문장은 무엇일까요?\n① 연필을 깍아요.\n② 손을 씻어요.\n③ 문을 다다요.\n④ 꼬리를 흔드러요.\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "②",
+   "accepted": [
+    "②",
+    "2",
+    "2번",
+    "손을 씻어요."
+   ]
+  },
+  "hint1": "문장마다 마지막 낱말을 보고, 받침이 있어야 할 글자를 찾아보세요.",
+  "hint2": "마지막 낱말을 '-다'로 바꾸면 받침이 보여요. ③은 '문을 ○다'로 바꾸면 첫 글자에 받침이 있으니 틀렸어요.",
+  "after_hint2": "①·②·④의 마지막 낱말을 '-다' 꼴로 바꾸어 받침이 바르게 쓰였는지 하나씩 판단하기",
+  "solution": "'씻다'의 받침 ㅅ을 앞 글자에 두었으니 ② '손을 씻어요.'가 바르게 쓴 문장이에요. 답은 ②예요. ① '깍아요'는 '깎다'의 받침 ㄲ을 ㄱ으로 써서 틀렸어요. ③ '다다요'는 '닫아요'를 소리 나는 대로 썼고, ④ '흔드러요'는 '흔들어요'를 소리 나는 대로 썼어요.",
+  "forbidden": [
+   "②",
+   "손을 씻어요."
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-14",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "medium",
+  "problem_type": "네 문장 가운데 바르게 쓴 문장 고르기",
+  "targets_misconception": "받침을 뒤 글자로 넘겨 소리 나는 대로 씀(웃어요 → 우서요)",
+  "text": "바르게 쓴 문장은 무엇일까요?\n① 숟가락을 놓아요.\n② 바다가 기퍼요.\n③ 그림을 그려써요.\n④ 아기가 우러요.\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "①",
+   "accepted": [
+    "①",
+    "1",
+    "1번",
+    "숟가락을 놓아요."
+   ]
+  },
+  "hint1": "문장 끝에 오는 낱말을 하나씩 보고, 받침이 앞 글자에 제대로 있는지 살펴보세요.",
+  "hint2": "②의 마지막 낱말을 '-다'로 바꾸면 첫 글자에 받침이 생겨요. 그러니 ②는 틀렸어요. 남은 문장도 같은 방법으로 살펴보세요.",
+  "after_hint2": "③·④의 마지막 낱말에서 받침이 빠졌는지 판단하고, ①의 낱말이 모두 바른지 확인하기",
+  "solution": "① '숟가락을 놓아요.'는 모두 바르게 썼어요. '숟가락'은 받침 ㄷ을 쓰는 낱말이에요. 답은 ①이에요. ② '기퍼요'는 '깊어요', ③ '그려써요'는 '그렸어요', ④ '우러요'는 '울어요'를 소리 나는 대로 써서 틀렸어요.",
+  "forbidden": [
+   "①",
+   "숟가락을 놓아요."
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-15",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "medium",
+  "problem_type": "네 문장 가운데 바르게 쓴 문장 고르기",
+  "targets_misconception": "받침을 뒤 글자로 넘겨 소리 나는 대로 씀(웃어요 → 우서요)",
+  "text": "바르게 쓴 문장은 무엇일까요?\n① 나무를 시머요.\n② 강아지가 지저요.\n③ 모자를 벗어요.\n④ 밥을 남겨써요.\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "③",
+   "accepted": [
+    "③",
+    "3",
+    "3번",
+    "모자를 벗어요."
+   ]
+  },
+  "hint1": "문장마다 마지막 낱말을 소리가 아니라 뜻을 생각하며 읽어 보세요.",
+  "hint2": "①의 마지막 낱말은 '땅에 나무를 ○다'라고 할 때의 말이에요. 그 첫 글자에는 받침이 있으니 ①은 틀렸어요.",
+  "after_hint2": "②·③·④의 마지막 낱말을 '-다' 꼴로 바꾸어 받침이 앞 글자에 있는지 하나씩 판단하기",
+  "solution": "③ '모자를 벗어요.'는 '벗다'의 받침 ㅅ을 앞 글자에 바르게 썼어요. 답은 ③이에요. ① '시머요'는 '심어요', ② '지저요'는 '짖어요', ④ '남겨써요'는 '남겼어요'를 소리 나는 대로 써서 틀렸어요.",
+  "forbidden": [
+   "③",
+   "모자를 벗어요."
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-16",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "medium",
+  "problem_type": "네 문장 가운데 바르게 쓴 문장 고르기",
+  "targets_misconception": "세게 들리는 대로 씀(국수 → 국쑤)",
+  "text": "바르게 쓴 문장은 무엇일까요?\n① 꿀이 아주 다라요.\n② 국쑤를 좋아해요.\n③ 눈물을 다까요.\n④ 동생이 줄을 잡아요.\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "④",
+   "accepted": [
+    "④",
+    "4",
+    "4번",
+    "동생이 줄을 잡아요."
+   ]
+  },
+  "hint1": "네 문장에서 받침이 있어야 하는 글자와 세게 들리는 글자를 찾아보세요.",
+  "hint2": "'국쑤'는 소리만 세게 날 뿐, 쓸 때는 센 글자로 쓰지 않아요. 그래서 ②는 틀렸어요. 나머지 문장의 받침도 살펴보세요.",
+  "after_hint2": "①·③·④의 마지막 낱말을 '-다' 꼴로 바꾸어 받침이 빠졌는지 하나씩 판단하기",
+  "solution": "④ '동생이 줄을 잡아요.'는 모두 바르게 썼어요. 답은 ④예요. ① '다라요'는 '달아요', ③ '다까요'는 '닦아요'를 소리 나는 대로 썼어요. ② '국쑤'는 [국쑤]로 소리 나도 '국수'라고 써야 해요.",
+  "forbidden": [
+   "④",
+   "동생이 줄을 잡아요."
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-17",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "hard",
+  "problem_type": "두 문장 (가)(나)의 [소리]를 둘 다 바르게 쓴 짝 고르기",
+  "targets_misconception": "[치]·[지]로 소리 나면 받침 없이 '치·지'로 씀(같이 → 가치)",
+  "text": "(가) 책상 [미치] 어두워요.\n(나) 엄마가 [오슬] 빨아요.\n두 [소리]를 다 바르게 쓴 것은 무엇일까요?\n① 미치 – 옷을\n② 밑이 – 오슬\n③ 밋이 – 옫을\n④ 밑이 – 옷을\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "④",
+   "accepted": [
+    "④",
+    "4",
+    "4번",
+    "밑이 – 옷을"
+   ]
+  },
+  "hint1": "(가)는 '아래쪽'이라는 뜻의 낱말에, (나)는 몸에 입는 것을 부르는 낱말에 무엇이 붙은 말인지 먼저 나누어 보세요.",
+  "hint2": "(가)와 (나) 모두 받침이 뒤로 넘어가 소리 난 말이에요. (가)에 '에'를 붙이면 [미테]로 소리 나니, 받침 ㅅ을 쓴 ③은 아니에요.",
+  "after_hint2": "(가)의 받침 ㅌ을 정하고 (나)의 받침을 따로 판단해 둘 다 맞는 짝을 고르기",
+  "solution": "(가) '아래쪽'이라는 뜻의 '밑'에 '이'가 붙어 [미치]로 소리 나요. '밑이'라고 써요. (나) 몸에 입는 '옷'에 '을'이 붙어 [오슬]로 소리 나요. '옷을'이라고 써요. 답은 ④예요. ①은 (가)를 소리 나는 대로 썼고, ②는 (나)를 소리 나는 대로 썼어요. ③은 (가)의 받침을 ㅅ, (나)의 받침을 ㄷ으로 잘못 썼어요.",
+  "forbidden": [
+   "④"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-18",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "hard",
+  "problem_type": "두 문장 (가)(나)의 [소리]를 둘 다 바르게 쓴 짝 고르기",
+  "targets_misconception": "받침을 뒤 글자로 넘겨 소리 나는 대로 씀(웃어요 → 우서요)",
+  "text": "(가) 언니가 머리를 [비서요].\n(나) 아빠는 [히미] 세요.\n두 [소리]를 다 바르게 쓴 것은 무엇일까요?\n① 빗어요 – 힘이\n② 빚어요 – 힘이\n③ 빗어요 – 히미\n④ 비서요 – 힘이\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "①",
+   "accepted": [
+    "①",
+    "1",
+    "1번",
+    "빗어요 – 힘이"
+   ]
+  },
+  "hint1": "(가)는 머리를 가지런히 하는 일을 '-다'로 바꾸어 보고, (나)는 '세다'의 앞말이 무엇인지 나누어 보세요.",
+  "hint2": "(나)는 받침이 '이'로 넘어가 소리 난 말이에요. 그러니 받침 없이 쓴 ③은 아니에요. (가)는 받침이 ㅅ인지 ㅈ인지 뜻으로 가려 보세요.",
+  "after_hint2": "(가)의 '-다' 꼴 받침을 뜻으로 정하고 (나)의 받침을 판단해 둘 다 맞는 짝을 고르기",
+  "solution": "(가) 머리를 가지런히 하는 일은 '빗다'예요. 받침 ㅅ을 앞에 두어 '빗어요'라고 써요. (나) 힘이 센 것이니 '힘'에 '이'가 붙어 '힘이'라고 써요. 답은 ①이에요. ② '빚어요'는 반죽으로 만두 같은 것을 만드는 다른 낱말이에요. ③은 (나)를, ④는 (가)를 소리 나는 대로 썼어요.",
+  "forbidden": [
+   "①"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-19",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "hard",
+  "problem_type": "짧은 글에서 틀리게 쓴 낱말 개수 고르기",
+  "targets_misconception": "받침을 뒤 글자로 넘겨 소리 나는 대로 씀(웃어요 → 우서요)",
+  "text": "'우리는 공원에서 놀아요. 친구가 공을 노피 차요. 나는 그 공을 바다요.'\n이 글에서 틀리게 쓴 낱말은 모두 몇 개일까요?\n① 1개\n② 2개\n③ 3개\n④ 4개\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "②",
+   "accepted": [
+    "②",
+    "2",
+    "2번",
+    "2개"
+   ]
+  },
+  "hint1": "글을 낱말로 나누고, 낱말마다 '-다' 꼴로 바꾸거나 다른 말을 붙여 받침을 확인해 보세요.",
+  "hint2": "'놀아요'는 '놀다'의 받침 ㄹ을 앞 글자에 썼으니 바르게 쓴 낱말이에요. 나머지 낱말도 하나씩 따져 보고 틀린 것을 세어 보세요.",
+  "after_hint2": "나머지 낱말을 하나씩 판정해 '노피'와 '바다요'를 찾고 틀린 낱말 수를 세기",
+  "solution": "틀린 낱말은 '노피'('높이'를 소리 나는 대로 씀)와 '바다요'('받아요'를 소리 나는 대로 씀) 두 개예요. '우리는', '공원에서', '놀아요', '친구가', '공을', '차요', '나는', '그'는 바르게 썼어요. 답은 ②예요. ①은 하나를 놓친 것이고, ③·④는 바르게 쓴 '놀아요' 같은 낱말까지 틀렸다고 센 것이에요.",
+  "forbidden": [
+   "②"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-kor-spelling-batchim-20",
+  "unit_id": "g1-kor-spelling-batchim",
+  "tag": "g1-kor-spelling-batchim",
+  "subject": "korean",
+  "grade": 1,
+  "standard": {
+   "code": "[2국04-02]",
+   "curriculum": "2022",
+   "unit": "받침이 있는 낱말 바르게 쓰기"
+  },
+  "difficulty": "hard",
+  "problem_type": "짧은 글에서 틀리게 쓴 낱말 개수 고르기",
+  "targets_misconception": "세게 들리는 대로 씀(국수 → 국쑤)",
+  "text": "'아침에 세수를 하고 바지를 이버요. 신발을 신꼬 무늘 열어요.'\n이 글에서 틀리게 쓴 낱말은 모두 몇 개일까요?\n① 1개\n② 2개\n③ 3개\n④ 4개\n(번호만 써 주세요)",
+  "verify": "manual",
+  "answer": {
+   "kind": "choice",
+   "value": "③",
+   "accepted": [
+    "③",
+    "3",
+    "3번",
+    "3개"
+   ]
+  },
+  "hint1": "글을 낱말로 나누어 보세요. 받침이 빠진 낱말과 세게 들리는 대로 쓴 낱말이 있는지 살펴보세요.",
+  "hint2": "'신꼬'는 쓸 때 센 글자로 쓰지 않는 말인데 센 글자로 썼으니 틀린 낱말이에요. 다른 낱말도 하나씩 살펴 세어 보세요.",
+  "after_hint2": "나머지 낱말을 하나씩 판정해 '이버요'와 '무늘'을 더 찾고 틀린 낱말 수를 세기",
+  "solution": "틀린 낱말은 '이버요'('입어요'), '신꼬'('신고'), '무늘'('문을') 세 개예요. '아침에', '세수를', '하고', '바지를', '신발을', '열어요'는 바르게 썼어요. 답은 ③이에요. ①·②는 틀린 낱말을 놓친 것이고, ④는 바르게 쓴 낱말을 틀렸다고 센 것이에요.",
+  "forbidden": [
+   "③"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ }
+]

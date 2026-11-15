@@ -223,16 +223,17 @@ describe('org http 모드(VITE_API_MODE=http + VITE_ORG_MODE=http, 명세 4.12)'
     expect(trials).toBe(2);
   });
 
-  it('처음부터 다시 체험: 옛 세트로 POST /auth/logout(쿠키 포함) 뒤 새 세트, 로그아웃이 실패해도 계속', async () => {
+  it('처음부터 다시 체험: 새 세트를 받은 뒤 옛 세트로 POST /auth/logout(쿠키 포함), 로그아웃이 실패해도 계속', async () => {
     orgEnv();
     const st = fakeStorage();
     st.map.set('ai-mentor-trial', JSON.stringify(trialBody(9)));
     server(() => json(500, { message: '서버 오류' }));
     const http = await load(st);
     await http.startNewTrial();
-    expect(calls.map((c) => `${c.method} ${c.url}`)).toEqual(['POST /auth/logout', 'POST /trial']);
-    expect(calls[0].headers['X-Trial-Id']).toBe('t-set9');
-    expect(calls[0].credentials).toBe('include');
+    // dev round2 #16: 새 세트를 먼저 받는다(POST /trial이 실패하면 옛 로그인·세트가 그대로 남게)
+    expect(calls.map((c) => `${c.method} ${c.url}`)).toEqual(['POST /trial', 'POST /auth/logout']);
+    expect(calls[1].headers['X-Trial-Id']).toBe('t-set9');
+    expect(calls[1].credentials).toBe('include');
     expect(JSON.parse(st.map.get('ai-mentor-trial')!).trialId).toBe('t-set1');
   });
 
@@ -268,5 +269,18 @@ describe('답 보내기(분수 칸 / 그 밖의 답 칸)', () => {
 
   it('숫자 한 칸·보기·낱말은 answer 글자로 보낸다', async () => {
     expect(await bodies((h) => h.submitAnswer('s1', 'p1', 0, 0, '②'))).toEqual([{ problemId: 'p1', answer: '②' }]);
+  });
+});
+
+describe('수다 보내기는 keepalive(명세 3.2 — 앱을 닫아도 요청이 끝까지 가게)', () => {
+  it('POST /sessions/{id}/chat·reply만 keepalive, 그 밖은 아님', async () => {
+    vi.stubGlobal('localStorage', fakeStorage());
+    const { keepaliveFor } = await import('./http');
+    expect(keepaliveFor('POST', '/sessions/s1/chat')).toBe(true);
+    expect(keepaliveFor('POST', '/sessions/s1/reply')).toBe(true);
+    expect(keepaliveFor('GET', '/sessions/s1/chat')).toBe(false);
+    expect(keepaliveFor('POST', '/sessions/s1/answer')).toBe(false);
+    expect(keepaliveFor('POST', '/sessions/s1/chat/end')).toBe(false);
+    vi.unstubAllGlobals();
   });
 });

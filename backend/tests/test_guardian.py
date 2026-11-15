@@ -96,7 +96,9 @@ async def test_red_alert_today_on_top(client, db_session):
     await db_session.flush()
     body = (await client.get(URL, headers=GUARDIAN)).json()
     assert set(body) == set(EMPTY)
-    assert body["alert"]["excerpt"] == "합성 발췌 둘"  # 오늘 가장 최근
+    # 11-15 04:30 성호: 아이 말은 보호자에게 가지 않는다 — 옛 행에 발췌가 남아 있어도 싣지 않음
+    assert body["alert"]["excerpt"] is None
+    assert datetime.fromisoformat(body["alert"]["created_at"]) == NOW  # 오늘 가장 최근
     assert body["alert"]["hotlines"] == ["109", "1388"]
     assert datetime.fromisoformat(body["alert"]["created_at"]) == NOW
     assert body["child_line"] is None  # crisis 세션은 한 줄 없음

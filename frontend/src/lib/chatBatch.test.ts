@@ -100,3 +100,33 @@ describe('수다 화면을 떠난 뒤 온 답', () => {
     expect(routeAfterLeftChat('wrap')).toBeNull();
   });
 });
+
+describe('앱이 가려지면 모은 말을 바로 보낸다(명세 3.2, 성호 11-15 — 1.5초 안 앱 종료 때 🔴 검사가 빠지던 것)', () => {
+  const fakeDoc = () => Object.assign(new EventTarget(), { visibilityState: 'visible' });
+  it('visibilitychange hidden → 1.5초 전에 바로 한 번 보낸다', async () => {
+    const { listenHidden } = await import('./chatBatch');
+    vi.useFakeTimers();
+    const sent: string[][] = [];
+    const b = createBatcher((t) => sent.push(t));
+    const win = new EventTarget(); const doc = fakeDoc();
+    const off = listenHidden(win, doc, () => b.flush());
+    b.push('조각1'); vi.advanceTimersByTime(500);
+    doc.visibilityState = 'hidden'; doc.dispatchEvent(new Event('visibilitychange'));
+    expect(sent).toEqual([['조각1']]);
+    vi.advanceTimersByTime(2000);
+    expect(sent).toHaveLength(1); // 타이머로 또 보내지 않는다
+    off(); vi.useRealTimers();
+  });
+  it('visible로 바뀔 때는 보내지 않고, pagehide면 보낸다. 뗀 뒤에는 안 부른다', async () => {
+    const { listenHidden } = await import('./chatBatch');
+    const calls: string[] = [];
+    const win = new EventTarget(); const doc = fakeDoc();
+    const off = listenHidden(win, doc, () => calls.push('hide'));
+    doc.dispatchEvent(new Event('visibilitychange'));
+    expect(calls).toEqual([]);
+    win.dispatchEvent(new Event('pagehide'));
+    expect(calls).toEqual(['hide']);
+    off(); win.dispatchEvent(new Event('pagehide'));
+    expect(calls).toEqual(['hide']);
+  });
+});

@@ -6,6 +6,7 @@
 """
 
 import logging
+import secrets
 import time
 import uuid
 from collections.abc import Awaitable, Callable, Sequence
@@ -28,7 +29,6 @@ from app.errors import ApiError
 from app.judge import contains_answer, judge, parse_value
 from app.llm import FIXED_REPLY, LLMAdapter, Reply, ReplyRequest, ScriptedAdapter, build_adapter
 from app.models import (
-    EXCERPT_MAX,
     MESSAGE_TTL,
     Alert,
     Message,
@@ -37,9 +37,9 @@ from app.models import (
     Session,
     Student,
 )
-from app.models_org import Account, SessionProblem
+from app.models_org import Account, SessionDifficulty, SessionProblem
 from app.pii import redact
-from app.prompts import PROMPT_VERSION, PromptInput, build_prompt, grade_band_now
+from app.prompts import PROMPT_VERSION, PromptInput, build_prompt, grade_band_now, subject_name
 from app.safety import check as red_keyword
 from app.state_machine import (
     ACTIVE,
@@ -55,7 +55,7 @@ from app.state_machine import (
     study_time_over,
     to_crisis,
 )
-from app.timeutil import as_utc, get_now, seoul_date
+from app.timeutil import as_utc, current_grade, get_now, seoul_date
 from app.trial import AI_DAILY_MAX, AI_HOURLY_MAX
 
 log = logging.getLogger(__name__)
@@ -135,10 +135,104 @@ async def _expire_row(db: AsyncSession, row: Session, now: datetime) -> None:
         await db.flush()
 
 
-async def _today_task(db: AsyncSession, student: Student) -> tuple[str, str] | None:
-    """(problem_id, source). 강사 지정이 먼저, 없으면 미해결 오개념 태그의 첫 문제."""
+# --- 고른 난이도대로(명세 4.13-7 D3, 11-14) ---------------------------------------------
+DIFF_ORDER = {
+    "easy": ("easy", "medium", "hard"),
+    "medium": ("medium", "easy", "hard"),
+    "hard": ("hard", "medium", "easy"),
+}
+DIFF_FROM_KO = {"초급": "easy", "중급": "medium", "고급": "hard"}
+SUBJECT_ORDER = {"math": 0, "korean": 1, "english": 2}
+
+
+def difficulty_of(problem: Problem | None) -> str:
+    """문제의 실제 난이도(D1 적재 값). 비어 있으면 medium — 기동 때 채우므로 운영에선 없다."""
+    return ((problem.standard or {}).get("difficulty") if problem else None) or "medium"
+
+
+async def _served_ids(db: AsyncSession, student_id: str) -> set[str]:
+    """이 학생에게 낸 적 있는 문제(세션 첫 문제 + 여러 문제 세션). 메시지는 72시간 만료라 쓰지 않는다."""
+    sids = select(Session.id).where(Session.student_id == student_id)
+    first = await db.scalars(
+        select(Session.problem_id).where(
+            Session.student_id == student_id, Session.problem_id.is_not(None)
+        )
+    )
+    more = await db.scalars(
+        select(SessionProblem.problem_id).where(SessionProblem.session_id.in_(sids))
+    )
+    return {p for p in [*first, *more] if p}
+
+
+async def _rotate_unit(db: AsyncSession, student_id: str, tags: list[str]) -> str | None:
+    """단원이 여럿이면 가장 오래전에 낸 단원(안 낸 단원 먼저), 같으면 수학→국어→영어(bb 검토)."""
+    if not tags:
+        return None
+    rows = await db.execute(
+        select(Problem.tag, func.max(Session.date))
+        .join(Problem, Problem.id == Session.problem_id)
+        .where(Session.student_id == student_id, Problem.tag.in_(tags))
+        .group_by(Problem.tag)
+    )
+    last = dict(rows.all())
+    subj = {}
+    for tag in tags:
+        p = await db.scalar(select(Problem).where(Problem.tag == tag).limit(1))
+        subj[tag] = SUBJECT_ORDER.get(
+            ((p.standard or {}).get("subject") if p else None) or "math", 9
+        )
+    return min(tags, key=lambda t: (last.get(t) or date.min, subj[t], t))
+
+
+async def _grade_tags(db: AsyncSession, student: Student, now: datetime) -> list[str]:
+    acc = await db.get(Account, student.id)
+    grade = current_grade(acc.grade, acc.created_at, now) if acc is not None else None
+    if grade is None:
+        return []
+    rows = (await db.scalars(select(Problem).where(Problem.grade == grade))).all()
+    return sorted({p.tag for p in rows if "subject" in (p.standard or {})})
+
+
+# 후보 중 무작위 1개(명세 4.13-7 D3-1). 테스트는 이 이름을 바꿔 끼워 고정한다.
+choose_problem: Callable[[Sequence[Problem]], Problem] = secrets.choice
+
+
+async def _pick_by_difficulty(
+    db: AsyncSession, tag: str, chosen: str, served: set[str]
+) -> tuple[str, str | None] | None:
+    rows = (await db.scalars(select(Problem).where(Problem.tag == tag).order_by(Problem.id))).all()
+    if not rows:
+        return None
+    for i, d in enumerate(DIFF_ORDER.get(chosen, DIFF_ORDER["medium"])):
+        cand = [p for p in rows if difficulty_of(p) == d and p.id not in served]
+        if cand:
+            return choose_problem(cand).id, (None if i == 0 else "nearby")
+    same = [p for p in rows if difficulty_of(p) == chosen] or rows  # 다 냈다 → 다시 풀기
+    return choose_problem(same).id, "repeat"
+
+
+async def _today_task(
+    db: AsyncSession,
+    student: Student,
+    chosen: str = "medium",
+    now: datetime | None = None,
+    picked: bool = False,
+) -> tuple[str, str, str | None] | None:
+    """(problem_id, source, note). 단원 = 강사 지정 단원 → 미해결 오개념 → 지금 학년 단원 → 분수 시드,
+    그 단원에서 고른 난이도 중 안 낸 문제(명세 4.13-7 D3·D3-2). note = 고른 대로 안 나간 이유(nearby/repeat).
+    picked = 아이가 난이도를 실제로 보냈나. 안 보낸 옛 경로·미리보기는 지정 문제 그대로(note instructor)."""
+    served = await _served_ids(db, student.id)
+    if student.today_task_problem_id and not picked:
+        return student.today_task_problem_id, "instructor", "instructor"
     if student.today_task_problem_id:
-        return student.today_task_problem_id, "instructor"
+        # D3-2(성호 11-15): 선생님은 단원만 정한다 — 지정 문제의 단원에서 고른 난이도로
+        assigned = await db.get(Problem, student.today_task_problem_id)
+        if assigned is not None and difficulty_of(assigned) == chosen and assigned.id not in served:
+            return assigned.id, "instructor", None  # 고른 난이도와 같으면 선생님이 고른 문제 먼저
+        got = await _pick_by_difficulty(db, assigned.tag, chosen, served) if assigned else None
+        if got is None:
+            return student.today_task_problem_id, "instructor", None
+        return got[0], "instructor", got[1]
     tags = (
         await db.scalars(
             select(Misconception.tag)
@@ -147,12 +241,23 @@ async def _today_task(db: AsyncSession, student: Student) -> tuple[str, str] | N
         )
     ).all()
     for tag in tags:
-        pid = await db.scalar(
-            select(Problem.id).where(Problem.tag == tag).order_by(Problem.id).limit(1)
-        )
-        if pid is not None:
-            return pid, "misconception"
-    return None
+        got = await _pick_by_difficulty(db, tag, chosen, served)
+        if got is not None:
+            return got[0], "misconception", got[1]
+    unit = await _rotate_unit(db, student.id, await _grade_tags(db, student, now or get_now()))
+    source = "grade"
+    if unit is None:  # 학년 단원이 없으면 분수 시드(은행 문제가 아닌 단원)
+        seed_tags = [
+            t
+            for t in TAG_NAME
+            if (p := await db.scalar(select(Problem).where(Problem.tag == t).limit(1))) is not None
+            and "subject" not in (p.standard or {})
+        ]
+        unit, source = await _rotate_unit(db, student.id, seed_tags), "seed"
+    if unit is None:
+        return None
+    got = await _pick_by_difficulty(db, unit, chosen, served)
+    return (got[0], source, got[1]) if got else None
 
 
 # --- 한 세션 여러 문제(SESSION_PROBLEMS > 1, 11-12) ------------------------------------
@@ -320,12 +425,22 @@ async def me_today(db: Db, now: Now, student: Child) -> dict[str, Any]:
 
 @router.post("/sessions")
 async def start_session(db: Db, now: Now, student: Child) -> dict[str, Any]:
+    return await begin_session(db, now, student, None)
+
+
+async def begin_session(
+    db: AsyncSession, now: datetime, student: Student, chosen: str | None
+) -> dict[str, Any]:
+    """오늘 세션을 연다(없으면 만든다). chosen = 고른 난이도 easy/medium/hard(명세 4.13-7 D2·D3).
+    None·이상한 값 = 아이가 안 고름 → medium으로 적고, 선생님 지정 문제는 그대로(D3-2)."""
+    picked = chosen in DIFF_ORDER
+    chosen = chosen if chosen is not None and picked else "medium"
     session = await _today_session(db, student, now)
     if session is not None and session.state in FINISHED:
         await db.commit()
         raise ApiError(409, "session_finished", "오늘은 이미 끝났어요. 내일 봐요.")
     if session is None:
-        task = await _today_task(db, student)
+        task = await _today_task(db, student, chosen, now, picked)
         if task is None:
             raise ApiError(409, "no_task", "오늘 할 문제가 없어요.")
         s = start(now)
@@ -344,6 +459,13 @@ async def start_session(db: Db, now: Now, student: Child) -> dict[str, Any]:
                 # 강사 지정은 세션으로 옮기고 비운다(명세 4.2 today_task)
                 student.today_task_problem_id = None
                 student.today_task_date = None
+                # 고른 난이도·고른 대로 안 나간 이유(명세 4.13-7 D2). id는 flush 때 생긴다
+                await db.flush()
+                db.add(
+                    SessionDifficulty(
+                        session_id=session.id, chosen=chosen, note=task[2], created_at=now
+                    )
+                )
         except IntegrityError:
             # 동시 요청이 먼저 오늘 세션을 만들었다 → 그 세션을 이어서(명세 4.6)
             # 세이브포인트 rollback이 만료시킨 속성을 비동기로 다시 읽는다
@@ -364,11 +486,17 @@ async def start_session(db: Db, now: Now, student: Child) -> dict[str, Any]:
 
 # --- 4. POST /sessions/{id}/messages -------------------------------------------------
 
-CRISIS_REPLY = "지금 한 말이 걱정돼서, 어른에게 알릴게"  # 부록 E. LLM 없이 고정
+# 부록 E ①. LLM 없이 고정, 고른 말투로(11-14 성호 A안 — 동작 그대로, 들어 주는 말로, 최종 문구 성호 승인)
+CRISIS_REPLY = (
+    "말해 줘서 정말 고마워. 그런 마음이 들 만큼 많이 힘들었구나. "
+    "혼자 견디지 않아도 돼. 지금 너를 도와줄 어른이랑 이어 줄게."
+)
+CRISIS_REPLY_POLITE = (
+    "말해 줘서 정말 고마워요. 그런 마음이 들 만큼 많이 힘들었겠어요. "
+    "혼자 견디지 않아도 돼요. 지금 도와줄 어른이랑 이어 줄게요."
+)
 HOTLINES = ["109", "1388"]  # 자살예방상담 · 청소년상담
-EXCERPT_TURNS = 3  # 🔴 문장 + 앞 2턴(뒤 턴은 아직 없다)
 RECENT_TURNS = 20  # 프롬프트에 넘기는 최근 턴 수. 6이면 수다 중 첫 이야기를 잊었다(11-13 시험)
-ROLE_LABEL = {"child": "아이", "mentor": "친구1"}
 
 
 @lru_cache
@@ -400,17 +528,6 @@ class MessageIn(BaseModel):
     def pieces(self) -> list[str]:
         raw = self.texts if self.texts is not None else [self.text or ""]
         return [t for t in raw if t.strip()]
-
-
-def build_excerpt(turns: Sequence[tuple[str, str]]) -> str:
-    """🔴 발췌: 최근 ±2턴(치환본)을 이어붙여 300자. 넘치면 앞을 자른다(🔴 문장이 끝에 있다).
-
-    팀 결정 ③(보호자 카드에서 발췌를 뺄지)이 나면 이 함수만 바꾼다.
-    """
-    joined = " / ".join(f"{ROLE_LABEL.get(r, r)}: {t}" for r, t in turns[-EXCERPT_TURNS:])
-    if len(joined) <= EXCERPT_MAX:
-        return joined
-    return "…" + joined[-(EXCERPT_MAX - 1) :]
 
 
 def _step(
@@ -664,7 +781,7 @@ async def _accept(
             verdict = judge(redacted, problem.answer)
         add_message("child", redacted, verdict)
         if trigger is not None:  # 답 생성 중이어도 즉시(늦게 온 답은 트랜잭션 2가 버린다)
-            return await _crisis(db, row, student, messages, add_message, trigger, now)
+            return await _crisis(db, row, student, add_message, trigger, now)
         verdicts.append(verdict)
 
     # 끊어 보낸 🔴 문장("죽고" / "싶어")은 조각 하나씩으로는 안 걸린다. LLM에는 답 안 된
@@ -673,7 +790,7 @@ async def _accept(
     if len(open_texts) > 1:
         trigger = red_keyword("\n".join(open_texts)) or red_keyword("".join(open_texts))
         if trigger is not None:
-            return await _crisis(db, row, student, messages, add_message, trigger, now)
+            return await _crisis(db, row, student, add_message, trigger, now)
 
     summary = turn_judge(verdicts)
     lease = await _claim_lease(db, row, now)
@@ -726,6 +843,7 @@ async def _reply(
         PromptInput(
             phase=phase,
             grade_band=await _grade_band_now(db, student, now),
+            subject=subject_name((problem.standard or {}).get("subject") if problem else None),
             honorific=student.honorific,
             style=student.style,
             polite=student.polite,
@@ -772,10 +890,22 @@ async def _reply(
             phase == State.STUDY.value
             and row.hint_level < 3
             and problem is not None
-            and contains_answer(reply.text, problem.answer, problem.text)
+            and contains_answer(reply.text, problem.answer, problem.text, problem.forbidden)
             and not await is_solved(db, row, problem)
         ):
-            log.warning("answer_leak 대체 session=%s source=%s", row.id, reply.source)
+            # 이유를 나눠 센다(명세 4.13 G6): 보기 글로 샌 것은 choice_text
+            kind = problem.answer.get("kind")
+            why = (
+                "choice_text"
+                if kind == "choice"
+                and not contains_answer(
+                    reply.text, {**problem.answer, "accepted": []}, problem.text
+                )
+                else kind
+            )
+            log.warning(
+                "answer_leak 대체 session=%s source=%s reason=leak:%s", row.id, reply.source, why
+            )
             reply = await _scripted().reply(req)
             await db.commit()  # is_solved 읽기 트랜잭션을 닫는다
     except Exception:
@@ -809,13 +939,7 @@ async def _save_reply(
     if row.state in FINISHED:
         crisis = None
         if row.state == State.CRISIS.value:
-            excerpt = await db.scalar(
-                select(Alert.excerpt)
-                .where(Alert.session_id == row.id)
-                .order_by(Alert.created_at.desc())
-                .limit(1)
-            )
-            crisis = {"excerpt": excerpt, "hotlines": list(HOTLINES)}
+            crisis = {"excerpt": None, "hotlines": list(HOTLINES)}  # 아이 말은 싣지 않음(11-15)
         await db.commit()
         log.info("reply dropped session=%s state=%s", row.id, row.state)
         return _out(row, None, claim.verdict, crisis=crisis)
@@ -860,15 +984,14 @@ async def _crisis(
     db: AsyncSession,
     row: Session,
     student: Student,
-    messages: Sequence[Message],
     add_message: Callable[[str, str], None],
     trigger: str,
     now: datetime,
 ) -> dict[str, Any]:
-    """🔴 전이 7. LLM 없이 flag·알림 행·발췌를 같은 트랜잭션에 쓴다(명세 4.2·4.3)."""
+    """🔴 전이 7. LLM 없이 flag·알림 행을 같은 트랜잭션에 쓴다(명세 4.2·4.3).
+    아이 말(발췌)은 만들지도 저장하지도 않는다 — 11-15 04:30 성호, 11-10·11-11을 바꿈."""
     phase = row.state
     new = to_crisis(_row_state(row))
-    excerpt = build_excerpt([(m.role, m.text_redacted) for m in messages])
     row.state = new.state.value
     row.deadline_at = new.deadline_at
     row.flag = "red"
@@ -876,18 +999,17 @@ async def _crisis(
     row.ended_at = now
     row.replying_until = None  # 생성 중이던 답은 트랜잭션 2에서 버려진다
     db.add(
-        Alert.new(
-            session_id=row.id, student_id=student.id, trigger=trigger, excerpt=excerpt, now=now
-        )
+        Alert.new(session_id=row.id, student_id=student.id, trigger=trigger, excerpt="", now=now)
     )
-    add_message("mentor", CRISIS_REPLY)
+    fixed = CRISIS_REPLY_POLITE if student.polite else CRISIS_REPLY
+    add_message("mentor", fixed)
     await db.commit()
-    log.warning("crisis session=%s phase=%s len=%d", row.id, phase, len(excerpt))
+    log.warning("crisis session=%s phase=%s", row.id, phase)
     return _out(
         row,
-        CRISIS_REPLY,
+        fixed,
         None,
-        crisis={"excerpt": excerpt, "hotlines": list(HOTLINES)},
+        crisis={"excerpt": None, "hotlines": list(HOTLINES)},
         source="fixed",
     )
 
@@ -900,6 +1022,25 @@ TAG_NAME = {
     "nat-div-nat": "자연수 ÷ 자연수",
     "frac-div-frac-same": "분모가 같은 분수의 나눗셈",
     "frac-div-frac-diff": "분모가 다른 분수의 나눗셈",
+    # 명세 4.13 학년별 시범 단원(G4). 학년을 이름에 붙여 강사가 섞어 고르지 않게
+    "g4-math-large-numbers": "큰 수 (초4)",
+    "g8-kor-parts-of-speech": "품사 (중2)",
+    "g10-eng-relative-clauses": "관계사 (고1)",
+    # 명세 4.13-7 D5(11-14, bb): 빈 학년 7개 × 수학·국어
+    "g1-math-add-sub": "덧셈과 뺄셈 (초1)",
+    "g1-kor-spelling-batchim": "받침 있는 낱말 (초1)",
+    "g2-math-times-tables": "곱셈구구 (초2)",
+    "g2-kor-describing-words": "흉내 내는 말 (초2)",
+    "g3-math-division": "나눗셈 (초3)",
+    "g3-kor-dictionary-base-form": "국어사전 찾기 (초3)",
+    "g7-math-prime-factorization": "소인수분해 (중1)",
+    "g7-kor-vocabulary-origin": "고유어·한자어·외래어 (중1)",
+    "g9-math-quadratic-equations": "이차방정식 (중3)",
+    "g9-kor-sentence-structure": "문장의 짜임 (중3)",
+    "g11-math-exponent-log": "지수와 로그 (고2)",
+    "g11-kor-honorifics": "높임 표현 (고2)",
+    "g12-math-derivative": "미분 (고3)",
+    "g12-kor-passive-causative": "피동·사동 (고3)",
 }
 QUIZ_COUNT = 3
 STUCK_FALLBACK = "막힌 곳 기록 없음"  # 부록 E 요약 ②: 문제가 없을 때
@@ -1031,19 +1172,45 @@ async def _quiz_options(db: AsyncSession, problem: Problem | None) -> list[dict[
 
 
 SUMMARY_SYSTEM = (
-    "너는 아이의 오늘 수학 풀이 기록을 보고, 어디서 막혔는지 보호자와 선생님이 읽을 "
+    "너는 아이의 오늘 풀이 기록을 보고, 어디서 막혔는지 보호자와 선생님이 읽을 "
     "한 구절(20자 안팎)을 쓴다. 정답이나 숫자 답을 쓰지 않는다. 이름을 쓰지 않는다. "
     "아이가 낸 틀린 답만 주어진다."
 )
 
 
+def plain_unit(name: str) -> str:
+    """아이·보호자 문장용 단원 이름 — 강사용 학년 표시 「 (초4)」를 뗀다(명세 4.13 G6)."""
+    return name.split(" (")[0]
+
+
+def stuck_template(unit: str, n: int, solved: bool) -> str:
+    """보기·낱말 문제의 막힌 곳(아이 글을 LLM에 넣지 않는다, TK-84 ⑧)."""
+    return (
+        f"{unit} 문제를 {n}번 고쳐 풀어 맞혔어요" if solved else f"{unit} 문제에서 {n}번 막혔어요"
+    )
+
+
 async def _stuck_phrase(
-    llm: LLMAdapter, student: Student, row: Session, problem: Problem | None, texts: list[str]
+    llm: LLMAdapter,
+    student: Student,
+    row: Session,
+    problem: Problem | None,
+    texts: list[str],
+    solved: bool = False,
 ) -> str:
     """요약 ② 막힌 곳. 입력은 저장 판정이 wrong인 study 조각만(수다·정답 제외), 실패하면 템플릿."""
     if problem is None:
         return STUCK_FALLBACK
     answer = problem.answer
+    if answer.get("kind") in (
+        "choice",
+        "text",
+    ):  # 명세 4.13 G6: 아이 글 → LLM → 보호자 경로를 만들지 않는다
+        return (
+            stuck_template(plain_unit(_tag_name(problem.tag)), len(texts), solved)
+            if texts
+            else STUCK_NO_WRONG
+        )
     answer_value = parse_value(str(answer.get("value", "")))
     # texts = 저장 판정 "wrong"(숫자·분수 형식의 study 답). 수다는 판정을 저장하지 않는다.
     # exact 문제에서 값만 같은 표기(6/16 등)도 정답 값이라 뺀다.
@@ -1097,23 +1264,28 @@ async def _ensure_bridge(
             .order_by(Misconception.first_wrong_date, Misconception.tag)
         )
     ).all()
-    line3 = "미해결: " + ", ".join(_tag_name(t) for t in open_tags) if open_tags else "미해결 없음"
+    line3 = (
+        "미해결: " + ", ".join(plain_unit(_tag_name(t)) for t in open_tags)
+        if open_tags
+        else "미해결 없음"
+    )
     prog = await progress(db, row)
     if prog.total > 1:  # 여러 문제 세션(SESSION_PROBLEMS)
         line1 = (
-            f"{name} 문제 {prog.total}개 중 {prog.solved}개, "
+            f"{plain_unit(name)} 문제 {prog.total}개 중 {prog.solved}개, "
             f"힌트 {prog.hints}번(풀이 보기 {prog.assisted}개)"
         )
     else:
-        line1 = (
-            f"{name} 문제 1개, 힌트 {row.hint_level}단계에서 {'정답' if solved else '풀이 보기'}"
-        )
+        line1 = f"{plain_unit(name)} 문제 1개, 힌트 {row.hint_level}단계에서 {'정답' if solved else '풀이 보기'}"
     row.study_summary = [
         line1,
-        await _stuck_phrase(llm, student, row, problem, await _judged_texts(db, row, "wrong")),
+        await _stuck_phrase(
+            llm, student, row, problem, await _judged_texts(db, row, "wrong"), solved
+        ),
         line3,
     ]
-    row.guardian_line = f"오늘 {name}{_obj_particle(name)} 다시 풀었어요."
+    kid_name = plain_unit(name)  # 아이·보호자 문장에는 학년 표시 없이
+    row.guardian_line = f"오늘 {kid_name}{_obj_particle(kid_name)} 다시 풀었어요."
     await db.flush()
 
 

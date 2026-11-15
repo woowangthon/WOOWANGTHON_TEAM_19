@@ -1,4 +1,6 @@
-// 학생 첫 실행 2/2 — 캐릭터(멘토) 고르기. "내 멘토" 탭에서 바꿀 때도 같은 화면(탭 보임).
+// 학생 「내 멘토」 탭 — 가진 띠로 바꾸고, 없는 띠는 칭찬 도장으로 산다(성호 11-14, 명세 4.12-5).
+// 11-14: 띠·말투는 가입 때 고른다(MentorPicker). 말투 바꾸기는 설정 → 멘토 말투. 첫 실행 캐릭터 고르기는 가입 때 멘토가 없던 옛 계정만.
+// (아래는 11-11 기록)
 // 11-11: 말투(스타일·호칭·반말/존댓말)는 첫 실행에서만 이 화면에서 고른다. 그 뒤엔 「내 멘토」 오른쪽 위
 //        말풍선 버튼 → 멘토 설정 시트에서만 바꾼다(전체 설정에는 넣지 않음). 탭 화면은 캐릭터·옷장만.
 // v0.4 (11-10 회의): 캐릭터를 앞뒤로 겹친 카드로 넘기기(가운데 크게, 뒤 카드는 작게) + 아래 빈 공간은 "옷장"
@@ -11,7 +13,7 @@ import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
 import { LoadError, Sheet } from '../../components/Common';
 import { Mascot, type Mood } from '../../components/Mascot';
-import { CosmeticArt, StampChip } from '../../components/Seed';
+import { CosmeticArt, StampChip, hasCosmeticArt, missingArtLine } from '../../components/Seed';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { useMentor } from '../../state/mentor';
@@ -29,11 +31,11 @@ const SPEECHES: Speech[] = ['반말', '존댓말'];
 
 export function StudentCharacter({ editMode = false }: { editMode?: boolean }) {
   const nav = useNavigate();
-  const { setting: saved, save, say } = useMentor();
+  const { setting: saved, save, say, buy } = useMentor();
   const { me } = useAuth();
   const [setting, setSetting] = useState<MentorSetting>({ style: '같이 풀어주는', title: '형', speech: '반말', animal: 'horse' });
   const [savedNow, setSavedNow] = useState(false);
-  const [talkOpen, setTalkOpen] = useState(false);
+  const [buying, setBuying] = useState<Animal | null>(null);
   // 넘겨 본 띠(아직 저장 전)는 말투 시트를 저장해 saved가 바뀌어도 되돌리지 않는다
   const animalTouched = useRef(false);
   useEffect(() => { if (saved) setSetting((cur) => ({ ...saved, animal: animalTouched.current ? cur.animal : saved.animal })); }, [saved]);
@@ -48,27 +50,38 @@ export function StudentCharacter({ editMode = false }: { editMode?: boolean }) {
   const idx = Math.max(0, ANIMALS.indexOf(setting.animal));
   const go = (d: number) => { animalTouched.current = true; set({ animal: ANIMALS[(idx + d + ANIMALS.length) % ANIMALS.length] }); };
   const style = STYLES.find((s) => s.style === setting.style)!;
+  // 가진 띠(서버). mock·옛 계정처럼 목록이 없으면 모두 가진 것으로(사기 없음)
+  const owned = (a: Animal) => !editMode || !saved?.ownedAnimals || saved.ownedAnimals.length === 0 || saved.ownedAnimals.includes(a);
+  const shown = setting.animal;
+  const isCurrent = editMode && saved?.animal === shown;
+  const price = saved?.animalPrice ?? 5;
+  const label = busy ? '저장하는 중…' : savedNow && isCurrent ? say('저장했어 ✓', '저장했어요 ✓')
+    : !editMode ? (setting.speech === '존댓말' ? '이 친구로 할래요' : '이 친구로 할래')
+    : isCurrent ? say('지금 함께하는 멘토야', '지금 함께하는 멘토예요')
+    : owned(shown) ? say('이 친구로 바꿀래', '이 친구로 바꿀래요') : say(`도장 ${price}개로 데려오기`, `도장 ${price}개로 데려오기`);
+  const onMain = () => (editMode && !owned(shown) ? setBuying(shown) : submit());
 
   return (
     <Frame title={editMode ? '내 멘토' : '캐릭터 고르기'} back={editMode ? undefined : '/student/onboarding/promise'} exit={editMode}
-      right={editMode ? <button className="icon-btn" aria-label="멘토 말투 설정" onClick={() => setTalkOpen(true)}><Icon name="talk" /></button> : <span className="pill pill--mint">2/2</span>}
+      right={editMode ? undefined : <span className="pill pill--mint">2/2</span>}
       tabs={editMode ? 'student' : undefined}
-      actions={<><LoadError error={error} /><button className="btn btn--primary" disabled={busy} onClick={submit}>{busy ? '저장하는 중…' : savedNow ? say('저장했어 ✓', '저장했어요 ✓') : editMode ? say('이 친구로 바꿀래', '이 친구로 바꿀래요') : (setting.speech === '존댓말' ? '이 친구로 할래요' : '이 친구로 할래')}</button></>}>
+      actions={<><LoadError error={error} /><button className="btn btn--primary" disabled={busy || isCurrent} onClick={onMain}>{label}</button></>}>
       <Stack index={idx} onMove={go} labels={ANIMALS.map((a) => ANIMAL_LABEL[a])}>
         {ANIMALS.map((a) => (
           <div key={a} className="stack-card__inner">
             <Mascot animal={a} mood={a === setting.animal ? style.mood : 'wave'} size={132} outfit={editMode ? me?.outfit : null} />
             <strong>{ANIMAL_LABEL[a]}</strong>
+            {editMode && !owned(a) && <span className="pill"><Icon name="lock" size={12} /> 도장 {price}</span>}
           </div>
         ))}
       </Stack>
 
       {!editMode && <TalkPicker setting={setting} onChange={set} />}
-      {editMode && <p className="small muted" style={{ textAlign: 'center' }}>{say('말투는 오른쪽 위 말풍선 버튼에서 바꿀 수 있어', '말투는 오른쪽 위 말풍선 버튼에서 바꿀 수 있어요')}</p>}
+      {editMode && <p className="small muted" style={{ textAlign: 'center' }}>{say('말투는 설정에서 바꿀 수 있어', '말투는 설정에서 바꿀 수 있어요')}</p>}
       {/* 첫 실행에는 잠긴 옷장을 보이지 않는다(R11, 시선 분산) — 「내 멘토」에서만 */}
       {editMode && <Wardrobe preview={false} animal={setting.animal} />}
       {/* 아직 저장한 멘토가 없으면(체험 계정 등) 화면에 보이는 값을 바탕으로 */}
-      {talkOpen && <TalkSheet saved={saved ?? setting} onSave={async (t) => { await save({ ...(saved ?? setting), ...t }); setTalkOpen(false); }} onClose={() => setTalkOpen(false)} />}
+      {buying && <BuyAnimalSheet animal={buying} price={price} onBuy={async () => { await buy(buying); setBuying(null); }} onClose={() => setBuying(null)} />}
     </Frame>
   );
 }
@@ -76,7 +89,7 @@ export function StudentCharacter({ editMode = false }: { editMode?: boolean }) {
 type Talk = Pick<MentorSetting, 'style' | 'title' | 'speech'>;
 
 /** 말투 고르기: 스타일 3 + 미리 듣기 말풍선 + 호칭 + 반말/존댓말. 첫 실행 화면과 멘토 설정 시트가 같이 쓴다 */
-function TalkPicker({ setting, onChange }: { setting: Talk; onChange: (patch: Partial<Talk>) => void }) {
+export function TalkPicker({ setting, onChange }: { setting: Talk; onChange: (patch: Partial<Talk>) => void }) {
   const style = STYLES.find((s) => s.style === setting.style)!;
   return (
     <>
@@ -101,17 +114,58 @@ function TalkPicker({ setting, onChange }: { setting: Talk; onChange: (patch: Pa
   );
 }
 
-/** 「내 멘토」 전용 설정 시트. 저장을 눌러야 바뀐다(닫으면 그대로) */
-function TalkSheet({ saved, onSave, onClose }: { saved: MentorSetting; onSave: (t: Talk) => Promise<void>; onClose: () => void }) {
-  const [talk, setTalk] = useState<Talk>({ style: saved.style, title: saved.title, speech: saved.speech });
-  const sayT = (c: string, p: string) => (talk.speech === '존댓말' ? p : c); // T2: 시트에서 고르는 말투를 바로 따른다
+/** 설정 → 멘토 말투(성호 11-14: 나중에 바꿀 때는 설정에서). 저장을 눌러야 바뀐다 */
+export function TalkSettings() {
+  const { setting: saved, save } = useMentor();
+  const nav = useNavigate();
+  const [talk, setTalk] = useState<Talk | null>(null);
+  useEffect(() => { if (saved && !talk) setTalk({ style: saved.style, title: saved.title, speech: saved.speech }); }, [saved, talk]);
   const { run, busy, error } = useAction();
+  const [done, setDone] = useState(false);
+  const sayT = (c: string, p: string) => (talk?.speech === '존댓말' ? p : c); // 고르는 말투를 바로 따른다
   return (
-    <Sheet title="멘토 말투 설정" onClose={onClose}>
-      <TalkPicker setting={talk} onChange={(p) => setTalk({ ...talk, ...p })} />
-      {error && <p className="hint hint--bad">{error}</p>}
-      <button className="btn btn--primary" disabled={busy} onClick={() => run(() => onSave(talk))}>{sayT('이 말투로 할래', '이 말투로 할래요')}</button>
+    <Frame title="멘토 말투" back="/settings"
+      actions={<><LoadError error={error} /><button className="btn btn--primary" disabled={busy || !talk || !saved} onClick={() => run(async () => { await save({ ...saved!, ...talk! }); setDone(true); window.setTimeout(() => nav('/settings'), 700); })}>{done ? sayT('바꿨어 ✓', '바꿨어요 ✓') : sayT('이 말투로 할래', '이 말투로 할래요')}</button></>}>
+      {talk ? <TalkPicker setting={talk} onChange={(p) => { setDone(false); setTalk({ ...talk, ...p }); }} /> : <p className="small muted">{saved === null ? '멘토를 먼저 골라 주세요.' : '불러오는 중…'}</p>}
+    </Frame>
+  );
+}
+
+/** 없는 띠 데려오기(칭찬 도장). 사면 가진 띠가 되고, 「이 친구로 바꿀래」로 바꾼다 */
+function BuyAnimalSheet({ animal, price, onBuy, onClose }: { animal: Animal; price: number; onBuy: () => Promise<void>; onClose: () => void }) {
+  const { say } = useMentor();
+  const { run, busy, error } = useAction();
+  // X4: 시트를 열 때마다 도장 수를 다시 읽어, 모자라면 누르기 전에 알린다(서버 409는 그대로)
+  const shop = useAsync(() => api.getStudentShop());
+  const stamps = shop.data?.stamps ?? null;
+  const short = stamps === null ? 0 : Math.max(0, price - stamps);
+  return (
+    <Sheet title={`${ANIMAL_LABEL[animal]} 데려오기`} onClose={onClose}>
+      <div className="row" style={{ justifyContent: 'center' }}><Mascot animal={animal} mood="wave" size={96} /></div>
+      <p className="small" style={{ textAlign: 'center' }}>{say(`칭찬 도장 ${price}개로 데려올 수 있어. 데려오면 언제든 바꿀 수 있어.`, `칭찬 도장 ${price}개로 데려올 수 있어요. 데려오면 언제든 바꿀 수 있어요.`)}</p>
+      {stamps !== null && <p className="small" style={{ textAlign: 'center' }}>{say(`지금 도장 ${stamps}개`, `지금 도장 ${stamps}개`)}{short > 0 && ` · ${say(`${short}개 더 모으면 데려올 수 있어`, `${short}개 더 모으면 데려올 수 있어요`)}`}</p>}
+      <LoadError error={error} />
+      <button className="btn btn--primary" disabled={busy || short > 0 || stamps === null} onClick={() => run(onBuy)}><StampChip n={price} /> {say('데려올래', '데려올래요')}</button>
     </Sheet>
+  );
+}
+
+/** 가입 때 멘토 고르기(성호 11-14): 띠 넘기기 + 말투(스타일·호칭·반말/존댓말) */
+export function MentorPicker({ value, onChange }: { value: MentorSetting; onChange: (v: MentorSetting) => void }) {
+  const idx = Math.max(0, ANIMALS.indexOf(value.animal));
+  const style = STYLES.find((s) => s.style === value.style)!;
+  return (
+    <>
+      <Stack index={idx} onMove={(d) => onChange({ ...value, animal: ANIMALS[(idx + d + ANIMALS.length) % ANIMALS.length] })} labels={ANIMALS.map((a) => ANIMAL_LABEL[a])}>
+        {ANIMALS.map((a) => (
+          <div key={a} className="stack-card__inner">
+            <Mascot animal={a} mood={a === value.animal ? style.mood : 'wave'} size={132} />
+            <strong>{ANIMAL_LABEL[a]}</strong>
+          </div>
+        ))}
+      </Stack>
+      <TalkPicker setting={value} onChange={(p) => onChange({ ...value, ...p })} />
+    </>
   );
 }
 
@@ -137,14 +191,18 @@ function Stack({ index, onMove, labels, children }: { index: number; onMove: (d:
 }
 
 /** 아래 빈 공간 = 옷장. 가진 옷은 바로 입히고, 없는 옷은 가격을 보여 주고 상점으로 */
-function Wardrobe({ preview, animal }: { preview: boolean; animal: Animal }) {
+export function Wardrobe({ preview, animal }: { preview: boolean; animal: Animal }) {
   const nav = useNavigate();
   const { refresh } = useAuth();
+  const { say } = useMentor();
   const { data, setData } = useAsync(() => api.getStudentShop());
   const { run, busy } = useAction();
   if (!data) return null;
   const outfits = data.cosmetics.filter((c) => c.kind === 'outfit');
   const equipped = outfits.find((c) => c.equipped)?.id ?? null;
+  // 입은 옷이 이 띠 그림으로 아직 없으면 말없이 기본 모습이 되지 않게 사실대로 한 줄(명세 4.12 5-2-1, 성호 11-14)
+  const worn = outfits.find((c) => c.equipped);
+  const missing = !preview && worn && !hasCosmeticArt(animal, 'outfit', worn.id) ? say(missingArtLine(worn.name, false), missingArtLine(worn.name, true)) : null;
   const put = (id: string | null) => run(async () => { setData(await api.equipOutfit(id)); await refresh(); });
   return (
     <section className="wardrobe" aria-label="옷장">
@@ -153,17 +211,20 @@ function Wardrobe({ preview, animal }: { preview: boolean; animal: Animal }) {
         {preview ? <span className="small muted">칭찬 도장을 모으면 옷을 입힐 수 있어</span>
           : <button className="seed-link" onClick={() => nav('/student/shop')}><StampChip n={data.stamps ?? 0} /> 상점 <Icon name="chevron" size={14} /></button>}
       </div>
+      {missing && <p className="small muted" role="status">{missing}</p>}
       <div className="chip-row chip-row--scroll wardrobe__row">
         {!preview && (
-          <button className={'ward' + (equipped === null ? ' ward--on' : '')} disabled={busy} onClick={() => put(null)}>
+          <button className={'ward' + (equipped === null ? ' ward--on' : '')} aria-pressed={equipped === null} disabled={busy} onClick={() => put(null)}>
             <span className="ward__art ward__art--none">기본</span><span className="small">기본</span>
           </button>
         )}
         {outfits.map((c) => (
-          <button key={c.id} className={'ward' + (c.equipped ? ' ward--on' : '') + (c.owned ? '' : ' ward--locked')} disabled={busy || preview}
+          <button key={c.id} className={'ward' + (c.equipped ? ' ward--on' : '') + (c.owned ? '' : ' ward--locked')} aria-pressed={c.equipped} disabled={busy || preview}
             onClick={() => (c.owned ? put(c.equipped ? null : c.id) : nav('/student/shop'))}>
             <CosmeticArt animal={animal} kind="outfit" id={c.id} name={c.name} size={56} />
             <span className="small">{c.owned ? c.name : <><Icon name="lock" size={12} /> 도장 {c.price}</>}</span>
+            {/* 색(테두리)만으로 알리지 않는다 — 상점처럼 글자로도 */}
+            {c.equipped && <strong className="small">입는 중</strong>}
           </button>
         ))}
       </div>

@@ -281,6 +281,56 @@ EARLY_ADULT_CASES = {
 }
 
 
+JUDGE_BACKEND = (
+    "cli"  # cli = 로컬 Claude 구독(claude -p), api = Anthropic API(크레딧). --judge로 바꾼다
+)
+_CLI_CWD = (
+    Path(os.environ.get("TMPDIR", "/tmp")) / "chingu1_judge"
+)  # 프로젝트 CLAUDE.md를 안 읽게 빈 폴더
+
+
+async def judge_chat_cli(
+    child: str, reply: str, goal: tuple[str, str] | None = None
+) -> dict[str, Any] | None:
+    """채점을 로컬 Claude 구독으로(11-14 성호). API 채점과 같은 기준·같은 형식.
+    도구·MCP·스킬·설정을 끄고 시스템 프롬프트를 채점 기준으로 바꿔 맥락을 ~1천 토큰으로 줄인다.
+    실패하면 한 번 더, 그래도 실패하면 None(채점 실패로 따로 센다)."""
+    system = JUDGE_SYSTEM + (
+        f" 이 상황에서 좋은 멘토: {goal[0]} / 나쁜 멘토: {goal[1]}. meets_goal: 좋은 쪽에 가까우면 true."
+        if goal
+        else " meets_goal: 상황 기준이 없으니 true."
+    )
+    _CLI_CWD.mkdir(parents=True, exist_ok=True)
+    env = {k: v for k, v in os.environ.items() if k not in ("ANTHROPIC_API_KEY", "LLM_API_KEY")}
+    args = [
+        "claude", "-p", f"아이: {child}\n멘토: {reply}",
+        "--model", "opus",
+        "--system-prompt", system,
+        "--json-schema", json.dumps(JUDGE_SCHEMA, ensure_ascii=False),
+        "--tools", "",
+        "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}',
+        "--disable-slash-commands", "--setting-sources", "",
+        "--no-session-persistence", "--output-format", "json",
+    ]  # fmt: skip
+    for _ in range(2):
+        proc = await asyncio.create_subprocess_exec(
+            *args,
+            cwd=_CLI_CWD,
+            env=env,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        try:
+            out, _err = await asyncio.wait_for(proc.communicate(), timeout=180)
+            got = json.loads(out.decode("utf-8")).get("structured_output")
+            if isinstance(got, dict) and "friend_like" in got:
+                return got
+        except (TimeoutError, json.JSONDecodeError, ValueError):
+            if proc.returncode is None:
+                proc.kill()
+    return None
+
+
 async def judge_chat(
     client: Any, model: str, child: str, reply: str, goal: tuple[str, str] | None = None
 ) -> dict[str, Any]:
@@ -504,7 +554,7 @@ async def run(rep: int, which: str = "core") -> dict[str, Any]:
                 )
     elif which == "cases":
         # --cases 파일(held-out 등): {id,name,style,polite,lines,good_mentor,bad_mentor,grade_band?}
-        for r in json.loads(Path(CASES_FILE).read_text(encoding="utf-8")):
+        for r in json.loads(Path(CASES_FILE or "").read_text(encoding="utf-8")):
             name = f"{r['id']} {r['name']}"
             plan.append(
                 (
@@ -659,14 +709,18 @@ async def run(rep: int, which: str = "core") -> dict[str, Any]:
 
     chat = [t for t in turns_out if t.phase == "chat" and t.source == "live"]
     jc = spy.inner._get_client()
-    sem = asyncio.Semaphore(8)
+    sem = asyncio.Semaphore(8 if JUDGE_BACKEND == "api" else 4)
 
     async def _j(t: Turn) -> None:
         async with sem:
-            t.judge = await judge_chat(jc, JUDGE_MODEL, t.child, t.final, GOALS.get(t.case))
+            if JUDGE_BACKEND == "cli":
+                t.judge = await judge_chat_cli(t.child, t.final, GOALS.get(t.case))
+            else:
+                t.judge = await judge_chat(jc, JUDGE_MODEL, t.child, t.final, GOALS.get(t.case))
 
     await asyncio.gather(*(_j(t) for t in chat))
-    n = max(len(chat), 1)
+    judge_failed = sum(1 for t in chat if t.judge is None)
+    n = max(len(chat) - judge_failed, 1)  # 채점 실패는 평균에서 뺀다(따로 센다)
 
     def pct(key: str) -> int:
         return round(100 * sum(1 for t in chat if t.judge and t.judge[key]) / n)
@@ -678,6 +732,8 @@ async def run(rep: int, which: str = "core") -> dict[str, Any]:
 
     friend = {
         "수다 답": len(chat),
+        "채점": JUDGE_BACKEND,
+        "채점 실패(건)": judge_failed,
         "자기노출%": pct("self_disclosure"),
         "응원%": pct("affirmation"),
         "질문으로 끝%": round(100 * sum(t.final.rstrip().endswith("?") for t in chat) / n),
@@ -732,9 +788,16 @@ def main() -> None:
         choices=["core", "all", "chat", "hard", "chat+hard", "grades", "wrap", "cases", "combos"],
     )
     ap.add_argument("--cases", default=None, help="--set cases 일 때 상황 파일(JSON)")
+    ap.add_argument(
+        "--judge",
+        default="cli",
+        choices=["cli", "api"],
+        help="cli=로컬 Claude 구독(기본), api=API 크레딧",
+    )
     a = ap.parse_args()
-    global CASES_FILE
+    global CASES_FILE, JUDGE_BACKEND
     CASES_FILE = a.cases
+    JUDGE_BACKEND = a.judge
     assert all(p in CHILD_PHASES for p in ("study", "chat"))
     result = asyncio.run(run(a.rep, a.set))
     with open(a.out, "w", encoding="utf-8") as f:

@@ -121,9 +121,20 @@ def _has_token(text: str, token: str) -> bool:
     return re.search(pattern, text) is not None
 
 
-def contains_answer(text: str, answer: dict[str, Any], problem_text: str = "") -> bool:
+_WORD = r"(?<![A-Za-z가-힣]){w}(?![A-Za-z])"  # text 답 낱말 경계(한글 뒤 조사는 허용)
+_OPTION_LINE = re.compile(r"^\s*[①②③④]\s*(.+?)\s*$", re.M)
+
+
+def _has_word(w: str, text: str) -> bool:
+    return re.search(_WORD.format(w=re.escape(w)), text, re.I) is not None
+
+
+def contains_answer(
+    text: str, answer: dict[str, Any], problem_text: str = "", forbidden: list[str] | None = None
+) -> bool:
     """멘토 답 문장에 정답 값·허용 표기가 들어 있나(A4 사후 검사). 문장은 돌려주지 않는다.
-    문제 글에 이미 보이는 표기(1 ÷ 3 문제의 「1÷3」)는 새는 게 아니라 뺀다."""
+    문제 글에 이미 보이는 표기(1 ÷ 3 문제의 「1÷3」)는 새는 게 아니라 뺀다.
+    명세 4.13 G6: 문제의 forbidden 표기(「7만」「70,000」)도 보고, choice는 정답 보기 글도 본다."""
     if answer.get("kind") == "choice":
         # 보기 번호는 문제 글에 늘 보이므로 빼지 않는다. 「정답은 ②」「2번이야」를 잡는다
         no = _choice_no(str(answer.get("value", "")))
@@ -131,14 +142,34 @@ def contains_answer(text: str, answer: dict[str, Any], problem_text: str = "") -
             return False
         body = text  # NFKC는 ②를 2로 바꾸므로 원문에서 찾는다
         pattern = rf"{_CIRCLED[no - 1]}|(?<!\d){no} ?번"
-        return re.search(pattern, body) is not None
+        if re.search(pattern, body) is not None:
+            # 서로 다른 보기 번호를 2개 이상 견주면(「②, ③, ④ 중에」) 짚는 게 아니다(부록 D 보기형 힌트 ②)
+            named = {
+                i + 1
+                for i, c in enumerate(_CIRCLED)
+                if c in body or re.search(rf"(?<!\d){i + 1} ?번", body)
+            }
+            return len(named) < 2
+        # 정답 보기 글(accepted 중 숫자·번호가 아닌 것, 2글자 이상). 보기 글이 2개 이상 나오면 견주는 말이라 누설 아님
+        words = [
+            a
+            for a in answer.get("accepted", [])
+            if len(a) >= 2 and not re.search(r"[0-9①②③④]|번$", a)
+        ]
+        if not any(_has_word(w, text) for w in words):
+            return False
+        options = [o for o in _OPTION_LINE.findall(problem_text) if len(o) >= 2]
+        return sum(_has_word(o, text) for o in options) < 2
+    extra = [f for f in (forbidden or []) if f]
     if answer.get("kind") == "text":
-        words = [a for a in [answer.get("value", ""), *answer.get("accepted", [])] if a]
+        words = [a for a in [answer.get("value", ""), *answer.get("accepted", []), *extra] if a]
         return any(
             re.search(rf"(?<![A-Za-z가-힣]){re.escape(w)}(?![A-Za-z])", text, re.I)
             and not re.search(rf"(?<![A-Za-z]){re.escape(w)}(?![A-Za-z])", problem_text, re.I)
             for w in words
         )
     body, shown = _loose(text), _loose(problem_text)
-    tokens = {_loose(t) for t in [str(answer.get("value", "")), *answer.get("accepted", [])]}
+    tokens = {
+        _loose(t) for t in [str(answer.get("value", "")), *answer.get("accepted", []), *extra]
+    }
     return any(t and _has_token(body, t) and not _has_token(shown, t) for t in tokens)

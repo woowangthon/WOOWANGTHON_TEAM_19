@@ -257,6 +257,8 @@ export const mockApi: MentorApi = {
   async acceptPromise() { await wait(80); me().promise = true; commit(); },
   async getMentor() { return currentRole() === 'student' ? me().mentor : null; },
   async saveMentor(setting) { await wait(80); me().mentor = setting; commit(); },
+  // mock: 띠는 모두 가진 것으로 본다(사기·도장은 서버에서만)
+  async buyAnimal() { await wait(80); return me().mentor!; },
 
   /* ---------- 학생: 세션 ---------- */
   async getActiveSession() { if (currentRole() !== 'student') return null; const s = tick(); return s ? view(s) : null; },
@@ -427,6 +429,13 @@ export const mockApi: MentorApi = {
     if (!myStudents().includes(studentId)) fail('내 강의실 학생에게만 과제를 줄 수 있어요.');
     db.tasks[studentId] = unit; commit(); return teacherToday();
   },
+  // mock 단원엔 문제 목록이 없어 문제 고르기는 서버에서만(처음·랜덤은 mock에서 단원 지정과 같음)
+  async assignTasks(studentIds, unit) {
+    await wait(120);
+    if (studentIds.some((id) => !myStudents().includes(id))) fail('내 강의실 학생에게만 과제를 줄 수 있어요.');
+    for (const id of studentIds) db.tasks[id] = unit;
+    commit(); return teacherToday();
+  },
   async getMemo(studentId) { await wait(100); return { memo: db.memos[studentId] ?? EMPTY_MEMO, draft: db.drafts[studentId] ?? null }; },
   async saveMemo(studentId, memo) { await wait(100); db.memos[studentId] = memo; commit(); },
 
@@ -484,7 +493,7 @@ export const mockApi: MentorApi = {
   async getAlerts() { await wait(); const cid = childOf(currentUserId() ?? '') ; return db.alerts.filter((a) => a.studentId === cid).map(({ studentName: _n, studentId: _i, ...a }) => a); },
   async ackAlert(id) {
     await wait(120);
-    db.alerts = db.alerts.map((a) => (a.id === id && a.status === '미확인' ? { ...a, status: '확인함' } : a));
+    db.alerts = db.alerts.map((a) => (a.id === id && a.status === '미확인' ? { ...a, status: '확인함', ackedAt: stampLabel(Date.now()) } : a));
     commit();
     const { studentName: _n, studentId: _i, ...a } = db.alerts.find((x) => x.id === id)!;
     return a;

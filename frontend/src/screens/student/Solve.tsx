@@ -2,7 +2,7 @@
 // 화면은 입력과 표시만 한다. 정답 판정·힌트 순서·20분 마감은 전부 서버(api)가 정한다.
 // 흐름: 답 확인 → 맞으면 "계속" / 틀리면 다음 힌트가 자동으로 나오고 "다시 해 보기"
 //       힌트 3개를 다 쓰고도 틀리면 「풀이 같이 보기」가 열린다 (답부터 주지 않는다)
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
 import { Frame } from '../../components/Frame';
@@ -15,6 +15,8 @@ import { useCountdown } from '../../lib/useCountdown';
 import { isSolveTimeUp } from '../../lib/kidScreens';
 import { useMentor } from '../../state/mentor';
 import { RequirePhase, useSession } from '../../state/session';
+import { difficultyNoteLine } from '../../lib/difficultyNote';
+import { useClassLocked } from '../../components/ClassSession';
 import type { AnswerResult, ProblemView, Solution } from '../../types';
 
 type Field = 'num' | 'den';
@@ -22,6 +24,35 @@ const CIRCLED = ['①', '②', '③', '④'];
 const NUMBER_MAX = 12; // 숫자 한 칸: 큰 수(억 단위)까지
 // 분수 밖 문제(문장이 긴 국어·영어·큰 수) 읽기 쉽게: 낱말 단위 줄바꿈, 넉넉한 줄 간격. 시드 분수 문제 화면은 그대로
 const READABLE: React.CSSProperties = { wordBreak: 'keep-all', overflowWrap: 'anywhere', lineHeight: 1.65 };
+
+/** 20분이 끝났을 때의 두 버튼. 수업 참여 잠금 중이면 「수다로 갈까?」를 끈다(잠금 중에 수다 10분이 흘러가지 않게) */
+export function TimeUpActions({ busy, onSolution, onChat }: { busy: boolean; onSolution: () => void; onChat: () => void }) {
+  const { say } = useMentor();
+  const locked = useClassLocked();
+  return (
+    <>
+      {locked && <p className="small muted" role="status" style={{ textAlign: 'center', margin: 0 }}>{say('수업 끝나고 수다할 수 있어', '수업 끝나고 수다할 수 있어요')}</p>}
+      <div className="btn-row">
+        <button className="btn btn--secondary" disabled={busy} onClick={onSolution}>풀이 같이 보기</button>
+        <button className="btn btn--primary" disabled={busy || locked} onClick={onChat}>수다로 갈까?</button>
+      </div>
+    </>
+  );
+}
+
+/** 답 확인 결과 한 줄 — 스크린리더가 맞았는지·틀렸는지 읽게 role=status */
+export const FeedbackTitle = ({ text }: { text: string }) => <div className="feedback__title" role="status">{text}</div>;
+/** 받은 힌트 점(받은 + 남은). 점 모양만 있어 이름(aria-label)이 읽히게 role=img */
+export function HintDots({ used, left }: { used: number; left: number }) {
+  return (
+    <span className="hint-dots" role="img" aria-label={`힌트 ${used}개 사용`}>
+      {/* 점 개수 = 받은 힌트 + 남은 힌트(서버가 정함) */}
+      {Array.from({ length: used + left }, (_, i) => <i key={i} className={i < used ? 'on' : ''} />)}
+    </span>
+  );
+}
+/** 멘토 말풍선 자리(새 힌트·채점 말) — 바뀌면 스크린리더가 읽게 늘 있는 aria-live 영역. 포커스는 옮기지 않는다 */
+export const TalkArea = ({ children }: { children: ReactNode }) => <div className="stack" style={{ gap: 'var(--space-3)' }} aria-live="polite">{children}</div>;
 
 export function StudentSolve() {
   return <RequirePhase phase="solve"><Solve /></RequirePhase>;
@@ -120,7 +151,7 @@ function Solve() {
 
   const header = (
     <header className="lessonbar">
-      <button className="icon-btn" aria-label="나가기(이어서 할 수 있어요)" onClick={() => nav('/student')}><Icon name="close" /></button>
+      <button className="icon-btn" aria-label="잠깐 나가기" onClick={() => nav('/student')}><Icon name="close" /></button>
       <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={p?.total ?? 5} aria-valuenow={p?.index ?? 0}>
         <div className="progress__fill" style={{ width: p ? `${((p.index + (result?.correct || solution ? 1 : 0)) / p.total) * 100}%` : '0%' }} />
       </div>
@@ -131,22 +162,17 @@ function Solve() {
   let actions: React.ReactNode = null;
   let tone: 'ok' | 'retry' | undefined;
   if (p && timeUp) {
-    actions = (
-      <div className="btn-row">
-        <button className="btn btn--secondary" disabled={!!busy} onClick={showSolution}>풀이 같이 보기</button>
-        <button className="btn btn--primary" disabled={!!busy} onClick={toChat}>수다로 갈까?</button>
-      </div>
-    );
+    actions = <TimeUpActions busy={!!busy} onSolution={showSolution} onChat={toChat} />;
   } else if (p && solution) {
     actions = <button className="btn btn--primary" onClick={next}>{isLast ? '끝내기' : '다음 문제'}</button>;
   } else if (p && result?.correct) {
     tone = 'ok';
-    actions = <><div className="feedback__title">{result.message}</div><button className="btn btn--primary" onClick={next}>계속</button></>;
+    actions = <><FeedbackTitle text={result.message} /><button className="btn btn--primary" onClick={next}>계속</button></>;
   } else if (p && wrong) {
     tone = 'retry';
     actions = (
       <>
-        <div className="feedback__title">{result!.message}</div>
+        <FeedbackTitle text={result!.message} />
         <div className="btn-row">
           {p.canShowSolution && <button className="btn btn--secondary" disabled={!!busy} onClick={showSolution}>풀이 같이 보기</button>}
           <button className="btn btn--accent" onClick={retry}>다시 해 보기</button>
@@ -176,12 +202,11 @@ function Solve() {
       {p && (
         <>
           <div className="row between small">
-            <strong className="num">{p.index + 1} / {p.total} 문제</strong>
-            <span className="hint-dots" aria-label={`힌트 ${p.hints.length}개 사용`}>
-              {/* 점 개수 = 받은 힌트 + 남은 힌트(서버가 정함) */}
-              {Array.from({ length: p.hints.length + p.hintsLeft }, (_, i) => <i key={i} className={i < p.hints.length ? 'on' : ''} />)}
-            </span>
+            <span className="row" style={{ gap: 6 }}><strong className="num">{p.index + 1} / {p.total} 문제</strong>{session?.difficulty && <span className="pill">{session.difficulty}</span>}</span>
+            <HintDots used={p.hints.length} left={p.hintsLeft} />
           </div>
+          {/* D4: 고른 난이도와 다르게 나간 이유 한 줄(사실대로, 명세 4.13-7) */}
+          {difficultyNoteLine(session?.difficultyNote, session?.chosen, session?.difficulty, say) && <p className="small muted" style={{ margin: "-8px 0 0" }}>{difficultyNoteLine(session?.difficultyNote, session?.chosen, session?.difficulty, say)}</p>}
           <section className="card problem">
             {p.text && <p style={kind === 'fraction' ? { whiteSpace: 'pre-line' } : { ...READABLE, whiteSpace: 'pre-line', fontSize: 17, width: '100%' }}>{p.text}</p>}
             {kind === 'number' && !solution && (
@@ -226,7 +251,7 @@ function Solve() {
             </div>}
             {!solution && kind === 'fraction' && <p className="small muted">{say('답이 자연수면 분모에 1을 넣어 (3 → 3/1)', '답이 자연수면 분모에 1을 넣어요 (3 → 3/1)')}</p>}
           </section>
-          {solution ? (
+          <TalkArea>{solution ? (
             <>
               <MentorSays mood="calm" text={say('괜찮아, 같이 풀이를 보자', '괜찮아요, 같이 풀이를 봐요')} />
               <ol className="steps card card--flat">{solution.steps.map((s) => <li key={s}>{s}</li>)}</ol>
@@ -243,7 +268,7 @@ function Solve() {
             <MentorSays mood="calm" text={kind === 'fraction' ? say('표시된 칸만 다시 생각해 봐', '표시된 칸만 다시 생각해 보세요') : say('다시 한번 생각해 봐', '다시 한번 생각해 보세요')} />
           ) : (
             <MentorSays mood="think" text={say('천천히 생각해 봐.\n막히면 힌트를 눌러', '천천히 생각해 보세요.\n막히면 힌트를 눌러요')} />
-          )}
+          )}</TalkArea>
           <div ref={bottom} />
         </>
       )}

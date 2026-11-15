@@ -166,13 +166,13 @@ async def test_start_after_finished_session_is_conflict(client, db_session, stud
     assert r.json()["code"] == "session_finished"
 
 
-async def test_start_without_task_is_conflict(client, db_session, make_student):
+async def test_start_without_task_uses_seed_unit(client, db_session, make_student):
+    # 명세 4.13-7 D3(11-14): 지정·오개념·학년 단원이 없으면 분수 시드에서 고른다 → 둘째 날 409 없음
     s = make_student()
     db_session.add(s)
     await db_session.flush()
     r = await client.post("/api/v1/sessions", headers=_child(s))
-    assert r.status_code == 409
-    assert r.json()["code"] == "no_task"
+    assert r.status_code == 200 and r.json()["problem"] is not None
 
 
 async def test_today_expires_chat_past_deadline(client, db_session, student):

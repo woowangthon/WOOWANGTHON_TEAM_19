@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { trapTab } from '../lib/focusTrap';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from './Icon';
 import { useServerWaking } from '../lib/slowServer';
@@ -46,8 +47,8 @@ export function LoadError({ error, onRetry }: { error: string | null; onRetry?: 
 /** 서버가 다시 시작돼 세션이 사라졌을 때: 세션을 다시 읽고 학생 홈으로(다시 시도는 같은 오류만 난다) */
 function GoHome() {
   const nav = useNavigate();
-  const { refresh } = useSession();
-  return <button className="btn btn--secondary btn--small" onClick={async () => { await refresh(); nav('/student', { replace: true }); }}>처음으로</button>;
+  const { reset } = useSession();
+  return <button className="btn btn--secondary btn--small" onClick={async () => { await reset(); nav('/student', { replace: true }); }}>처음으로</button>;
 }
 
 /** 아래에서 올라오는 시트. Esc로 닫히고, 닫히면 원래 버튼으로 포커스가 돌아간다 */
@@ -58,13 +59,14 @@ export function Sheet({ title, children, onClose }: { title: string; children: R
   useEffect(() => {
     const before = document.activeElement as HTMLElement | null;
     ref.current?.querySelector<HTMLElement>('input, button')?.focus();
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeRef.current(); };
+    // #23(11-14): aria-modal이니 Tab이 시트 안에서만 돈다(누를 때마다 요소를 다시 찾음)
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeRef.current(); else if (ref.current) trapTab(ref.current, e); };
     window.addEventListener('keydown', onKey);
     return () => { window.removeEventListener('keydown', onKey); before?.focus(); };
   }, []);
   return (
     <div className="sheet-backdrop" onClick={onClose}>
-      <div ref={ref} className="sheet" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
+      <div ref={ref} className="sheet" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} onClick={(e) => e.stopPropagation()}>
         <h2 className="h3">{title}</h2>
         {children}
       </div>

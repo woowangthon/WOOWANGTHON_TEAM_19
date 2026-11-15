@@ -177,7 +177,8 @@ class Alert(Base):
     student_id: Mapped[str] = mapped_column(ForeignKey("students.id", ondelete="CASCADE"))
     level: Mapped[str] = mapped_column(String(10), default="red")
     trigger: Mapped[str] = mapped_column(String(20))  # 키워드 id (R1 등)
-    excerpt: Mapped[str] = mapped_column(String(EXCERPT_MAX))  # ±2턴 치환본, 300자
+    # 11-15부터 빈 문자열(발췌 안 만듦, 성호 04:30). 칸은 남김 — 표 변경 없음
+    excerpt: Mapped[str] = mapped_column(String(EXCERPT_MAX))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     guardian_seen: Mapped[bool] = mapped_column(Boolean, default=False)

@@ -13,10 +13,12 @@ const DONT = ['답부터 알려주기', '숙제 대신하기', '개인정보 묻
 
 export function StudentPromise() {
   const nav = useNavigate();
-  const { say } = useMentor();
+  const { say, setting } = useMentor();
+  // 11-14: 가입 때(또는 체험 세트가) 멘토를 정해 두었으면 캐릭터 고르기를 건너뛴다. 멘토가 없는 옛 계정만 캐릭터 화면
+  const hasMentor = !!setting?.animal && (setting.ownedAnimals ? setting.ownedAnimals.length > 0 : true);
   // 저장이 실패하면 버튼 아래에 이유를 보이고, 보내는 동안은 다시 못 누르게(N4)
   const { run, busy, error } = useAction();
-  const agree = () => run(async () => { await api.acceptPromise(); nav('/student/onboarding/character'); });
+  const agree = () => run(async () => { await api.acceptPromise(); nav(hasMentor ? '/student/difficulty' : '/student/onboarding/character'); });
   return (
     <Frame title="약속" back="/student" right={<span className="pill pill--mint">1/2</span>}
       actions={<><LoadError error={error} /><button className="btn btn--primary" disabled={busy} onClick={agree}>{busy ? '저장하는 중…' : say('약속할게', '약속할게요')}</button></>}>
@@ -36,8 +38,8 @@ export function StudentPromise() {
       </div>
       <div className="notice" style={{ justifyContent: 'flex-start' }}>
         <Icon name="shield" size={20} />
-        {/* TK-74 #13 · 결정(11-11): 평소 수다는 안 보내고, 🔴일 때만 앞뒤 일부가 보호자에게 간다 */}
-        <span>{say('보호자께는 오늘 배운 것과 퀴즈만 가. 평소 수다는 안 보내. 다만 너를 해칠 수 있는 걱정되는 얘기가 나오면, 그 말과 앞뒤 몇 마디를 보호자께 알려 줄게.', '보호자께는 오늘 배운 것과 퀴즈만 가요. 평소 수다는 보내지 않아요. 다만 스스로를 해칠 수 있는 걱정되는 얘기가 나오면, 그 말과 앞뒤 몇 마디를 보호자께 알려 드려요.')}</span>
+        {/* 11-15 성호 v0.8: 🔴이면 「힘들어 보인다」 알림만 가고 아이가 한 말은 가지 않는다(발췌 없음) */}
+        <span>{say('보호자께는 오늘 배운 것과 한 줄만 가. 평소 수다는 안 보내. 다만 너를 해칠 수 있는 걱정되는 얘기가 나오면, 보호자께 「많이 힘들어 보인다」고만 알려 줄게.', '보호자께는 오늘 배운 것과 한 줄만 가요. 평소 수다는 보내지 않아요. 다만 스스로를 해칠 수 있는 걱정되는 얘기가 나오면, 보호자께 「많이 힘들어 보인다」고만 알려 드려요.')}</span>
       </div>
     </Frame>
   );

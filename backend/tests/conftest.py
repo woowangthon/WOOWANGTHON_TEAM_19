@@ -40,6 +40,7 @@ def make_student():
             "style": "EBSP",
             "honorific": "friend",
             "polite": False,
+            "consent": True,  # 약속을 마친 아이(세션 시작에 약속 필요, 11-14 round2 #5)
         }
         values.update(overrides)
         return Student(**values)

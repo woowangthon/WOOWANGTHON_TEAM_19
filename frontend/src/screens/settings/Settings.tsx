@@ -35,6 +35,7 @@ const Group = ({ title, children }: { title: string; children: ReactNode }) => (
 export function Settings() {
   const nav = useNavigate();
   const { me, logout } = useAuth();
+  const { run: byeRun, busy: byeBusy, error: byeError } = useAction();
   const [bye, setBye] = useState(false);
   const [ask, setAsk] = useState(false);
   if (!me) return null;
@@ -55,7 +56,8 @@ export function Settings() {
         <Group title="연결·학원">
           <Item icon="link" label="보호자 연결" sub={me.linked.length ? me.linked.map((x) => x.name).join(', ') : me.pendingLinks.length ? '동의 기다리는 중' : '아직 없음'} to="/settings/family" badge={me.restricted ? <span className="pill pill--accent">필요</span> : undefined} />
           <Item icon="building" label="학원·강의실" sub={me.academy?.name ?? '아직 없음'} to="/settings/org" />
-          <Item icon="mentor" label="내 멘토" sub="캐릭터·말투·옷장" to="/student/mentor" />
+          <Item icon="talk" label="멘토 말투" sub="스타일·호칭·반말/존댓말" to="/settings/talk" />
+          <Item icon="mentor" label="내 멘토" sub="캐릭터·옷장" to="/student/mentor" />
         </Group>
       )}
       {me.role === 'guardian' && (
@@ -100,8 +102,10 @@ export function Settings() {
           <p className="small muted">다시 들어오려면 아이디와 비밀번호로 로그인해요.</p>
           <div className="btn-row">
             <button className="btn btn--secondary" onClick={() => setBye(false)}>취소</button>
-            <button className="btn btn--primary" onClick={async () => { await logout(); nav('/login', { replace: true }); }}>로그아웃</button>
+            <button className="btn btn--primary" disabled={byeBusy} onClick={() => byeRun(async () => { await logout(); nav('/login', { replace: true }); })}>{byeBusy ? '로그아웃하는 중…' : '로그아웃'}</button>
           </div>
+          {/* #14: 서버 로그아웃이 실패하면 지우지 않고 이유를 보인다(다시 누르면 됨) */}
+          <LoadError error={byeError} />
         </Sheet>
       )}
       {ask && (
@@ -295,7 +299,7 @@ function ConsentSheet({ name, onAgree, onClose, busy }: { name: string | null; o
       <p className="small">{name ? `${name} 학생과 연결해요. ` : ''}만 14세 미만 아이의 개인정보는 보호자 동의가 있어야 처리할 수 있어요.</p>
       <dl className="kv">
         <dt>받는 정보</dt><dd>아이 아이디·별명·학년, 학습 기록(푼 문제·시간·힌트)</dd>
-        <dt>수다</dt><dd>평소 수다는 보호자·학습지도자에게 보이지 않아요. 자해·자살 같은 위험 신호가 나오면 그 말의 앞뒤 일부(최대 300자)를 보호자에게만 함께 알려요</dd>
+        <dt>수다</dt><dd>평소 수다는 보호자·선생님에게 보이지 않아요. 자해·자살 같은 위험 신호가 나오면 보호자에게 「힘들어 보인다」는 알림만 가요. 아이가 한 말은 보내지 않아요.</dd>
         <dt>쓰는 곳</dt><dd>학습 도움, 보호자·학습지도자에게 결과 공유</dd>
         <dt>보관</dt><dd>탈퇴하면 지워요</dd>
       </dl>

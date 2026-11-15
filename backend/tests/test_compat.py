@@ -4,6 +4,7 @@
 문장은 전부 합성이다. 시계는 테스트가 움직인다(서울 날짜 기준).
 """
 
+import re
 from datetime import UTC, date, datetime, timedelta
 
 import pytest
@@ -13,7 +14,7 @@ from sqlalchemy import select
 
 from app.actors import DEMO_CHILD_ID, DEMO_GUARDIAN_ID, DEMO_INSTRUCTOR_ID
 from app.api import TAG_NAME, get_llm
-from app.compat import GUARDIAN_ALERT_NOTICE
+from app.compat import GUARDIAN_ALERT_ACKED, GUARDIAN_ALERT_NOTICE
 from app.db import get_db
 from app.llm import ScriptedAdapter
 from app.main import create_app
@@ -93,7 +94,7 @@ async def test_day_flow(client, db_session, clock):
     assert len(home["attendance"]) == 7 and home["todayIndex"] == 1  # 화요일
     assert (await call("GET", "/sessions/active")).json() is None
 
-    s = (await call("POST", "/sessions", json={"difficulty": "중급"})).json()
+    s = (await call("POST", "/sessions", json={"difficulty": "초급"})).json()
     sid = s["id"]
     assert s["phase"] == "solve" and s["total"] == 1 and s["solved"] == 0
 
@@ -186,7 +187,8 @@ async def test_crisis_in_chat(client, clock):
     assert len(alerts) == 1
     a = alerts[0]
     assert a["level"] == "긴급" and a["status"] == "미확인"
-    assert a["excerpt"]  # 🔴이면 발췌 ±2턴·300자가 보호자에게 간다(결정 11-10·11-11)
+    assert a["excerpt"] is None  # 아이 말은 보내지 않는다(11-15 04:30 성호, 11-10·11-11을 바꿈)
+    assert a["action"] and a["hotlines"] == ["109", "1388"]
     card = (await call("GET", "/guardian/today", headers=GUARDIAN)).json()
     assert card["done"] is False and card["line"] is None
     # 위기로 끝난 날 보호자 첫 화면: 「공부 전」 대신 알림 확인 안내(문구는 상수 한곳, 11-11)
@@ -204,7 +206,7 @@ async def test_solution_needs_both_hints(client):
 async def test_hint_and_solution_busy_while_replying(client, db_session, clock, path):
     """답 생성 중에는 기본 경로 kind:hint처럼 409 busy(계약 프론트 할 일 9)."""
     call = Recorder(client)
-    sid = (await call("POST", "/sessions", json={"difficulty": "중급"})).json()["id"]
+    sid = (await call("POST", "/sessions", json={"difficulty": "초급"})).json()["id"]
     row = await db_session.get(Session, sid)
     row.replying_until = clock.now + timedelta(seconds=10)
     await db_session.flush()
@@ -240,7 +242,15 @@ async def test_mentor_round_trip(client):
     body = {"style": "들어주는", "title": "언니", "speech": "존댓말", "animal": "horse"}
     assert (await call("PUT", "/student/mentor", json=body)).status_code == 200
     got = (await call("GET", "/student/mentor")).json()
-    assert got == {"style": "들어주는", "title": "언니", "speech": "존댓말", "animal": None}
+    # 명세 4.12-5(11-14): 띠를 저장한다 — 띠가 없던 아이의 첫 고르기는 무료 소유
+    assert got == {
+        "style": "들어주는",
+        "title": "언니",
+        "speech": "존댓말",
+        "animal": "horse",
+        "ownedAnimals": ["horse"],
+        "animalPrice": 5,
+    }
 
 
 @pytest.mark.parametrize(
@@ -307,6 +317,10 @@ async def test_study_min_survives_phase_change(client, clock):
 
 async def test_promise_sets_consent(client, db_session):
     call = Recorder(client)
+    student = await db_session.get(Student, DEMO_CHILD_ID)
+    assert student is not None
+    student.consent = False  # 픽스처 기본은 약속함 → 약속 전 아이로
+    await db_session.commit()
     assert (await call("GET", "/student/home")).json()[
         "needsOnboarding"
     ] is True  # 합성 학생은 동의 전
@@ -347,6 +361,7 @@ async def test_teacher_memo_draft_edit_approve_reaches_guardian(client, db_sessi
         "name": "테스트학생",
         "task": "분수 ÷ 자연수",
         "status": "지정됨",
+        "assignedProblemId": "frac-div-nat-01",  # TK-101 보강(11-14)
         "draftStatus": None,
     }
 
@@ -439,7 +454,8 @@ async def test_teacher_assign_unit_reaches_child_home(client, db_session):
     row = next(s for s in today["students"] if s["id"] == DEMO_CHILD_ID)
     assert row["task"] is None and row["status"] == "지정 전"
     home = (await client.get(f"{BASE}/student/home", headers=CHILD)).json()
-    assert home["task"] is None
+    # 명세 4.13-7: 지정이 없으면 친구1이 단원·난이도로 고른다(전에는 None)
+    assert home["task"] is not None and home["task"]["assignedBy"] == "친구1"
 
     r = await client.put(url, headers=INSTRUCTOR, json={"unit": "없는 단원"})
     assert r.status_code == 422
@@ -486,7 +502,7 @@ async def test_teacher_task_and_scope_follow_started_session(client, scripted_dr
     """아이가 시작하면 지정은 세션으로 옮겨져 비워진다(명세 4.2). 그래도 강사 화면에는
     오늘 푸는 단원이 보이고, 초안의 scope도 다음 지정이 아니라 오늘 푼 단원이다."""
     call = Recorder(client)
-    await call("POST", "/sessions", json={"difficulty": "중급"})
+    await call("POST", "/sessions", json={"difficulty": "초급"})
     today = (await call("GET", "/teacher/today", headers=INSTRUCTOR)).json()
     row = next(s for s in today["students"] if s["id"] == DEMO_CHILD_ID)
     assert row["task"] == "분수 ÷ 자연수" and row["status"] == "진행 중"
@@ -614,3 +630,217 @@ async def test_draft_source_live_when_model_wrote_it():
 
     body, source = await _draft_body(Live(), Student(), "분수", "역수", "", [])  # type: ignore[arg-type]
     assert source == "live" and body.startswith("오늘 분수")
+
+
+# ── 명세 4.13 G4·TK-101(11-14, bb 검토 반영): 시범 단원 이름표, 특정·랜덤·여러 명 지정 ──
+
+G4_UNIT = "큰 수 (초4)"
+
+
+async def test_pilot_units_have_names_and_assign(client, db_session):
+    assert {"큰 수 (초4)", "품사 (중2)", "관계사 (고1)"} <= set(TAG_NAME.values())
+    url = f"{BASE}/teacher/students/{DEMO_CHILD_ID}/task"
+    r = await client.put(url, headers=INSTRUCTOR, json={"unit": G4_UNIT})
+    assert r.status_code == 200
+    assert r.json()["assigned"] == [
+        {"studentId": DEMO_CHILD_ID, "problemId": "g4-math-large-numbers-01"}
+    ]
+    student = await db_session.get(Student, DEMO_CHILD_ID)
+    assert student is not None and student.today_task_problem_id == "g4-math-large-numbers-01"
+
+
+async def test_assign_specific_and_random_problem(client, db_session):
+    url = f"{BASE}/teacher/students/{DEMO_CHILD_ID}/task"
+    r = await client.put(
+        url, headers=INSTRUCTOR, json={"unit": G4_UNIT, "problemId": "g4-math-large-numbers-07"}
+    )
+    assert r.json()["assigned"][0]["problemId"] == "g4-math-large-numbers-07"
+    # 단원 밖 문제는 422
+    r = await client.put(url, headers=INSTRUCTOR, json={"unit": G4_UNIT, "problemId": PROBLEM})
+    assert r.status_code == 422
+    # random: 단원 안에서, 응답에 실제로 뽑힌 문제
+    for _ in range(5):
+        r = await client.put(url, headers=INSTRUCTOR, json={"unit": G4_UNIT, "pick": "random"})
+        pid = r.json()["assigned"][0]["problemId"]
+        assert pid.startswith("g4-math-large-numbers-")
+        student = await db_session.get(Student, DEMO_CHILD_ID)
+        await db_session.refresh(student)
+        assert student is not None and student.today_task_problem_id == pid
+
+
+async def test_assign_many_students(client, db_session, make_student):
+    db_session.add(make_student(id="s-two"))
+    await db_session.flush()
+    body = {"studentIds": [DEMO_CHILD_ID, "s-two", DEMO_CHILD_ID], "unit": "품사 (중2)"}
+    r = await client.put(f"{BASE}/teacher/tasks", headers=INSTRUCTOR, json=body)
+    assert r.status_code == 200
+    got = r.json()["assigned"]
+    assert [a["studentId"] for a in got] == [DEMO_CHILD_ID, "s-two"]  # 중복 제거
+    assert all(a["problemId"] == "g8-kor-parts-of-speech-01" for a in got)
+    # 빈 목록·상한 초과는 422
+    r = await client.put(
+        f"{BASE}/teacher/tasks", headers=INSTRUCTOR, json={**body, "studentIds": []}
+    )
+    assert r.status_code == 422
+    many = [f"x{i}" for i in range(41)]
+    r = await client.put(
+        f"{BASE}/teacher/tasks", headers=INSTRUCTOR, json={**body, "studentIds": many}
+    )
+    assert r.status_code == 422
+
+
+async def test_assign_many_all_or_nothing(client, db_session):
+    body = {"studentIds": [DEMO_CHILD_ID, "없는-학생"], "unit": "품사 (중2)"}
+    r = await client.put(f"{BASE}/teacher/tasks", headers=INSTRUCTOR, json=body)
+    assert r.status_code == 404
+    student = await db_session.get(Student, DEMO_CHILD_ID)
+    await db_session.refresh(student)
+    assert student is not None and student.today_task_problem_id != "g8-kor-parts-of-speech-01"
+
+
+async def test_teacher_units_list_without_answers(client):
+    r = await client.get(f"{BASE}/teacher/units", headers=INSTRUCTOR)
+    assert r.status_code == 200
+    units = {u["name"]: u for u in r.json()}
+    assert len(units) == len(TAG_NAME)  # 분수 4 + 시범 3 + D5 14(명세 4.13)
+    g4 = units[G4_UNIT]
+    assert g4["grade"] == 4 and g4["subject"] == "math" and len(g4["problems"]) == 20
+    assert set(g4["problems"][0]) == {"id", "text"}
+    assert units["분수 ÷ 자연수"]["subject"] == "math"
+    for who in (CHILD, GUARDIAN):
+        assert (await client.get(f"{BASE}/teacher/units", headers=who)).status_code == 403
+
+
+async def test_bank_problem_text_has_no_answer(db_session):
+    # 강사 문제 목록·보호자 퀴즈로 문제 글이 나간다 → 글에 정답 값이 없어야 한다(choice는 번호라 제외)
+    await load_seed(db_session)
+    rows = (await db_session.scalars(select(Problem))).all()
+    for p in rows:
+        if "subject" not in p.standard or p.answer["kind"] == "choice":
+            continue
+        for a in [p.answer["value"], *p.answer.get("accepted", [])]:
+            # 다른 수의 한 자리(「73□4105」 속 4)는 누설이 아니다 → 앞뒤가 숫자·글자가 아닌 값만
+            assert not re.search(
+                rf"(?<![0-9A-Za-z가-힣]){re.escape(a)}(?![0-9A-Za-z가-힣])", p.text
+            ), p.id
+
+
+async def test_choice_quiz_options_keep_choice_lines(db_session):
+    # 명세 4.13 G3: 보기형 퀴즈 문장은 ①~④ 줄을 그대로(보호자가 풀 수 있게), 정답·풀이는 없음.
+    # 다리 놓기는 문장 전체가 같아야 id를 찾는다 → 화면은 여러 줄 문장 전체를 보내야 한다
+    from app.api import _quiz_options
+
+    await load_seed(db_session)
+    base = await db_session.get(Problem, "g8-kor-parts-of-speech-01")
+    opts = await _quiz_options(db_session, base)
+    assert len(opts) == 3 and all(set(o) == {"id", "text"} for o in opts)
+    multi = [o for o in opts if "\n" in o["text"] and "①" in o["text"]]
+    assert multi, "보기형 문장이 여러 줄 그대로"
+    for o in opts:
+        p = await db_session.get(Problem, o["id"])
+        assert p is not None and p.solution not in o["text"]
+
+
+async def test_teacher_today_shows_assigned_problem_id(client):
+    # 11-14 UX 점검: 학생 상세를 다시 열면 「처음 문제부터」로 돌아가 보였다 → 지정한 문제 id를 싣는다
+    url = f"{BASE}/teacher/students/{DEMO_CHILD_ID}/task"
+    body = {"unit": "큰 수 (초4)", "problemId": "g4-math-large-numbers-07"}
+    today = (await client.put(url, headers=INSTRUCTOR, json=body)).json()
+    row = next(s for s in today["students"] if s["id"] == DEMO_CHILD_ID)
+    assert row["assignedProblemId"] == "g4-math-large-numbers-07"
+    today = (await client.put(url, headers=INSTRUCTOR, json={"unit": None})).json()
+    row = next(s for s in today["students"] if s["id"] == DEMO_CHILD_ID)
+    assert row["assignedProblemId"] is None
+
+
+async def test_start_needs_promise(client, db_session):
+    # 11-14 round2 #5: 약속(AI 사용·🔴 알림 고지) 전에는 주소 직접 입력으로도 시작하지 못한다
+    student = await db_session.get(Student, DEMO_CHILD_ID)
+    assert student is not None
+    student.consent = False
+    await db_session.commit()
+    r = await client.post(f"{BASE}/sessions", headers=CHILD, json={"difficulty": "초급"})
+    assert r.status_code == 409 and r.json()["code"] == "needs_promise"
+    await client.post(f"{BASE}/student/promise", headers=CHILD)
+    r = await client.post(f"{BASE}/sessions", headers=CHILD, json={"difficulty": "초급"})
+    assert r.status_code == 200
+
+
+# ── 🔴 보호자 「확인했어요」(명세 4.3, 성호 11-15) ─────────────────────────────────
+
+
+async def _red_alert_id(call) -> str:
+    sid = (await call("POST", "/sessions", json={"difficulty": "초급"})).json()["id"]
+    r = (await call("POST", f"/sessions/{sid}/chat", json={"text": RED_LINE})).json()
+    assert r["crisis"] is True
+    alerts = (await call("GET", "/guardian/alerts", headers=GUARDIAN)).json()
+    assert alerts[0]["status"] == "미확인" and alerts[0]["ackedAt"] is None
+    return alerts[0]["id"]
+
+
+async def test_alert_notice_changes_after_ack(client, clock):
+    """「확인했어요」 뒤 첫 화면 문구가 바뀐다 — 확인한 보호자에게 「확인이 필요한」이 남지 않게(명세 4.11-9, 11-15)."""
+    call = Recorder(client)
+    aid = await _red_alert_id(call)
+    card = (await call("GET", "/guardian/today", headers=GUARDIAN)).json()
+    assert card["alertNotice"] == GUARDIAN_ALERT_NOTICE
+    assert (await call("POST", f"/guardian/alerts/{aid}/ack", headers=GUARDIAN)).status_code == 200
+    card = (await call("GET", "/guardian/today", headers=GUARDIAN)).json()
+    assert card["alertNotice"] == GUARDIAN_ALERT_ACKED
+    assert card["alertNotice"] != GUARDIAN_ALERT_NOTICE
+
+
+async def test_guardian_ack_marks_seen_with_first_time(client, clock):
+    call = Recorder(client)
+    aid = await _red_alert_id(call)
+    clock.tick(60)
+    r = await call("POST", f"/guardian/alerts/{aid}/ack", headers=GUARDIAN)
+    assert r.status_code == 200, r.text
+    first = r.json()
+    assert first["id"] == aid and first["status"] == "확인함" and first["ackedAt"]
+    assert first["excerpt"] is None and first["hotlines"] == ["109", "1388"]  # 카드·도움은 그대로
+    clock.tick(600)
+    again = (await call("POST", f"/guardian/alerts/{aid}/ack", headers=GUARDIAN)).json()
+    assert again["ackedAt"] == first["ackedAt"]  # 멱등 — 처음 누른 시각
+    listed = (await call("GET", "/guardian/alerts", headers=GUARDIAN)).json()
+    assert len(listed) == 1  # 지우지 않는다
+    assert listed[0]["status"] == "확인함" and listed[0]["ackedAt"] == first["ackedAt"]
+
+
+async def test_guardian_ack_only_own_child(client, db_session, make_student, clock):
+    from app.models import Alert
+
+    other = make_student(id="other-kid")
+    db_session.add(other)
+    await db_session.flush()
+    sess = Session(student_id=other.id, date=SEOUL_TODAY, problem_id=PROBLEM)
+    db_session.add(sess)
+    await db_session.flush()
+    alert = Alert.new(
+        session_id=sess.id, student_id=other.id, trigger="K01", excerpt="(치환본)", now=clock.now
+    )
+    db_session.add(alert)
+    await db_session.flush()
+    call = Recorder(client)
+    r = await call("POST", f"/guardian/alerts/{alert.id}/ack", headers=GUARDIAN)
+    assert r.status_code == 404
+    r = await call("POST", "/guardian/alerts/no-such-id/ack", headers=GUARDIAN)
+    assert r.status_code == 404
+    await db_session.refresh(alert)
+    assert alert.guardian_seen is False
+    r = await call("POST", f"/guardian/alerts/{alert.id}/ack")  # 아이 역할은 못 누른다
+    assert r.status_code in (401, 403, 404)
+
+
+async def test_crisis_session_chat_gives_only_last_mentor_line(client, db_session):
+    # 명세 부록 E(11-15 A안 완성): 위기 화면이 새로고침·같이 풀기 중 🔴에도 서버 문장을 받는다
+    from app.api import CRISIS_REPLY, CRISIS_REPLY_POLITE
+
+    call = Recorder(client)
+    sid = (await call("POST", "/sessions", json={"difficulty": "초급"})).json()["id"]
+    r = (await call("POST", f"/sessions/{sid}/chat", json={"text": RED_LINE})).json()
+    assert r["crisis"] is True
+    chat = (await call("GET", f"/sessions/{sid}/chat")).json()
+    assert chat["messages"] == [{"from": "mentor", "text": r["reply"]}]
+    assert r["reply"] in (CRISIS_REPLY, CRISIS_REPLY_POLITE)
+    assert all(RED_LINE not in m["text"] for m in chat["messages"])  # 아이 말은 싣지 않는다

@@ -1,4 +1,4 @@
-"""계정·연결·학원·강의실·씨앗·상점·알림함 테이블 12개(명세 4.12, 설계 1112 §2·§10).
+"""계정·연결·학원·강의실·씨앗·상점(사진)·알림함 테이블 15개(명세 4.12, 설계 1112 §2·§10).
 
 - 기존 학습 테이블 7개에는 열을 더하지 않는다(create_all은 새 테이블만 만든다).
 - 모든 행에 created_at·trial_id(체험 세상이면 세트 id, 아니면 None) — 72시간 정리 대상.
@@ -21,6 +21,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    LargeBinary,
     String,
     Text,
     UniqueConstraint,
@@ -166,6 +167,21 @@ class ShopItem(_Stamped, Base):
     note: Mapped[str] = mapped_column(String(120), default="")
 
 
+class ShopItemImage(_Stamped, Base):
+    """학원 상품 사진 1장(11-14). 상품 목록과 따로 둬서 목록 응답이 무거워지지 않게 한다.
+
+    브라우저가 줄인 JPG·PNG·WEBP만(서버는 종류·크기·파일 머리를 본다). version이 바뀌면
+    사진 주소가 바뀌어 브라우저가 옛 사진을 캐시에서 꺼내지 않는다.
+    """
+
+    __tablename__ = "shop_item_images"
+
+    item_id: Mapped[str] = mapped_column(String(40), primary_key=True)  # = shop_items.id
+    mime: Mapped[str] = mapped_column(String(20))
+    data: Mapped[bytes] = mapped_column(LargeBinary)
+    version: Mapped[str] = mapped_column(String(16))
+
+
 class Order(_Stamped, Base):
     __tablename__ = "orders"
 
@@ -177,11 +193,61 @@ class Order(_Stamped, Base):
     status: Mapped[str] = mapped_column(String(10))  # 교환 요청 / 전달 완료
 
 
+class CosmeticItem(Base):
+    """꾸미기 목록(옷·이모티콘) — 체험 세트와 상관없는 전체 목록이라 trial_id가 없다(11-14).
+
+    기본 16개는 기동 때 seeds.ensure_cosmetics가 빠진 것만 채운다(고친 값은 덮어쓰지 않음).
+    새 옷은 이 표에 줄을 더한다. 내릴 때는 지우지 말고 active=False(가진 아이 옷장에는 남음).
+    그림은 frontend/public/mascot/{띠}/{kind}-{id}.png, 없으면 화면이 「그림 준비 중」.
+    """
+
+    __tablename__ = "cosmetic_items"
+
+    id: Mapped[str] = mapped_column(String(20), primary_key=True)  # = cosmetics_owned.cosmetic_id
+    kind: Mapped[str] = mapped_column(String(10))  # outfit / emote
+    name: Mapped[str] = mapped_column(String(40))
+    price: Mapped[int] = mapped_column(Integer)  # 칭찬 도장 개수(1 이상)
+    description: Mapped[str] = mapped_column(String(120), default="")
+    sort: Mapped[int] = mapped_column(Integer, default=0)  # 작은 것부터
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class CosmeticOwned(_Stamped, Base):
     __tablename__ = "cosmetics_owned"
 
     student_account_id: Mapped[str] = mapped_column(String(40), primary_key=True)
     cosmetic_id: Mapped[str] = mapped_column(String(20), primary_key=True)
+
+
+class SessionDifficulty(_Stamped, Base):
+    """세션이 고른 난이도와 고른 대로 안 나간 이유(명세 4.13-7 D2). 새 표라 기존 표 칸 추가 없음."""
+
+    __tablename__ = "session_difficulty"
+
+    session_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    chosen: Mapped[str] = mapped_column(String(10))  # easy / medium / hard
+    note: Mapped[str | None] = mapped_column(String(20))  # instructor / nearby / repeat / None
+
+
+class AlertAck(Base):
+    """🔴 알림을 보호자가 처음 「확인했어요」 누른 시각(명세 4.3, 11-15). 새 표라 alerts 칸 추가 없음."""
+
+    __tablename__ = "alert_acks"
+
+    alert_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("alerts.id", ondelete="CASCADE"), primary_key=True
+    )
+    acked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class StudentMentorCurrent(_Stamped, Base):
+    """지금 고른 띠(그림) 하나(명세 4.12-5). 가진 띠는 cosmetics_owned의 animal-{띠}. 새 표라 칸 추가 없음."""
+
+    __tablename__ = "student_mentor_current"
+
+    student_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    animal: Mapped[str] = mapped_column(String(10))
 
 
 class Notice(_Stamped, Base):

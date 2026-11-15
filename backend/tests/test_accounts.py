@@ -17,7 +17,7 @@ from app.db import get_db
 from app.instructor import get_draft_adapter
 from app.llm import ScriptedAdapter
 from app.main import create_app
-from app.models import Student
+from app.models import Problem, Student
 from app.models_org import Account, AuthToken, Link, Room, RoomPerson
 from app.seed import load_seed
 from app.timeutil import get_now
@@ -120,7 +120,7 @@ async def test_signup_student_creates_day3_like_row(client, db_session):
     student = await db_session.get(Student, me["id"])
     assert student is not None
     assert student.nickname == "새싹" and student.streak_days == 0 and student.consent is False
-    assert student.today_task_problem_id is not None
+    assert student.today_task_problem_id is None  # 명세 4.13-7: 가입 때 오늘 할 것을 정하지 않는다
     # 홈: 계정 학생은 restricted 계산값
     home = await client.get(f"{BASE}/student/home", headers=_bearer(token))
     assert home.status_code == 200
@@ -698,7 +698,7 @@ async def test_signup_student_starts_without_trial_misconceptions(client, db_ses
     )
     assert count == 0
     assert student.freezes == 0 and student.streak_days == 0
-    assert student.today_task_problem_id is not None
+    assert student.today_task_problem_id is None  # 명세 4.13-7: 시작 때 학년 단원·난이도로 고른다
 
 
 @pytest.mark.parametrize(
@@ -735,3 +735,334 @@ def test_grade_band_now_uses_rolled_grade():
     signup = datetime(2026, 11, 14, tzinfo=UTC)
     assert grade_band_now(6, signup, datetime(2027, 3, 2, tzinfo=UTC), "초5-6") == "중1-3"
     assert grade_band_now(None, signup, datetime(2027, 3, 2, tzinfo=UTC), "초5-6") == "초5-6"
+
+
+# 명세 4.13 G1 → 4.13-7(11-14): 시작하면 가입 학년 단원의 고른 난이도 문제(학년 단원 없으면 분수 시드)
+@pytest.mark.parametrize(
+    ("grade", "tag"),
+    [
+        (4, "g4-math-large-numbers"),
+        (8, "g8-kor-parts-of-speech"),
+        (10, "g10-eng-relative-clauses"),
+        (6, None),
+        (5, None),
+    ],
+)
+async def test_signup_starts_with_grade_unit(client, db_session, grade, tag):
+    from app.models import Problem
+
+    token, _ = await _signup(client, grade=grade)
+    got = await _start_with(client, token, "중급")
+    p = await db_session.get(Problem, got["problem"]["id"])
+    assert p is not None and p.standard["difficulty"] == "medium"
+    if tag is None:
+        assert "subject" not in p.standard  # 분수 시드
+    else:
+        assert p.tag == tag
+
+
+# ── 명세 4.12-5 가입 때 멘토·띠 사기(11-14, bb 검토 반영) ─────────────────────────
+
+MENTOR = {"animal": "tiger", "style": "들어주는", "title": "언니", "speech": "존댓말"}
+
+
+async def test_signup_with_mentor_saves_all(client, db_session):
+    token, me = await _signup(client, grade=4, mentor=MENTOR)
+    m = (await client.get(f"{BASE}/student/mentor", headers=_bearer(token))).json()
+    assert m["animal"] == "tiger" and m["ownedAnimals"] == ["tiger"]
+    assert (m["style"], m["title"], m["speech"]) == ("들어주는", "언니", "존댓말")
+    assert m["animalPrice"] == 5
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [{**MENTOR, "animal": "cat"}, {**MENTOR, "style": "EBSP"}, {**MENTOR, "speech": "높임"}],
+)
+async def test_signup_mentor_bad_value_422(client, bad):
+    r = await client.post(
+        f"{BASE}/auth/signup",
+        json={
+            "role": "student",
+            "loginId": "kid_bad",
+            "password": PW,
+            "name": "새싹",
+            "grade": 5,
+            "agreements": {"terms": True, "privacy": True, "marketing": False},
+            "mentor": bad,
+        },
+    )
+    assert r.status_code == 422
+
+
+async def test_signup_adult_with_mentor_422(client):
+    r = await client.post(
+        f"{BASE}/auth/signup",
+        json={
+            "role": "guardian",
+            "loginId": "mom_one",
+            "password": PW,
+            "name": "보호자",
+            "email": "mom_one@example.com",
+            "agreements": {"terms": True, "privacy": True, "marketing": False},
+            "mentor": MENTOR,
+        },
+    )
+    assert r.status_code == 422
+
+
+async def test_animal_buy_and_switch(client, db_session):
+    from app.seeds import STAMP, add_seed
+
+    token, me = await _signup(client, grade=4, mentor=MENTOR)
+    h = _bearer(token)
+    put = {"style": "들어주는", "title": "언니", "speech": "존댓말"}
+    # 안 가진 띠로는 못 바꿈
+    r = await client.put(f"{BASE}/student/mentor", headers=h, json={**put, "animal": "monkey"})
+    assert r.status_code == 409
+    # 도장 모자람
+    r = await client.post(f"{BASE}/student/shop/animals/monkey/buy", headers=h)
+    assert r.status_code == 409 and r.json()["code"] == "not_enough_stamps"
+    await add_seed(db_session, me["id"], 5, STAMP, "합성", "g", datetime.now(UTC))
+    await db_session.commit()
+    r = await client.post(f"{BASE}/student/shop/animals/monkey/buy", headers=h)
+    assert r.status_code == 200 and sorted(r.json()["ownedAnimals"]) == ["monkey", "tiger"]
+    r = await client.post(f"{BASE}/student/shop/animals/monkey/buy", headers=h)
+    assert r.status_code == 409 and r.json()["code"] == "already_owned"
+    r = await client.post(f"{BASE}/student/shop/animals/cat/buy", headers=h)
+    assert r.status_code == 422
+    r = await client.put(f"{BASE}/student/mentor", headers=h, json={**put, "animal": "monkey"})
+    assert r.status_code == 200 and r.json()["animal"] == "monkey"
+
+
+async def test_old_account_first_animal_free(client, db_session):
+    token, _ = await _signup(client, grade=5)  # mentor 없이(옛 방식)
+    h = _bearer(token)
+    m = (await client.get(f"{BASE}/student/mentor", headers=h)).json()
+    assert m["animal"] is None and m["ownedAnimals"] == []
+    body = {"style": "같이 풀어주는", "title": "친구", "speech": "반말", "animal": "dog"}
+    r = await client.put(f"{BASE}/student/mentor", headers=h, json=body)
+    assert (
+        r.status_code == 200 and r.json()["animal"] == "dog" and r.json()["ownedAnimals"] == ["dog"]
+    )
+
+
+async def test_delete_removes_current_animal(client, db_session):
+    from app.models_org import StudentMentorCurrent
+
+    token, me = await _signup(client, grade=4, mentor=MENTOR)
+    r = await client.post(f"{BASE}/me/delete", headers=_bearer(token), json={"password": PW})
+    assert r.status_code == 204
+    assert await db_session.get(StudentMentorCurrent, me["id"]) is None
+
+
+async def test_trial_child_starts_with_horse(client, db_session):
+    # 명세 4.12-5: 체험 세트 아이는 말띠 소유·현재, 같이 풀어 주는·친구·반말
+    r = await client.post(f"{BASE}/trial", json={})
+    trial = r.json()
+    child = trial["actors"]["child"]
+    h = {"X-Demo-Role": "child", "X-Demo-Actor": child, "X-Trial-Id": trial["trialId"]}
+    m = (await client.get(f"{BASE}/student/mentor", headers=h)).json()
+    assert m["animal"] == "horse" and m["ownedAnimals"] == ["horse"]
+    assert (m["style"], m["title"], m["speech"]) == ("같이 풀어주는", "친구", "반말")
+
+
+async def test_shop_still_works_with_owned_animal(client):
+    # 띠는 cosmetics_owned의 animal-* — 꾸미기 목록(cosmetic_items)에 없는 id가 상점을 깨지 않는다
+    token, _ = await _signup(client, grade=4, mentor=MENTOR)
+    r = await client.get(f"{BASE}/student/shop", headers=_bearer(token))
+    assert r.status_code == 200
+    assert all(not c["id"].startswith("animal-") for c in r.json()["cosmetics"])
+
+
+# ── 명세 4.13-7 고른 난이도대로(D1~D4, 11-14) ───────────────────────────────────
+
+DIFF_KO = {"easy": "초급", "medium": "중급", "hard": "고급"}
+
+
+async def _start_with(client, token, chosen_ko: str) -> dict:
+    h = _bearer(token)
+    await client.post(f"{BASE}/student/promise", headers=h)
+    r = await client.post(f"{BASE}/sessions", headers=h, json={"difficulty": chosen_ko})
+    assert r.status_code == 200, r.text
+    view = r.json()
+    p = (await client.get(f"{BASE}/sessions/{view['id']}/problem", headers=h)).json()
+    return {"view": view, "problem": p}
+
+
+async def test_every_problem_has_difficulty(db_session):
+    from app.models import Problem
+
+    await load_seed(db_session)
+    rows = (await db_session.scalars(select(Problem))).all()
+    assert rows and all(r.standard.get("difficulty") in DIFF_KO for r in rows)
+
+
+async def test_backfill_difficulty_on_old_rows(db_session):
+    from app.models import Problem
+
+    await load_seed(db_session)
+    p = await db_session.get(Problem, "frac-div-nat-01")
+    assert p is not None
+    p.standard = {k: v for k, v in p.standard.items() if k != "difficulty"}  # 옛 운영 행
+    await db_session.flush()
+    await load_seed(db_session)
+    await db_session.refresh(p)
+    assert p.standard["difficulty"] == "easy"
+
+
+@pytest.mark.parametrize("chosen", ["easy", "medium", "hard"])
+async def test_first_problem_matches_chosen_difficulty(client, db_session, clock, chosen):
+    from app.models import Problem
+
+    token, _ = await _signup(client, grade=4)
+    got = await _start_with(client, token, DIFF_KO[chosen])
+    p = await db_session.get(Problem, got["problem"]["id"])
+    assert p is not None and p.tag == "g4-math-large-numbers"
+    assert p.standard["difficulty"] == chosen
+    assert got["view"]["difficulty"] == DIFF_KO[chosen] and got["view"]["chosen"] == DIFF_KO[chosen]
+    assert got["view"]["difficultyNote"] is None
+
+
+async def test_no_repeat_then_nearby_then_second_day_ok(client, db_session, clock):
+    from app.models import Problem
+
+    token, _ = await _signup(client, grade=4)
+    seen = []
+    hard = await db_session.scalar(
+        select(func.count()).select_from(Problem).where(Problem.tag == "g4-math-large-numbers")
+    )
+    assert hard
+    n_hard = sum(
+        1
+        for p in (
+            await db_session.scalars(select(Problem).where(Problem.tag == "g4-math-large-numbers"))
+        ).all()
+        if p.standard["difficulty"] == "hard"
+    )
+    for day in range(n_hard + 1):  # 하루 한 세션 → 날을 바꿔 가며
+        clock.now = NOW + timedelta(days=day)
+        got = await _start_with(client, token, "고급")
+        seen.append(got["problem"]["id"])
+        if day < n_hard:
+            assert got["view"]["difficulty"] == "고급" and got["view"]["difficultyNote"] is None
+        else:  # 고급을 다 낸 뒤 → 가까운 난이도(중급)와 이유
+            assert got["view"]["difficulty"] == "중급"
+            assert got["view"]["difficultyNote"] == "nearby"
+    assert len(set(seen)) == len(seen)  # 같은 문제를 다시 내지 않았다
+
+
+async def test_signup_has_no_today_task_and_instructor_sets_unit_only(client, db_session, clock):
+    """명세 4.13-7 D3-2(성호 11-15): 선생님 지정은 단원만 — 그 단원에서 아이가 고른 난이도로."""
+    token, me = await _signup(client, grade=4)
+    student = await db_session.get(Student, me["id"])
+    assert student is not None and student.today_task_problem_id is None  # G1 가입 today_task 없앰
+    assigned = await db_session.get(Problem, "g4-math-large-numbers-02")
+    assert assigned is not None
+    hard = {
+        p.id
+        for p in (await db_session.scalars(select(Problem).where(Problem.tag == assigned.tag)))
+        if (p.standard or {}).get("difficulty") == "hard"
+    }
+    assert (
+        hard and assigned.id not in hard
+    )  # 지정 문제는 고급이 아니다 → 고른 난이도가 이겨야 보인다
+    student.today_task_problem_id = assigned.id
+    from app.timeutil import seoul_date
+
+    student.today_task_date = seoul_date(NOW)
+    await db_session.commit()
+    got = await _start_with(client, token, "고급")
+    assert got["problem"]["id"] in hard
+    assert got["view"]["chosen"] == "고급" and got["view"]["difficulty"] == "고급"
+    assert got["view"]["difficultyNote"] is None  # 「선생님이 정한 문제」 안내는 더 없다
+
+
+async def test_no_fixed_difficulty_constant():
+    import pathlib
+
+    app_dir = pathlib.Path(__file__).resolve().parents[1] / "app"
+    assert not any("DIFFICULTY =" in f.read_text("utf-8") for f in app_dir.glob("*.py"))
+
+
+async def test_two_units_same_grade_alternate_math_first(client, db_session, clock):
+    # 명세 4.13-7(bb 검토 ③): 초1은 수학·국어 두 단원 → 1일차 수학, 2일차 국어, 3일차 수학
+    from app.models import Problem
+
+    token, _ = await _signup(client, grade=1)
+    tags = []
+    for day in range(3):
+        clock.now = NOW + timedelta(days=day)
+        got = await _start_with(client, token, "중급")
+        p = await db_session.get(Problem, got["problem"]["id"])
+        assert p is not None
+        tags.append(p.standard["subject"])
+    assert tags == ["math", "korean", "math"]
+
+
+# ── 명세 4.13-7 D3-1 무작위(성호 11-14 밤) — 같은 학년·난이도 새 아이도 서로 다른 첫 문제 ──
+
+
+async def test_first_problem_is_random_among_unserved(client, db_session, clock, monkeypatch):
+    from app import api
+    from app.models import Problem
+
+    picks = []
+    for i, chooser in enumerate((lambda xs: xs[0], lambda xs: xs[-1])):  # 서로 다른 rng 값
+        monkeypatch.setattr(api, "choose_problem", chooser)
+        token, _ = await _signup(client, login=f"kid_rand{i}", grade=4)
+        got = await _start_with(client, token, "중급")
+        p = await db_session.get(Problem, got["problem"]["id"])
+        assert p is not None and p.tag == "g4-math-large-numbers"
+        assert p.standard["difficulty"] == "medium" and got["view"]["difficultyNote"] is None
+        picks.append(p.id)
+    assert picks[0] != picks[1]
+
+
+async def test_random_pick_never_repeats_until_all_served(client, db_session, clock):
+    # 실제 무작위 그대로: 같은 아이 여러 날 → 중급을 다 낼 때까지 중복 없음
+    from app.models import Problem
+
+    rows = (
+        await db_session.scalars(select(Problem).where(Problem.tag == "g4-math-large-numbers"))
+    ).all()
+    n_medium = sum(1 for p in rows if p.standard["difficulty"] == "medium")
+    assert n_medium >= 2
+    token, _ = await _signup(client, grade=4)
+    seen = []
+    for day in range(n_medium):
+        clock.now = NOW + timedelta(days=day)
+        got = await _start_with(client, token, "중급")
+        assert got["view"]["difficultyNote"] is None
+        seen.append(got["problem"]["id"])
+    assert len(set(seen)) == n_medium
+
+
+async def test_all_served_then_random_repeat_same_difficulty(db_session, monkeypatch):
+    from app import api
+    from app.models import Problem
+
+    await load_seed(db_session)
+    rows = (
+        await db_session.scalars(select(Problem).where(Problem.tag == "g4-math-large-numbers"))
+    ).all()
+    served = {p.id for p in rows}  # 다 냈다
+    hard = sorted(p.id for p in rows if p.standard["difficulty"] == "hard")
+    got = []
+    for chooser in (lambda xs: xs[0], lambda xs: xs[-1]):
+        monkeypatch.setattr(api, "choose_problem", chooser)
+        r = await api._pick_by_difficulty(db_session, "g4-math-large-numbers", "hard", served)
+        assert r is not None and r[1] == "repeat" and r[0] in hard
+        got.append(r[0])
+    assert len(hard) < 2 or got[0] != got[1]
+
+
+def test_new_units_have_names():
+    from app.api import TAG_NAME
+
+    for tag, name in {
+        "g1-math-add-sub": "덧셈과 뺄셈 (초1)",
+        "g12-kor-passive-causative": "피동·사동 (고3)",
+        "g9-math-quadratic-equations": "이차방정식 (중3)",
+    }.items():
+        assert TAG_NAME[tag] == name
+    assert len(TAG_NAME) == 21

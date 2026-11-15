@@ -11,6 +11,7 @@
 
 import math
 import re
+import secrets
 from collections.abc import Callable, Coroutine
 from datetime import datetime, timedelta
 from typing import Any, Literal
@@ -27,6 +28,7 @@ from app import config
 from app.accounts import CurrentAccount, connected_ids, is_restricted
 from app.actors import Actor
 from app.api import (
+    DIFF_FROM_KO,
     FINISHED,
     HOTLINES,
     TAG_NAME,
@@ -51,6 +53,8 @@ from app.api import (
     _today_session,
     _today_task,
     _with_seq_retry,
+    begin_session,
+    difficulty_of,
     get_bridge,
     is_solved,
     next_streak,
@@ -61,7 +65,6 @@ from app.api import (
     post_reply,
     progress,
     put_mentor,
-    start_session,
     sync_progress,
 )
 from app.demo import ResetBody, _write_day3_student
@@ -81,17 +84,29 @@ from app.instructor import (
     put_today_task,
     update_draft_body,
 )
+from app.mentor_animals import (
+    ANIMAL_PRICE,
+    ANIMALS,
+    DEFAULT_ANIMAL,
+    current_animal,
+    give_animal,
+    owned_animals,
+    set_current,
+)
 from app.models import MESSAGE_TTL, Alert, InstructorNote, Message, Problem, Session, Student
-from app.models_org import Account, Room
+from app.models_org import Account, AlertAck, Room, SessionDifficulty
 from app.pii import unredact_name
 from app.safety import check as red_keyword
 from app.seed import load_seed
 from app.seeds import (
+    COSMETIC_BUY,
     STUDY_DONE,
+    add_seed,
     balance_of,
     earn_study_seeds,
     earned_on,
     in_class,
+    lock_student,
     selected_unit_names,
     stamps_of,
 )
@@ -131,12 +146,33 @@ router = APIRouter(prefix="/compat", route_class=_CompatRoute)
 
 # 아이가 🔴으로 끝난 날 보호자 첫 화면 안내. 문구는 여기 한곳만 바꾸면 된다(11-11, 성호 결정 대기)
 GUARDIAN_ALERT_NOTICE = "오늘 확인이 필요한 알림이 있어요"
-DIFFICULTY = "중급"  # 시드에 난이도가 없다. 프론트 타입을 채우는 표시용 고정값
+GUARDIAN_ALERT_ACKED = (
+    "오늘 안전 알림을 확인했어요"  # 오늘 🔴을 모두 「확인했어요」 뒤(명세 4.11-9, 11-15)
+)
+DIFF_KO = {"easy": "초급", "medium": "중급", "hard": "고급"}
+
+
+def difficulty_label(problem: Problem | None) -> str | None:
+    """그 문제의 실제 난이도(명세 4.13-7 D4). 문제가 없으면 None."""
+    return DIFF_KO[difficulty_of(problem)] if problem is not None else None
+
+
+async def _difficulty_fields(
+    db: AsyncSession, row: Session, problem: Problem | None
+) -> dict[str, Any]:
+    sd = await db.get(SessionDifficulty, row.id)
+    return {
+        "difficulty": difficulty_label(problem),
+        "chosen": DIFF_KO.get(sd.chosen) if sd else None,
+        "difficultyNote": sd.note if sd else None,  # instructor / nearby / repeat / None
+    }
+
+
 STUDY_SEC = 20 * 60  # 명세 3.2 「같이 풀기 ~20분」. 남은 초는 state_machine.study_remaining_sec
 TASK_MINUTES = 20
 HINT_COUNT = MAX_HINT - 1  # 힌트 1·2. 3은 풀이 보기
 WEEKDAY = "월화수목금토일"
-ASSIGNED_BY = {"instructor": "선생님", "misconception": "친구1"}
+ASSIGNED_BY = {"instructor": "선생님", "misconception": "친구1", "grade": "친구1", "seed": "친구1"}
 STYLE_LABEL = {"EBSP": "같이 풀어주는", "EQLC": "들어주는", "DQSC": "짚어주는"}
 TITLE_LABEL = {"hyung": "형", "unni": "언니", "friend": "친구"}
 _OPERAND = r"\(?(\d+)(?:/(\d+))?\)?"
@@ -249,7 +285,7 @@ async def _view(db: AsyncSession, row: Session, student: Student, now: datetime)
         "id": row.id,
         "phase": phase,
         "unit": _tag_name(problem),
-        "difficulty": DIFFICULTY,
+        **await _difficulty_fields(db, row, problem),
         "solved": prog.solved,
         "total": prog.total,
         "assisted": prog.assisted,
@@ -346,33 +382,75 @@ async def accept_promise(db: Db, student: Child) -> None:
     await db.commit()
 
 
-@router.get("/student/mentor")
-async def get_mentor(student: Child) -> dict[str, Any]:
-    # 그림(띠)은 저장 칸이 없어 null — 스타일 코드와 분리(팀 결정 11-09)
+async def _trial_of(db: AsyncSession, student_id: str) -> str | None:
+    acc = await db.get(Account, student_id)
+    return acc.trial_id if acc is not None else None
+
+
+async def _mentor_view(db: AsyncSession, student: Student) -> dict[str, Any]:
+    # 띠(그림)는 스타일 코드와 분리(팀 결정 11-09). 띠 저장은 명세 4.12-5(11-14)
     return {
         "style": STYLE_LABEL[student.style],
         "title": TITLE_LABEL[student.honorific],
         "speech": "존댓말" if student.polite else "반말",
-        "animal": None,
+        "animal": await current_animal(db, student.id),
+        "ownedAnimals": await owned_animals(db, student.id),
+        "animalPrice": ANIMAL_PRICE,
     }
+
+
+@router.get("/student/mentor")
+async def get_mentor(db: Db, student: Child) -> dict[str, Any]:
+    return await _mentor_view(db, student)
 
 
 class MentorSettingIn(BaseModel):
     style: Literal["같이 풀어주는", "들어주는", "짚어주는"]
     title: Literal["형", "언니", "친구"]
     speech: Literal["반말", "존댓말"]
-    animal: str | None = None  # 받기만 하고 저장하지 않는다
+    animal: str | None = None  # 띠 키(12개). 가진 띠만, 띠가 없던 옛 계정의 첫 고르기는 무료
 
 
 @router.put("/student/mentor")
 async def save_mentor(body: MentorSettingIn, db: Db, now: Now, student: Child) -> dict[str, Any]:
+    if body.animal is not None:
+        if body.animal not in ANIMALS:
+            raise ApiError(422, "invalid_request", "고를 수 있는 캐릭터가 아니에요.")
+        owned = await owned_animals(db, student.id)
+        if body.animal != await current_animal(db, student.id):
+            session = await _today_session(db, student, now)
+            if session is not None and session.state in (State.STUDY.value, State.CHAT.value):
+                raise ApiError(409, "in_session", "공부하는 중에는 바꿀 수 없어요. 끝나고 바꿔 줘.")
+            trial = await _trial_of(db, student.id)
+            if not owned:  # 옛 계정 첫 고르기는 무료 소유
+                await give_animal(db, student.id, body.animal, now, trial)
+            elif body.animal not in owned:
+                raise ApiError(409, "not_owned", "아직 없는 캐릭터예요.")
+            await set_current(db, student.id, body.animal, now, trial)
     style = {v: k for k, v in STYLE_LABEL.items()}[body.style]
     honorific = {v: k for k, v in TITLE_LABEL.items()}[body.title]
     mentor = MentorIn.model_validate(
         {"style": style, "honorific": honorific, "polite": body.speech == "존댓말"}
     )
     await put_mentor(mentor, db, now, student)
-    return await get_mentor(student)
+    return await _mentor_view(db, student)
+
+
+@router.post("/student/shop/animals/{animal}/buy")
+async def buy_animal(animal: str, db: Db, now: Now, student: Child) -> dict[str, Any]:
+    """띠 사기 = 칭찬 도장 ANIMAL_PRICE개(명세 4.12-5). 옷 사기와 같은 잠금·장부."""
+    if animal not in ANIMALS:
+        raise ApiError(422, "invalid_request", "고를 수 있는 캐릭터가 아니에요.")
+    await lock_student(db, student.id)
+    if animal in await owned_animals(db, student.id):
+        raise ApiError(409, "already_owned", "이미 가지고 있어요.")
+    short = ANIMAL_PRICE - await stamps_of(db, student.id)
+    if short > 0:
+        raise ApiError(409, "not_enough_stamps", f"도장이 {short}개 더 필요해요.")
+    await add_seed(db, student.id, -ANIMAL_PRICE, COSMETIC_BUY, "캐릭터", student.id, now)
+    await give_animal(db, student.id, animal, now, await _trial_of(db, student.id))
+    await db.commit()
+    return await _mentor_view(db, student)
 
 
 # --- 학생: 하루 세션 -------------------------------------------------------------------
@@ -387,12 +465,17 @@ async def active_session(db: Db, now: Now, student: Child) -> dict[str, Any] | N
 
 
 class StartIn(BaseModel):
-    difficulty: str | None = None  # 시드에 난이도가 없어 쓰지 않는다
+    difficulty: str | None = None  # 초급·중급·고급(명세 4.13-7). 없거나 이상하면 중급
 
 
 @router.post("/sessions")
-async def start(db: Db, now: Now, student: Child, _: StartIn | None = None) -> dict[str, Any]:
-    started = await start_session(db, now, student)
+async def start(db: Db, now: Now, student: Child, body: StartIn | None = None) -> dict[str, Any]:
+    # 약속(AI 사용·🔴 보호자 알림 고지) 전에는 시작하지 않는다 — 주소 직접 입력으로 건너뛸 수 있었다(11-14 round2 #5)
+    if not student.consent and await _today_session(db, student, now) is None:
+        raise ApiError(409, "needs_promise", "약속부터 해 줘.")
+    # 안 보냈거나 이상하면 None → 서버가 medium으로 적고 선생님 지정 문제 그대로(명세 4.13-7 D3-2)
+    chosen = DIFF_FROM_KO.get((body.difficulty if body else None) or "")
+    started = await begin_session(db, now, student, chosen)
     return await _session_view(db, started["session_id"], student, now)
 
 
@@ -470,6 +553,14 @@ async def submit_answer(
     text = body.as_text()
     if text is None:
         raise ApiError(422, "invalid_request", "답을 넣어 주세요.")
+    if (
+        problem is not None
+        and (problem.answer or {}).get("kind") == "choice"
+        and len(text) == 1
+        and text in "①②③④"
+    ):
+        # 명세 4.13-3(11-14 R7): 「③」은 저장 때 정규화로 「3」이 되어 보기 번호인 줄 몰랐다 → 「3번」
+        text = f"{'①②③④'.index(text) + 1}번"
     try:
         msg = MessageIn(kind="text", text=text)
     except ValidationError:  # 터무니없이 큰 수(11-12 점검: 500이던 것)
@@ -608,6 +699,16 @@ async def get_chat(session_id: str, db: Db, now: Now, student: Child) -> dict[st
             for m in rows
             if (created := as_utc(m.expires_at)) is not None and created - MESSAGE_TTL >= started
         ]
+    elif row.state == State.CRISIS.value:
+        # 위기 화면 맨 위 서버 고정 문장(명세 부록 E, 11-15) — 마지막 멘토 말 1개만, 아이 말은 싣지 않는다
+        last = await db.scalar(
+            select(Message)
+            .where(Message.session_id == row.id, Message.role == "mentor")
+            .order_by(Message.seq.desc())
+            .limit(1)
+        )
+        if last is not None:
+            messages = [{"from": "mentor", "text": last.text_redacted}]
     remaining = _seconds_left(as_utc(row.deadline_at), now)
     await db.commit()
     return {"messages": messages, "remainingSec": remaining}
@@ -713,7 +814,9 @@ async def get_wrap(session_id: str, db: Db, now: Now, student: Child, llm: Llm) 
         "unit": view["unit"],
         "solved": view["solved"],
         "total": view["total"],
-        "difficulty": DIFFICULTY,
+        "difficulty": view["difficulty"],
+        "chosen": view["chosen"],
+        "difficultyNote": view["difficultyNote"],
         "studyMin": view["studyMin"],
         "chatMin": 0,  # 수다 시간은 따로 저장하지 않는다
         "streakDays": student.streak_days,
@@ -770,6 +873,17 @@ async def get_guardian_today(
         )
         .limit(1)
     )
+    # 오늘 🔴 세션의 알림 중 아직 「확인했어요」 안 누른 것(명세 4.11-9, 11-15)
+    unseen_today = await db.scalar(
+        select(Alert.id)
+        .join(Session, Session.id == Alert.session_id)
+        .where(
+            Session.student_id.in_(kids),
+            Session.date == seoul_date(now),
+            Alert.guardian_seen.is_(False),
+        )
+        .limit(1)
+    )
     session = await db.scalar(
         select(Session).where(Session.student_id == student.id, Session.date == seoul_date(now))
     )
@@ -789,8 +903,12 @@ async def get_guardian_today(
         "homework": card["homework"],  # 승인된 강사 노트의 사실 칸(명세 부록 D)
         "attendance": _attendance(student, now),
         "todayIndex": seoul_date(now).weekday(),
-        # 오늘 🔴로 끝났으면 첫 화면에 「공부 전」 대신 이 안내(알림 탭으로)
-        "alertNotice": GUARDIAN_ALERT_NOTICE if red_today is not None else None,
+        # 오늘 🔴로 끝났으면 첫 화면에 「공부 전」 대신 이 안내(알림 탭으로). 모두 확인했으면 확인 문구
+        "alertNotice": None
+        if red_today is None
+        else GUARDIAN_ALERT_NOTICE
+        if unseen_today is not None
+        else GUARDIAN_ALERT_ACKED,
     }
 
 
@@ -808,34 +926,66 @@ async def _guardian_children(
     return kids
 
 
+def _seoul_label(t: datetime) -> str:
+    u = as_utc(t)
+    assert u is not None
+    at = u.astimezone(SEOUL)
+    return f"{at.month}월 {at.day}일 · {at:%H:%M}"
+
+
+def _alert_item(a: Alert, kids: dict[str, str], ack: AlertAck | None) -> dict[str, Any]:
+    return {
+        "id": a.id,
+        "at": _seoul_label(a.created_at),
+        "level": "긴급",  # 🔴(자해·자살)만 있다
+        "category": "안전",
+        "action": "지금 아이와 직접 이야기해 주세요. 도움: " + "·".join(HOTLINES),
+        "status": "확인함" if a.guardian_seen else "미확인",
+        # 보호자가 처음 「확인했어요」 누른 시각(명세 4.3, 11-15). 없으면 null
+        "ackedAt": _seoul_label(ack.acked_at) if ack is not None else None,
+        "excerpt": None,  # 아이 말은 보내지 않는다 — 옛 행에 남은 값도(11-15 04:30 성호)
+        "hotlines": list(HOTLINES),
+        "childName": kids.get(a.student_id),  # 아이가 둘 이상이면 누구 알림인지
+    }
+
+
 @router.get("/guardian/alerts")
 async def get_alerts(
     db: Db, student: GuardianChild, account: CurrentAccount
 ) -> list[dict[str, Any]]:
-    """🔴 알림 목록. 발췌 ±2턴·300자를 싣는다(결정 11-10·11-11, 🔴일 때만). 연결된 모든 아이 것."""
+    """🔴 알림 목록. 발췌(아이 말)는 싣지 않는다(11-15 04:30 성호). 연결된 모든 아이 것."""
     kids = await _guardian_children(db, student, account)
-    alerts = await db.scalars(
-        select(Alert).where(Alert.student_id.in_(kids)).order_by(Alert.created_at.desc())
-    )
-    out = []
-    for a in alerts:
-        created = as_utc(a.created_at)
-        assert created is not None
-        at = created.astimezone(SEOUL)
-        out.append(
-            {
-                "id": a.id,
-                "at": f"{at.month}월 {at.day}일 · {at:%H:%M}",
-                "level": "긴급",  # 🔴(자해·자살)만 있다
-                "category": "안전",
-                "action": "지금 아이와 직접 이야기해 주세요. 도움: " + "·".join(HOTLINES),
-                "status": "확인함" if a.guardian_seen else "미확인",
-                "excerpt": a.excerpt,
-                "hotlines": list(HOTLINES),
-                "childName": kids.get(a.student_id),  # 아이가 둘 이상이면 누구 알림인지
-            }
+    alerts = list(
+        await db.scalars(
+            select(Alert).where(Alert.student_id.in_(kids)).order_by(Alert.created_at.desc())
         )
-    return out
+    )
+    acks = {
+        k.alert_id: k
+        for k in await db.scalars(
+            select(AlertAck).where(AlertAck.alert_id.in_([a.id for a in alerts]))
+        )
+    }
+    return [_alert_item(a, kids, acks.get(a.id)) for a in alerts]
+
+
+@router.post("/guardian/alerts/{alert_id}/ack")
+async def ack_alert(
+    alert_id: str, db: Db, now: Now, student: GuardianChild, account: CurrentAccount
+) -> dict[str, Any]:
+    """보호자 「확인했어요」(명세 4.3, 성호 11-15). 볼 수 있는 아이의 알림만, 아니면 404.
+    처음 누른 시각을 남기고 다시 눌러도 그 시각 그대로(멱등). 카드는 지우지 않는다."""
+    kids = await _guardian_children(db, student, account)
+    alert = await db.get(Alert, alert_id)
+    if alert is None or alert.student_id not in kids:
+        raise ApiError(404, "not_found", "알림을 찾지 못했어요.")
+    ack = await db.get(AlertAck, alert.id)
+    if ack is None:
+        ack = AlertAck(alert_id=alert.id, acked_at=now)
+        db.add(ack)
+    alert.guardian_seen = True
+    await db.commit()
+    return _alert_item(alert, kids, ack)
 
 
 # --- 강사 (F5, 11-11) -----------------------------------------------------------------
@@ -896,6 +1046,10 @@ async def _teacher_today(db: AsyncSession, now: datetime, actor: Actor) -> dict[
                 "name": student.nickname,
                 "task": task,
                 "status": status,
+                # 강사가 오늘 지정해 둔 문제(아직 시작 전, TK-101). 화면이 고른 문제를 다시 보여 준다
+                "assignedProblemId": student.today_task_problem_id
+                if student.today_task_date == seoul_date(now)
+                else None,
                 "draftStatus": DRAFT_STATUS.get(note.status) if note is not None else None,
             }
         )
@@ -959,6 +1113,43 @@ async def teacher_today(db: Db, now: Now, actor: Instructor) -> dict[str, Any]:
 
 class AssignIn(BaseModel):
     unit: str | None = None  # 단원 이름. null이면 지정 해제
+    # TK-101(명세 4.13): 특정 문제(그 단원 안) 또는 단원 안 무작위. 둘 다 없으면 단원 첫 문제
+    problemId: str | None = Field(default=None, max_length=40)
+    pick: Literal["first", "random"] = "first"
+
+
+ASSIGN_MAX = 40  # 한 번에 지정할 학생 수 상한(강의실 하나 넉넉히)
+
+
+class AssignManyIn(AssignIn):
+    studentIds: list[str] = Field(min_length=1, max_length=ASSIGN_MAX)
+
+
+async def _unit_problem_ids(db: AsyncSession, unit: str | None) -> list[str]:
+    """단원 이름 → 그 단원 문제 id(id 순). 모르는 단원이거나 문제가 0개면 422."""
+    tag = UNIT_TAG.get(unit or "")
+    ids = (
+        list(
+            (
+                await db.scalars(select(Problem.id).where(Problem.tag == tag).order_by(Problem.id))
+            ).all()
+        )
+        if tag is not None
+        else []
+    )
+    if not ids:
+        raise ApiError(422, "invalid_request", "고를 수 있는 단원이 아니에요.")
+    return ids
+
+
+def _pick_problem(ids: list[str], body: AssignIn) -> str:
+    if body.problemId is not None:
+        if body.problemId not in ids:
+            raise ApiError(422, "invalid_request", "그 단원의 문제가 아니에요.")
+        return body.problemId
+    if body.pick == "random":
+        return secrets.choice(ids)  # 학생마다 따로 뽑는다. 뽑힌 문제는 응답 assigned에
+    return ids[0]
 
 
 @router.put("/teacher/students/{student_id}/task")
@@ -972,16 +1163,31 @@ async def assign_task(
         student.today_task_date = None
         await db.commit()
         return await _teacher_today(db, now, actor)
-    tag = UNIT_TAG.get(body.unit)
-    problem_id = (
-        await db.scalar(select(Problem.id).where(Problem.tag == tag).order_by(Problem.id).limit(1))
-        if tag is not None
-        else None
-    )
-    if problem_id is None:
-        raise ApiError(422, "invalid_request", "고를 수 있는 단원이 아니에요.")
+    problem_id = _pick_problem(await _unit_problem_ids(db, body.unit), body)
     await put_today_task(student.id, TodayTaskIn(problem_id=problem_id), db, now, actor)
-    return await _teacher_today(db, now, actor)
+    return {
+        **await _teacher_today(db, now, actor),
+        "assigned": [{"studentId": student.id, "problemId": problem_id}],
+    }
+
+
+@router.put("/teacher/tasks")
+async def assign_tasks(body: AssignManyIn, db: Db, now: Now, actor: Instructor) -> dict[str, Any]:
+    """여러 명에게 한 번에(TK-101). 하나라도 권한 밖이면 아무것도 바꾸지 않는다."""
+    ids = list(dict.fromkeys(body.studentIds))  # 순서 유지 중복 제거
+    if body.unit is None:
+        raise ApiError(422, "invalid_request", "단원을 골라 주세요.")
+    pool = await _unit_problem_ids(db, body.unit)
+    students = [await _student_or_404(db, sid, actor) for sid in ids]  # 먼저 전부 확인
+    assigned = []
+    today = seoul_date(now)
+    for student in students:
+        pid = _pick_problem(pool, body)
+        student.today_task_problem_id = pid
+        student.today_task_date = today
+        assigned.append({"studentId": student.id, "problemId": pid})
+    await db.commit()
+    return {**await _teacher_today(db, now, actor), "assigned": assigned}
 
 
 class TeacherMemoIn(BaseModel):
@@ -1090,6 +1296,10 @@ async def create_trial(db: Db, now: Now) -> dict[str, Any]:
     child = await db.get(Student, child_id)
     assert child is not None
     child.created_at = now
+    # 명세 4.12-5: 체험 지우는 고르기 없이 말띠 + 같이 풀어 주는·친구·반말
+    child.style, child.honorific, child.polite = "EBSP", "friend", False
+    await give_animal(db, child_id, DEFAULT_ANIMAL, now, trial_id)
+    await set_current(db, child_id, DEFAULT_ANIMAL, now, trial_id)
     await db.commit()
     return {
         "trialId": trial_id,

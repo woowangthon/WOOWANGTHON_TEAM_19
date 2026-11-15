@@ -1,6 +1,6 @@
 // 가입 정보 입력 — 「가입하기」가 왜 막혔는지 한 줄(R3)
 import { describe, expect, it } from 'vitest';
-import { looksLikePhone, signupMissing } from './signupHint';
+import { looksLikePhone, pwHint, signupMissing } from './signupHint';
 
 const ok = { loginId: 'haneul01', idOk: true as boolean | null, pwOk: true, same: true, name: '하늘', kid: true, grade: 5 as number | null, emailOk: false };
 
@@ -35,5 +35,22 @@ describe('별명에 전화번호(R1)', () => {
   });
   it('어른 이름 칸은 검사하지 않는다', () => {
     expect(signupMissing({ ...base, kid: false, emailOk: true, name: '김선생님1234' })).toBeNull();
+  });
+});
+
+describe('pwHint — 비밀번호 칸 바로 아래, 지금 몇 자인지(성호 11-14)', () => {
+  it('맞으면 좋아요', () => {
+    expect(pwHint('abcd1234')).toEqual({ ok: true, text: '좋아요' });
+  });
+  it('짧으면 지금 글자 수와 모자란 수', () => {
+    expect(pwHint('abc1234')).toEqual({ ok: false, text: '지금 7자예요. 1자 더 넣어 주세요 (영문+숫자 8~20자)' });
+    expect(pwHint('ab1234')).toEqual({ ok: false, text: '지금 6자예요. 2자 더 넣어 주세요 (영문+숫자 8~20자)' });
+  });
+  it('길면 지금 글자 수', () => {
+    expect(pwHint('a'.repeat(20) + '1')).toEqual({ ok: false, text: '지금 21자예요. 20자까지 쓸 수 있어요' });
+  });
+  it('길이는 맞는데 영문·숫자 한쪽만이면 섞으라고', () => {
+    expect(pwHint('abcdefgh')).toEqual({ ok: false, text: '지금 8자예요. 숫자도 하나 넣어 주세요' });
+    expect(pwHint('12345678')).toEqual({ ok: false, text: '지금 8자예요. 영문도 하나 넣어 주세요' });
   });
 });

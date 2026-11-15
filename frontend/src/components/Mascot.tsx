@@ -4,8 +4,9 @@
 // 그림체가 바뀌어도 같은 이름으로 파일만 교체하면 된다.
 import { useState } from 'react';
 import { useMentor } from '../state/mentor';
+import { useMeOptional } from '../state/auth';
 import { FULL_ART_ANIMALS, type Animal } from '../types';
-import { hasCosmeticArt } from './Seed';
+import { outfitArtSrc } from './Seed';
 
 export type Mood = 'wave' | 'think' | 'cheer' | 'promise' | 'calm' | 'read';
 type Variant = 'avatar' | 'face' | 'full';
@@ -15,19 +16,23 @@ const pick = (size: number): Variant => (size <= 56 ? 'avatar' : size <= 96 ? 'f
 /**
  * outfit: 입은 옷 id. 옷 그림은 인사(wave) 자세만 만든다 → public/mascot/{animal}/outfit-{id}.png · outfit-{id}-face.png
  * 옷 그림 파일이 아직 없으면 기본 그림을 쓴다(오류 없이).
+ * outfit도 animal도 안 넘기면 = 「내 멘토」 → 로그인한 아이가 입은 옷(me.outfit)을 쓴다. 산 옷이 모든 아이 화면에 유지되게(11-15 페이블 감사 C②, 성호)
+ * 작은 머리 그림(56px 이하)은 옷 파일이 없어서 옷을 입었으면 상반신 옷 그림을 쓴다.
  */
 export function Mascot({ mood = 'wave', size = 72, animal, variant, outfit }: { mood?: Mood; size?: number; animal?: Animal; variant?: Variant; outfit?: string | null }) {
   const ctx = useMentor();
+  const me = useMeOptional();
   const a = animal ?? ctx.animal;
   const v = variant ?? pick(size);
+  const wear = outfit !== undefined ? outfit : animal ? null : (me?.outfit ?? null);
   const [broken, setBroken] = useState(false);
   const [outfitBroken, setOutfitBroken] = useState<string | null>(null);
   const base = `${import.meta.env.BASE_URL}mascot/${a}/`;
   // 새 띠 10종은 인사(wave) 그림만 있다 → 다른 표정은 인사 그림으로(없는 파일을 요청하지 않게, 11-13)
   const m: Mood = FULL_ART_ANIMALS.includes(a) ? mood : 'wave';
   const plain = `${base}${m}${v === 'full' ? '' : '-' + v}.png`;
-  // 옷 그림이 있는 것만 요청(없으면 맨 캐릭터) — 404 없이(11-12)
-  const dressed = outfit && v !== 'avatar' && hasCosmeticArt(a, 'outfit', outfit) ? `${base}outfit-${outfit}${v === 'full' ? '' : '-' + v}.png` : null;
+  // 옷 그림은 그 크기(전신·얼굴) 파일이 있을 때만 요청(없으면 맨 캐릭터) — 404 없이(11-12, 크기별 11-14)
+  const dressed = outfitArtSrc(base, a, wear, v === 'avatar' ? 'face' : v);
   const src = dressed && outfitBroken !== dressed ? dressed : plain;
   return (
     <div className={'mascot mascot--' + v} style={{ width: size, height: size }} aria-hidden>

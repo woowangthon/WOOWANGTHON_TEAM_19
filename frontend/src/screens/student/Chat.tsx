@@ -1,5 +1,6 @@
 // 학생 ④ 수다 (선택, 최대 10분) — 학생이 '끝내기'로 조절하고, 10분 마감은 서버가 판정한다.
-// 위험 표현이 감지되면 서버가 세션을 crisis로 끝내고, 화면은 위기 화면으로 넘어간다.
+// 위험 표현이 감지되면 서버가 세션을 crisis로 끝낸다. 화면은 1안 「수다 안에서 받기」(성호 11-15): 대화를 남긴 채 서버 고정 문장
+// 말풍선 + 1388·109·문자 카드, 입력은 닫고 「도움받을 곳 더 보기」 → 위기 화면. 새로고침·뒤로·앱 닫기는 지금처럼 위기 화면.
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
@@ -8,13 +9,16 @@ import { Icon } from '../../components/Icon';
 import { Mascot } from '../../components/Mascot';
 import { LoadError, Thinking } from '../../components/Common';
 import { mmss } from '../../lib/date';
+import { chatTimeShow } from '../../lib/chatTime';
 import { useCountdown } from '../../lib/useCountdown';
 import { useAsync } from '../../lib/useAsync';
 import { RequirePhase, useSession } from '../../state/session';
 import { useMentor } from '../../state/mentor';
-import { createBatcher, followPending, routeAfterLeftChat } from '../../lib/chatBatch';
+import { chatReplyAction, createBatcher, followPending, listenHidden, routeAfterLeftChat } from '../../lib/chatBatch';
+import { CrisisContacts, CrisisNotified } from '../../components/CrisisHelp';
 import { onceAtATime, useOnResume } from '../../lib/resume';
-import type { ChatMessage, ChatReply } from '../../types';
+import { refreshIfChatExpired } from '../../lib/sessionSync';
+import type { ChatMessage, ChatReply, SessionView } from '../../types';
 
 const SUGGEST = ['오늘 피곤해', '자랑할 거 있어', '그냥 얘기하고 싶어'];
 
@@ -35,6 +39,9 @@ function Chat() {
   const [ending, setEnding] = useState(false);
   const [closing, setClosing] = useState(false);  // U9: 끝난 뒤 2초 안내를 보이고 넘어간다(서버 판정·단계는 그대로)
   const stopped = useRef(false);                 // 위기·단계 바뀜 뒤 늦게 온 답은 버린다
+  // 1안: 수다 중 🔴 응답의 세션(crisis). 화면에 남는 동안 들고 있다가 떠날 때·「더 보기」 때 맞춘다(RequirePhase가 바로 옮기지 않게)
+  const [held, setHeld] = useState<SessionView | null>(null);
+  const heldRef = useRef<SessionView | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const inflight = useRef(0);                    // 다시 읽기용: 나가 있는 요청 수(렌더를 기다리지 않는 값)
   const sends = useRef(0);                       // 다시 읽기용: 지금까지 보낸 묶음 수
@@ -49,13 +56,22 @@ function Chat() {
   useEffect(() => { if (data) setMsgs([...data.messages, ...batcher.peek().map((t): ChatMessage => ({ from: 'me', text: t }))]); }, [data, batcher]);
   useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }); }, [msgs, waiting]);
   // U9: 10분이 다 되면 바로 넘기지 않고 안내 한 줄을 2초 보인 뒤 서버에 다시 묻는다
-  const left = useCountdown(data ? data.remainingSec : null, () => { setClosing(true); window.setTimeout(refresh, 2000); });
+  const left = useCountdown(data ? data.remainingSec : null, () => { if (heldRef.current) return; setClosing(true); window.setTimeout(refresh, 2000); });
+  // 이미 끝난 시간(0초)으로 열리면 카운트다운이 0을 지나지 않는다 → 바로 서버 단계를 다시 읽는다(빈 수다 화면에 갇히지 않게)
+  useEffect(() => { refreshIfChatExpired(data?.remainingSec, () => { void refresh(); }); }, [data, refresh]);
+  const t = chatTimeShow(left); // TK-94: 3분 전부터만 남은 시간을 보인다
 
   /** 응답 하나 처리. 계속 받아도 되면 true */
   const take = (r: ChatReply): boolean => {
     if (stopped.current) return false;
-    if (r.session.phase !== 'chat') {
-      stopped.current = true; sync(r.session); // 위기 감지·시간 종료 → 서버 단계에 맞는 화면으로
+    const act = chatReplyAction(r.session.phase, left_.current);
+    if (act === 'crisis-here') { // 1안: 대화는 그대로, 서버 고정 문장을 말풍선으로(화면에 문장을 적지 않는다)
+      stopped.current = true; heldRef.current = r.session; setHeld(r.session);
+      if (r.reply) setMsgs((m) => [...m, { from: 'mentor', text: r.reply }]);
+      return false;
+    }
+    if (act === 'leave') {
+      stopped.current = true; sync(r.session); // 시간 종료 등(또는 떠난 뒤 온 위기) → 서버 단계에 맞는 화면으로
       // 떠난 뒤라 RequirePhase가 옮겨 주지 못한다. 위기면 직접 위기 화면으로(홈이 예전 상태로 남지 않게)
       const to = left_.current ? routeAfterLeftChat(r.session.phase) : null;
       if (to) navigate(to, { replace: true });
@@ -74,7 +90,9 @@ function Chat() {
   sendRef.current = sendBatch;
   // 화면을 떠날 때 모아 둔 말은 버리지 않고 먼저 보낸다(🔴 검사를 거치게, 명세 4.11 7). 이동은 막지 않고,
   // 요청은 화면이 사라진 뒤에도 끝까지 간다(위기면 sync로 세션이 바뀐다). 마감 뒤라 빈 답이 와도 정상
-  useEffect(() => () => { left_.current = true; batcher.flush(); }, [batcher]);
+  useEffect(() => () => { left_.current = true; if (heldRef.current) sync(heldRef.current); else batcher.flush(); }, [batcher, sync]);
+  // 앱을 내리거나 스와이프로 닫으면 1.5초를 기다리지 않고 모은 말을 바로 보낸다(keepalive, 명세 3.2 — 🔴 검사·보호자 알림이 빠지지 않게)
+  useEffect(() => listenHidden(window, document, () => batcher.flush()), [batcher]);
 
   // 앱을 내렸다 올리거나 인터넷이 돌아오면 서버 대화·남은 시간을 다시 읽는다(겹치면 한 번만).
   // 서버에 나가 있는 요청이 있으면 그 응답이 답을 가져오니 건너뛰고, 위기·단계 바뀜·끝내는 중이면 읽지 않는다.
@@ -102,7 +120,9 @@ function Chat() {
   };
   const busy = waiting > 0 || buffered > 0 || ending || closing; // 「끝내기」는 보낼 말·답이 남아 있으면 막는다
 
-  const actions = (
+  const actions = held ? (
+    <button className="btn btn--primary" onClick={() => sync(held)}>도움받을 곳 더 보기</button>
+  ) : (
     <>
       {/* BRIEF: 입력창 위 오른쪽, 회색 테두리 '오늘 수다 끝내기' */}
       <div className="row" style={{ justifyContent: 'flex-end' }}>
@@ -119,7 +139,7 @@ function Chat() {
   );
 
   return (
-    <Frame title="수다" back="/student" right={<span className={'pill num ' + (data && left <= 60 ? 'pill--accent' : 'pill--mint')} aria-label={`남은 시간 ${mmss(left)}`}><Icon name="clock" size={14} /> {mmss(left)}</span>} actions={actions}>
+    <Frame title="수다" back="/student" right={data && t.show && !held ? <span className={'pill num ' + (t.urgent ? 'pill--accent' : 'pill--mint')} aria-label={`남은 시간 ${mmss(left)}`}><Icon name="clock" size={14} /> {mmss(left)}</span> : undefined} actions={actions}>
       <LoadError error={error} onRetry={reload} />
       <div className="chat-log" role="log" aria-live="polite">
         {/* TK-74 #8: 서버는 첫 인사 없이 빈 대화로 시작한다 → 화면에만 보이는 첫 인사(서버로 보내지 않음).
@@ -134,13 +154,23 @@ function Chat() {
         ))}
         {!data && !error && <Thinking label="불러오는 중" />}
         {/* U8: 묶어 보내기 1.5초 동안 「듣고 있어」, 서버를 기다리는 동안 「생각 중」 */}
-        {waiting > 0 ? <Thinking /> : buffered > 0 ? <Thinking label={say('듣고 있어', '듣고 있어요')} /> : null}
-        {/* U9: 1분 남았을 때·끝났을 때 화면 안내(멘토 말풍선이 아님 — AI 말처럼 꾸미지 않는다) */}
-        {data && !closing && left > 0 && left <= 60 && <p className="small muted" role="status" style={{ textAlign: 'center' }}>{say('1분 남았어', '1분 남았어요')}</p>}
+        {held ? <CrisisInChat /> : waiting > 0 ? <Thinking /> : buffered > 0 ? <Thinking label={say('듣고 있어', '듣고 있어요')} /> : null}
+        {/* U9·TK-94: 끝나기 3분 전부터 「n분 남았어」(올림 분)·끝났을 때 화면 안내(멘토 말풍선이 아님 — AI 말처럼 꾸미지 않는다) */}
+        {data && !closing && !held && t.show && <p className="small muted" role="status" style={{ textAlign: 'center' }}>{say(`${t.minutes}분 남았어`, `${t.minutes}분 남았어요`)}</p>}
         {closing && <div className="notice notice--plain" role="status">{say('수다 시간이 끝났어. 마무리하러 가자!', '수다 시간이 끝났어요. 마무리하러 가요!')}</div>}
         <div ref={bottom} />
       </div>
       <LoadError error={sendError} />
     </Frame>
+  );
+}
+
+/** 1안: 수다 중 🔴 — 서버 문장 말풍선 바로 아래 같은 순간에 붙는 연락처 카드(위기 화면과 같은 문구·컴포넌트) */
+export function CrisisInChat() {
+  return (
+    <section className="card card--danger stack" aria-label="도움받을 곳">
+      <CrisisNotified />
+      <CrisisContacts />
+    </section>
   );
 }

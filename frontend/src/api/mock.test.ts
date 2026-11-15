@@ -133,7 +133,10 @@ describe('안전 알림', () => {
     await as('g1');
     // 긴급은 확인 전에는 닫을 수 없다
     await expect(api.closeAlert(alert.id, '오해였어요')).rejects.toThrow();
-    await api.ackAlert(alert.id);
+    const acked = await api.ackAlert(alert.id);
+    expect(acked).toMatchObject({ status: '확인함' });
+    expect(acked.ackedAt).toBeTruthy();
+    expect((await api.ackAlert(alert.id)).ackedAt).toBe(acked.ackedAt); // 두 번 눌러도 처음 시각
     expect(await api.closeAlert(alert.id, '아이와 이야기해 봤어요')).toMatchObject({ status: '닫음', closeReason: '아이와 이야기해 봤어요' });
   });
 });

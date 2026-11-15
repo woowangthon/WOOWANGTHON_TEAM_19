@@ -9,16 +9,17 @@ async function load() {
 afterEach(() => { vi.unstubAllEnvs(); });
 
 const LEARNING_ORG = ['getRecords', 'getUnits', 'saveUnits', 'getResults'] as const;
-const STAY = ['ackAlert', 'closeAlert', 'resetDemo'] as const;
+const STAY = ['closeAlert', 'resetDemo'] as const; // ackAlert는 11-15부터 서버(🔴 「확인했어요」, 성호)
 
 describe('api 고르기', () => {
-  it('둘 다 http면 orgApi 전부 + 학습 4개가 httpApi, ackAlert·closeAlert·resetDemo는 mock', async () => {
+  it('둘 다 http면 orgApi 전부 + 학습 4개 + ackAlert가 httpApi, closeAlert·resetDemo는 mock', async () => {
     vi.stubEnv('VITE_API_MODE', 'http'); vi.stubEnv('VITE_ORG_MODE', 'http');
     const { idx, http, mock, org } = await load();
     expect(idx.ORG_MODE).toBe('http');
     for (const k of [...Object.keys(org.orgApi), ...LEARNING_ORG] as (keyof typeof http.httpApi)[]) expect(idx.api[k], k).toBe(http.httpApi[k]);
     for (const k of STAY) expect(idx.api[k], k).toBe(mock.mockApi[k]);
     expect(idx.api.getStudentHome).toBe(http.httpApi.getStudentHome);
+    expect(idx.api.ackAlert).toBe(http.httpApi.ackAlert);
   });
 
   it('API만 http면 지금처럼 org·학습 4개는 mock', async () => {

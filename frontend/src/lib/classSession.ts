@@ -6,6 +6,7 @@
 // 저장: org http 모드(VITE_ORG_MODE=http)면 서버(명세 4.12 5-4, /class-live)에, 아니면 이 기기(브라우저)에(mock).
 // 서버 모드는 앱이 5초마다 다시 읽어 강사 PC ↔ 학생·보호자 폰이 이어진다(서버 푸시 없음). 시각은 서버가 정한다.
 import { useEffect, useState } from 'react';
+import { PendingDefaults } from './pendingDefaults';
 import { load, save } from './storage';
 import { ORG_HTTP, classLiveCall } from '../api/http';
 
@@ -57,7 +58,7 @@ export async function refreshClassLive(): Promise<void> {
 export let liveError: string | null = null;
 export async function liveAct(method: 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<void> {
   try { liveError = null; setRemoteLive(await classLiveCall<LiveState>(method, path, body)); }
-  catch (e) { liveError = (e as Error).message; await refreshClassLive(); }
+  catch (e) { liveError = (e as Error).message; emit(); await refreshClassLive(); } // 다시 읽기가 실패해도 화면이 오류를 그리게 알린다
 }
 // 화면 여러 곳이 같이 써도 서버 읽기는 한 줄만(5초마다)
 let pollers = 0; let pollTimer: number | undefined;
@@ -71,7 +72,19 @@ export function useLivePoll(enabled = true) {
 
 export function loadSessions(): Record<string, ClassSession> { return ORG_HTTP ? remote?.sessions ?? {} : load<Record<string, ClassSession>>(K_SESSIONS, {}); }
 function saveSessions(s: Record<string, ClassSession>) { save(K_SESSIONS, s); emit(); }
-export function loadDefaults(): ClassDefaults { return { ...DEFAULTS, ...(ORG_HTTP ? remote?.defaults : load<Partial<ClassDefaults>>(K_DEFAULTS, {})) }; }
+// #9(11-14): 원장이 응답 전에 또 바꾸면 「보내는 중 값」 위에 덮어 5칸 전체를 보낸다(서버는 전체를 받음). 화면도 보내는 중 값을 바로
+const pendingDefaults = new PendingDefaults<ClassDefaults>();
+export function loadDefaults(): ClassDefaults {
+  const server = { ...DEFAULTS, ...(ORG_HTTP ? remote?.defaults : load<Partial<ClassDefaults>>(K_DEFAULTS, {})) };
+  return ORG_HTTP ? pendingDefaults.view(server) : server;
+}
+/** 기본값 몇 칸만 바꾸기. http면 보내는 중 값 위에 덮어 보내고, 마지막 요청 응답에 비움·실패면 서버 값으로(오류 줄은 LiveSaveError) */
+export function patchDefaults(p: Partial<ClassDefaults>) {
+  if (!ORG_HTTP) { saveDefaults({ ...loadDefaults(), ...p }); return; }
+  const { seq, body } = pendingDefaults.patch({ ...DEFAULTS, ...remote?.defaults }, p); emit();
+  const { alertsMin: _skip, ...rest } = body; void _skip;
+  void liveAct('PUT', '/class-live/defaults', rest).then(() => { if (liveError) pendingDefaults.fail(seq); else pendingDefaults.settle(seq); emit(); });
+}
 export function saveDefaults(d: ClassDefaults) {
   if (ORG_HTTP) { const { alertsMin: _skip, ...rest } = d; void _skip; void liveAct('PUT', '/class-live/defaults', rest); return; }
   save(K_DEFAULTS, d); emit();

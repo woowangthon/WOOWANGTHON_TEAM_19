@@ -3,43 +3,41 @@
 //  - 1388 청소년상담: 성평등가족부 https://www.mogef.go.kr/cc/ccy/cc_ccy_f001.do — 휴대전화는 「지역번호+1388」,
 //    문자는 「수신번호에 1388 입력 후 고민 전송」, 카카오톡 「청소년상담1388」 채널, 웹 https://www.1388.go.kr
 //  - 109 자살예방 상담전화: 보건복지부 — 국번 없이 109
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../../api';
+import { crisisLine } from '../../lib/crisisLine';
 import { Frame } from '../../components/Frame';
-import { Icon } from '../../components/Icon';
 import { MentorSays } from '../../components/Mascot';
+import { CrisisContacts, CrisisNotified } from '../../components/CrisisHelp';
 import { useMentor } from '../../state/mentor';
-import { RequirePhase } from '../../state/session';
+import { useSession } from '../../state/session';
 
+// 단계로 막지 않는다: 수업 잠금 화면의 「힘든 일이 있으면」 링크는 수다·풀기 중에도, 세션이 없어도 여기로 온다(연락처는 늘 보인다).
+// 보호자 알림 문구만 세션이 실제로 crisis 단계일 때(서버가 알림을 보낸 때) 보인다 — 아니면 사실과 다른 말이 된다
 export function StudentCrisis() {
-  return <RequirePhase phase="crisis"><Crisis /></RequirePhase>;
+  const { session } = useSession();
+  const crisisId = session?.phase === 'crisis' ? session.id : null;
+  // 11-15 성호 「A안 완성」: 서버가 위기 때 남긴 고정 문장을 맨 위에(위기 세션일 때만, 실패·없음이면 문장 없이)
+  const [line, setLine] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    if (crisisId) api.getChat(crisisId).then((c) => { if (alive) setLine(crisisLine(c.messages)); }, () => {});
+    return () => { alive = false; };
+  }, [crisisId]);
+  return <Crisis notified={crisisId !== null} line={crisisId ? line : null} />;
 }
 
-function Crisis() {
+function Crisis({ notified, line }: { notified: boolean; line: string | null }) {
   const nav = useNavigate();
   const { say } = useMentor();
+  // 명세 부록 E(11-14 성호 A안, 11-15 완성): 고마움·위로는 서버 고정 문장이 맨 위에서, 그 아래 멘토 말은 연락 쪽만
   return (
-    <Frame title="잠깐 멈출게" actions={<button className="btn btn--secondary" onClick={() => nav('/student')}>처음 화면으로</button>}>
-      <MentorSays mood="calm" size={64} text={say('말해 줘서 정말 고마워.\n혼자 버티지 않아도 돼.\n지금 한 번만 전화해 보자.', '말해 줘서 정말 고마워요.\n혼자 버티지 않아도 돼요.\n지금 한 번만 전화해 봐요.')} />
-      {/* 11-12 결정: 연락하게 미는 배치 — 1388을 가장 크게, 109는 그 아래 */}
-      <a className="btn btn--primary" href="tel:1388" style={{ flexDirection: 'column', gap: 2, minHeight: 72, textDecoration: 'none' }}>
-        <strong className="num" style={{ fontSize: 28 }}>1388</strong>
-        <span>청소년 상담전화 · 24시간 · 지금 전화하기</span>
-      </a>
-      {/* B35: 휴대폰에서 1388만 누르면 안 이어질 수 있다(공식 안내: 지역번호+1388) */}
-      <p className="small muted" style={{ textAlign: 'center', margin: '-4px 0 0' }}>{say('휴대폰에서 안 걸리면 지역번호를 붙여 줘 (예: 서울 02-1388)', '휴대폰에서 안 걸리면 지역번호를 붙여 주세요 (예: 서울 02-1388)')}</p>
-      <a className="btn btn--secondary" href="tel:109" style={{ justifyContent: 'flex-start', gap: 12, textDecoration: 'none' }}><strong className="num" style={{ fontSize: 20 }}>109</strong> 자살예방 상담전화 전화하기</a>
-      <section className="card card--flat">
-        <p>{say('전화가 어려우면 1388은 문자나 카카오톡으로도 이야기할 수 있어.', '전화가 어려우면 1388은 문자나 카카오톡으로도 이야기할 수 있어요.')}</p>
-        <a className="btn btn--secondary btn--small" href="sms:1388" style={{ marginTop: 8, textDecoration: 'none' }}><Icon name="talk" size={18} />{say('1388에 문자 보내기', '1388에 문자 보내기')}</a>
-        <p className="small" style={{ marginTop: 8 }}>{say('카카오톡에서 「청소년상담1388」 채널을 추가해서 이야기해도 돼.', '카카오톡에서 「청소년상담1388」 채널을 추가해서 이야기해도 돼요.')}</p>
-        <p className="small muted">{say('인터넷 상담: ', '인터넷 상담: ')}<a href="https://www.1388.go.kr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary-strong)' }}>www.1388.go.kr</a></p>
-        <p className="small muted" style={{ marginTop: 6 }}>{say('보호자나 선생님께 “할 이야기가 있어” 한마디만 해도 충분해.', '보호자나 선생님께 “할 이야기가 있어요” 한마디만 해도 충분해요.')}</p>
-      </section>
-      <div className="notice" style={{ justifyContent: 'flex-start' }}>
-        <Icon name="shield" size={20} />
-        {/* TK-74 #13 · 결정(11-11): 🔴이면 보호자 카드에 걱정된 말의 앞뒤 일부(±2턴·300자)가 함께 간다 → 아이에게도 사실대로 */}
-        <span>{say('약속한 대로 보호자께 알림을 보냈어. 걱정된 말과 그 앞뒤 몇 마디도 함께 갔어. 보호자가 네 얘기를 들어 줄 수 있게.', '약속한 대로 보호자께 알림을 보냈어요. 걱정된 말과 그 앞뒤 몇 마디도 함께 갔어요. 보호자가 이야기를 들어 줄 수 있게요.')}</span>
-      </div>
+    <Frame title={say('네 마음, 잘 들었어', '마음, 잘 들었어요')} actions={<button className="btn btn--secondary" onClick={() => nav('/student')}>처음 화면으로</button>}>
+      {line && <div role="status"><MentorSays mood="calm" size={64} text={line} /></div>}
+      {/* 11-15 성호 v0.8: 보호자 얘기 먼저, 연락처는 그 아래 */}
+      {notified ? <CrisisNotified /> : !line && <MentorSays mood="calm" size={64} text={say('지금 한 번만 연락해 보자.', '지금 한 번만 연락해 봐요.')} />}
+      <CrisisContacts full />
     </Frame>
   );
 }

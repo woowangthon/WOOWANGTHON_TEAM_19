@@ -10,7 +10,7 @@ import { Settings, SettingsDelete, SettingsFamily, SettingsNotify, SettingsOrg, 
 import { Notifications } from './screens/settings/Notifications';
 import { StudentToday } from './screens/student/Today';
 import { StudentPromise } from './screens/student/Promise';
-import { StudentCharacter } from './screens/student/Character';
+import { StudentCharacter, TalkSettings } from './screens/student/Character';
 import { StudentDifficulty } from './screens/student/Difficulty';
 import { StudentSolve } from './screens/student/Solve';
 import { StudentDone } from './screens/student/Done';
@@ -73,6 +73,7 @@ export default function App() {
           <Route path="/notifications" element={as(ALL, <Notifications />)} />
           <Route path="/settings" element={as(ALL, <Settings />)} />
           <Route path="/settings/profile" element={as(ALL, <SettingsProfile />)} />
+          <Route path="/settings/talk" element={as('student', <TalkSettings />)} />
           <Route path="/settings/password" element={as(ALL, <SettingsPassword />)} />
           <Route path="/settings/notify" element={as(ALL, <SettingsNotify />)} />
           <Route path="/settings/delete" element={as(ALL, <SettingsDelete />)} />

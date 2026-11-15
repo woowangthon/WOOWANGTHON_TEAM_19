@@ -4,15 +4,19 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { api } from '../api';
-import { setDemoRole, setLoggedOutHandler } from '../api/http';
+import { hasStoredRole, setDemoRole, setLoggedOutHandler } from '../api/http';
+import { isTransient } from '../lib/apiError';
 import type { AccountRole, Me } from '../types';
 import { useOnResume } from '../lib/resume';
+import { logoutThenClear } from '../lib/logout';
 import { useSession } from './session';
 import { useMentor } from './mentor';
 
 interface AuthCtx {
   me: Me | null;
   ready: boolean;
+  /** #17: 앱을 열 때 서버에 닿지 못함(네트워크·5xx) — 로그아웃이 아니라 「다시 시도」 */
+  offline: boolean;
   /** 서버에 다시 물어보기(연결·승인 상태가 바뀌었을 수 있을 때) */
   refresh: () => Promise<Me | null>;
   /** 다시 열기·화면 진입 때: 요청이 실패하면(인터넷 끊김 등) 지금 로그인을 그대로 둔다. 로그인 만료(401)는 따로 처리됨 */
@@ -31,13 +35,20 @@ export function takeLoginExpired(): boolean {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
   const [ready, setReady] = useState(false);
+  const [offline, setOffline] = useState(false);
   const session = useSession();
   const mentor = useMentor();
-  const reloadSession = session.refresh; // 둘 다 useCallback이라 바뀌지 않는다(refresh 효과가 반복되지 않게)
+  const reloadSession = session.reset; // 둘 다 useCallback이라 바뀌지 않는다(refresh 효과가 반복되지 않게)
   const reloadMentor = mentor.reload;
   // 서버 요청의 역할 헤더는 로그인한 계정의 역할로 정한다(api/http.ts). 역할이 바뀌면 학습 상태도 그 역할로 다시 읽는다
   const refresh = useCallback(async () => {
-    const m = await api.getMe().catch(() => null);
+    let m: Me | null = null;
+    try { m = await api.getMe(); }
+    catch (e) {
+      // #17(11-14): 로그인했던 기기에서 연결이 끊긴 것(네트워크·5xx)이면 역할을 지우지 않고 「다시 시도」 화면. 처음 방문(저장된 역할 없음)은 지금처럼 로그인 화면
+      if (isTransient(e) && hasStoredRole()) { setOffline(true); setReady(true); return null; }
+    }
+    setOffline(false);
     const changed = setDemoRole(m?.role ?? null);
     if (changed && m) await Promise.all([reloadSession(), reloadMentor()]);
     setMe(m); setReady(true); return m;
@@ -51,20 +62,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMe(m);
   }, [reloadSession, reloadMentor]);
   // 다른 기기에서 연결·학원이 바뀌었을 수 있다 → 앱을 다시 열면(화면 다시 보임·인터넷 복귀) 로그인한 사람의 정보를 다시 읽는다
-  useOnResume(() => { if (me) void refreshQuiet(); });
-  const enter = useCallback(async (m: Me) => { setDemoRole(m.role); setMe(m); await Promise.all([session.refresh(), mentor.reload()]); }, [session, mentor]);
+  useOnResume(() => { if (offline) void refresh(); else if (me) void refreshQuiet(); });
+  const enter = useCallback(async (m: Me) => { setDemoRole(m.role); setMe(m); await Promise.all([session.reset(), mentor.reload()]); }, [session, mentor]);
   // 로그아웃과 같은 정리(서버 호출만 빼고). 서버가 「로그인 안 됨」이라 할 때도 쓴다 → me가 null이면 RequireRole이 로그인 화면으로 보낸다
-  const clear = useCallback(async () => { setDemoRole(null); setMe(null); await Promise.all([session.refresh(), mentor.reload()]); }, [session, mentor]);
-  const logout = useCallback(async () => { await api.logout(); await clear(); }, [clear]);
+  const clear = useCallback(async () => { setDemoRole(null); setMe(null); await Promise.all([session.reset(), mentor.reload()]); }, [session, mentor]);
+  const logout = useCallback(() => logoutThenClear(() => api.logout(), clear), [clear]);
   // 서버가 「로그인 안 됨」이라 해서 풀린 경우: 로그인 화면이 「다시 로그인해 주세요」를 한 번 보여 주게 표시
   useEffect(() => { setLoggedOutHandler(() => { try { sessionStorage.setItem(EXPIRED_KEY, '1'); } catch { /* 막혀도 안내만 빠짐 */ } void clear(); }); return () => setLoggedOutHandler(null); }, [clear]);
-  return <Ctx.Provider value={{ me, ready, refresh, refreshQuiet, enter, logout }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ me, ready, offline, refresh, refreshQuiet, enter, logout }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {
   const v = useContext(Ctx);
   if (!v) throw new Error('AuthProvider 안에서만 쓸 수 있어요');
   return v;
+}
+
+/** 로그인한 내 정보(없거나 AuthProvider 밖이면 null) — 그림처럼 어디서나 쓰는 작은 부품용(던지지 않음) */
+export function useMeOptional(): Me | null {
+  return useContext(Ctx)?.me ?? null;
 }
 
 /** 화면이 열릴 때 내 정보(연결·학원 상태)를 서버에서 다시 읽는다 — 다른 기기에서 바뀐 것이 바로 보이게 */
@@ -85,11 +101,23 @@ export function homeFor(me: Me | null): string {
 }
 
 const Loading = () => <div className="frame"><main className="screen-body center muted">불러오는 중…</main></div>;
+/** #17: 앱을 열 때 서버에 닿지 못함 — 로그인은 그대로 두고 다시 시도(앱 다시 보임·인터넷 복귀 때도 자동으로 다시 읽음) */
+function Offline({ onRetry }: { onRetry: () => void }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="frame"><main className="screen-body center stack" role="alert" style={{ textAlign: 'center' }}>
+      <strong>서버에 연결하지 못했어요</strong>
+      <p className="small muted">인터넷 연결을 확인하고 다시 시도해 주세요. 로그인은 그대로예요.</p>
+      <button className="btn btn--primary" disabled={busy} onClick={async () => { setBusy(true); try { await onRetry(); } finally { setBusy(false); } }}>{busy ? '연결하는 중…' : '다시 시도'}</button>
+    </main></div>
+  );
+}
 
 /** 로그인한 사람만, 그리고 맞는 역할만 들어오게 한다 */
 export function RequireRole({ role, children }: { role: AccountRole | AccountRole[]; children: ReactNode }) {
-  const { me, ready } = useAuth();
+  const { me, ready, offline, refresh } = useAuth();
   if (!ready) return <Loading />;
+  if (offline) return <Offline onRetry={() => void refresh()} />;
   if (!me) return <Navigate to="/login" replace />;
   const roles = Array.isArray(role) ? role : [role];
   if (!roles.includes(me.role)) return <Navigate to={homeFor(me)} replace />;
@@ -112,7 +140,8 @@ export function GuestOnly({ children }: { children: ReactNode }) {
 }
 
 export function RootRedirect() {
-  const { me, ready } = useAuth();
+  const { me, ready, offline, refresh } = useAuth();
   if (!ready) return <Loading />;
+  if (offline) return <Offline onRetry={() => void refresh()} />;
   return <Navigate to={homeFor(me)} replace />;
 }

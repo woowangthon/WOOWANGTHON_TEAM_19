@@ -1,7 +1,7 @@
 // 화면이 백엔드에 요청할 수 있는 일의 목록(계약).
 // mock.ts(가짜 서버)와 http.ts(진짜 FastAPI)가 둘 다 이 모양을 따른다 → 화면 코드는 어느 쪽인지 몰라도 된다.
 import type {
-  AnswerResult, ChatReply, ChatState, Difficulty, Draft, GuardianToday, HintResult, MentorSetting,
+  Animal, AnswerResult, AssignOpts, ChatReply, ChatState, Difficulty, Draft, GuardianToday, HintResult, MentorSetting,
   ProblemView, SafetyAlert, SessionView, Solution, StudentHome, StudentResult, StudyRecord, TeacherAlert, TeacherMemo,
   TeacherToday, Unit, WrapBody, WrapInfo,
 } from '../types';
@@ -17,6 +17,8 @@ export interface MentorApi extends AccountApi {
   acceptPromise(): Promise<void>;
   getMentor(): Promise<MentorSetting | null>;
   saveMentor(setting: MentorSetting): Promise<void>;
+  /** 띠 사기(칭찬 도장) — 소유만, 바꾸기는 saveMentor(animal) */
+  buyAnimal(animal: Animal): Promise<MentorSetting>;
 
   /* 학생 — 하루 세션 (서버가 단계·시간·정답을 관리) */
   getActiveSession(): Promise<SessionView | null>;            // 새로고침해도 이어서 할 수 있게
@@ -39,7 +41,9 @@ export interface MentorApi extends AccountApi {
   getUnits(): Promise<Unit[]>;
   saveUnits(selectedIds: string[]): Promise<Unit[]>;
   getTeacherToday(): Promise<TeacherToday>;
-  assignTask(studentId: string, unit: string | null): Promise<TeacherToday>;
+  assignTask(studentId: string, unit: string | null, opts?: AssignOpts): Promise<TeacherToday>;
+  /** 여러 명 한 번에(TK-101) */
+  assignTasks(studentIds: string[], unit: string, opts?: AssignOpts): Promise<TeacherToday>;
   getMemo(studentId: string): Promise<{ memo: TeacherMemo; draft: Draft | null }>;
   saveMemo(studentId: string, memo: TeacherMemo): Promise<void>;
   createDraft(studentId: string): Promise<Draft>;

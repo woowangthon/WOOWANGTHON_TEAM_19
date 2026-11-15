@@ -45,12 +45,6 @@ async def current_guardian_child(
 GuardianChild = Annotated[Student, Depends(current_guardian_child)]
 
 
-def _guardian_excerpt(alert: Alert) -> str | None:
-    """보호자 카드에 싣는 발췌 ±2턴·300자(치환본). 결정 11-10 「깊은 세이프워드 발동 시에만 내용 전송」·
-    11-11 「11-15 안전 알림 전달 수준」. 바뀌면 여기만 바꾼다."""
-    return alert.excerpt
-
-
 async def _today_alert(db: AsyncSession, student: Student, now: datetime) -> dict[str, Any] | None:
     """오늘(서울 날짜) 가장 최근 알림. SQLite가 시간대를 버려서 날짜 비교는 파이썬에서 한다."""
     today = seoul_date(now)
@@ -63,7 +57,7 @@ async def _today_alert(db: AsyncSession, student: Student, now: datetime) -> dic
         if seoul_date(created) == today:
             return {
                 "created_at": created.isoformat(),
-                "excerpt": _guardian_excerpt(alert),
+                "excerpt": None,  # 아이 말은 보내지 않는다(11-15 04:30 성호, 11-10·11-11을 바꿈)
                 "hotlines": list(HOTLINES),
             }
     return None

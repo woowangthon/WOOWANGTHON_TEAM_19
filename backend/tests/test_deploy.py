@@ -125,10 +125,10 @@ async def test_crisis_survives_seq_conflict(booted, db_file, monkeypatch):
     """🔴 요청이 seq 경합에서 지면 한 번 더 써서 알림을 잃지 않는다."""
     _, c = booted
     sid = (await c.post("/api/v1/sessions", headers=CHILD)).json()["session_id"]
-    original = api.build_excerpt
+    original = api.Alert.new  # 🔴 트랜잭션 안(커밋 전)에서 불리는 곳
     calls = {"n": 0}
 
-    def conflicting_excerpt(turns):
+    def conflicting_alert(**kwargs):
         calls["n"] += 1
         if calls["n"] == 1:
             # 다른 요청이 같은 seq를 먼저 커밋한 상황(별도 연결)
@@ -148,9 +148,9 @@ async def test_crisis_survives_seq_conflict(booted, db_file, monkeypatch):
             )
             con.commit()
             con.close()
-        return original(turns)
+        return original(**kwargs)
 
-    monkeypatch.setattr(api, "build_excerpt", conflicting_excerpt)
+    monkeypatch.setattr(api.Alert, "new", conflicting_alert)
     r = await c.post(
         f"/api/v1/sessions/{sid}/messages", headers=CHILD, json={"kind": "text", "text": R1}
     )

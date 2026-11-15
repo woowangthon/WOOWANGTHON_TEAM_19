@@ -22,8 +22,10 @@ from app.guardian import router as guardian_router
 from app.instructor import router as instructor_router
 from app.models import Base
 from app.org_routes import router as org_router
+from app.schema_guard import add_missing_columns
 from app.seed import load_seed
 from app.seed_routes import router as seed_router
+from app.seeds import ensure_cosmetics
 from app.timeutil import get_now
 
 # 기동 준비를 한 번에 하나씩 하게 거는 Postgres 자문 잠금 번호(임의의 고정값)
@@ -57,11 +59,13 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         if conn.dialect.name == "postgresql":
             await conn.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": _STARTUP_LOCK_KEY})
         await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(add_missing_columns)  # 표는 있는데 새 칸이 없을 때(11-14)
         if conn.dialect.name == "postgresql":
             await _enable_rls(conn)
         db = AsyncSession(bind=conn, expire_on_commit=False)
         try:
             await load_seed(db)
+            await ensure_cosmetics(db)  # 꾸미기 기본값 중 빠진 것만(11-14)
             await ensure_demo_actors(db, get_now())
             await db.flush()
         finally:

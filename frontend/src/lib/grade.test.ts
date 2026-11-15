@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gradeBand, gradeLabel, splitGrade, toGrade } from './grade';
+import { GRADE_OPTIONS, gradeBand, gradeLabel, splitGrade, toGrade } from './grade';
 import type { Grade } from '../types';
 
 describe('학년 도우미', () => {
@@ -37,5 +37,14 @@ describe('학년 도우미', () => {
     expect(gradeBand(6)).toBe('초5-6');
     expect(gradeBand(8)).toBe('중');
     expect(gradeBand(11)).toBe('고');
+  });
+});
+
+describe('GRADE_OPTIONS — 가입 학년을 초1~고3 한 목록으로(성호 11-14 「스크롤로 초1부터 고3까지」)', () => {
+  it('12개, 1~12 순서, 이름은 「초등학교 1학년」 꼴', () => {
+    expect(GRADE_OPTIONS.map((o) => o.grade)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    expect(GRADE_OPTIONS[0].label).toBe('초등학교 1학년');
+    expect(GRADE_OPTIONS[6].label).toBe('중학교 1학년');
+    expect(GRADE_OPTIONS[11].label).toBe('고등학교 3학년');
   });
 });

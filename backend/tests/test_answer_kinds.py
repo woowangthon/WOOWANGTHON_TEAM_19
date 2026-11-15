@@ -152,9 +152,8 @@ seed_client = _client_for("frac-div-nat-01")
 
 
 async def _start(c) -> tuple[str, dict]:
-    sid = (await c.post(BASE + "/sessions", json={"difficulty": "중급"}, headers=CHILD)).json()[
-        "id"
-    ]
+    # 난이도를 안 보냄 → 선생님 지정 문제 그대로(명세 4.13-7 D3-2). 이 파일은 답 형식만 본다
+    sid = (await c.post(BASE + "/sessions", headers=CHILD)).json()["id"]
     p = (await c.get(BASE + f"/sessions/{sid}/problem", headers=CHILD)).json()
     return sid, p
 
@@ -202,3 +201,61 @@ async def test_answer_needs_fraction_or_text(seed_client):
     sid, p = await _start(seed_client)
     r = await _answer(seed_client, sid, p["id"])
     assert r.status_code == 422
+
+
+# 명세 4.13 G2: 시범 단원 학생은 문제·오개념 태그가 그 단원 안에서만(학년이 섞이지 않음)
+g4_client = _client_for("g4-math-large-numbers-01")
+
+
+async def test_grade_unit_wrong_answer_stays_in_unit(g4_client, db_session):
+    from sqlalchemy import select
+
+    from app.api import _plan_ids
+    from app.models import Misconception
+
+    sid, p = await _start(g4_client)
+    assert p["id"] == "g4-math-large-numbers-01" and p["answerKind"] == "number"
+    await _answer(g4_client, sid, p["id"], answer="7")
+    for _ in range(3):  # 힌트 3 도달 → 오개념 열림
+        await g4_client.post(
+            BASE + f"/sessions/{sid}/hint", json={"problemId": p["id"]}, headers=CHILD
+        )
+    await g4_client.post(
+        BASE + f"/sessions/{sid}/solution", json={"problemId": p["id"]}, headers=CHILD
+    )
+    tags = set(
+        (
+            await db_session.scalars(
+                select(Misconception.tag).where(Misconception.student_id == DEMO_CHILD_ID)
+            )
+        ).all()
+    )
+    assert tags <= {"g4-math-large-numbers"} and "g4-math-large-numbers" in tags
+    import app.config as cfg
+
+    orig = cfg.session_problems
+    cfg.session_problems = lambda: 3
+    try:
+        ids = await _plan_ids(db_session, "g4-math-large-numbers-01")
+    finally:
+        cfg.session_problems = orig
+    assert len(ids) == 3 and all(i.startswith("g4-math-large-numbers-") for i in ids)
+
+
+async def test_choice_answer_reaches_llm_as_option_number(choice_client, db_session):
+    # 명세 4.13-3(11-14 R7): 「③」이 NFKC로 「3」이 되어 보기 번호인 줄 몰랐다 → 「n번」으로 저장·전달
+    from sqlalchemy import select
+
+    from app.models import Message
+
+    sid, p = await _start(choice_client)
+    r = (await _answer(choice_client, sid, p["id"], answer="③")).json()
+    assert r["correct"] is False
+    texts = (
+        await db_session.scalars(
+            select(Message.text_redacted).where(Message.session_id == sid, Message.role == "child")
+        )
+    ).all()
+    assert "3번" in texts
+    ok = (await _answer(choice_client, sid, p["id"], answer="②")).json()
+    assert ok["correct"] is True  # 판정은 그대로

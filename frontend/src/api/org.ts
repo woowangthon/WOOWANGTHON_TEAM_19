@@ -4,7 +4,7 @@
 // · 한계: User.academyId가 하나라 보호자는 학원 1곳에만 속한다(아이 둘이 서로 다른 학원이면 보호자는 먼저 들어간 곳). 자세한 건 enrollLinked 위 주석.
 import type { Currency,
   AcademyApplication, AcademyForm, AccountRole, AppNotice, Classroom, Cosmetic, EntryCode, Grade, Me, NotifySettings, Order, OrgType, OwnerDashboard, PersonRow,
-  SeedBoard, SeedEntry, SeedSource, ShopItem, SignupBody, StampState, StudentClasses, StudentShop, TeacherClasses, Wallet,
+  SeedBoard, SeedEntry, SeedSource, ShopItem, ShopItemSave, SignupBody, StampState, StudentClasses, StudentShop, TeacherClasses, Wallet,
 } from '../types';
 import { ymd, stampLabel, weekKeys } from '../lib/date';
 import { load, save } from '../lib/storage';
@@ -90,6 +90,9 @@ export const COSMETICS: CosmeticDef[] = [
   { id: 'question', kind: 'emote', name: '궁금해', price: 1 },
   { id: 'idea', kind: 'emote', name: '알았다!', price: 1 },
   { id: 'sorry', kind: 'emote', name: '미안해', price: 1 },
+  // 11-14 그림 도착(GPT-053) — 재하 요청 「이모티콘 캐릭터당 10개」. 서버 목록은 성호 님께
+  { id: 'hello', kind: 'emote', name: '반가워', price: 1 },
+  { id: 'congrats', kind: 'emote', name: '축하해', price: 1 },
 ];
 
 /** 시연 계정 비밀번호(모두 같음) — 체험 계정 시트에 표시 */
@@ -726,8 +729,12 @@ export const orgApi = {
     notify(studentId, `${t.name}이 칭찬 씨앗 ${amount}개를 줬어! (${note.trim().slice(0, 30)})`, '/student/shop'); commit();
     return seedBoard(t);
   },
-  async saveShopItem(item: Omit<ShopItem, 'id'> & { id?: string }): Promise<SeedBoard> {
+  async saveShopItem(body: ShopItemSave): Promise<SeedBoard> {
     const t = must('teacher');
+    // mock: 사진은 data URL을 imagePath에 그대로 둔다(image 없음 = 그대로, "" = 빼기, TK-97)
+    const { image, ...rest } = body;
+    const old = rest.id ? db.items.find((i) => i.id === rest.id)?.imagePath ?? null : null;
+    const item = { ...rest, imagePath: image === undefined ? old : image || null };
     if (!item.name.trim()) fail('상품 이름을 적어 주세요.');
     if (!Number.isInteger(item.price) || item.price < 1 || item.price > 200) fail('가격은 1~200 씨앗으로 정해 주세요.');
     if (item.stock !== null && (!Number.isInteger(item.stock) || item.stock < 0)) fail('수량은 0 이상으로 적어 주세요.');

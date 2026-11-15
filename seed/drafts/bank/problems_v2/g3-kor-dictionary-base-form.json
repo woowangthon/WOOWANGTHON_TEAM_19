@@ -1,0 +1,722 @@
+[
+  {
+    "id": "g3-kor-dictionary-base-form-01",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "easy",
+    "problem_type": "작은따옴표 낱말의 기본형 한 낱말로 쓰기(앞부분이 그대로 남는 낱말)",
+    "targets_misconception": "바뀐 꼴을 사전에서 그대로 찾으려 함('먹었다'를 그대로 찾음)",
+    "text": "「언니가 동화책을 '읽었어요'.」\n'읽었어요'를 국어사전에서 찾으려면 어떤 낱말로 찾아야 할까요?\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "표준국어대사전 표제어 '읽다'(기억 대조). '읽고·읽으니·읽어서'에서 공통으로 남는 부분은 '읽' 하나라 다른 답 없음.",
+    "answer": {
+      "kind": "text",
+      "value": "읽다",
+      "accepted": [
+        "읽다"
+      ]
+    },
+    "hint1": "국어사전에는 '읽었어요'처럼 모양이 바뀐 낱말이 그대로 실려 있지 않아요. 이 낱말에서 바뀌는 뒷부분이 어디부터인지 보세요.",
+    "hint2": "뒤에 '-고', '-으니', '-어서'를 붙여 여러 모양으로 바꿔 말해 보세요. 어느 모양에서나 똑같이 남는 앞부분이 있어요. 사전에 실린 낱말은 끝이 '-다'예요.",
+    "after_hint2": "여러 모양에서 똑같이 남는 앞부분을 스스로 찾고, 그 뒤에 '-다'를 붙여 기본형 정하기",
+    "solution": "'읽었어요'는 '읽고, 읽으니, 읽어서'처럼 모양이 바뀌어도 '읽'이 늘 남아요. 여기에 '-다'를 붙인 '읽다'가 사전에 실린 기본형이에요. 답은 '읽다'예요. '읽었어요'를 그대로 찾으면 사전에 없어요.",
+    "forbidden": [
+      "읽다"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-02",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "easy",
+    "problem_type": "작은따옴표 낱말의 기본형 한 낱말로 쓰기(앞부분이 그대로 남는 낱말)",
+    "targets_misconception": "",
+    "text": "「아기가 '웃으며' 손을 흔들었어요.」\n'웃으며'를 국어사전에서 찾을 때 쓰는 기본형은 무엇일까요?\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "표준국어대사전 표제어 '웃다'(기억 대조). '웃으다'는 표제어 아님.",
+    "answer": {
+      "kind": "text",
+      "value": "웃다",
+      "accepted": [
+        "웃다"
+      ]
+    },
+    "hint1": "'웃으며'를 다른 모양으로 바꿔 말할 수 있는지 보세요. 바꿔도 그대로 남는 글자가 무엇일까요?",
+    "hint2": "'아기가 ○고 있어요', '○어서 기뻐요'처럼 말해 보세요. 사전에서는 그렇게 남는 부분 뒤에 '-다'를 붙인 모양으로 찾아요.",
+    "after_hint2": "'○고', '○어서' 자리에 들어갈 말을 스스로 떠올려 늘 남는 글자를 찾고 기본형 만들기",
+    "solution": "'웃으며'는 '웃고, 웃어서'처럼 바뀌어도 '웃'이 남아요. '웃'에 '-다'를 붙인 '웃다'가 기본형이라 답은 '웃다'예요. '웃으다'는 사전에 없는 말이에요.",
+    "forbidden": [
+      "웃다"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-03",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "easy",
+    "problem_type": "작은따옴표 낱말의 기본형 한 낱말로 쓰기(앞부분이 그대로 남는 낱말)",
+    "targets_misconception": "바뀐 꼴을 사전에서 그대로 찾으려 함('먹었다'를 그대로 찾음)",
+    "text": "「버스에서 손잡이를 꼭 '잡고' 섰어요.」\n'잡고'를 국어사전에서 찾으려면 어떤 낱말로 찾아야 할까요?\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "표준국어대사전 표제어 '잡다'(기억 대조). 문장의 '손잡이'는 대상 낱말이 아님.",
+    "answer": {
+      "kind": "text",
+      "value": "잡다",
+      "accepted": [
+        "잡다"
+      ]
+    },
+    "hint1": "'잡고'는 뒤에 오는 말에 따라 모양이 바뀌어요. 어느 부분이 바뀌는지 보세요.",
+    "hint2": "'잡고'를 '-아서', '-으니'로 끝나게 바꿔 보면 뒤 글자만 달라져요. 국어사전은 낱말을 '-다'로 끝나는 모양으로 실어요.",
+    "after_hint2": "바뀌지 않는 앞 글자를 스스로 찾아 '-다'로 끝나는 모양으로 바꾸기",
+    "solution": "'잡고, 잡아서, 잡으니'에서 '잡'은 그대로이고 뒤만 바뀌어요. '잡'에 '-다'를 붙인 '잡다'가 기본형이라 답은 '잡다'예요. '잡고'를 그대로 찾으면 사전에 없어요.",
+    "forbidden": [
+      "잡다"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-04",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "easy",
+    "problem_type": "작은따옴표 낱말의 기본형 한 낱말로 쓰기(앞부분이 그대로 남는 낱말)",
+    "targets_misconception": "",
+    "text": "「자기 전에 이를 깨끗이 '닦았어요'.」\n'닦았어요'를 국어사전에서 찾을 때 쓰는 기본형은 무엇일까요?\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "표준국어대사전 표제어 '닦다'(기억 대조). 받침 ㄲ 유지.",
+    "answer": {
+      "kind": "text",
+      "value": "닦다",
+      "accepted": [
+        "닦다"
+      ]
+    },
+    "hint1": "'닦았어요'는 이미 한 일을 말하는 모양이에요. 지금 하는 일로 바꿔 말하면 어떻게 되는지 떠올려 보세요.",
+    "hint2": "'이를 ○아요', '이를 ○고 자요'처럼 말할 때 늘 같은 글자가 남아요. 그 글자 뒤에 사전에 실리는 모양의 끝을 붙여 보세요.",
+    "after_hint2": "두 말에 똑같이 남는 글자를 스스로 찾고, 사전 모양의 끝이 '-다'임을 떠올려 붙이기",
+    "solution": "'닦아요, 닦고'에서 '닦'이 늘 남아요. 여기에 '-다'를 붙인 '닦다'가 기본형이라 답은 '닦다'예요. 받침 'ㄲ'까지 그대로 써야 해요.",
+    "forbidden": [
+      "닦다"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-05",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "easy",
+    "problem_type": "첫 자음자가 다른 낱말 4개 중 국어사전에 가장 먼저(또는 나중에) 나오는 것 고르기",
+    "targets_misconception": "자음자 차례(ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ)를 헷갈림",
+    "text": "낱말 넷 가운데 국어사전에 가장 먼저 나오는 낱말은 무엇일까요?\n① 바다\n② 나비\n③ 하늘\n④ 다리\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "나비"
+      ]
+    },
+    "hint1": "네 낱말의 첫 글자에서 처음 나오는 자음자만 보세요.",
+    "hint2": "자음자 차례는 ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ예요. '하늘'의 ㅎ은 맨 끝이라 먼저 나올 수 없어요.",
+    "after_hint2": "남은 세 낱말의 첫 자음자 ㅂ·ㄴ·ㄷ 가운데 차례가 가장 앞선 것을 스스로 고르기",
+    "solution": "첫 자음자는 바다 ㅂ, 나비 ㄴ, 하늘 ㅎ, 다리 ㄷ이에요. 차례로 ㄴ이 가장 앞이라 답은 ②예요. ① 바다의 ㅂ은 ㄴ·ㄷ보다 뒤, ③ 하늘의 ㅎ은 맨 끝, ④ 다리의 ㄷ은 ㄴ 바로 뒤예요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-06",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "easy",
+    "problem_type": "첫 자음자가 다른 낱말 4개 중 국어사전에 가장 먼저(또는 나중에) 나오는 것 고르기",
+    "targets_misconception": "자음자 차례(ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ)를 헷갈림",
+    "text": "낱말 넷 가운데 국어사전에 가장 나중에 나오는 낱말은 무엇일까요?\n① 토끼\n② 사슴\n③ 여우\n④ 코끼리\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "토끼"
+      ]
+    },
+    "hint1": "사전 뒤쪽에 실리는 낱말은 첫 자음자가 차례의 끝 쪽에 있어요. 네 낱말의 첫 자음자를 하나씩 적어 보세요.",
+    "hint2": "ㅋ, ㅌ, ㅍ, ㅎ은 자음자 차례의 끝 쪽에 모여 있어요. 그 가운데 두 자음자가 보기에 있으니 둘의 앞뒤를 견주어 보세요.",
+    "after_hint2": "ㅋ과 ㅌ 가운데 어느 것이 더 뒤에 오는지 스스로 정하기",
+    "solution": "첫 자음자는 토끼 ㅌ, 사슴 ㅅ, 여우 ㅇ, 코끼리 ㅋ이에요. 자음자 차례는 … ㅅ ㅇ … ㅋ ㅌ …이라 ㅌ이 가장 뒤예요. 답은 ①이에요. ② 사슴의 ㅅ과 ③ 여우의 ㅇ은 가운데쯤이고, ④ 코끼리의 ㅋ은 ㅌ 바로 앞이에요. 글자 수가 많다고 뒤에 오는 것이 아니에요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-07",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "medium",
+    "problem_type": "작은따옴표 낱말의 기본형 한 낱말로 쓰기(앞 글자 모양이 바뀌는 낱말)",
+    "targets_misconception": "앞 글자 모양이 바뀌는 낱말에서 바뀐 앞 글자를 그대로 둔 채 기본형을 만듦('도와'→'도우다')",
+    "text": "「목수가 나무로 작은 집을 '지어요'.」\n'지어요'를 국어사전에서 찾을 때 쓰는 기본형은 무엇일까요?\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "표준국어대사전 표제어 '짓다'(기억 대조). '집을 지어요'에서 '지다'로 읽을 수 없음('지다'는 '져요'로 바뀜).",
+    "answer": {
+      "kind": "text",
+      "value": "짓다",
+      "accepted": [
+        "짓다"
+      ]
+    },
+    "hint1": "'지어요'의 앞 글자 '지'가 다른 모양으로 말할 때도 그대로인지 보세요.",
+    "hint2": "'집을 ○고 있어요', '집을 ○는 사람'처럼 말해 보면 앞 글자에 받침이 생겨요. 그 받침이 무엇인지 찾고 '-다'를 붙여 보세요.",
+    "after_hint2": "'○고' 자리에 들어갈 말을 스스로 떠올려 생기는 받침을 찾고 기본형 만들기",
+    "solution": "'지어요'는 '짓고, 짓는'처럼 말할 때 앞 글자가 '짓'이 돼요. 그래서 기본형은 '짓다'이고 답은 '짓다'예요. '지으다'는 없는 말이고, '지다'는 '짐을 등에 지다'처럼 뜻이 다른 낱말이에요.",
+    "forbidden": [
+      "짓다"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-08",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "medium",
+    "problem_type": "작은따옴표 낱말의 기본형 한 낱말로 쓰기(앞 글자 모양이 바뀌는 낱말)",
+    "targets_misconception": "앞 글자 모양이 바뀌는 낱말에서 바뀐 앞 글자를 그대로 둔 채 기본형을 만듦('도와'→'도우다')",
+    "text": "「창밖에서 새소리를 '들었어요'.」\n'들었어요'를 국어사전에서 찾을 때 쓰는 기본형은 무엇일까요?\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "표준국어대사전 표제어 '듣다'(기억 대조). '들다'(들어 올리다·안으로 가다)는 '새소리를'과 어울리지 않아 다른 답 없음.",
+    "answer": {
+      "kind": "text",
+      "value": "듣다",
+      "accepted": [
+        "듣다"
+      ]
+    },
+    "hint1": "'들었어요'가 귀로 한 일인지, 손으로 한 일인지 먼저 보세요.",
+    "hint2": "'새소리를 ○고 있어요'처럼 '-고'를 붙여 말해 보세요. 그러면 앞 글자의 받침이 'ㄹ'이 아닌 다른 받침으로 바뀌어요.",
+    "after_hint2": "'○고' 자리의 말을 스스로 떠올려 바뀐 받침을 찾고 기본형 만들기",
+    "solution": "새소리는 귀로 한 일이에요. '듣고, 듣는'처럼 말할 때 앞 글자는 '듣'이라 기본형은 '듣다'예요. 답은 '듣다'예요. '들다'는 '가방을 들다'처럼 손으로 올리는 뜻의 다른 낱말이라 이 문장과 맞지 않아요.",
+    "forbidden": [
+      "듣다"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-09",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "medium",
+    "problem_type": "작은따옴표 낱말의 기본형 한 낱말로 쓰기(앞 글자 모양이 바뀌는 낱말)",
+    "targets_misconception": "바뀐 꼴 끝에 '-다'만 붙여 기본형을 만듦('먹어'→'먹어다')",
+    "text": "「밖이 너무 '추워서' 장갑을 꼈어요.」\n'추워서'를 국어사전에서 찾으려면 어떤 낱말로 찾아야 할까요?\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "표준국어대사전 표제어 '춥다'(기억 대조). '추우다'·'추워다'는 표제어 아님.",
+    "answer": {
+      "kind": "text",
+      "value": "춥다",
+      "accepted": [
+        "춥다"
+      ]
+    },
+    "hint1": "'추워서'의 '워'가 다른 모양으로 말할 때도 남아 있는지 보세요.",
+    "hint2": "'오늘은 ○고 흐려요'처럼 말하면 '워'가 사라지고 첫 글자에 받침이 붙어요. 그 모양 뒤에 '-다'를 붙여 보세요.",
+    "after_hint2": "'○고' 자리의 말을 스스로 떠올려 첫 글자에 붙는 받침을 찾고 기본형 만들기",
+    "solution": "'추워서'는 '춥고, 춥지'처럼 말할 때 첫 글자가 '춥'이 돼요. 그래서 기본형은 '춥다'이고 답은 '춥다'예요. '추워다'는 끝에 '-다'만 붙인 말이라 사전에 없어요.",
+    "forbidden": [
+      "춥다"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-10",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "medium",
+    "problem_type": "작은따옴표 낱말의 기본형 한 낱말로 쓰기(앞 글자 모양이 바뀌는 낱말)",
+    "targets_misconception": "앞 글자 모양이 바뀌는 낱말에서 바뀐 앞 글자를 그대로 둔 채 기본형을 만듦('도와'→'도우다')",
+    "text": "「시냇물이 졸졸 '흘러' 내려가요.」\n'흘러'를 국어사전에서 찾을 때 쓰는 기본형은 무엇일까요?\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "표준국어대사전 표제어 '흐르다'(기억 대조). '흘르다'는 표제어 아님.",
+    "answer": {
+      "kind": "text",
+      "value": "흐르다",
+      "accepted": [
+        "흐르다"
+      ]
+    },
+    "hint1": "'흘러'를 '물이 ○고 있어요'처럼 바꿔 말하면 글자 수가 어떻게 되는지 보세요.",
+    "hint2": "'-고'를 붙이면 첫 글자 '흘'의 받침 'ㄹ'이 뒤 글자로 옮겨 가요. 받침이 없어진 첫 글자 뒤에 어떤 글자가 오는지 말해 보고 기본형을 만들어 보세요.",
+    "after_hint2": "받침이 옮겨 간 둘째 글자가 무엇인지 스스로 정하고 '-다'를 붙여 세 글자 기본형 만들기",
+    "solution": "'흘러'는 '흐르고, 흐르니'처럼 말해요. 그래서 기본형은 '흐르다'이고 답은 '흐르다'예요. '흘르다'는 첫 글자의 받침을 그대로 둔 말이라 사전에 없어요.",
+    "forbidden": [
+      "흐르다"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-11",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 속 작은따옴표 낱말을 사전에서 찾을 기본형 고르기",
+    "targets_misconception": "바뀐 꼴 끝에 '-다'만 붙여 기본형을 만듦('먹어'→'먹어다')",
+    "text": "「할아버지께서 고구마를 '구워' 주셨어요.」\n'구워'를 국어사전에서 찾을 때 쓰는 기본형은 무엇일까요?\n① 구워다\n② 구우다\n③ 굽다\n④ 구워요\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "굽다"
+      ]
+    },
+    "hint1": "'구워'를 다른 모양으로 바꿔 말하면 앞 글자가 어떻게 되는지 보세요.",
+    "hint2": "사전에 실린 낱말은 끝이 '-다'라서 '-다'로 끝나지 않는 보기 하나는 먼저 지울 수 있어요. 남은 보기는 '-다'를 '-고'로 바꿔 '고구마를 ○고 있어요'에 넣고, 실제로 쓰는 말인지 들어 보세요.",
+    "after_hint2": "남은 세 보기를 '-고' 모양으로 바꿔 소리 내 보고, 실제로 쓰는 말 하나를 스스로 고르기",
+    "solution": "'구워'는 '굽고, 굽는'처럼 말하니 기본형은 '굽다'예요. 답은 ③이에요. ① '구워다'는 '구워' 끝에 '-다'만 붙인 말이라 없어요. ② '구우다'는 '구우고'라고 말하지 않으니 없는 말이에요. ④ '구워요'는 '-다'로 끝나지 않아 기본형이 아니에요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-12",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 속 작은따옴표 낱말을 사전에서 찾을 기본형 고르기",
+    "targets_misconception": "바뀐 꼴을 사전에서 그대로 찾으려 함('먹었다'를 그대로 찾음)",
+    "text": "「언니가 머리를 짧게 '잘랐어요'.」\n'잘랐어요'를 국어사전에서 찾을 때 쓰는 기본형은 무엇일까요?\n① 잘랐다\n② 자르다\n③ 잘르다\n④ 잘라다\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "자르다"
+      ]
+    },
+    "hint1": "'잘랐어요'를 '종이를 ○고 있어요'처럼 지금 하는 일로 바꿔 말해 보세요.",
+    "hint2": "'~했다'처럼 이미 한 일을 말하는 모양의 보기는 사전에 실린 모양이 아니에요. 나머지 보기 셋 가운데 '-다'를 '-고'로 바꿨을 때 '종이를 ○고'에 어울리는 것을 찾아보세요.",
+    "after_hint2": "남은 세 보기를 '-고' 모양으로 바꿔 말해 보고, 실제로 쓰는 말 하나를 스스로 고르기",
+    "solution": "'잘랐어요'는 '자르고, 자르니'처럼 말하니 기본형은 '자르다'예요. 답은 ②예요. ① '잘랐다'는 이미 한 일을 말하는 바뀐 모양이에요. ③ '잘르다'는 첫 글자 받침을 그대로 둔 말이라 없어요. ④ '잘라다'는 '잘라' 끝에 '-다'만 붙인 말이라 없어요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-13",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "medium",
+    "problem_type": "첫 자음자가 같은 낱말 4개 중 국어사전에 가장 먼저(또는 나중에) 나오는 것 고르기(모음자 견주기)",
+    "targets_misconception": "첫 자음자가 같으면 모음자를 견주지 않고 둘째 글자로 차례를 정함",
+    "text": "낱말 넷 가운데 국어사전에 가장 먼저 나오는 낱말은 무엇일까요?\n① 모자\n② 무지개\n③ 마을\n④ 미소\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "마을"
+      ]
+    },
+    "hint1": "네 낱말의 첫 자음자가 모두 같아요. 그러면 첫 글자의 어느 부분을 견주어야 할까요?",
+    "hint2": "첫 자음자가 같으니 첫 글자의 모음자를 견줄 차례예요. 모음자는 ㅏ ㅑ ㅓ ㅕ ㅗ ㅛ ㅜ ㅠ ㅡ ㅣ 순서로 사전에 실려요. 둘째 글자는 아직 보지 않아요.",
+    "after_hint2": "네 낱말 첫 글자의 모음자를 스스로 찾아 차례에 대어 보고 가장 앞선 것 고르기",
+    "solution": "첫 글자의 모음자는 모자 ㅗ, 무지개 ㅜ, 마을 ㅏ, 미소 ㅣ예요. ㅏ가 가장 앞이라 답은 ③이에요. ① ㅗ와 ② ㅜ는 ㅏ보다 뒤예요. ④ 미소는 둘째 글자 ㅅ이 앞선다고 먼저 고르기 쉽지만, 첫 글자 모음자 ㅣ가 맨 끝이라 가장 뒤에 나와요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-14",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "medium",
+    "problem_type": "첫 자음자가 같은 낱말 4개 중 국어사전에 가장 먼저(또는 나중에) 나오는 것 고르기(모음자 견주기)",
+    "targets_misconception": "첫 자음자가 같으면 모음자를 견주지 않고 둘째 글자로 차례를 정함",
+    "text": "낱말 넷 가운데 국어사전에 가장 나중에 나오는 낱말은 무엇일까요?\n① 거울\n② 구름\n③ 고래\n④ 기린\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "기린"
+      ]
+    },
+    "hint1": "네 낱말 모두 첫 글자가 ㄱ으로 시작해요. 첫 글자 안에서 ㄱ 다음에 오는 글자를 보세요.",
+    "hint2": "첫 자음자가 같을 때는 첫 글자 모음자의 차례(ㅏ ㅑ ㅓ ㅕ ㅗ ㅛ ㅜ ㅠ ㅡ ㅣ)로 정해요. '고래'의 ㅗ는 '거울'의 ㅓ보다 뒤예요.",
+    "after_hint2": "남은 두 낱말의 모음자도 차례에 대어 보고 가장 뒤에 오는 것을 스스로 고르기",
+    "solution": "첫 글자의 모음자는 거울 ㅓ, 구름 ㅜ, 고래 ㅗ, 기린 ㅣ예요. 차례는 ㅓ → ㅗ → ㅜ → ㅣ라서 기린이 가장 나중이에요. 답은 ④예요. ① 거울은 둘째 글자 ㅇ 때문에 뒤에 온다고 착각하기 쉽지만 ㅓ라서 가장 앞이에요. ② ㅜ와 ③ ㅗ도 ㅣ보다 앞이에요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-15",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "medium",
+    "problem_type": "첫 글자의 자음자·모음자가 같은 낱말 4개 중 국어사전에 가장 먼저(또는 나중에) 나오는 것 고르기(받침 견주기)",
+    "targets_misconception": "받침 없는 글자가 받침 있는 글자보다 뒤에 온다고 여김",
+    "text": "낱말 넷 가운데 국어사전에 가장 먼저 나오는 낱말은 무엇일까요?\n① 강물\n② 가방\n③ 각도\n④ 간식\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "가방"
+      ]
+    },
+    "hint1": "네 낱말의 첫 글자는 모두 ㄱ과 ㅏ로 되어 있어요. 첫 글자에서 서로 다른 부분이 무엇인지 보세요.",
+    "hint2": "첫 글자의 자음자와 모음자가 같으면 받침을 견줘요. 받침끼리는 자음자 차례를 따르니 '강'의 받침 ㅇ은 '간'의 ㄴ보다 뒤예요. 받침이 아예 없는 글자는 어디쯤 올지도 생각해 보세요.",
+    "after_hint2": "받침 없는 글자와 받침 ㄱ·ㄴ이 있는 글자의 앞뒤를 스스로 정해 가장 앞선 것 고르기",
+    "solution": "첫 글자는 강(받침 ㅇ), 가(받침 없음), 각(받침 ㄱ), 간(받침 ㄴ)이에요. 받침 없는 글자가 가장 먼저라 답은 ②예요. ③ 각도는 받침 ㄱ이 있어 '가'보다 뒤, ④ 간식은 받침 ㄴ이라 '각'보다 뒤, ① 강물은 받침 ㅇ이라 셋 가운데 가장 뒤예요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-16",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "medium",
+    "problem_type": "첫 글자의 자음자·모음자가 같은 낱말 4개 중 국어사전에 가장 먼저(또는 나중에) 나오는 것 고르기(받침 견주기)",
+    "targets_misconception": "",
+    "text": "낱말 넷 가운데 국어사전에 가장 나중에 나오는 낱말은 무엇일까요?\n① 산책\n② 사과\n③ 살구\n④ 삼촌\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "삼촌"
+      ]
+    },
+    "hint1": "첫 글자 '산', '사', '살', '삼'에서 서로 다른 부분이 어디인지 보세요.",
+    "hint2": "다른 곳은 받침이에요. 받침이 없는 '사'는 받침 있는 글자보다 앞에 와요. 남은 받침 ㄴ, ㄹ, ㅁ의 차례를 견주어 보세요.",
+    "after_hint2": "받침 ㄴ·ㄹ·ㅁ을 자음자 차례에 대어 가장 뒤에 오는 것을 스스로 고르기",
+    "solution": "첫 글자는 산(ㄴ), 사(받침 없음), 살(ㄹ), 삼(ㅁ)이에요. 자음자 차례에서 ㄴ → ㄹ → ㅁ이라 '삼'이 가장 뒤예요. 답은 ④예요. ② 사과는 받침이 없어 가장 앞, ① 산책은 ㄴ, ③ 살구는 ㄹ이라 ㅁ보다 앞이에요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-17",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "hard",
+    "problem_type": "낱말 4개를 국어사전 차례로 늘어놓을 때 몇 번째 낱말 고르기(모음자·받침 함께 견주기)",
+    "targets_misconception": "",
+    "text": "낱말 넷을 국어사전에 실린 차례대로 늘어놓으려고 해요. 세 번째에 오는 낱말은 무엇일까요?\n① 노을\n② 나무\n③ 눈사람\n④ 낙엽\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "노을"
+      ]
+    },
+    "hint1": "네 낱말의 첫 자음자는 같아요. 첫 글자에서 모음자와 받침을 차례로 견주어 보세요.",
+    "hint2": "모음자를 먼저 견주면 ㅏ가 든 두 낱말이 앞쪽 두 자리를 차지해요. 남은 두 낱말의 앞뒤를 정하는 것이 이제 할 일이에요.",
+    "after_hint2": "남은 두 낱말의 첫 글자 모음자 ㅗ와 ㅜ의 앞뒤를 스스로 정해 세 번째 낱말 고르기",
+    "solution": "차례는 나무(나) → 낙엽(낙, 받침 ㄱ) → 노을(노) → 눈사람(눈)이에요. 모음자 ㅏ가 든 나무·낙엽이 앞이고, ㅗ가 ㅜ보다 앞이라 세 번째는 노을이에요. 답은 ①이에요. ② 나무는 첫 번째, ④ 낙엽은 두 번째, ③ 눈사람은 네 번째예요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-18",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "hard",
+    "problem_type": "바뀐 꼴 낱말 4개를 기본형으로 바꾼 뒤 국어사전에 가장 먼저(또는 나중에) 나오는 것 고르기",
+    "targets_misconception": "바뀐 꼴 그대로 사전 차례를 견줌(기본형으로 바꾼 뒤 견주지 않음)",
+    "text": "작은따옴표 낱말을 기본형으로 바꾸어 국어사전에서 찾으려고 해요. 사전에 가장 나중에 나오는 것은 무엇일까요?\n① 곡식을 '거둬'\n② 학교까지 '걸어서'\n③ 물고기를 '건져'\n④ 감기에 '걸려서'\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "감기에 '걸려서'"
+      ]
+    },
+    "hint1": "먼저 네 낱말을 모두 사전에 실린 모양으로 바꾸어 보세요. 바꾸기 전 모양으로 견주면 차례가 달라질 수 있어요.",
+    "hint2": "'학교까지 ○고 가요'처럼 말하면 '걸어서'의 첫 글자 받침이 'ㄹ'이 아니게 돼요. 네 기본형의 첫 글자는 모두 ㄱ과 ㅓ로 같으니 받침을 견주어 보세요.",
+    "after_hint2": "나머지 세 낱말의 기본형을 스스로 만들고, 네 첫 글자의 받침(없음·ㄴ·ㄷ·ㄹ)을 차례에 대어 가장 뒤의 것 고르기",
+    "solution": "기본형은 거둬 → 거두다, 걸어서 → 걷다, 건져 → 건지다, 걸려서 → 걸리다예요. 첫 글자는 거(받침 없음) → 건(ㄴ) → 걷(ㄷ) → 걸(ㄹ) 차례라 '걸리다'가 가장 나중이에요. 답은 ④예요. ② '걸어서'는 바뀐 모양 그대로 견주면 가장 뒤 같지만 기본형 '걷다'는 '걸리다'보다 앞이에요. ① 거두다는 가장 앞, ③ 건지다는 두 번째예요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-19",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "hard",
+    "problem_type": "문장 속 바뀐 꼴 낱말 2개를 기본형으로 바꾼 뒤 국어사전에 먼저 나오는 기본형 쓰기",
+    "targets_misconception": "바뀐 꼴 그대로 사전 차례를 견줌(기본형으로 바꾼 뒤 견주지 않음)",
+    "text": "「동생은 소파에 '누워서' 리모컨 단추를 '눌러' 보았어요.」\n두 낱말을 기본형으로 바꾸었을 때, 국어사전에 먼저 나오는 기본형은 무엇일까요?\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "표제어 '눕다'·'누르다'(기억 대조). 사전 차례: 누(받침 없음)+르 < 눕 → '누르다'가 앞. 바뀐 꼴로는 누워서(누) < 눌러(눌)라 오개념이면 '눕다'를 씀.",
+    "answer": {
+      "kind": "text",
+      "value": "누르다",
+      "accepted": [
+        "누르다"
+      ]
+    },
+    "hint1": "두 낱말을 각각 '-고'를 붙인 모양으로 바꿔 말해 보세요. '소파에 ○고', '단추를 ○고'처럼요.",
+    "hint2": "'누워서'는 '-고'를 붙이면 첫 글자에 받침이 생겨요. 다른 낱말도 '-고'를 붙였을 때 첫 글자에 받침이 있는지 보고, 받침 없는 글자가 먼저라는 차례로 견주어 보세요.",
+    "after_hint2": "'눌러'의 기본형을 스스로 만들어 첫 글자 받침이 없어짐을 확인하고, 두 기본형 가운데 앞선 것을 골라 쓰기",
+    "solution": "'누워서'는 '눕고'처럼 말하니 기본형이 '눕다'(첫 글자 눕, 받침 ㅂ)예요. '눌러'는 '누르고'처럼 말하니 기본형이 '누르다'(첫 글자 누, 받침 없음)예요. 받침 없는 '누'가 '눕'보다 앞이라 답은 '누르다'예요. 바뀐 모양 그대로 견주면 '누워서'가 앞처럼 보여 '눕다'를 고르기 쉬워요.",
+    "forbidden": [
+      "누르다"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g3-kor-dictionary-base-form-20",
+    "unit_id": "g3-kor-dictionary-base-form",
+    "tag": "g3-kor-dictionary-base-form",
+    "subject": "korean",
+    "grade": 3,
+    "standard": {
+      "code": "[4국04-02]",
+      "curriculum": "2022",
+      "unit": "국어사전에서 낱말 찾기"
+    },
+    "difficulty": "hard",
+    "problem_type": "문장 속 바뀐 꼴 낱말 2개를 기본형으로 바꾼 뒤 국어사전에 먼저 나오는 기본형 쓰기",
+    "targets_misconception": "바뀐 꼴 그대로 사전 차례를 견줌(기본형으로 바꾼 뒤 견주지 않음)",
+    "text": "「짐 옮기는 일을 '도와' 드리는 사이에 손님이 '도착했어요'.」\n두 낱말을 국어사전에서 찾으려고 해요. 사전 앞쪽에 실린 낱말의 기본형을 써 보세요.\n(한 낱말로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "표제어 '돕다'·'도착하다'(기억 대조). 도(받침 없음) < 돕 → '도착하다'가 앞. 바뀐 꼴로는 도와(도+와) < 도착(도+착)이라 오개념이면 '돕다'를 씀.",
+    "answer": {
+      "kind": "text",
+      "value": "도착하다",
+      "accepted": [
+        "도착하다"
+      ]
+    },
+    "hint1": "'도와'를 '일을 ○고 있어요'처럼 바꾸어 말해 보세요. 첫 글자가 그대로인가요?",
+    "hint2": "'도와'는 기본형으로 바꾸면 첫 글자가 받침 있는 글자가 돼요. '도착했어요'도 사전에 실린 모양으로 바꾼 다음, 두 기본형의 첫 글자끼리 견주어 보세요.",
+    "after_hint2": "'도착했어요'의 기본형을 스스로 만들고, 받침 없는 첫 글자와 받침 있는 첫 글자 가운데 앞선 것을 골라 쓰기",
+    "solution": "'도와'는 '돕고'처럼 말하니 기본형이 '돕다'(첫 글자 돕)예요. '도착했어요'의 기본형은 '도착하다'(첫 글자 도)예요. 받침 없는 '도'가 '돕'보다 앞이라 답은 '도착하다'예요. 바뀐 모양으로 견주면 '도와'의 '와'(ㅇ)가 '착'(ㅊ)보다 앞이라 '돕다'를 쓰기 쉽고, '도착했다'는 기본형이 아니에요.",
+    "forbidden": [
+      "도착하다"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  }
+]

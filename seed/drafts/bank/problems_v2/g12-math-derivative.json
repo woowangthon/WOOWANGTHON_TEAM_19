@@ -1,0 +1,706 @@
+[
+  {
+    "id": "g12-math-derivative-01",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-01]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "easy",
+    "problem_type": "평균변화율 구하기(구간 [a, b])",
+    "targets_misconception": "평균변화율을 구할 때 x의 증가량으로 나누지 않고 함숫값의 차만 구함",
+    "text": "함수 f(x) = x² + 3x에서 x의 값이 1에서 4까지 변할 때의 평균변화율을 구하세요.\n(숫자만)",
+    "expr": "((4*4+3*4)-(1*1+3*1))/(4-1)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "8",
+      "accepted": [
+        "8"
+      ]
+    },
+    "hint1": "평균변화율은 어떤 값을 어떤 값으로 나눈 것인지 떠올려 보세요. x는 얼마만큼 늘었나요?",
+    "hint2": "y의 증가량은 f(4) − f(1)이고, f(1)은 4예요. 이 차를 구한 뒤 x의 증가량으로 나누는 것까지 해야 해요.",
+    "after_hint2": "f(4)를 계산해 f(4) − f(1)을 구하고, x의 증가량으로 나누기",
+    "solution": "f(4) = 16 + 12 = 28, f(1) = 1 + 3 = 4예요. y의 증가량은 28 − 4 = 24, x의 증가량은 4 − 1 = 3이므로 평균변화율은 24 ÷ 3 = 8이에요. 24에서 멈추면 x의 증가량으로 나누지 않은 거예요.",
+    "forbidden": [
+      "8"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-02",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-01]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "easy",
+    "problem_type": "평균변화율 구하기(구간 [a, b])",
+    "targets_misconception": "평균변화율을 구할 때 x의 증가량으로 나누지 않고 함숫값의 차만 구함",
+    "text": "함수 f(x) = 2x³ − x에서 x의 값이 1에서 3까지 변할 때의 평균변화율을 구하세요.\n(숫자만)",
+    "expr": "((2*3*3*3-3)-(2*1*1*1-1))/(3-1)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "25",
+      "accepted": [
+        "25"
+      ]
+    },
+    "hint1": "x가 1에서 3으로 바뀔 때 f(x)의 값은 얼마에서 얼마로 바뀌나요?",
+    "hint2": "f(3)을 구할 때는 3³ = 27에 2를 곱한 다음 3을 빼요. 함숫값의 차만 구하고 멈추면 안 돼요.",
+    "after_hint2": "f(3)과 f(1)을 계산해 차를 구하고, x의 증가량으로 나누기",
+    "solution": "f(3) = 54 − 3 = 51, f(1) = 2 − 1 = 1이에요. y의 증가량 51 − 1 = 50을 x의 증가량 3 − 1 = 2로 나누면 평균변화율은 25예요. 50은 나누기 전의 값이라 틀려요.",
+    "forbidden": [
+      "25"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-03",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-04]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "easy",
+    "problem_type": "다항함수의 도함수로 미분계수 f′(a) 구하기",
+    "targets_misconception": "xⁿ을 미분할 때 지수를 낮추지 않거나 원래 지수 n을 곱하지 않음",
+    "text": "함수 f(x) = x⁴ − 2x² + 5x에 대하여 f′(2)의 값을 구하세요.\n(숫자만)",
+    "expr": "4*2*2*2-4*2+5",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "29",
+      "accepted": [
+        "29"
+      ]
+    },
+    "hint1": "xⁿ을 미분하면 지수와 계수가 어떻게 바뀌나요? 항마다 따로 미분해 보세요.",
+    "hint2": "x⁴을 미분하면 4x³이 돼요. 나머지 두 항도 같은 방법으로 미분해 f′(x)를 만든 뒤 x = 2를 넣어 보세요.",
+    "after_hint2": "−2x²과 5x를 미분해 f′(x)를 완성하고 x = 2를 대입해 계산하기",
+    "solution": "f′(x) = 4x³ − 4x + 5예요. f′(2) = 32 − 8 + 5 = 29예요. 지수를 앞에 곱하지 않으면 x³ − x + 5처럼 되어 다른 값이 나와요.",
+    "forbidden": [
+      "29"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-04",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-05]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "easy",
+    "problem_type": "다항함수의 도함수로 미분계수 f′(a) 구하기",
+    "targets_misconception": "상수항을 미분해도 그대로 남긴다고 생각함",
+    "text": "함수 f(x) = 3x² − 4x + 7에 대하여 f′(5)의 값을 구하세요.\n(숫자만)",
+    "expr": "6*5-4",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "26",
+      "accepted": [
+        "26"
+      ]
+    },
+    "hint1": "f(x)의 세 항 가운데 x가 없는 항은 미분하면 어떻게 되나요?",
+    "hint2": "상수항 7은 x가 바뀌어도 값이 그대로라서 미분하면 0이 돼요. 남은 두 항을 미분해 x = 5를 넣어 보세요.",
+    "after_hint2": "3x² − 4x를 미분해 f′(x)를 만들고 x = 5를 대입해 계산하기",
+    "solution": "f′(x) = 6x − 4이므로 f′(5) = 30 − 4 = 26이에요. 상수항 7을 남기면 33이 되어 틀려요.",
+    "forbidden": [
+      "26"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-05",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-02]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "easy",
+    "problem_type": "곡선 위 한 점에서 접선의 기울기 구하기",
+    "targets_misconception": "접선의 기울기 대신 접점의 함숫값(y좌표)을 기울기로 씀",
+    "text": "곡선 y = x³ − 3x + 2 위의 점 (2, 4)에서의 접선의 기울기를 구하세요.\n(숫자만)",
+    "expr": "3*2*2-3",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "9",
+      "accepted": [
+        "9"
+      ]
+    },
+    "hint1": "곡선 위 한 점에서 접선의 기울기는 그 점에서 무엇의 값과 같나요?",
+    "hint2": "접선의 기울기는 점의 y좌표 4가 아니라 그 점에서의 미분계수예요. y를 x에 대하여 미분해 보세요.",
+    "after_hint2": "y′를 구하고 x = 2를 넣어 계산하기",
+    "solution": "y′ = 3x² − 3이므로 x = 2에서 접선의 기울기는 12 − 3 = 9예요. 점의 y좌표 4는 기울기가 아니에요.",
+    "forbidden": [
+      "9"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-06",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-02]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "easy",
+    "problem_type": "곡선 위 한 점에서 접선의 기울기 구하기",
+    "targets_misconception": "xⁿ을 미분할 때 지수를 낮추지 않거나 원래 지수 n을 곱하지 않음",
+    "text": "곡선 y = x⁴ − x³ 위의 x = 2인 점에서의 접선의 기울기를 구하세요.\n(숫자만)",
+    "expr": "4*2*2*2-3*2*2",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "20",
+      "accepted": [
+        "20"
+      ]
+    },
+    "hint1": "x = 2인 점에서의 접선의 기울기를 구하려면 먼저 무엇을 구해야 하나요?",
+    "hint2": "각 항을 미분할 때 지수를 하나 낮추면서 원래 지수를 앞에 곱해야 해요. x³을 미분하면 3x²이에요.",
+    "after_hint2": "x⁴을 미분해 y′를 완성하고 x = 2를 넣어 계산하기",
+    "solution": "y′ = 4x³ − 3x²이에요. x = 2를 넣으면 32 − 12 = 20이에요. 지수를 앞에 곱하지 않고 x³ − x²으로 쓰면 4가 나와 틀려요.",
+    "forbidden": [
+      "20"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-07",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-01]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "medium",
+    "problem_type": "극한 꼴로 쓴 미분계수의 값 구하기",
+    "targets_misconception": "극한 꼴로 쓴 미분계수에서 h 앞의 배수나 분모와 분자의 증가량 차이를 빠뜨림",
+    "text": "함수 f(x) = x² + 4x에 대하여, h가 0으로 갈 때 {f(1 + 3h) − f(1)} / h의 극한값을 구하세요.\n(숫자만)",
+    "expr": "3*(2*1+4)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "18",
+      "accepted": [
+        "18"
+      ]
+    },
+    "hint1": "미분계수의 정의 {f(a + h) − f(a)} / h와 견주어 보세요. 분자에서 x가 늘어난 양과 분모가 같나요?",
+    "hint2": "분자에서 x는 3h만큼 늘었는데 분모는 h예요. 분모를 3h로 맞추려면 식 밖에 3을 곱해야 해요.",
+    "after_hint2": "f′(x)로 f′(1)을 구하고 3을 곱하기",
+    "solution": "{f(1 + 3h) − f(1)} / h = 3 × {f(1 + 3h) − f(1)} / (3h)이므로 극한값은 3f′(1)이에요. f′(x) = 2x + 4에서 f′(1) = 6이고, 3 × 6 = 18이에요. 3을 빠뜨리면 6이 나와 틀려요.",
+    "forbidden": [
+      "18"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-08",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-01]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "medium",
+    "problem_type": "극한 꼴로 쓴 미분계수의 값 구하기",
+    "targets_misconception": "극한 꼴로 쓴 미분계수에서 h 앞의 배수나 분모와 분자의 증가량 차이를 빠뜨림",
+    "text": "함수 f(x) = x³ − x에 대하여, h가 0으로 갈 때 {f(2 + h) − f(2 − h)} / h의 극한값을 구하세요.\n(숫자만)",
+    "expr": "2*(3*2*2-1)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "22",
+      "accepted": [
+        "22"
+      ]
+    },
+    "hint1": "분자의 두 함숫값에서 x는 각각 2에서 얼마만큼 떨어져 있나요? 두 x의 차이는 얼마인가요?",
+    "hint2": "분자에 f(2)를 빼고 더해 {f(2 + h) − f(2)} / h와 {f(2) − f(2 − h)} / h 두 식으로 나눠 보세요. 앞의 식의 극한값은 f′(2)예요.",
+    "after_hint2": "뒤의 식도 f′(2)로 바꿀 수 있음을 보이고, f′(2)를 계산해 두 값을 더하기",
+    "solution": "뒤의 식은 {f(2 − h) − f(2)} / (−h)와 같아서 극한값이 f′(2)예요. 그래서 전체 극한값은 2f′(2)예요. f′(x) = 3x² − 1이므로 f′(2) = 11이고, 2 × 11 = 22예요. 분모가 h라서 f′(2)라고 하면 11이 나와 틀려요.",
+    "forbidden": [
+      "22"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-09",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-05]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "medium",
+    "problem_type": "곱의 미분법으로 미분계수 구하기",
+    "targets_misconception": "곱의 미분을 각 식의 도함수끼리 곱해서 구함",
+    "text": "함수 f(x) = (x² + 1)(2x − 3)에 대하여 f′(2)의 값을 구하세요.\n(숫자만)",
+    "expr": "2*2*(2*2-3)+(2*2+1)*2",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "14",
+      "accepted": [
+        "14"
+      ]
+    },
+    "hint1": "두 식의 곱을 미분할 때, 각 식을 미분해서 곱하기만 하면 될까요?",
+    "hint2": "곱의 미분법은 {g(x)k(x)}′ = g′(x)k(x) + g(x)k′(x)예요. x² + 1과 2x − 3의 도함수부터 각각 구해 보세요.",
+    "after_hint2": "두 도함수를 공식에 넣어 f′(x)를 만들고 x = 2를 대입해 계산하기",
+    "solution": "f′(x) = 2x(2x − 3) + 2(x² + 1)이에요. x = 2를 넣으면 4 × 1 + 2 × 5 = 4 + 10 = 14예요. 도함수끼리 곱해 2x × 2 = 4x로 하면 8이 나와 틀려요.",
+    "forbidden": [
+      "14"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-10",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-05]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "medium",
+    "problem_type": "곱의 미분법으로 미분계수 구하기",
+    "targets_misconception": "곱의 미분을 각 식의 도함수끼리 곱해서 구함",
+    "text": "함수 f(x) = (x³ − 2x)(x + 5)에 대하여 f′(2)의 값을 구하세요.\n(숫자만)",
+    "expr": "(3*2*2-2)*(2+5)+(2*2*2-2*2)*1",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "74",
+      "accepted": [
+        "74"
+      ]
+    },
+    "hint1": "전개해서 미분해도 되고 곱의 미분법을 써도 돼요. x = 2에서 두 괄호의 값은 각각 얼마인가요?",
+    "hint2": "x = 2에서 앞 괄호의 값은 4, 뒤 괄호의 값은 7이에요. 이번에는 두 괄호의 도함수를 x = 2에서 각각 구해, 앞의 도함수와 뒤 괄호, 앞 괄호와 뒤의 도함수를 짝지어 곱해 더하세요.",
+    "after_hint2": "x = 2에서 3x² − 2와 1의 값을 구해 짝지어 곱한 뒤 더하기",
+    "solution": "f′(x) = (3x² − 2)(x + 5) + (x³ − 2x) × 1이에요. x = 2에서 10 × 7 + 4 × 1 = 70 + 4 = 74예요. 도함수끼리만 곱하면 10 × 1 = 10이 되어 틀려요.",
+    "forbidden": [
+      "74"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-11",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-05]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "medium",
+    "problem_type": "미분계수·함숫값 조건으로 미지수(계수) 구하기",
+    "targets_misconception": "xⁿ을 미분할 때 지수를 낮추지 않거나 원래 지수 n을 곱하지 않음",
+    "text": "함수 f(x) = x³ + ax² − 2x에서 f′(2) = 34일 때, 상수 a의 값을 구하세요.\n(숫자만)",
+    "expr": "(34-3*2*2+2)/(2*2)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "6",
+      "accepted": [
+        "6"
+      ]
+    },
+    "hint1": "a가 들어 있는 항 ax²을 미분하면 어떤 꼴이 되나요? a는 상수로 보세요.",
+    "hint2": "f′(x) = 3x² + 2ax − 2예요. 여기에 x = 2를 넣어 a에 대한 일차방정식을 세워 보세요.",
+    "after_hint2": "f′(2)를 a로 나타내 34와 같다고 놓고 일차방정식 풀기",
+    "solution": "f′(2) = 12 + 4a − 2 = 4a + 10이에요. 4a + 10 = 34에서 4a = 24, a = 6이에요. ax²을 ax로 잘못 미분하면 12 + a − 2 = 34에서 24가 나와 틀려요.",
+    "forbidden": [
+      "6"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-12",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-05]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "medium",
+    "problem_type": "미분계수·함숫값 조건으로 미지수(계수) 구하기",
+    "targets_misconception": "",
+    "text": "함수 f(x) = 2x² + ax + b에서 f(1) = 12, f′(1) = 11일 때, 상수 b의 값을 구하세요.\n(숫자만)",
+    "expr": "12-2-(11-4)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "3",
+      "accepted": [
+        "3"
+      ]
+    },
+    "hint1": "두 조건 가운데 미지수가 하나만 남는 것은 어느 쪽인가요? b는 미분하면 어떻게 될까요?",
+    "hint2": "b는 상수라 미분하면 사라져서 f′(x) = 4x + a예요. f′(1) = 11로 a를 먼저 구한 다음 f(1) = 12에 넣으세요.",
+    "after_hint2": "f′(1) = 11에서 a를 구하고, 그 a를 f(1) = 12에 넣어 b 구하기",
+    "solution": "f′(x) = 4x + a이므로 4 + a = 11, a = 7이에요. f(1) = 2 + 7 + b = 12에서 b = 3이에요. b를 미분해도 남긴다고 보면 4 + a + b = 11이 되어 f(1) 조건과 맞지 않아요.",
+    "forbidden": [
+      "3"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-13",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-06]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "medium",
+    "problem_type": "접점이 주어진 접선의 방정식으로 y절편·x절편 구하기",
+    "targets_misconception": "접선의 방정식을 세울 때 (x − a)를 빠뜨려 y = f′(a)x + f(a)로 씀",
+    "text": "곡선 y = −2x² + 9x + 4 위의 점 (2, 14)에서의 접선의 y절편을 구하세요.\n(숫자만)",
+    "expr": "14-2*(-4*2+9)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "12",
+      "accepted": [
+        "12"
+      ]
+    },
+    "hint1": "접선의 방정식을 세우려면 접점 말고 무엇이 더 필요한가요?",
+    "hint2": "먼저 x = 2에서의 미분계수로 접선의 기울기를 구하세요. 접선은 접점 (2, 14)를 지나니까 y − 14 = (기울기) × (x − 2) 꼴로 세워요.",
+    "after_hint2": "기울기를 계산해 접선의 방정식을 정리하고 x = 0일 때의 y값 구하기",
+    "solution": "x = 2에서 기울기는 −8 + 9 = 1이에요. 접선은 y − 14 = 1 × (x − 2), 곧 y = x + 12이고 y절편은 12예요. (x − 2)를 빠뜨려 y = x + 14로 쓰면 14가 나와 틀려요.",
+    "forbidden": [
+      "12"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-14",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-06]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "medium",
+    "problem_type": "접점이 주어진 접선의 방정식으로 y절편·x절편 구하기",
+    "targets_misconception": "접선의 기울기 대신 접점의 함숫값(y좌표)을 기울기로 씀",
+    "text": "곡선 y = x³ − 3x² + x − 7 위의 점 (2, −9)에서의 접선이 x축과 만나는 점의 x좌표를 구하세요.\n(숫자만)",
+    "expr": "2-(-9)/(3*2*2-6*2+1)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "11",
+      "accepted": [
+        "11"
+      ]
+    },
+    "hint1": "접선이 x축과 만나는 점은 접선의 방정식에서 y에 무엇을 넣으면 구할 수 있나요?",
+    "hint2": "y에 0을 넣기 전에 접선의 방정식이 있어야 해요. 그 기울기는 −9가 아니라 x = 2에서 y′의 값이에요.",
+    "after_hint2": "기울기를 구해 접선의 방정식을 세우고, y = 0을 넣어 x 구하기",
+    "solution": "x = 2에서 기울기는 12 − 12 + 1 = 1이에요. 접선은 y + 9 = 1 × (x − 2), 곧 y = x − 11이고, y = 0일 때 x = 11이에요. 기울기를 −9로 쓰면 x = 1이 나와 틀려요.",
+    "forbidden": [
+      "11"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-15",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-08]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "medium",
+    "problem_type": "삼차함수의 극댓값·극솟값 구하기",
+    "targets_misconception": "극값을 물었는데 f′(x) = 0의 해(x좌표)를 답함",
+    "text": "함수 f(x) = x³ − 3x² − 9x + 40의 극솟값을 구하세요.\n(숫자만)",
+    "expr": "3*3*3-3*3*3-9*3+40",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "13",
+      "accepted": [
+        "13"
+      ]
+    },
+    "hint1": "극값을 가질 수 있는 x를 찾으려면 f′(x)가 어떤 값이 되는 곳을 보나요?",
+    "hint2": "f′(x) = 3x² − 6x − 9 = 3(x + 1)(x − 3)이에요. 두 x 가운데 f′(x)의 부호가 −에서 +로 바뀌는 쪽을 고르세요.",
+    "after_hint2": "극소가 되는 x를 부호로 고르고, 그 x에서 f(x)의 값을 계산하기",
+    "solution": "x = 3의 왼쪽에서는 f′(x) < 0, 오른쪽에서는 f′(x) > 0이라 x = 3에서 극소예요. 극솟값은 f(3) = 27 − 27 − 27 + 40 = 13이에요. x좌표 3을 답으로 쓰면 틀려요. x = −1에서는 극대예요.",
+    "forbidden": [
+      "13"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-16",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-08]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "medium",
+    "problem_type": "삼차함수의 극댓값·극솟값 구하기",
+    "targets_misconception": "f′(x)의 부호 변화를 확인하지 않아 극대와 극소를 바꿔 씀",
+    "text": "함수 f(x) = −x³ + 6x² + 5의 극댓값을 구하세요.\n(숫자만)",
+    "expr": "-4*4*4+6*4*4+5",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "37",
+      "accepted": [
+        "37"
+      ]
+    },
+    "hint1": "최고차항의 계수가 음수예요. f′(x) = 0의 두 근 사이에서 f′(x)는 어떤 부호일까요?",
+    "hint2": "f′(x) = −3x² + 12x = −3x(x − 4)예요. 두 근 사이의 수 x = 1을 넣어 f′(x)의 부호를 확인해 보세요.",
+    "after_hint2": "부호 변화로 극대가 되는 x를 정하고 그 x에서 f(x)의 값을 계산하기",
+    "solution": "0 < x < 4에서 f′(x) > 0, x > 4에서 f′(x) < 0이라 x = 4에서 극대예요. 극댓값은 f(4) = −64 + 96 + 5 = 37이에요. x = 0에서의 값 5는 극솟값이라 바꿔 쓰면 틀려요.",
+    "forbidden": [
+      "37"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-17",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-08]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "hard",
+    "problem_type": "극값 조건으로 미지수를 정한 뒤 극값 구하기",
+    "targets_misconception": "f′(x)의 부호 변화를 확인하지 않아 극대와 극소를 바꿔 씀",
+    "text": "함수 f(x) = x³ + ax² + bx + 1이 x = 1과 x = 3에서 극값을 가질 때, f(x)의 극댓값을 구하세요. (a, b는 상수)\n(숫자만)",
+    "expr": "1+(-6)+9+1",
+    "verify": "manual",
+    "verify_note": "a = −6, b = 9를 연립으로 구해 f′(1) = 3 − 12 + 9 = 0, f′(3) = 27 − 36 + 9 = 0 확인. f(1) = 5, f(3) = 1. expr은 a, b를 대입한 f(1)이라 문제의 수만으로 된 식이 아니어서 manual.",
+    "answer": {
+      "kind": "value",
+      "value": "5",
+      "accepted": [
+        "5"
+      ]
+    },
+    "hint1": "x = 1과 x = 3에서 극값을 가지면, 그 두 곳에서 f′(x)의 값은 얼마인가요?",
+    "hint2": "f′(x) = 3x² + 2ax + b예요. f′(1)과 f′(3)을 이용해 a, b에 대한 연립방정식을 세워 보세요.",
+    "after_hint2": "연립방정식으로 a, b를 구하고, f′(x)의 부호로 극대가 되는 x를 정해 함숫값 계산하기",
+    "solution": "f′(1) = 3 + 2a + b = 0, f′(3) = 27 + 6a + b = 0을 풀면 a = −6, b = 9예요. f′(x) = 3(x − 1)(x − 3)이라 x = 1에서 부호가 +에서 −로 바뀌어 극대예요. 극댓값은 f(1) = 1 − 6 + 9 + 1 = 5예요. x = 3에서의 값 1은 극솟값이에요.",
+    "forbidden": [
+      "5"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-18",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-08]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "hard",
+    "problem_type": "극값 조건으로 미지수를 정한 뒤 극값 구하기",
+    "targets_misconception": "",
+    "text": "함수 f(x) = −2x³ + ax² + 12x가 x = 2에서 극댓값을 가질 때, 극댓값과 극솟값의 차를 구하세요. (a는 상수)\n(숫자만)",
+    "expr": "(-2*2*2*2+3*2*2+12*2)-(-2*(-1)*(-1)*(-1)+3*(-1)*(-1)+12*(-1))",
+    "verify": "manual",
+    "verify_note": "f′(2) = 0에서 a = 3 → f′(x) = −6(x − 2)(x + 1). x = 2 왼쪽 f′(1) = 12 > 0, 오른쪽 f′(3) = −24 < 0으로 극대 확인. f(2) = 20, f(−1) = −7, 차 27. expr은 a = 3을 대입한 식이라 manual.",
+    "answer": {
+      "kind": "value",
+      "value": "27",
+      "accepted": [
+        "27"
+      ]
+    },
+    "hint1": "x = 2에서 극값을 가진다는 조건으로 a를 먼저 정할 수 있나요?",
+    "hint2": "f′(2) = 0에서 a를 구한 다음 f′(x)를 인수분해하면 f′(x) = 0의 다른 근이 나와요. 그 근에서 극솟값을 가져요.",
+    "after_hint2": "a를 구하고 다른 근을 찾은 뒤, 두 x에서 함숫값을 계산해 차 구하기",
+    "solution": "f′(x) = −6x² + 2ax + 12이고 f′(2) = −24 + 4a + 12 = 0에서 a = 3이에요. f′(x) = −6(x − 2)(x + 1)이라 x = −1에서 극소, x = 2에서 극대예요. f(2) = −16 + 12 + 24 = 20, f(−1) = 2 + 3 − 12 = −7이고, 차는 20 − (−7) = 27이에요.",
+    "forbidden": [
+      "27"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-19",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-08]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "hard",
+    "problem_type": "실수 전체에서 증가하도록 하는 정수 미지수의 개수 구하기",
+    "targets_misconception": "실수 전체에서 증가할 조건 f′(x) ≥ 0에서 등호를 빼고 판별식 D < 0으로 풂",
+    "text": "함수 f(x) = x³ + ax² + 3x + 1이 실수 전체에서 증가하도록 하는 정수 a의 개수를 구하세요.\n(숫자만)",
+    "expr": "7",
+    "verify": "manual",
+    "verify_note": "a = −3~3 대입: D/4 = a² − 9 ≤ 0 성립(7개). a = ±4는 16 − 9 = 7 > 0 불성립. a = ±3에서 f′(x) = 3(x ± 1)²으로 x = ∓1 한 점에서만 0 → 증가 유지. 개수 세기라 expr은 정답 그대로.",
+    "answer": {
+      "kind": "value",
+      "value": "7",
+      "accepted": [
+        "7"
+      ]
+    },
+    "hint1": "실수 전체에서 증가하려면 f′(x)는 모든 x에서 어떤 부호여야 하나요? f′(x)가 0이 되는 점이 있어도 될까요?",
+    "hint2": "f′(x) = 3x² + 2ax + 3이 모든 x에서 0 이상이려면 이 이차식의 판별식이 0 이하여야 해요. 등호도 들어간다는 점을 기억하세요.",
+    "after_hint2": "판별식 조건으로 a의 범위를 구하고, 그 범위의 정수 개수 세기",
+    "solution": "모든 x에서 f′(x) = 3x² + 2ax + 3 ≥ 0이어야 해요. D/4 = a² − 9 ≤ 0에서 −3 ≤ a ≤ 3이고, 정수는 −3부터 3까지 7개예요. a = ±3일 때 f′(x)는 한 점에서만 0이라 f(x)는 그래도 증가해요. 등호를 빼고 D < 0으로 풀면 5개가 나와 틀려요.",
+    "forbidden": [
+      "7"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g12-math-derivative-20",
+    "unit_id": "g12-math-derivative",
+    "tag": "g12-math-derivative",
+    "subject": "math",
+    "grade": 12,
+    "standard": {
+      "code": "[12수학Ⅱ02-06]",
+      "curriculum": "2015",
+      "unit": "미분: 미분계수·도함수·접선·증가와 감소·극값(다항함수)"
+    },
+    "difficulty": "hard",
+    "problem_type": "기울기가 주어진 접선(접점을 먼저 찾기)의 y절편 구하기",
+    "targets_misconception": "접선의 방정식을 세울 때 (x − a)를 빠뜨려 y = f′(a)x + f(a)로 씀",
+    "text": "곡선 y = x³ − 3x² + 5에 접하고 기울기가 9인 직선은 두 개예요. 이 가운데 y절편이 양수인 직선의 y절편을 구하세요.\n(숫자만)",
+    "expr": "9*(0-(-1))+((-1)*(-1)*(-1)-3*(-1)*(-1)+5)",
+    "verify": "manual",
+    "verify_note": "3x² − 6x − 9 = 0 → x = 3, −1. x = 3: f(3) = 5, 접선 y = 9x − 22(y절편 −22, 음수). x = −1: f(−1) = 1, 접선 y = 9x + 10(y절편 10, 양수). 양수는 하나뿐. expr은 접점 x = −1을 대입한 식이라 manual.",
+    "answer": {
+      "kind": "value",
+      "value": "10",
+      "accepted": [
+        "10"
+      ]
+    },
+    "hint1": "기울기가 9인 접선의 접점을 찾으려면 y′가 얼마가 되는 x를 구해야 하나요?",
+    "hint2": "3x² − 6x = 9를 풀면 접점의 x좌표가 둘 나오고, 그 가운데 하나는 x = 3이에요. 두 접점에서 접선을 각각 세워 y절편을 견주어 보세요.",
+    "after_hint2": "다른 접점의 x좌표를 구하고 두 접선의 y절편을 계산해 양수인 것 고르기",
+    "solution": "y′ = 3x² − 6x = 9에서 x² − 2x − 3 = 0, x = 3 또는 x = −1이에요. x = 3이면 접점 (3, 5), 접선 y = 9x − 22로 y절편이 −22예요. x = −1이면 접점 (−1, 1), 접선 y = 9(x + 1) + 1 = 9x + 10으로 y절편이 10이에요. (x + 1)을 빠뜨려 y = 9x + 1로 쓰면 1이 나와 틀려요.",
+    "forbidden": [
+      "10"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  }
+]

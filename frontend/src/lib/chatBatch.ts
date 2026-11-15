@@ -44,6 +44,14 @@ export function createBatcher(send: (texts: string[]) => void, waitMs = BATCH_WA
   };
 }
 
+/** 앱 전환·스와이프 종료(visibilitychange hidden·pagehide) 때 onHide를 바로 부른다(명세 3.2, 성호 11-15). 떼는 함수를 돌려준다 */
+export function listenHidden(win: EventTarget, doc: EventTarget & { visibilityState: string }, onHide: () => void): () => void {
+  const vis = () => { if (doc.visibilityState === 'hidden') onHide(); };
+  doc.addEventListener('visibilitychange', vis);
+  win.addEventListener('pagehide', onHide);
+  return () => { doc.removeEventListener('visibilitychange', vis); win.removeEventListener('pagehide', onHide); };
+}
+
 /**
  * 첫 응답을 넣고, pending이면 reply()로 답을 더 받는다(최대 REPLY_MAX번).
  * onReply가 false를 돌려주면(위기·단계 바뀜) 바로 멈춘다.
@@ -64,4 +72,12 @@ export async function followPending<R extends { pending?: boolean }>(
 /** 수다 화면을 떠난 뒤 도착한 응답의 단계 → 보낼 화면. 위기면 위기 화면(아이가 109·1388을 꼭 보게), 그 밖은 null(그대로) */
 export function routeAfterLeftChat(phase: string): string | null {
   return phase === 'crisis' ? '/student/crisis' : null;
+}
+
+/** 1안 「수다 안에서 받기」(성호 11-15): 수다 화면이 응답 하나를 어떻게 받을지.
+ *  crisis-here = 화면에 남아 서버 문장 말풍선 + 연락처 카드(세션은 화면을 떠날 때 맞춘다),
+ *  leave = 단계가 바뀜(시간 종료 등 — 지금처럼 바로 맞춰 다음 화면으로), reply = 계속 */
+export function chatReplyAction(phase: string, leftAlready: boolean): 'crisis-here' | 'leave' | 'reply' {
+  if (phase === 'chat') return 'reply';
+  return phase === 'crisis' && !leftAlready ? 'crisis-here' : 'leave';
 }

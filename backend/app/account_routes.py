@@ -39,13 +39,15 @@ from app.accounts import (
     verify_password,
 )
 from app.class_routes import scrub_student
-from app.compat import _CompatRoute
+from app.compat import STYLE_LABEL, TITLE_LABEL, _CompatRoute
 from app.demo import ResetBody, _write_day3_student
 from app.demo_world import RESERVED_LOGIN, demo_accounts, ensure_world, seed_key_of, world_id
+from app.mentor_animals import ANIMALS, give_animal, set_current
 from app.models import Alert, InstructorNote, Message, Misconception, Session, Student
 from app.models_org import (
     Academy,
     Account,
+    AlertAck,
     AuthToken,
     CosmeticOwned,
     Link,
@@ -53,7 +55,9 @@ from app.models_org import (
     Order,
     RoomPerson,
     SeedLedger,
+    SessionDifficulty,
     SessionProblem,
+    StudentMentorCurrent,
 )
 from app.prompts import grade_band_of
 from app.seed import load_seed
@@ -129,6 +133,15 @@ class Agreements(BaseModel):
     marketing: bool = False
 
 
+class MentorSignupIn(BaseModel):
+    """가입 때 멘토(명세 4.12-5, 11-14). 띠는 12개 키, 나머지는 화면 라벨 그대로."""
+
+    animal: Literal[ANIMALS]  # type: ignore[valid-type]
+    style: Literal["같이 풀어주는", "들어주는", "짚어주는"]
+    title: Literal["형", "언니", "친구"]
+    speech: Literal["반말", "존댓말"]
+
+
 class SignupIn(BaseModel):
     role: Literal["student", "guardian", "teacher"]
     loginId: str
@@ -137,6 +150,7 @@ class SignupIn(BaseModel):
     grade: int | None = None
     email: str | None = None
     agreements: Agreements
+    mentor: MentorSignupIn | None = None  # 학생만(보호자·선생님이면 422)
 
 
 @router.post("/auth/signup")
@@ -159,6 +173,8 @@ async def signup(
         fail("이름은 12자까지 쓸 수 있어요.", 422)
     if body.role == "student" and not (isinstance(body.grade, int) and 1 <= body.grade <= 12):
         fail("학년을 골라 주세요.", 422)
+    if body.role != "student" and body.mentor is not None:
+        fail("멘토는 학생만 고를 수 있어요.", 422)
     if body.role != "student" and not EMAIL_RULE.match(body.email or ""):
         fail("이메일을 바르게 적어 주세요. 아이디·비밀번호를 찾을 때 써요.", 422)
     acc_id = new_account_id()
@@ -205,6 +221,17 @@ async def signup(
         student.freezes = 0
         student.streak_days = 0
         student.grade_band = grade_band_of(body.grade)  # 학년대 말투(명세 부록 D, B11)
+        # 명세 4.13-7 D3: 가입 때 오늘 할 것을 정하지 않는다(학년 단원·고른 난이도로 시작 때 고름).
+        # day3가 넣은 3/4÷2도 비운다 — 강사 지정과 같은 칸이라 「선생님이 정한 문제」로 보였다
+        student.today_task_problem_id = None
+        student.today_task_date = None
+        if body.mentor is not None:  # 가입 때 멘토(명세 4.12-5): 설정 + 그 띠 소유·현재
+            m = body.mentor
+            student.style = {v: k for k, v in STYLE_LABEL.items()}[m.style]
+            student.honorific = {v: k for k, v in TITLE_LABEL.items()}[m.title]
+            student.polite = m.speech == "존댓말"
+            await give_animal(db, acc_id, m.animal, now, None)
+            await set_current(db, acc_id, m.animal, now, None)
         student.last_streak_date = None
         student.created_at = now
     await issue_session(db, request, response, acc, now, remember=True)
@@ -379,12 +406,21 @@ async def _delete_student_data(db: Db, student_id: str) -> None:
     sessions = select(Session.id).where(Session.student_id == student_id)
     await db.execute(delete(Message).where(Message.session_id.in_(sessions)))
     await db.execute(delete(SessionProblem).where(SessionProblem.session_id.in_(sessions)))
+    await db.execute(delete(SessionDifficulty).where(SessionDifficulty.session_id.in_(sessions)))
+    await db.execute(
+        delete(AlertAck).where(
+            AlertAck.alert_id.in_(select(Alert.id).where(Alert.student_id == student_id))
+        )
+    )
     await db.execute(delete(Alert).where(Alert.student_id == student_id))
     await db.execute(delete(Session).where(Session.student_id == student_id))
     await db.execute(delete(Misconception).where(Misconception.student_id == student_id))
     await db.execute(delete(InstructorNote).where(InstructorNote.student_id == student_id))
     await db.execute(delete(SeedLedger).where(SeedLedger.student_account_id == student_id))
     await db.execute(delete(CosmeticOwned).where(CosmeticOwned.student_account_id == student_id))
+    await db.execute(
+        delete(StudentMentorCurrent).where(StudentMentorCurrent.student_id == student_id)
+    )
     await db.execute(delete(Order).where(Order.student_account_id == student_id))
     await db.execute(delete(Notice).where(Notice.account_id == student_id))
     await db.execute(delete(Student).where(Student.id == student_id))

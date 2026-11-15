@@ -11,6 +11,11 @@ export const SCHOOL_LEVELS: { level: SchoolLevel; label: string; years: number; 
   { level: '고', label: '고등학교', years: 3, start: 10 },
 ];
 
+/** 가입 학년 목록: 초1~고3 한 줄(성호 11-14 「스크롤로 초1부터 고3까지」). 폰에서는 선택 휠로 뜬다 */
+export const GRADE_OPTIONS: { grade: Grade; label: string }[] = SCHOOL_LEVELS.flatMap((s) =>
+  Array.from({ length: s.years }, (_, i) => ({ grade: (s.start + i) as Grade, label: `${s.label} ${i + 1}학년` })),
+);
+
 const info = (level: SchoolLevel) => SCHOOL_LEVELS.find((s) => s.level === level)!;
 
 /** 학교급 + 그 학교 안의 학년(1부터) → 저장용 숫자. 범위 밖이면 null */

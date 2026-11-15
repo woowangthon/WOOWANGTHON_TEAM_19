@@ -10,13 +10,15 @@ records·results·units는 기존 학습 신원(Child·Instructor: 계정 또는
 DB가 모르는 값(실수 유형·어려운 점·연속 초급 등)은 지어내지 않고 null/0. 아이 원문은 싣지 않는다.
 """
 
+import base64
+import binascii
 import secrets
 from datetime import date, datetime
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 from pydantic import BaseModel
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.accounts import (
@@ -31,13 +33,21 @@ from app.accounts import (
 )
 from app.actors import Actor
 from app.api import TAG_NAME, Child, _today_session, progress
-from app.compat import DIFFICULTY, _CompatRoute, _problem, _unit_today
+from app.compat import _CompatRoute, _problem, _unit_today, difficulty_label
 from app.instructor import Instructor
 from app.models import Message, Problem, Session, Student
-from app.models_org import Account, CosmeticOwned, Order, Room, RoomPerson, SeedLedger, ShopItem
+from app.models_org import (
+    Account,
+    CosmeticOwned,
+    Order,
+    Room,
+    RoomPerson,
+    SeedLedger,
+    ShopItem,
+    ShopItemImage,
+)
 from app.seeds import (
     COSMETIC_BUY,
-    COSMETICS,
     PRAISE,
     PURCHASE,
     SEED,
@@ -45,6 +55,7 @@ from app.seeds import (
     STAMP,
     add_seed,
     balance_of,
+    cosmetic_catalog,
     earned_on,
     lock_student,
     save_selected_tags,
@@ -61,7 +72,6 @@ router = APIRouter(prefix="/compat", route_class=_CompatRoute)
 
 _ID_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789"
 _WEEKDAY_SUN0 = "일월화수목금토"  # lib/date shortLabel
-_COSMETIC = {c[0]: c for c in COSMETICS}
 
 
 def _new_id(prefix: str) -> str:
@@ -88,7 +98,8 @@ async def _order_view(db: AsyncSession, o: Order) -> dict[str, Any]:
     }
 
 
-def _item_view(i: ShopItem) -> dict[str, Any]:
+def _item_view(i: ShopItem, versions: dict[str, str]) -> dict[str, Any]:
+    v = versions.get(i.id)
     return {
         "id": i.id,
         "name": i.name,
@@ -96,7 +107,89 @@ def _item_view(i: ShopItem) -> dict[str, Any]:
         "stock": i.stock,
         "visible": i.visible,
         "note": i.note,
+        # API 주소(VITE_API_BASE) 뒤에 붙이는 경로. 사진이 없으면 None
+        "imagePath": None if v is None else f"/shop/images/{i.id}?v={v}",
     }
+
+
+async def _item_views(db: AsyncSession, items: Any) -> list[dict[str, Any]]:
+    """상품 목록 + 사진 버전(쿼리 1번, 사진 바이트는 읽지 않는다)."""
+    items = list(items)
+    ids = [i.id for i in items]
+    versions: dict[str, str] = {}
+    if ids:
+        rows = await db.execute(
+            select(ShopItemImage.item_id, ShopItemImage.version).where(
+                ShopItemImage.item_id.in_(ids)
+            )
+        )
+        versions = {item_id: v for item_id, v in rows.all()}
+    return [_item_view(i, versions) for i in items]
+
+
+# --- 상품 사진 -------------------------------------------------------------------------
+# 브라우저가 줄여서(약 400px) data URL로 보낸다. SVG는 스크립트를 품을 수 있어 받지 않는다
+IMAGE_MAX_BYTES = 512 * 1024
+_IMAGE_MAGIC = {
+    "image/jpeg": lambda b: b.startswith(b"\xff\xd8\xff"),
+    "image/png": lambda b: b.startswith(b"\x89PNG\r\n\x1a\n"),
+    "image/webp": lambda b: b[:4] == b"RIFF" and b[8:12] == b"WEBP",
+}
+MSG_IMAGE_KIND = "사진은 JPG·PNG·WEBP 파일만 올릴 수 있어요."
+MSG_IMAGE_SIZE = "사진이 너무 커요. 더 작은 사진을 골라 주세요."
+
+
+def _decode_image(data_url: str) -> tuple[str, bytes]:
+    head, sep, b64 = data_url.partition(",")
+    mime = head.removeprefix("data:").removesuffix(";base64")
+    if not sep or not head.startswith("data:") or not head.endswith(";base64"):
+        fail(MSG_IMAGE_KIND, 422, "invalid_image")
+    check = _IMAGE_MAGIC.get(mime)
+    if check is None:
+        fail(MSG_IMAGE_KIND, 422, "invalid_image")
+    if len(b64) > IMAGE_MAX_BYTES * 4 // 3 + 4:  # 풀기 전에 길이로 먼저 자른다
+        fail(MSG_IMAGE_SIZE, 422, "image_too_large")
+    try:
+        raw = base64.b64decode(b64, validate=True)
+    except (binascii.Error, ValueError):
+        fail(MSG_IMAGE_KIND, 422, "invalid_image")
+    if len(raw) > IMAGE_MAX_BYTES:
+        fail(MSG_IMAGE_SIZE, 422, "image_too_large")
+    if not check(raw):
+        fail(MSG_IMAGE_KIND, 422, "invalid_image")
+    return mime, raw
+
+
+async def _apply_image(db: AsyncSession, item: ShopItem, image: str | None, now: datetime) -> None:
+    """None = 그대로, "" = 지움, data URL = 바꿈."""
+    if image is None:
+        return
+    if image == "":
+        await db.execute(delete(ShopItemImage).where(ShopItemImage.item_id == item.id))
+        return
+    mime, raw = _decode_image(image)
+    row = await db.get(ShopItemImage, item.id)
+    if row is None:
+        row = ShopItemImage(item_id=item.id, trial_id=item.trial_id, created_at=now)
+        db.add(row)
+    row.mime, row.data, row.version = mime, raw, secrets.token_hex(4)
+
+
+@router.get("/shop/images/{item_id}")
+async def get_shop_image(item_id: str, db: Db) -> Response:
+    """로그인 없이 연다: <img>는 체험 헤더를 싣지 못한다. 상품 id는 추측할 수 없는 16자.
+    주소에 버전(v)이 붙어 있어 오래 캐시해도 된다."""
+    row = await db.get(ShopItemImage, item_id)
+    if row is None:
+        fail("사진을 찾지 못했어요.", 404, "image_not_found")
+    return Response(
+        content=row.data,
+        media_type=row.mime,
+        headers={
+            "Cache-Control": "public, max-age=31536000, immutable",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 
 
 # --- 학생: 지갑·상점 --------------------------------------------------------------------
@@ -152,17 +245,20 @@ async def _student_shop(db: AsyncSession, s: Account) -> dict[str, Any]:
     return {
         "balance": await balance_of(db, s.id),  # 씨앗(학원 상점)
         "stamps": await stamps_of(db, s.id),  # 칭찬 도장(꾸미기, cosmetics.price 단위)
-        "academyItems": [_item_view(i) for i in items],
+        "academyItems": await _item_views(db, items),
+        # DB 표 cosmetic_items(11-14). 내린 것(active=False)은 가진 아이에게만 보인다(옷장)
         "cosmetics": [
             {
-                "id": cid,
-                "kind": kind,
-                "name": name,
-                "price": price,
-                "owned": cid in owned,
-                "equipped": s.outfit == cid,
+                "id": c.id,
+                "kind": c.kind,
+                "name": c.name,
+                "price": c.price,
+                "description": c.description,
+                "owned": c.id in owned,
+                "equipped": s.outfit == c.id,
             }
-            for cid, kind, name, price in COSMETICS
+            for c in await cosmetic_catalog(db)
+            if c.active or c.id in owned
         ],
         "orders": [await _order_view(db, o) for o in orders],
     }
@@ -231,10 +327,10 @@ async def buy_cosmetic(
     cosmetic_id: str, db: Db, now: Now, account: CurrentAccount
 ) -> dict[str, Any]:
     s = require_account(account, "student")
-    c = _COSMETIC.get(cosmetic_id)
+    c = next((x for x in await cosmetic_catalog(db) if x.id == cosmetic_id and x.active), None)
     if c is None:
         fail("상품을 찾지 못했어요.", 404, "item_not_found")
-    _, kind, name, price = c
+    kind, name, price = c.kind, c.name, c.price
     await lock_student(db, s.id)  # 같은 학생의 동시 구매를 줄 세운 뒤 보유·잔액을 읽는다
     if await db.get(CosmeticOwned, (s.id, cosmetic_id)) is not None:
         fail("이미 가지고 있어요.", 409, "already_owned")
@@ -359,7 +455,7 @@ async def _seed_board(db: AsyncSession, t: Account, now: datetime) -> dict[str, 
     return {
         "students": students,
         "orders": [await _order_view(db, o) for o in orders],
-        "items": [_item_view(i) for i in items],
+        "items": await _item_views(db, items),
     }
 
 
@@ -410,6 +506,8 @@ class ShopItemIn(BaseModel):
     stock: float | None = None
     visible: bool = True
     note: str = ""
+    # 사진: None(칸 없음) = 그대로, "" = 지움, data URL = 바꿈. 큰 사진은 _decode_image가 422
+    image: str | None = None
 
 
 def _check_item(body: ShopItemIn) -> tuple[str, int, int | None]:
@@ -431,19 +529,19 @@ async def create_shop_item(
 ) -> dict[str, Any]:
     t = require_account(account, "teacher")
     name, price, stock = _check_item(body)
-    db.add(
-        ShopItem(
-            id=_new_id("i"),
-            teacher_id=t.id,
-            name=name,
-            price=price,
-            stock=stock,
-            visible=body.visible,
-            note=body.note[:120],
-            trial_id=t.trial_id,
-            created_at=now,
-        )
+    item = ShopItem(
+        id=_new_id("i"),
+        teacher_id=t.id,
+        name=name,
+        price=price,
+        stock=stock,
+        visible=body.visible,
+        note=body.note[:120],
+        trial_id=t.trial_id,
+        created_at=now,
     )
+    await _apply_image(db, item, body.image, now)  # 사진이 틀리면 상품도 안 만든다(커밋 전)
+    db.add(item)
     await db.commit()
     return await _seed_board(db, t, now)
 
@@ -457,6 +555,7 @@ async def update_shop_item(
     item = await db.get(ShopItem, item_id)
     if item is None or item.teacher_id != t.id:
         fail("상품을 찾지 못했어요.", 404, "item_not_found")
+    await _apply_image(db, item, body.image, now)
     item.name, item.price, item.stock = name, price, stock
     item.visible, item.note = body.visible, body.note[:120]
     await db.commit()
@@ -516,7 +615,7 @@ async def get_records(db: Db, student: Child) -> list[dict[str, Any]]:
                 "unit": TAG_NAME.get(problem.tag, problem.tag) if problem else "오늘 문제",
                 "solved": prog.solved,
                 "total": prog.total,
-                "difficulty": DIFFICULTY,
+                "difficulty": difficulty_label(problem),  # 그 문제의 실제 난이도(명세 4.13-7 D4)
                 "hints": prog.hints,
                 "chatted": chatted is not None,
             }
@@ -552,7 +651,10 @@ async def get_results(db: Db, now: Now, actor: Instructor) -> list[dict[str, Any
                 "unit": await _unit_today(db, student, session, now) or "-",
                 "solved": prog.solved if prog is not None and done else 0,
                 "total": prog.total if prog is not None else 1,
-                "difficulty": DIFFICULTY if done else None,
+                # 그 문제의 실제 난이도(명세 4.13-7 D4)
+                "difficulty": difficulty_label(await _problem(db, session))
+                if done and session
+                else None,
                 "streak": student.streak_days,
                 "hints": prog.hints if prog is not None else 0,
                 "mistake": None,
@@ -565,19 +667,27 @@ async def get_results(db: Db, now: Now, actor: Instructor) -> list[dict[str, Any
 
 
 async def _units(db: AsyncSession, account: Account | None) -> list[dict[str, Any]]:
-    rows = await db.execute(select(Problem.tag, func.count()).group_by(Problem.tag))
-    counts: dict[str, int] = {tag: n for tag, n in rows.all()}
+    by_tag: dict[str, list[Problem]] = {}
+    for p in (await db.scalars(select(Problem).order_by(Problem.id))).all():
+        by_tag.setdefault(p.tag, []).append(p)
     chosen = set(selected_tags(account))
-    return [
-        {
-            "id": tag,
-            "name": name,
-            "count": counts.get(tag, 0),
-            "selected": tag in chosen,
-            "hasProblems": counts.get(tag, 0) > 0,
-        }
-        for tag, name in TAG_NAME.items()
-    ]
+    out = []
+    for tag, name in TAG_NAME.items():
+        rows = by_tag.get(tag, [])
+        out.append(
+            {
+                "id": tag,
+                "name": name,
+                "count": len(rows),
+                "selected": tag in chosen,
+                "hasProblems": bool(rows),
+                # TK-101(명세 4.13): 단원 학년·과목·문제 목록. 문제 글만 — 정답·힌트·풀이는 싣지 않는다
+                "grade": rows[0].grade if rows else None,
+                "subject": (rows[0].standard or {}).get("subject", "math") if rows else None,
+                "problems": [{"id": p.id, "text": p.text} for p in rows],
+            }
+        )
+    return out
 
 
 async def _teacher_account(db: AsyncSession, actor: Actor) -> Account | None:

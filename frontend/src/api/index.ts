@@ -9,17 +9,17 @@ import { orgApi } from './org';
 
 export const HTTP_FUNCS: (keyof MentorApi)[] = [
   // 학생
-  'getStudentHome', 'acceptPromise', 'getMentor', 'saveMentor', 'getActiveSession', 'startSession', 'getProblem',
+  'getStudentHome', 'acceptPromise', 'getMentor', 'saveMentor', 'buyAnimal', 'getActiveSession', 'startSession', 'getProblem',
   'submitAnswer', 'requestHint', 'showSolution', 'afterStudy', 'getChat', 'sendChat', 'replyChat', 'endChat',
   'getWrap', 'submitWrap',
   // 보호자
-  'getGuardianToday', 'getAlerts',
+  'getGuardianToday', 'getAlerts', 'ackAlert', // ackAlert: 🔴 「확인했어요」(11-15 성호)
   // 학습지도자
-  'getTeacherToday', 'assignTask', 'getMemo', 'saveMemo', 'createDraft', 'updateDraft', 'approveDraft', 'getTeacherAlerts',
+  'getTeacherToday', 'assignTask', 'assignTasks', 'getMemo', 'saveMemo', 'createDraft', 'updateDraft', 'approveDraft', 'getTeacherAlerts',
 ];
 
 /** VITE_ORG_MODE=http일 때 더 보내는 것: 계정·학원·씨앗(orgApi 전부) + 로그인 계정을 읽는 학습 4개(명세 4.12).
- *  ackAlert·closeAlert·resetDemo는 화면이 안 부르거나 mock 되돌리기라 그대로 둔다 */
+ *  closeAlert·resetDemo는 화면이 안 부르거나 mock 되돌리기라 그대로 둔다(ackAlert는 11-15부터 서버) */
 export const ORG_HTTP_FUNCS: (keyof MentorApi)[] = [
   ...(Object.keys(orgApi) as (keyof MentorApi)[]),
   'getRecords', 'getUnits', 'saveUnits', 'getResults',

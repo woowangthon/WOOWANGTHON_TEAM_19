@@ -183,6 +183,7 @@ async def test_guardian_sees_red_alerts_of_every_linked_child(client, clock, db_
 
     t = await _trial(client)
     g1, s1 = [await _demo(client, t, k) for k in ("g1", "s1")]
+    await s1.ok("POST", "/student/promise")  # 약속 뒤에 시작(11-14 round2 #5)
     sid = (await s1.ok("POST", "/sessions", json={}))["id"]
     db_session.add(
         Link(
@@ -204,7 +205,7 @@ async def test_guardian_sees_red_alerts_of_every_linked_child(client, clock, db_
     )
     await db_session.commit()
     alerts = await g1.ok("GET", "/guardian/alerts")
-    assert [a["excerpt"] for a in alerts] == ["합성 발췌"]
+    assert [a["excerpt"] for a in alerts] == [None]  # 옛 행의 발췌도 싣지 않음(11-15 04:30 성호)
     assert alerts[0]["childName"]  # 어느 아이인지 보인다
 
 
@@ -214,6 +215,7 @@ async def test_guardian_notice_shows_when_second_child_had_red_today(client, clo
 
     t = await _trial(client)
     g1, s1 = [await _demo(client, t, k) for k in ("g1", "s1")]
+    await s1.ok("POST", "/student/promise")  # 약속 뒤에 시작(11-14 round2 #5)
     sid = (await s1.ok("POST", "/sessions", json={}))["id"]
     db_session.add(
         Link(

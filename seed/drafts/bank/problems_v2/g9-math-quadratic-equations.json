@@ -1,0 +1,731 @@
+[
+  {
+    "id": "g9-math-quadratic-equations-01",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "인수분해(x²의 계수 1)로 이차방정식을 풀어 양수인 근·큰 근·중근 구하기",
+    "targets_misconception": "인수분해한 (x + a) = 0의 근을 −a가 아니라 a로 씀",
+    "text": "이차방정식 x² + x − 30 = 0의 두 근 가운데 양수인 근을 구하세요.\n(숫자만)",
+    "expr": "5",
+    "verify": "manual",
+    "verify_note": "x = 5: 25 + 5 − 30 = 0 성립, x = −6: 36 − 6 − 30 = 0 성립. 이차방정식이라 근은 이 둘뿐이고 양수인 근은 5. 부호 오개념으로 풀면 x = 6, −5가 되어 6을 고름.",
+    "answer": {
+      "kind": "value",
+      "value": "5",
+      "accepted": [
+        "5"
+      ]
+    },
+    "hint1": "곱해서 −30, 더해서 1이 되는 두 정수는 무엇일까요? 곱의 부호부터 보면 두 수의 부호가 어떤지 알 수 있어요.",
+    "hint2": "두 수는 부호가 서로 다르고, 합이 양수이니 절댓값이 큰 쪽이 양수예요. 인수분해한 다음 두 괄호 가운데 하나가 0이 되는 경우를 나눠 보세요. 괄호 안이 'x + 양수'인 쪽의 근은 음수예요.",
+    "after_hint2": "곱 −30, 합 1인 두 수 6과 −5를 찾아 (x + 6)(x − 5) = 0으로 쓰고, 두 근 가운데 양수인 근 고르기",
+    "solution": "곱해서 −30, 더해서 1인 두 수는 6과 −5예요. 그래서 (x + 6)(x − 5) = 0이고, x + 6 = 0이면 x = −6, x − 5 = 0이면 x = 5예요. 양수인 근은 5예요. x + 6 = 0의 근을 6으로 쓰면 양수인 근을 6으로 잘못 고르게 돼요.",
+    "forbidden": [
+      "5"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-02",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "인수분해(x²의 계수 1)로 이차방정식을 풀어 양수인 근·큰 근·중근 구하기",
+    "targets_misconception": "인수분해한 (x + a) = 0의 근을 −a가 아니라 a로 씀",
+    "text": "이차방정식 x² − 4x − 21 = 0의 큰 근을 구하세요.\n(숫자만)",
+    "expr": "7",
+    "verify": "manual",
+    "verify_note": "x = 7: 49 − 28 − 21 = 0 성립, x = −3: 9 + 12 − 21 = 0 성립. 큰 근 7. 부호를 바꾸지 않으면 −7, 3이 되어 3을 고름.",
+    "answer": {
+      "kind": "value",
+      "value": "7",
+      "accepted": [
+        "7"
+      ]
+    },
+    "hint1": "곱해서 −21, 더해서 −4가 되는 두 정수를 찾아보세요. 두 수 가운데 어느 쪽이 음수일까요?",
+    "hint2": "합이 음수이니 절댓값이 큰 쪽이 음수예요. 인수분해한 식에서 근을 읽을 때는 괄호 안 수의 부호를 바꿔야 한다는 점을 챙기세요.",
+    "after_hint2": "−7과 3을 찾아 (x − 7)(x + 3) = 0으로 쓰고, 두 근 가운데 큰 근 고르기",
+    "solution": "곱이 −21, 합이 −4인 두 수는 −7과 3이에요. (x − 7)(x + 3) = 0이므로 x = 7 또는 x = −3이고, 큰 근은 7이에요. 부호를 바꾸지 않고 x = −7, x = 3으로 읽으면 큰 근을 3으로 잘못 고르게 돼요.",
+    "forbidden": [
+      "7"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-03",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "인수분해(x²의 계수 1)로 이차방정식을 풀어 양수인 근·큰 근·중근 구하기",
+    "targets_misconception": "",
+    "text": "이차방정식 x² − 16x + 64 = 0은 근이 하나뿐이에요. 그 근을 구하세요.\n(숫자만)",
+    "expr": "8",
+    "verify": "manual",
+    "verify_note": "x = 8: 64 − 128 + 64 = 0 성립. 좌변 = (x − 8)²이라 다른 근은 없음(중근).",
+    "answer": {
+      "kind": "value",
+      "value": "8",
+      "accepted": [
+        "8"
+      ]
+    },
+    "hint1": "좌변의 세 항을 보세요. 상수항 64와 x의 계수 16 사이에는 어떤 관계가 있나요?",
+    "hint2": "좌변은 (x − □)²처럼 한 식의 제곱으로 쓸 수 있어요. 제곱해서 0이 되는 수는 0뿐이라 괄호 안이 0이 되는 x 하나만 근이 돼요.",
+    "after_hint2": "64 = 8², 16 = 2 × 8임을 확인해 (x − 8)² = 0으로 쓰고 x − 8 = 0 풀기",
+    "solution": "64 = 8²이고 16 = 2 × 8이라 x² − 16x + 64 = (x − 8)²이에요. (x − 8)² = 0이면 x − 8 = 0이므로 근은 8 하나(중근)예요.",
+    "forbidden": [
+      "8"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-04",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "제곱근을 이용해 x² = q, (x − p)² = q 꼴을 풀고 작은 근·양수인 근·두 근의 합 구하기",
+    "targets_misconception": "x² = q나 (x − p)² = q에서 양의 제곱근만 생각해 근 하나를 빠뜨림",
+    "text": "이차방정식 (x − 8)² = 25의 두 근 가운데 작은 근을 구하세요.\n(숫자만)",
+    "expr": "3",
+    "verify": "manual",
+    "verify_note": "x = 3: (−5)² = 25 성립, x = 13: 5² = 25 성립. 작은 근 3. 양의 제곱근만 쓰면 13 하나만 나옴.",
+    "answer": {
+      "kind": "value",
+      "value": "3",
+      "accepted": [
+        "3"
+      ]
+    },
+    "hint1": "괄호 안 x − 8을 한 덩어리로 보세요. 제곱해서 25가 되는 수는 무엇무엇인가요?",
+    "hint2": "제곱해서 25가 되는 수는 양수와 음수 두 개예요. x − 8이 그 각각과 같다고 놓고 x를 두 번 구한 뒤, 둘을 견주어 보세요.",
+    "after_hint2": "x − 8 = 5와 x − 8 = −5를 풀어 두 근 13과 3을 구하고 작은 근 고르기",
+    "solution": "제곱해서 25가 되는 수는 5와 −5예요. x − 8 = 5이면 x = 13, x − 8 = −5이면 x = 3이에요. 작은 근은 3이에요. 5만 생각하면 근이 13 하나뿐이라고 잘못 알게 돼요.",
+    "forbidden": [
+      "3"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-05",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "제곱근을 이용해 x² = q, (x − p)² = q 꼴을 풀고 작은 근·양수인 근·두 근의 합 구하기",
+    "targets_misconception": "",
+    "text": "이차방정식 2x² − 72 = 0의 양수인 근을 구하세요.\n(숫자만)",
+    "expr": "6",
+    "verify": "manual",
+    "verify_note": "x = 6: 2 × 36 − 72 = 0 성립, x = −6도 성립. 양수인 근 6.",
+    "answer": {
+      "kind": "value",
+      "value": "6",
+      "accepted": [
+        "6"
+      ]
+    },
+    "hint1": "x²만 한쪽에 남기려면 어떤 순서로 정리해야 할까요?",
+    "hint2": "72를 오른쪽으로 옮기고 양변을 x²의 계수로 나누면 'x² = 수' 꼴이 돼요. 그 수의 제곱근은 두 개인데, 문제는 그 가운데 양수만 물어요.",
+    "after_hint2": "72 ÷ 2 = 36을 계산하고 36의 양의 제곱근 구하기",
+    "solution": "2x² = 72에서 양변을 2로 나누면 x² = 36이에요. x는 36의 제곱근이라 x = 6 또는 x = −6이고, 양수인 근은 6이에요.",
+    "forbidden": [
+      "6"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-06",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "easy",
+    "problem_type": "제곱근을 이용해 x² = q, (x − p)² = q 꼴을 풀고 작은 근·양수인 근·두 근의 합 구하기",
+    "targets_misconception": "x² = q나 (x − p)² = q에서 양의 제곱근만 생각해 근 하나를 빠뜨림",
+    "text": "이차방정식 (x − 6)² = 49의 두 근의 합을 구하세요.\n(숫자만)",
+    "expr": "12",
+    "verify": "manual",
+    "verify_note": "x = 13: 7² = 49, x = −1: (−7)² = 49 성립. 합 13 + (−1) = 12. 양의 제곱근만 쓰면 근이 13 하나라 합을 구하지 못하거나 13이라고 씀.",
+    "answer": {
+      "kind": "value",
+      "value": "12",
+      "accepted": [
+        "12"
+      ]
+    },
+    "hint1": "제곱근을 이용하면 x − 6 = □ 꼴의 일차방정식이 몇 개 생기나요?",
+    "hint2": "x − 6은 49의 양의 제곱근일 수도, 음의 제곱근일 수도 있어요. 두 경우의 x를 각각 구해서 더하세요.",
+    "after_hint2": "x − 6 = 7, x − 6 = −7을 풀어 13과 −1을 구하고 더하기",
+    "solution": "제곱해서 49가 되는 수는 7과 −7이에요. x − 6 = 7이면 x = 13, x − 6 = −7이면 x = −1이에요. 두 근의 합은 13 + (−1) = 12예요. 7만 생각하면 근이 13 하나뿐이라고 잘못 알게 돼요.",
+    "forbidden": [
+      "12"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-07",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "식을 전개·이항해 정리한 뒤 인수분해로 풀어 양수인 근 구하기",
+    "targets_misconception": "(x − a)(x − b) = c(c ≠ 0)에서 식을 정리하지 않고 x − a = c, x − b = c로 풂",
+    "text": "이차방정식 (x − 2)(x + 3) = 14의 근 가운데 양수인 것을 구하세요.\n(숫자만)",
+    "expr": "4",
+    "verify": "manual",
+    "verify_note": "x = 4: 2 × 7 = 14 성립, x = −5: (−7)(−2) = 14 성립. 양수인 근 4. 오개념으로 x − 2 = 14, x + 3 = 14로 풀면 16, 11이 나옴.",
+    "answer": {
+      "kind": "value",
+      "value": "4",
+      "accepted": [
+        "4"
+      ]
+    },
+    "hint1": "오른쪽이 0이 아니라 14예요. 곱이 14라는 것만으로 괄호 하나의 값을 정할 수 있을까요?",
+    "hint2": "왼쪽을 전개하고 14를 왼쪽으로 옮겨 '(식) = 0' 꼴로 만든 다음 인수분해하세요. 전개한 식의 상수항은 −6이에요.",
+    "after_hint2": "x² + x − 20 = 0으로 정리해 (x + 5)(x − 4) = 0으로 인수분해하고 양수인 근 고르기",
+    "solution": "왼쪽을 전개하면 x² + x − 6이에요. x² + x − 6 = 14에서 14를 옮기면 x² + x − 20 = 0, (x + 5)(x − 4) = 0이에요. x = −5 또는 x = 4이고 양수인 근은 4예요. 곱이 0일 때만 괄호 하나가 0이라고 할 수 있어요. x − 2 = 14, x + 3 = 14로 풀면 틀려요(x = 16을 넣으면 14 × 19 = 266).",
+    "forbidden": [
+      "4"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-08",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "식을 전개·이항해 정리한 뒤 인수분해로 풀어 양수인 근 구하기",
+    "targets_misconception": "인수분해한 (x + a) = 0의 근을 −a가 아니라 a로 씀",
+    "text": "이차방정식 x(x + 1) = 3x + 63의 양의 근을 구하세요.\n(숫자만)",
+    "expr": "9",
+    "verify": "manual",
+    "verify_note": "정리하면 x² − 2x − 63 = 0. x = 9: 9 × 10 = 90 = 27 + 63 성립, x = −7: (−7)(−6) = 42 = −21 + 63 성립. 양의 근 9. 부호 오개념이면 −9, 7이 되어 7을 고름.",
+    "answer": {
+      "kind": "value",
+      "value": "9",
+      "accepted": [
+        "9"
+      ]
+    },
+    "hint1": "x가 양쪽에 다 있어요. 먼저 왼쪽을 전개하면 어떤 식이 되나요?",
+    "hint2": "오른쪽 항을 모두 왼쪽으로 옮기면 x의 계수가 음수가 돼요. 정리한 식을 인수분해해 괄호마다 0이 되는 x를 구하고, 부호를 한 번 더 확인하세요.",
+    "after_hint2": "x² − 2x − 63 = 0으로 정리해 (x − 9)(x + 7) = 0으로 인수분해하고 양의 근 고르기",
+    "solution": "x² + x = 3x + 63에서 오른쪽 항을 옮기면 x² − 2x − 63 = 0이에요. 곱이 −63, 합이 −2인 두 수는 −9와 7이라 (x − 9)(x + 7) = 0, x = 9 또는 x = −7이에요. 양의 근은 9예요. 괄호 안 수의 부호를 바꾸지 않으면 7을 고르게 돼요.",
+    "forbidden": [
+      "9"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-09",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "완전제곱식 (x − p)² = q 꼴로 고칠 때 q 또는 p + q 구하기",
+    "targets_misconception": "완전제곱식을 만들 때 더한 수를 한쪽 변에만 더함",
+    "text": "이차방정식 x² − 10x + 7 = 0을 (x − 5)² = q 꼴로 고쳤을 때, q의 값을 구하세요.\n(숫자만)",
+    "expr": "-7+(10/2)*(10/2)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "18",
+      "accepted": [
+        "18"
+      ]
+    },
+    "hint1": "(x − 5)²을 전개하면 상수항이 얼마가 되는지 먼저 보세요.",
+    "hint2": "상수항 7을 오른쪽으로 옮긴 뒤, 왼쪽이 (x − 5)²이 되도록 필요한 수를 더해요. 그 수는 왼쪽에만이 아니라 양변에 똑같이 더해야 해요.",
+    "after_hint2": "x² − 10x = −7에서 25를 양변에 더해 −7 + 25 계산하기",
+    "solution": "x² − 10x = −7로 옮긴 뒤, (x − 5)² = x² − 10x + 25이므로 양변에 25를 더해요. (x − 5)² = −7 + 25 = 18이라 q는 18이에요. 25를 왼쪽에만 더하면 q를 −7로 잘못 쓰게 돼요.",
+    "forbidden": [
+      "18"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-10",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "완전제곱식 (x − p)² = q 꼴로 고칠 때 q 또는 p + q 구하기",
+    "targets_misconception": "x²의 계수가 1이 아닐 때 양변을 나누지 않고 완전제곱식을 만듦",
+    "text": "이차방정식 2x² − 12x + 4 = 0을 (x − p)² = q 꼴로 고쳤을 때, p + q의 값을 구하세요.\n(숫자만)",
+    "expr": "12/4+(-4/2+(12/4)*(12/4))",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "10",
+      "accepted": [
+        "10"
+      ]
+    },
+    "hint1": "(x − p)² 꼴을 바로 만들려면 x²의 계수가 얼마여야 하나요?",
+    "hint2": "먼저 양변을 2로 나눠 x²의 계수를 1로 만드세요. 그다음 상수항을 옮기고, 왼쪽이 완전제곱식이 되도록 양변에 같은 수를 더하면 p와 q가 나와요.",
+    "after_hint2": "x² − 6x + 2 = 0을 x² − 6x = −2로 옮기고 9를 양변에 더해 (x − 3)² = 7을 만든 뒤 p + q 계산하기",
+    "solution": "양변을 2로 나누면 x² − 6x + 2 = 0, x² − 6x = −2예요. 양변에 (6 ÷ 2)² = 9를 더하면 (x − 3)² = 7이라 p = 3, q = 7이고 p + q = 10이에요. 2로 나누지 않고 2x² − 12x = −4에 36을 더해 (x − 6)² = 32로 쓰면 틀려요(전개하면 x² − 12x + 36이라 원래 식과 달라요).",
+    "forbidden": [
+      "10"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-11",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "근의 공식(근호가 풀리는 경우)으로 x²의 계수가 1이 아닌 방정식을 풀어 양수인 근 구하기",
+    "targets_misconception": "근의 공식에서 분모를 2a가 아니라 2로 씀",
+    "text": "이차방정식 2x² − x − 10 = 0의 양수인 근을 근의 공식으로 구하세요.\n(숫자만, 예: 3/4)",
+    "expr": "(1+9)/(2*2)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "5/2",
+      "accepted": [
+        "5/2"
+      ]
+    },
+    "hint1": "a, b, c가 각각 얼마인지 부호까지 적어 보세요. 근의 공식의 분모는 무엇이었나요?",
+    "hint2": "b² − 4ac를 계산하면 81이 되어 근호가 깔끔하게 풀려요. 분모는 2가 아니라 2a라는 점을 챙기고, ±의 두 경우를 따로 계산하세요.",
+    "after_hint2": "√81 = 9로 (1 + 9) ÷ 4와 (1 − 9) ÷ 4를 계산해 양수인 근을 기약분수로 쓰기",
+    "solution": "a = 2, b = −1, c = −10이라 b² − 4ac = 1 + 80 = 81이에요. x = (1 ± 9)/4이므로 x = 10/4 = 5/2 또는 x = −8/4 = −2예요. 양수인 근은 5/2예요. 분모를 2로 쓰면 5가 나와 틀려요.",
+    "forbidden": [
+      "2.5",
+      "5/2",
+      "2분의5",
+      "2 1/2",
+      "2분의 5",
+      "2와 2분의 1"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-12",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "근의 공식(근호가 풀리는 경우)으로 x²의 계수가 1이 아닌 방정식을 풀어 양수인 근 구하기",
+    "targets_misconception": "근의 공식에서 b가 음수일 때 −b의 부호를 틀림",
+    "text": "이차방정식 4x² − 4x − 3 = 0을 근의 공식으로 풀어, 양수인 근을 구하세요.\n(숫자만, 예: 3/4)",
+    "expr": "(4+8)/(2*4)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "3/2",
+      "accepted": [
+        "3/2"
+      ]
+    },
+    "hint1": "b가 음수예요. 근의 공식 분자에 있는 −b는 얼마가 되나요?",
+    "hint2": "b² − 4ac는 64이니 근호 부분은 8이 돼요. 분자는 −b ± 8인데, b가 음수라서 −b는 음수가 아니에요. 분모 2a도 계산해 두 경우를 각각 구하세요.",
+    "after_hint2": "(4 + 8) ÷ 8과 (4 − 8) ÷ 8을 계산해 양수인 근을 기약분수로 쓰기",
+    "solution": "a = 4, b = −4, c = −3이라 b² − 4ac = 16 + 48 = 64예요. x = (4 ± 8)/8이므로 x = 12/8 = 3/2 또는 x = −4/8 = −1/2이에요. 양수인 근은 3/2예요. −b를 −4로 쓰면 x = (−4 ± 8)/8이 되어 1/2을 고르게 돼요.",
+    "forbidden": [
+      "1.5",
+      "3/2",
+      "2분의3",
+      "1 1/2",
+      "2분의 3",
+      "1과 2분의 1"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-13",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "한 근이 주어질 때 대입으로 미지수를 구하고 다른 한 근 구하기",
+    "targets_misconception": "음수인 근을 대입할 때 제곱한 값의 부호를 틀림",
+    "text": "x에 대한 이차방정식 x² + ax − 44 = 0의 한 근이 −4일 때, 다른 한 근을 구하세요.\n(숫자만)",
+    "expr": "11",
+    "verify": "manual",
+    "verify_note": "x = −4 대입: 16 − 4a − 44 = 0 → a = −7. x² − 7x − 44 = (x − 11)(x + 4) = 0 → 다른 근 11(121 − 77 − 44 = 0 확인). (−4)²을 −16으로 쓰면 a = −15가 되어 x² − 15x − 44 = 0은 −4를 근으로 갖지 않음(16 + 60 − 44 ≠ 0).",
+    "answer": {
+      "kind": "value",
+      "value": "11",
+      "accepted": [
+        "11"
+      ]
+    },
+    "hint1": "근이라는 것은 방정식에 넣었을 때 등식이 성립하는 값이에요. x 자리에 무엇을 넣어 볼까요?",
+    "hint2": "x = −4를 넣으면 (−4)²부터 계산해야 해요. 음수를 제곱하면 양수가 된다는 점을 챙겨 a를 구하고, 그 a를 넣은 방정식을 다시 인수분해하세요.",
+    "after_hint2": "16 − 4a − 44 = 0에서 a = −7을 구하고 x² − 7x − 44 = 0을 인수분해해 −4가 아닌 근 찾기",
+    "solution": "x = −4를 넣으면 16 − 4a − 44 = 0, −4a = 28이라 a = −7이에요. 방정식은 x² − 7x − 44 = 0이고 (x − 11)(x + 4) = 0이므로 다른 한 근은 11이에요.",
+    "forbidden": [
+      "11"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-14",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "한 근이 주어질 때 대입으로 미지수를 구하고 다른 한 근 구하기",
+    "targets_misconception": "",
+    "text": "x에 대한 이차방정식 3x² − 14x + k = 0의 한 근이 3일 때, 다른 한 근을 구하세요.\n(숫자만, 예: 3/4)",
+    "expr": "5/3",
+    "verify": "manual",
+    "verify_note": "x = 3 대입: 27 − 42 + k = 0 → k = 15. 3x² − 14x + 15 = (3x − 5)(x − 3) = 0 → 다른 근 5/3(3 × 25/9 − 70/3 + 15 = 25/3 − 70/3 + 45/3 = 0 확인).",
+    "answer": {
+      "kind": "value",
+      "value": "5/3",
+      "accepted": [
+        "5/3"
+      ]
+    },
+    "hint1": "한 근 3을 방정식에 넣으면 k에 대한 어떤 식이 생기나요?",
+    "hint2": "x = 3을 넣어 정리하면 27 − 42 + k = 0이 돼요. 여기서 k를 구해 방정식을 완성한 뒤, 인수분해하거나 근의 공식을 써서 3이 아닌 근을 찾으세요.",
+    "after_hint2": "k = 15를 구하고 3x² − 14x + 15 = 0을 (3x − 5)(x − 3) = 0으로 풀어 다른 근 구하기",
+    "solution": "x = 3을 넣으면 27 − 42 + k = 0이라 k = 15예요. 3x² − 14x + 15 = 0은 (3x − 5)(x − 3) = 0으로 인수분해되므로 x = 5/3 또는 x = 3이에요. 다른 한 근은 5/3이에요.",
+    "forbidden": [
+      "5/3",
+      "3분의5",
+      "1 2/3",
+      "3분의 5",
+      "1과 3분의 2"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-15",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "중근을 가질 조건으로 상수 구하기(양수 조건으로 하나로)",
+    "targets_misconception": "중근 조건에서 상수항이 (x의 계수의 절반)²이라는 관계를 틀림(절반을 하지 않거나 제곱하지 않음)",
+    "text": "x에 대한 이차방정식 x² + kx + 49 = 0이 중근을 가질 때, 양수 k의 값을 구하세요.\n(숫자만)",
+    "expr": "14",
+    "verify": "manual",
+    "verify_note": "k = 14: x² + 14x + 49 = (x + 7)² → 중근 −7. k = −14도 중근(x − 7)²이지만 양수 조건으로 제외. k = 7이면 x² + 7x + 49는 완전제곱식이 아님.",
+    "answer": {
+      "kind": "value",
+      "value": "14",
+      "accepted": [
+        "14"
+      ]
+    },
+    "hint1": "중근을 가지면 좌변은 어떤 꼴로 쓸 수 있나요?",
+    "hint2": "좌변이 (x + m)²이 되어야 해요. 전개하면 상수항은 m²이고, x의 계수는 m 그대로가 아니라 m의 두 배예요.",
+    "after_hint2": "m² = 49에서 양수 m = 7을 고르고 k = 2m 계산하기",
+    "solution": "중근을 가지려면 x² + kx + 49가 (x + m)² = x² + 2mx + m² 꼴이어야 해요. m² = 49이고 k가 양수이니 m = 7, k = 2 × 7 = 14예요. k를 7로 쓰면 x² + 7x + 49는 완전제곱식이 아니에요.",
+    "forbidden": [
+      "14"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-16",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "medium",
+    "problem_type": "중근을 가질 조건으로 상수 구하기(양수 조건으로 하나로)",
+    "targets_misconception": "중근 조건에서 상수항이 (x의 계수의 절반)²이라는 관계를 틀림(절반을 하지 않거나 제곱하지 않음)",
+    "text": "x에 대한 이차방정식 x² − 8x + k − 5 = 0이 중근을 가질 때, 상수 k의 값을 구하세요.\n(숫자만)",
+    "expr": "5+(8/2)*(8/2)",
+    "verify": "expr",
+    "answer": {
+      "kind": "value",
+      "value": "21",
+      "accepted": [
+        "21"
+      ]
+    },
+    "hint1": "상수항이 k − 5 한 덩어리예요. 중근을 가지려면 상수항이 무엇과 같아야 하나요?",
+    "hint2": "x² − 8x에 상수항을 붙여 완전제곱식이 되려면, 상수항은 x의 계수의 절반을 제곱한 수여야 해요. 그 수와 k − 5가 같다고 놓으세요.",
+    "after_hint2": "(8 ÷ 2)² = 16을 계산하고 k − 5 = 16 풀기",
+    "solution": "x² − 8x + 16 = (x − 4)²이므로 상수항 k − 5가 16이어야 중근을 가져요. k − 5 = 16에서 k = 21이에요. 절반을 하지 않고 64로 놓으면 k = 69, 제곱하지 않고 4로 놓으면 k = 9가 되어 틀려요.",
+    "forbidden": [
+      "21"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-17",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "hard",
+    "problem_type": "이차방정식 활용 문장제(연속하는 수·넓이·쏘아 올린 물체·다각형의 대각선): 식 세우기 → 풀기 → 조건에 맞는 근 고르기",
+    "targets_misconception": "활용 문제에서 구한 두 근 가운데 문제의 조건(자연수, 양수인 길이, 올라갈 때·내려올 때)에 맞는 근을 고르지 않음",
+    "text": "연속하는 두 자연수의 제곱의 합이 145예요. 두 수의 곱을 구하세요.\n(숫자만)",
+    "expr": "8*9",
+    "verify": "manual",
+    "verify_note": "n² + (n + 1)² = 145 → 2n² + 2n − 144 = 0 → n² + n − 72 = 0 → (n + 9)(n − 8) = 0. 자연수 조건으로 n = 8, 두 수 8·9(64 + 81 = 145 확인), 곱 72. n = −9는 자연수가 아님.",
+    "answer": {
+      "kind": "value",
+      "value": "72",
+      "accepted": [
+        "72"
+      ]
+    },
+    "hint1": "연속하는 두 자연수 가운데 작은 수를 n이라 하면 큰 수는 어떻게 나타낼 수 있나요?",
+    "hint2": "n² + (n + 1)² = 145를 전개해 정리하면 양변을 2로 나눌 수 있어요. 인수분해해서 나온 두 근 가운데 자연수가 아닌 것은 버려야 해요.",
+    "after_hint2": "n² + n − 72 = 0을 (n + 9)(n − 8) = 0으로 풀어 n = 8을 고르고, 두 수 8과 9의 곱 계산하기",
+    "solution": "작은 수를 n이라 하면 n² + (n + 1)² = 145, 2n² + 2n − 144 = 0, n² + n − 72 = 0이에요. (n + 9)(n − 8) = 0에서 n은 자연수이니 n = 8이고 두 수는 8과 9예요(64 + 81 = 145). 곱은 8 × 9 = 72예요. n = −9는 자연수가 아니라서 버려요.",
+    "forbidden": [
+      "72"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-18",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "hard",
+    "problem_type": "이차방정식 활용 문장제(연속하는 수·넓이·쏘아 올린 물체·다각형의 대각선): 식 세우기 → 풀기 → 조건에 맞는 근 고르기",
+    "targets_misconception": "활용 문제에서 구한 두 근 가운데 문제의 조건(자연수, 양수인 길이, 올라갈 때·내려올 때)에 맞는 근을 고르지 않음",
+    "text": "정사각형 모양의 꽃밭이 있어요. 가로를 3 m 늘이고 세로를 2 m 줄여 직사각형을 만들었더니 넓이가 50 m²가 되었어요. 처음 꽃밭의 넓이는 몇 m²인가요?\n(단위 없이 숫자만)",
+    "expr": "7*7",
+    "verify": "manual",
+    "verify_note": "한 변 x: (x + 3)(x − 2) = 50 → x² + x − 56 = 0 → (x + 8)(x − 7) = 0. 길이 조건으로 x = 7(10 × 5 = 50 확인), 처음 넓이 49. x = −8은 길이가 될 수 없음. 한 변 7을 답으로 쓰면 묻는 것을 잘못 읽은 것.",
+    "answer": {
+      "kind": "value",
+      "value": "49",
+      "accepted": [
+        "49"
+      ]
+    },
+    "hint1": "처음 꽃밭의 한 변을 x m라 하면 새 직사각형의 가로와 세로는 각각 어떻게 나타낼까요?",
+    "hint2": "(x + 3)(x − 2) = 50을 정리해 인수분해하면 근이 두 개 나와요. 길이는 양수여야 하니 한 근은 버리세요. 문제가 한 변이 아니라 넓이를 묻는다는 점도 다시 보세요.",
+    "after_hint2": "x² + x − 56 = 0을 (x + 8)(x − 7) = 0으로 풀어 x = 7을 고르고 처음 정사각형의 넓이 7 × 7 계산하기",
+    "solution": "처음 한 변을 x m라 하면 (x + 3)(x − 2) = 50, x² + x − 6 = 50, x² + x − 56 = 0이에요. (x + 8)(x − 7) = 0에서 길이는 양수라 x = 7이에요(10 × 5 = 50). 처음 꽃밭의 넓이는 7 × 7 = 49 m²예요. x = −8은 길이가 될 수 없어서 버려요.",
+    "forbidden": [
+      "49"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-19",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "hard",
+    "problem_type": "이차방정식 활용 문장제(연속하는 수·넓이·쏘아 올린 물체·다각형의 대각선): 식 세우기 → 풀기 → 조건에 맞는 근 고르기",
+    "targets_misconception": "활용 문제에서 구한 두 근 가운데 문제의 조건(자연수, 양수인 길이, 올라갈 때·내려올 때)에 맞는 근을 고르지 않음",
+    "text": "땅에서 똑바로 위로 쏘아 올린 공의 t초 뒤 높이는 (80t − 5t²) m예요. 공이 올라갔다가 내려오면서 높이가 195 m가 되는 것은 쏘아 올린 지 몇 초 뒤인가요?\n(단위 없이 숫자만)",
+    "expr": "13",
+    "verify": "manual",
+    "verify_note": "80t − 5t² = 195 → t² − 16t + 39 = 0 → (t − 3)(t − 13) = 0. t = 3: 240 − 45 = 195, t = 13: 1040 − 845 = 195 성립. 가장 높은 때는 t = 8(높이 320)이라 3초는 올라갈 때, 13초는 내려올 때. 답 13.",
+    "answer": {
+      "kind": "value",
+      "value": "13",
+      "accepted": [
+        "13"
+      ]
+    },
+    "hint1": "높이가 195 m라는 조건을 t에 대한 식으로 쓰면 어떻게 되나요?",
+    "hint2": "80t − 5t² = 195를 한쪽으로 모으고 양변을 5로 나누면 t²의 계수가 1인 식이 돼요. 근이 두 개 나오는데, 두 시각이 각각 올라갈 때와 내려올 때 가운데 어느 쪽인지 따져 보세요.",
+    "after_hint2": "t² − 16t + 39 = 0을 (t − 3)(t − 13) = 0으로 풀고 두 시각 가운데 늦은 쪽 고르기",
+    "solution": "80t − 5t² = 195를 정리하면 5t² − 80t + 195 = 0, t² − 16t + 39 = 0이에요. (t − 3)(t − 13) = 0이라 t = 3 또는 t = 13이에요. 공은 먼저 올라가다가 내려오니 3초 뒤는 올라갈 때, 13초 뒤는 내려올 때예요. 답은 13초예요. 3을 쓰면 올라갈 때의 시각을 고른 거예요.",
+    "forbidden": [
+      "13"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g9-math-quadratic-equations-20",
+    "unit_id": "g9-math-quadratic-equations",
+    "tag": "g9-math-quadratic-equations",
+    "subject": "math",
+    "grade": 9,
+    "standard": {
+      "code": "[9수02-13]",
+      "curriculum": "2015",
+      "unit": "이차방정식을 인수분해·제곱근·근의 공식으로 풀고 활용하기"
+    },
+    "difficulty": "hard",
+    "problem_type": "이차방정식 활용 문장제(연속하는 수·넓이·쏘아 올린 물체·다각형의 대각선): 식 세우기 → 풀기 → 조건에 맞는 근 고르기",
+    "targets_misconception": "활용 문제에서 구한 두 근 가운데 문제의 조건(자연수, 양수인 길이, 올라갈 때·내려올 때)에 맞는 근을 고르지 않음",
+    "text": "n각형의 대각선은 모두 n(n − 3)/2개예요. 대각선이 모두 90개인 다각형은 몇 각형인가요?\n(단위 없이 숫자만)",
+    "expr": "15",
+    "verify": "manual",
+    "verify_note": "n(n − 3)/2 = 90 → n² − 3n − 180 = 0 → (n − 15)(n + 12) = 0. n = 15: 15 × 12 ÷ 2 = 90 확인. n = −12는 변의 개수가 될 수 없음.",
+    "answer": {
+      "kind": "value",
+      "value": "15",
+      "accepted": [
+        "15"
+      ]
+    },
+    "hint1": "n(n − 3)/2 = 90에서 분모를 먼저 없애면 어떤 식이 되나요?",
+    "hint2": "양변에 2를 곱해 전개하면 n² − 3n − 180 = 0이에요. 곱해서 −180, 더해서 −3이 되는 두 정수를 찾고, 다각형의 변의 개수가 될 수 없는 근은 버리세요.",
+    "after_hint2": "곱 −180, 합 −3인 두 수 −15와 12를 찾아 (n − 15)(n + 12) = 0으로 풀고 변의 개수가 될 수 있는 근 고르기",
+    "solution": "양변에 2를 곱하면 n(n − 3) = 180, n² − 3n − 180 = 0이에요. 곱이 −180, 합이 −3인 두 수는 −15와 12라 (n − 15)(n + 12) = 0, n = 15 또는 n = −12예요. 변의 개수는 자연수라 n = 15이고 십오각형이에요(15 × 12 ÷ 2 = 90).",
+    "forbidden": [
+      "15"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  }
+]

@@ -8,10 +8,10 @@ from datetime import UTC, datetime, timedelta
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 
 from app import config, seed_routes
-from app.api import get_llm
+from app.api import TAG_NAME, get_llm
 from app.db import get_db
 from app.instructor import get_draft_adapter
 from app.llm import ScriptedAdapter
@@ -149,17 +149,27 @@ async def test_student_shop_shape(client):
     assert shop["balance"] == 14
     names = [i["name"] for i in shop["academyItems"]]
     assert names == ["칭찬 간식 쿠폰", "자리 고르기권", "보드게임 10분"]  # 숨긴 상품 제외
-    assert set(shop["academyItems"][0]) == {"id", "name", "price", "stock", "visible", "note"}
+    assert set(shop["academyItems"][0]) == {
+        "id",
+        "name",
+        "price",
+        "stock",
+        "visible",
+        "note",
+        "imagePath",
+    }
     glasses = next(c for c in shop["cosmetics"] if c["id"] == "glasses")
     assert glasses == {
         "id": "glasses",
         "kind": "outfit",
         "name": "공부 안경",
         "price": 1,  # 칭찬 도장 개수
+        "description": "",  # DB 표 cosmetic_items(11-14)
         "owned": True,
         "equipped": False,
     }
-    assert len(shop["cosmetics"]) == 16  # 11-13 재하 추가 옷 4·이모티콘 4 포함
+    assert len(shop["cosmetics"]) == 18  # 11-13 재하 옷 4·이모티콘 4 + 11-14 반가워·축하해
+    assert {"hello", "congrats"} <= {c["id"] for c in shop["cosmetics"]}
     assert shop["orders"] == []
 
 
@@ -383,7 +393,8 @@ async def test_teacher_routes_need_teacher(client):
 
 async def _finish_study(client, clock, headers) -> str:
     """힌트 2번 + 풀이 보기 → 같이 풀기 끝 → 끝내기(skip)."""
-    s = (await client.post(f"{BASE}/sessions", json={"difficulty": "중급"}, headers=headers)).json()
+    # 체험 지정 문제(frac-div-nat-01)가 초급 → 같은 난이도면 그 문제 그대로(명세 4.13-7 D3-2)
+    s = (await client.post(f"{BASE}/sessions", json={"difficulty": "초급"}, headers=headers)).json()
     sid = s["id"]
     p = (await client.get(f"{BASE}/sessions/{sid}/problem", headers=headers)).json()
     for _ in range(2):
@@ -480,7 +491,7 @@ async def test_records_shape(client, clock):
             "unit": "분수 ÷ 자연수",
             "solved": 1,
             "total": 1,
-            "difficulty": "중급",
+            "difficulty": "초급",  # 그 문제(frac-div-nat-01)의 실제 난이도(명세 4.13-7 D4)
             "hints": 2,
             "chatted": False,
         }
@@ -526,14 +537,16 @@ async def test_units_get_save(client):
     t = await _trial(client)
     teacher = await _login(client, t, "t1")
     units = (await client.get(f"{BASE}/teacher/units", headers=_b(teacher))).json()
-    assert len(units) == 4
-    assert units[0] == {
+    assert len(units) == len(TAG_NAME)  # 명세 4.13: 분수 4 + 시범 3 + D5 14
+    assert {k: units[0][k] for k in ("id", "name", "count", "selected", "hasProblems")} == {
         "id": "frac-div-nat",
         "name": "분수 ÷ 자연수",
         "count": 5,
         "selected": True,
         "hasProblems": True,
     }
+    assert units[0]["grade"] == 6 and units[0]["subject"] == "math"
+    assert set(units[0]["problems"][0]) == {"id", "text"}
     saved = (
         await client.put(
             f"{BASE}/teacher/units", json={"selectedIds": ["nat-div-nat", "x"]}, headers=_b(teacher)
@@ -699,6 +712,8 @@ async def test_two_currencies_in_wallet_home_shop(client):
         "question": 1,
         "idea": 1,
         "sorry": 1,
+        "hello": 1,  # 11-14 반가워
+        "congrats": 1,  # 11-14 축하해
     }
 
 
@@ -779,3 +794,185 @@ async def test_timer_alerts_validation(client):
     for bad in ([], [0], [61], [1.5], [10, 5, 3, 1], ["5"]):
         r = await client.put(url, json={"alertsMin": bad}, headers=_b(owner))
         assert r.status_code == 422, bad
+
+
+# --- 학원 상품 사진(11-14 성호: 글만보다 사진이 있으면 좋겠다) --------------------------------
+# 사진은 브라우저가 줄여서 data URL로 상품 저장 때 같이 보낸다. 서버는 종류·크기·파일 머리만 본다
+PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 40  # 합성 바이트(머리만 PNG)
+JPG = b"\xff\xd8\xff\xe0" + b"\x00" * 40
+
+
+def _data_url(mime: str, raw: bytes) -> str:
+    import base64
+
+    return f"data:{mime};base64," + base64.b64encode(raw).decode()
+
+
+async def _new_item(client, teacher: str, **extra) -> dict:
+    body = {
+        "name": "연필",
+        "price": 5,
+        "stock": None,
+        "visible": True,
+        "note": "예쁜 연필",
+        **extra,
+    }
+    r = await client.post(f"{BASE}/teacher/shop/items", json=body, headers=_b(teacher))
+    assert r.status_code == 200, r.text
+    return next(i for i in r.json()["items"] if i["name"] == "연필")
+
+
+async def test_shop_item_photo_saved_and_served(client):
+    t = await _trial(client)
+    teacher = await _login(client, t, "t1")
+    item = await _new_item(client, teacher, image=_data_url("image/png", PNG))
+    path = item["imagePath"]
+    assert path.startswith(f"/shop/images/{item['id']}?v=")
+    r = await client.get(BASE + path)  # 로그인 없이(img 태그는 체험 헤더를 못 싣는다)
+    assert r.status_code == 200 and r.content == PNG
+    assert r.headers["content-type"] == "image/png"
+    assert "immutable" in r.headers["cache-control"]
+    assert r.headers["x-content-type-options"] == "nosniff"
+    # 아이 상점에도 같은 사진, 사진 없는 상품은 None
+    kid = await _login(client, t, "s1")
+    shop = (await client.get(f"{BASE}/student/shop", headers=_b(kid))).json()
+    paths = {i["name"]: i["imagePath"] for i in shop["academyItems"]}
+    assert paths["연필"] == path and paths["칭찬 간식 쿠폰"] is None
+
+
+async def test_shop_item_photo_keep_replace_remove(client):
+    t = await _trial(client)
+    teacher = await _login(client, t, "t1")
+    item = await _new_item(client, teacher, image=_data_url("image/png", PNG))
+    url = f"{BASE}/teacher/shop/items/{item['id']}"
+    # image 칸 없이 고치면(화면이 받은 상품을 그대로 돌려보냄) 사진은 그대로
+    board = (await client.put(url, json={**item, "price": 6}, headers=_b(teacher))).json()
+    same = next(i for i in board["items"] if i["id"] == item["id"])
+    assert same["imagePath"] == item["imagePath"] and same["price"] == 6
+    # 바꾸면 주소(v)가 바뀐다 → 브라우저 캐시가 옛 사진을 안 보여 줌
+    body = {**same, "image": _data_url("image/jpeg", JPG)}
+    board = (await client.put(url, json=body, headers=_b(teacher))).json()
+    new = next(i for i in board["items"] if i["id"] == item["id"])
+    assert new["imagePath"] != item["imagePath"]
+    r = await client.get(BASE + new["imagePath"])
+    assert r.content == JPG and r.headers["content-type"] == "image/jpeg"
+    # 빈 문자열이면 지운다
+    board = (await client.put(url, json={**new, "image": ""}, headers=_b(teacher))).json()
+    gone = next(i for i in board["items"] if i["id"] == item["id"])
+    assert gone["imagePath"] is None
+    assert (await client.get(BASE + new["imagePath"])).status_code == 404
+
+
+async def test_shop_item_photo_rejects_bad_files(client):
+    t = await _trial(client)
+    teacher = await _login(client, t, "t1")
+    kinds = "사진은 JPG·PNG·WEBP 파일만 올릴 수 있어요."
+    for bad, msg in [
+        (_data_url("image/svg+xml", b"<svg/>"), kinds),  # SVG는 스크립트를 품을 수 있다
+        (_data_url("image/jpeg", PNG), kinds),  # 종류와 파일 머리가 다름
+        ("data:image/png;base64,@@@", kinds),
+        ("https://example.com/a.png", kinds),  # 바깥 주소는 받지 않는다
+        (
+            _data_url("image/png", PNG + b"\x00" * 600_000),
+            "사진이 너무 커요. 더 작은 사진을 골라 주세요.",
+        ),
+    ]:
+        body = {"name": "연필", "price": 5, "note": "", "image": bad}
+        r = await client.post(f"{BASE}/teacher/shop/items", json=body, headers=_b(teacher))
+        assert r.status_code == 422 and r.json()["detail"] == msg, (bad[:30], r.text)
+    # 실패하면 상품도 안 생긴다
+    board = (await client.get(f"{BASE}/teacher/seeds", headers=_b(teacher))).json()
+    assert not any(i["name"] == "연필" for i in board["items"])
+
+
+async def test_unknown_photo_is_404(client):
+    r = await client.get(f"{BASE}/shop/images/nope?v=1")
+    assert r.status_code == 404
+
+
+# --- 꾸미기 목록을 DB 표로(성호 11-14 「옷·내용이 DB에 곧 추가될 것 — 확장성」) ----------------
+# 코드의 COSMETICS는 처음 채우는 기본값일 뿐이고, 상점·구매는 cosmetic_items 표를 읽는다.
+# 새 옷은 표에 줄을 더하면 화면에 나오고(그림은 public/mascot/{띠}/outfit-{id}.png, 없으면 「그림 준비 중」)
+
+
+async def test_cosmetic_catalog_comes_from_db(client, db_session):
+    from app.models_org import CosmeticItem
+
+    t = await _trial(client)
+    kid = await _login(client, t, "s1")
+    shop = (await client.get(f"{BASE}/student/shop", headers=_b(kid))).json()
+    assert len(shop["cosmetics"]) == 18 and shop["cosmetics"][0]["id"] == "glasses"
+    assert shop["cosmetics"][0]["description"] == ""
+    # 운영자가 DB에 새 옷을 더함(설명 포함) + 기존 옷 값 바꿈 + 하나는 내림
+    db_session.add(
+        CosmeticItem(
+            id="sunhat", kind="outfit", name="밀짚모자", price=2, description="여름 소풍용", sort=15
+        )
+    )
+    await db_session.execute(update(CosmeticItem).where(CosmeticItem.id == "cape").values(price=4))
+    await db_session.execute(
+        update(CosmeticItem).where(CosmeticItem.id == "best").values(active=False)
+    )
+    await db_session.flush()
+    shop = (await client.get(f"{BASE}/student/shop", headers=_b(kid))).json()
+    by_id = {c["id"]: c for c in shop["cosmetics"]}
+    assert by_id["sunhat"] == {
+        "id": "sunhat",
+        "kind": "outfit",
+        "name": "밀짚모자",
+        "price": 2,
+        "description": "여름 소풍용",
+        "owned": False,
+        "equipped": False,
+    }
+    assert [c["id"] for c in shop["cosmetics"]][:2] == ["glasses", "sunhat"]  # sort 순
+    assert by_id["cape"]["price"] == 4 and "best" not in by_id
+    # 새 옷을 도장으로 산다(지우 도장 2)
+    shop = (await client.post(f"{BASE}/student/shop/cosmetics/sunhat/buy", headers=_b(kid))).json()
+    assert shop["stamps"] == 0
+    assert next(c for c in shop["cosmetics"] if c["id"] == "sunhat")["equipped"] is True
+    # 내린 옷은 못 산다
+    r = await client.post(f"{BASE}/student/shop/cosmetics/best/buy", headers=_b(kid))
+    assert r.status_code == 404
+
+
+async def test_restart_keeps_db_edits_and_adds_only_missing_defaults(client, db_session):
+    from app.models_org import CosmeticItem
+    from app.seeds import ensure_cosmetics
+
+    t = await _trial(client)
+    kid = await _login(client, t, "s1")
+    await client.get(f"{BASE}/student/shop", headers=_b(kid))  # 처음 채움
+    await db_session.execute(update(CosmeticItem).where(CosmeticItem.id == "cape").values(price=4))
+    await db_session.execute(
+        update(CosmeticItem).where(CosmeticItem.id == "best").values(active=False)
+    )
+    await db_session.execute(delete(CosmeticItem).where(CosmeticItem.id == "sorry"))  # 지운 기본값
+    await ensure_cosmetics(db_session)  # 다시 기동
+    await db_session.flush()
+    cape = await db_session.get(CosmeticItem, "cape")
+    best = await db_session.get(CosmeticItem, "best")
+    assert cape is not None and cape.price == 4  # 고친 값은 덮어쓰지 않는다
+    assert best is not None and best.active is False
+    assert await db_session.get(CosmeticItem, "sorry") is not None  # 빠진 기본값만 채운다
+
+
+async def test_owned_item_stays_visible_after_retired_and_bad_rows_skipped(client, db_session):
+    from app.models_org import CosmeticItem
+
+    t = await _trial(client)
+    kid = await _login(client, t, "s1")  # 지우는 glasses를 갖고 있다
+    await client.get(f"{BASE}/student/shop", headers=_b(kid))
+    await db_session.execute(
+        update(CosmeticItem).where(CosmeticItem.id == "glasses").values(active=False)
+    )
+    # 손으로 넣다 틀린 줄(종류·값)은 화면에 안 보낸다(500 대신 건너뜀)
+    db_session.add(CosmeticItem(id="oops1", kind="hat", name="모자", price=1))
+    db_session.add(CosmeticItem(id="oops2", kind="outfit", name="공짜", price=0))
+    await db_session.flush()
+    shop = (await client.get(f"{BASE}/student/shop", headers=_b(kid))).json()
+    by_id = {c["id"]: c for c in shop["cosmetics"]}
+    assert by_id["glasses"]["owned"] is True  # 내려도 가진 아이에겐 남는다(옷장)
+    assert "oops1" not in by_id and "oops2" not in by_id
+    r = await client.post(f"{BASE}/student/shop/cosmetics/oops2/buy", headers=_b(kid))
+    assert r.status_code == 404

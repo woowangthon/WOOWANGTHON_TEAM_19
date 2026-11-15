@@ -9,12 +9,13 @@ import { Mascot } from '../../components/Mascot';
 import { LoadError, Sheet } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
-import { looksLikePhone, signupMissing } from '../../lib/signupHint';
+import { looksLikePhone, pwHint, signupAgreements, signupMissing } from '../../lib/signupHint';
 import { GRADE_NOTE, TONE_NOTE, currentGradeUi, gradeOpen, showToneNote } from '../../lib/gradeUi';
 import { clearJustSignedUp, homeFor, markJustSignedUp, takeLoginExpired, useAuth } from '../../state/auth';
 import { DOCS } from '../../data/docs';
-import { ROLE_LABEL, type Agreements, type Grade, type SignupBody } from '../../types';
-import { SCHOOL_LEVELS, toGrade, type SchoolLevel } from '../../lib/grade';
+import { ROLE_LABEL, type Agreements, type Grade, type MentorSetting, type SignupBody } from '../../types';
+import { MentorPicker } from '../student/Character';
+import { GRADE_OPTIONS } from '../../lib/grade';
 import { DEMO_PASSWORD, ID_RULE, PW_RULE } from '../../api/org';
 
 /* ======================= 로그인 ======================= */
@@ -106,12 +107,11 @@ export function Signup() {
   const [role, setRole] = useState<Role | null>(null);
   const [agree, setAgree] = useState<Agreements>({ terms: false, privacy: false, marketing: false });
   const [f, setF] = useState({ loginId: '', password: '', confirm: '', name: '', email: '', grade: (gradeUi === 'b' ? 5 : null) as Grade | null });
-  // 학교급을 먼저 고르고 학년을 고른다. 학교급을 바꾸면 학년은 다시 고르게 비운다
-  const [level, setLevel] = useState<SchoolLevel | null>(gradeUi === 'b' ? '초' : null);
   const [idOk, setIdOk] = useState<null | boolean>(null);
   const [doc, setDoc] = useState<string | null>(null);
-  const [regrade, setRegrade] = useState(false);   // R2: 학교를 바꿔 학년이 비었으면 한 줄 안내
   const [showPw, setShowPw] = useState(false);     // R5: 로그인처럼 비밀번호 보기
+  // 성호 11-14: 아이는 가입 때 멘토(띠·스타일·호칭·반말/존댓말)를 고른다. 나중엔 말투는 설정, 띠는 도장으로 데려오기
+  const [mentor, setMentor] = useState<MentorSetting>({ animal: 'horse', style: '같이 풀어주는', title: '친구', speech: '반말' });
   const head = useRef<HTMLHeadingElement>(null);   // R12: 단계가 바뀌면 그 단계 제목으로 포커스
   const firstStep = useRef(true);
   useEffect(() => { if (firstStep.current) { firstStep.current = false; return; } head.current?.focus(); }, [step]);
@@ -125,25 +125,27 @@ export function Signup() {
 
   const checkId = () => run(async () => setIdOk(await api.checkLoginId(f.loginId)));
   const submit = () => run(async () => {
-    const me = await api.signup({ role: role!, loginId: f.loginId, password: f.password, name: f.name, agreements: agree, ...(kid ? { grade: f.grade! } : { email: f.email }) });
+    const me = await api.signup({ role: role!, loginId: f.loginId, password: f.password, name: f.name, agreements: signupAgreements(agree, kid), ...(kid ? { grade: f.grade!, mentor: { animal: mentor.animal, style: mentor.style, title: mentor.title, speech: mentor.speech } } : { email: f.email }) });
     // enter 직후 GuestOnly가 먼저 홈으로 보내 「가입 완료」를 건너뛰지 않게 표시해 둔다(GuestOnly가 /welcome으로 보냄)
     markJustSignedUp(); await enter(me); nav('/welcome', { replace: true });
   });
 
-  const titles = ['누가 쓰나요?', '약관 동의', '정보 입력'];
+  const titles = ['누가 쓰나요?', '약관 동의', '정보 입력', '내 멘토 고르기'];
+  const total = kid ? 4 : 3;
   let action: ReactNode = null;
   if (step === 1) action = <button className="btn btn--primary" disabled={!agree.terms || !agree.privacy} onClick={() => setStep(2)}>다음</button>;
   // 막혔으면 무엇이 빠졌는지 한 줄(R3) — 특히 「중복 확인」을 안 눌러 막히는 경우가 많다
   const missing = step === 2 ? signupMissing({ loginId: f.loginId, idOk, pwOk, same, name: f.name, kid, grade: f.grade, emailOk: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email) }) : null;
-  if (step === 2) action = <>{missing && <p className="hint" role="status" style={{ textAlign: 'center' }}>{missing}</p>}<button className="btn btn--primary" disabled={!infoOk || busy} onClick={submit}>가입하기</button></>;
+  if (step === 2) action = <>{missing && <p className="hint" role="status" style={{ textAlign: 'center' }}>{missing}</p>}<button className="btn btn--primary" disabled={!infoOk || busy} onClick={kid ? () => { setError(null); setStep(3); } : submit}>{kid ? '다음' : '가입하기'}</button></>;
+  if (step === 3) action = <button className="btn btn--primary" disabled={busy} onClick={submit}>{mentor.speech === '존댓말' ? '이 친구로 가입할래요' : '이 친구로 가입할래'}</button>;
 
   return (
-    <Frame adult={!!role && !kid} title="회원가입" back={false} right={<span className="pill pill--mint">{step + 1}/3</span>}
+    <Frame adult={!!role && !kid} title="회원가입" back={false} right={<span className="pill pill--mint">{step + 1}/{total}</span>}
       header={<header className="topbar"><div className="topbar__side"><button className="icon-btn" aria-label="뒤로" onClick={back}><Icon name="back" /></button></div>
         <div className="topbar__center"><div className="topbar__title">회원가입</div></div>
-        <div className="topbar__side topbar__side--right"><span className="pill pill--mint">{step + 1}/3</span></div></header>}
+        <div className="topbar__side topbar__side--right"><span className="pill pill--mint">{step + 1}/{total}</span></div></header>}
       actions={action}>
-      <div className="progress progress--thin auth-narrow" aria-hidden><div className="progress__fill" style={{ width: `${((step + 1) / 3) * 100}%` }} /></div>
+      <div className="progress progress--thin auth-narrow" aria-hidden><div className="progress__fill" style={{ width: `${((step + 1) / total) * 100}%` }} /></div>
       <h1 className="h2" ref={head} tabIndex={-1}>{titles[step]}</h1>
 
       {step === 0 && (
@@ -195,7 +197,7 @@ export function Signup() {
               <input className="input" type={showPw ? 'text' : 'password'} autoComplete="new-password" value={f.password} placeholder="영문+숫자 8~20자" onChange={(e) => set('password', e.target.value)} />
               <button type="button" className="icon-btn pw-field__eye" aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 보기'} onClick={() => setShowPw(!showPw)}><Icon name={showPw ? 'eyeOff' : 'eye'} size={20} /></button>
             </div>
-            {f.password && <span className={'hint ' + (pwOk ? 'hint--ok' : '')}>{pwOk ? '좋아요' : '영문과 숫자를 섞어 8~20자'}</span>}
+            {f.password && <span className={'hint ' + (pwOk ? 'hint--ok' : 'hint--bad')} role="status">{pwHint(f.password).text}</span>}
           </label>
           <label className="field">비밀번호 확인
             <input className="input" type={showPw ? 'text' : 'password'} autoComplete="new-password" value={f.confirm} onChange={(e) => set('confirm', e.target.value)} />
@@ -203,23 +205,17 @@ export function Signup() {
           </label>
           <label className="field">{kid ? '별명' : '이름'}
             <input className="input" value={f.name} maxLength={12} placeholder={kid ? '예: 하늘, 별똥별' : '예: 김선생님'} onChange={(e) => set('name', e.target.value)} />
-            {/* R1: 프롬프트에는 별명을 넣지 않고 「너」로 부른다 → 「멘토가 불러 줄 이름」이라 하지 않는다. 진짜 이름·전화번호를 처음부터 덜 받게 */}
-            {kid && (looksLikePhone(f.name) ? <span className="hint hint--bad">전화번호처럼 보여. 별명만 써 줘</span> : <span className="hint">진짜 이름 말고 별명을 써 줘</span>)}
+            {/* R1: 프롬프트에는 별명을 넣지 않고 「너」로 부른다 → 「멘토가 불러 줄 이름」이라 하지 않는다.
+                11-14 성호: 「진짜 이름·전화번호 적지 말라」 상시 안내는 뺌. 전화번호처럼 보일 때만 알린다(가입도 막음) */}
+            {kid && looksLikePhone(f.name) && <span className="hint hint--bad">전화번호처럼 보여. 별명만 써 줘</span>}
           </label>
           {kid ? (
             <fieldset className="field"><legend>학년 <span className="hint">학년에 맞는 말투로 멘토가 이야기해요</span></legend>
-              <div className="chip-row" role="radiogroup" aria-label="학교">
-                {SCHOOL_LEVELS.map((s) => <button key={s.level} type="button" role="radio" aria-checked={level === s.level} disabled={!gradeOpen(gradeUi, toGrade(s.level, s.years)!)} className={'chip' + (level === s.level ? ' chip--on' : '')} onClick={() => { if (level !== s.level) { setRegrade(f.grade !== null); setLevel(s.level); set('grade', null); } }}>{s.label}{gradeOpen(gradeUi, toGrade(s.level, s.years)!) ? '' : ' · 준비 중'}</button>)}
-              </div>
-              {level && (
-                <div className="chip-row chip-row--reveal" role="radiogroup" aria-label={`${level} 학년`}>
-                  {Array.from({ length: SCHOOL_LEVELS.find((s) => s.level === level)!.years }, (_, i) => i + 1).map((y) => {
-                    const g = toGrade(level, y)!;
-                    return <button key={g} type="button" role="radio" aria-checked={f.grade === g} disabled={!gradeOpen(gradeUi, g)} className={'chip' + (f.grade === g ? ' chip--on' : '')} onClick={() => { setRegrade(false); set('grade', g); }}>{y}학년</button>;
-                  })}
-                </div>
-              )}
-              {regrade && f.grade === null && <span className="hint hint--bad" role="status">학년을 다시 골라 줘</span>}
+              {/* 11-14 성호: 학교급 → 학년 두 단계 대신 초1~고3 한 목록(폰에서는 선택 휠). 체험 B안은 초5·6만 열림 */}
+              <select className="input" aria-label="학년" value={f.grade ?? ''} onChange={(e) => set('grade', e.target.value ? Number(e.target.value) : null)}>
+                <option value="" disabled>학년을 골라 주세요</option>
+                {GRADE_OPTIONS.map((o) => <option key={o.grade} value={o.grade} disabled={!gradeOpen(gradeUi, o.grade)}>{o.label}{gradeOpen(gradeUi, o.grade) ? '' : ' · 준비 중'}</option>)}
+              </select>
               {gradeUi === 'b' && <span className="hint">체험에서는 초5·6만 고를 수 있어요 (다른 학년은 준비 중)</span>}
               {showToneNote(gradeUi) && <span className="hint">{GRADE_NOTE}. {TONE_NOTE}</span>}
             </fieldset>
@@ -229,6 +225,14 @@ export function Signup() {
             </label>
           )}
           {role === 'teacher' && <div className="notice notice--plain"><span>학원·학교 소속은 가입한 뒤 <strong>설정 → 소속</strong>에서 일련번호로 신청하거나, 새로 등록할 수 있어요.</span></div>}
+          <LoadError error={error} />
+        </>
+      )}
+      {step === 3 && kid && (
+        <>
+          <p className="small muted">{mentor.speech === '존댓말' ? '같이 공부할 친구와 말투를 골라 주세요. 말투는 나중에 설정에서 바꿀 수 있어요.' : '같이 공부할 친구와 말투를 골라 줘. 말투는 나중에 설정에서 바꿀 수 있어.'}</p>
+          {/* X1: 한 칸으로 감싸 넓은 화면에서도 420px 안에(말풍선 maxWidth가 묶음을 덮지 않게) */}
+          <div className="stack"><MentorPicker value={mentor} onChange={setMentor} /></div>
           <LoadError error={error} />
         </>
       )}

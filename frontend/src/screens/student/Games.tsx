@@ -12,6 +12,9 @@ const GAMES: { id: Game; name: string; desc: string; icon: IconName }[] = [
   { id: 'reaction', name: '반응 속도', desc: '초록이 되면 바로 누르기', icon: 'flame' },
 ];
 
+/** 업다운 맞힌 줄(말투 짝) */
+export const upDownWinLine = (n: number, say: (casual: string, polite: string) => string) => say(`${n}번 만에 맞혔어!`, `${n}번 만에 맞혔어요!`);
+
 export function StudentGames() {
   const { say } = useMentor();
   const [game, setGame] = useState<Game | null>(null);
@@ -98,7 +101,7 @@ function UpDown() {
         </div>
       ) : (
         <>
-          <strong>{log.length}번 만에 맞혔어!</strong>
+          <strong>{upDownWinLine(log.length, say)}</strong>
           <button className="btn btn--secondary" onClick={() => { setAnswer(1 + Math.floor(Math.random() * 50)); setLog([]); setWin(false); }}>한 번 더</button>
         </>
       )}

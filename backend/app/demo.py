@@ -20,7 +20,9 @@ from app import config
 from app.actors import DEMO_CHILD_ID, DEMO_GUARDIAN_ID, DEMO_INSTRUCTOR_ID
 from app.db import get_db
 from app.errors import ApiError
+from app.mentor_animals import DEFAULT_ANIMAL, give_animal, set_current
 from app.models import Alert, InstructorNote, Message, Misconception, Problem, Session, Student
+from app.models_org import AlertAck, CosmeticOwned, SessionDifficulty, StudentMentorCurrent
 from app.seed import load_seed
 from app.timeutil import get_now, seoul_date
 
@@ -67,7 +69,13 @@ async def _wipe_demo_child(db: AsyncSession, *, keep_notes: bool = False) -> Non
     """keep_notes=True면 강사 노트(메모·코멘트)는 남긴다(compat /demo/restart, 11-11)."""
     sessions = select(Session.id).where(Session.student_id == DEMO_CHILD_ID)
     await db.execute(delete(Message).where(Message.session_id.in_(sessions)))
+    await db.execute(
+        delete(AlertAck).where(
+            AlertAck.alert_id.in_(select(Alert.id).where(Alert.student_id == DEMO_CHILD_ID))
+        )
+    )
     await db.execute(delete(Alert).where(Alert.student_id == DEMO_CHILD_ID))
+    await db.execute(delete(SessionDifficulty).where(SessionDifficulty.session_id.in_(sessions)))
     await db.execute(delete(Session).where(Session.student_id == DEMO_CHILD_ID))
     await db.execute(delete(Misconception).where(Misconception.student_id == DEMO_CHILD_ID))
     if not keep_notes:
@@ -185,6 +193,18 @@ async def reset(
     await load_seed(db)
     await _wipe_demo_child(db)
     await _write_day3_student(db, body, today)
+    # 명세 4.12-5: 시연 아이 띠는 처음(말띠)으로 — 산 띠·지금 띠를 지우고 말띠만
+    await db.execute(
+        delete(CosmeticOwned).where(
+            CosmeticOwned.student_account_id == DEMO_CHILD_ID,
+            CosmeticOwned.cosmetic_id.startswith("animal-"),
+        )
+    )
+    await db.execute(
+        delete(StudentMentorCurrent).where(StudentMentorCurrent.student_id == DEMO_CHILD_ID)
+    )
+    await give_animal(db, DEMO_CHILD_ID, DEFAULT_ANIMAL, now, None)
+    await set_current(db, DEMO_CHILD_ID, DEFAULT_ANIMAL, now, None)
     await db.commit()
     if body.timer_scale is None:
         config.clear_timer_scale()

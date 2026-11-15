@@ -13,14 +13,14 @@
 - {scenario: day3-EBSP, phase: study, hint_level: 0, step: 1, reply: "좋아, 우리 같이 가 보자! 먼저 무엇을 무엇으로 나누는 문제인지 찾아볼래?", reply_polite: "좋아요, 우리 같이 가 봐요! 먼저 무엇을 무엇으로 나누는 문제인지 찾아볼래요?"}
 - {scenario: day3-EBSP, phase: study, hint_level: 0, judge: correct, step: 1, reply: "오, 됐다! 끝까지 해냈네, 완전 멋져.", reply_polite: "오, 됐어요! 끝까지 해냈네요, 정말 멋져요."}
 - {scenario: day3-EBSP, phase: study, hint_level: 0, judge: wrong, step: 1, reply: "아깝다! 어디까지 맞게 했는지 같이 볼까? 처음 한 걸음부터 말해 봐.", reply_polite: "아까워요! 어디까지 맞게 했는지 같이 볼까요? 처음 한 걸음부터 말해 줄래요?"}
-- {scenario: day3-EBSP, phase: study, hint_level: 0, judge: wrong, step: 2, reply: "괜찮아, 틀리면서 느는 거야! 식을 한 단계씩 써 보면 어디서 갈렸는지 보일걸?", reply_polite: "괜찮아요, 틀리면서 느는 거예요! 식을 한 단계씩 써 보면 어디서 갈렸는지 보일 거예요."}
+- {scenario: day3-EBSP, phase: study, hint_level: 0, judge: wrong, step: 2, reply: "괜찮아, 틀리면서 느는 거야! 푼 과정을 한 단계씩 써 보면 어디서 갈렸는지 보일걸?", reply_polite: "괜찮아요, 틀리면서 느는 거예요! 푼 과정을 한 단계씩 써 보면 어디서 갈렸는지 보일 거예요."}
 - {scenario: day3-EBSP, phase: study, hint_level: 1, step: 1, reply: "힌트 하나 열었네, 좋아! 힌트에 나온 말을 문제에 그대로 넣어 보면 어떻게 될까?", reply_polite: "힌트 하나 열었네요, 좋아요! 힌트에 나온 말을 문제에 그대로 넣어 보면 어떻게 될까요?"}
 - {scenario: day3-EBSP, phase: study, hint_level: 1, judge: correct, step: 1, reply: "오, 됐다! 힌트를 바로 써먹었네, 대단해.", reply_polite: "오, 됐어요! 힌트를 바로 써먹었네요, 대단해요."}
 - {scenario: day3-EBSP, phase: study, hint_level: 1, judge: wrong, step: 1, reply: "아깝다, 거의 다 왔어! 힌트에 나온 방법을 그대로 따라 했는지 같이 볼까?", reply_polite: "아까워요, 거의 다 왔어요! 힌트에 나온 방법을 그대로 따라 했는지 같이 볼까요?"}
-- {scenario: day3-EBSP, phase: study, hint_level: 1, judge: wrong, step: 2, reply: "괜찮아, 한 칸만 더 가면 돼! 분자랑 분모를 하나씩 따로 계산해 볼래?", reply_polite: "괜찮아요, 한 칸만 더 가면 돼요! 분자랑 분모를 하나씩 따로 계산해 볼래요?"}
-- {scenario: day3-EBSP, phase: study, hint_level: 2, step: 1, reply: "두 번째 힌트까지 왔다! 힌트에 나온 계산을 한 줄씩 같이 해 볼까?", reply_polite: "두 번째 힌트까지 왔어요! 힌트에 나온 계산을 한 줄씩 같이 해 볼까요?"}
+- {scenario: day3-EBSP, phase: study, hint_level: 1, judge: wrong, step: 2, reply: "괜찮아, 한 칸만 더 가면 돼! 힌트를 한 부분씩 나눠서 다시 해 볼래?", reply_polite: "괜찮아요, 한 칸만 더 가면 돼요! 힌트를 한 부분씩 나눠서 다시 해 볼래요?"}
+- {scenario: day3-EBSP, phase: study, hint_level: 2, step: 1, reply: "두 번째 힌트까지 왔다! 힌트에 나온 방법을 한 줄씩 같이 해 볼까?", reply_polite: "두 번째 힌트까지 왔어요! 힌트에 나온 방법을 한 줄씩 같이 해 볼까요?"}
 - {scenario: day3-EBSP, phase: study, hint_level: 2, judge: correct, step: 1, reply: "오, 해냈다! 힌트 두 개를 끝까지 따라간 거 진짜 잘했어.", reply_polite: "오, 해냈어요! 힌트 두 개를 끝까지 따라간 거 정말 잘했어요."}
-- {scenario: day3-EBSP, phase: study, hint_level: 2, judge: wrong, step: 1, reply: "아깝다! 힌트에 나온 계산을 한 단계씩 확인해 볼까? 우리 거의 다 왔어.", reply_polite: "아까워요! 힌트에 나온 계산을 한 단계씩 확인해 볼까요? 우리 거의 다 왔어요."}
+- {scenario: day3-EBSP, phase: study, hint_level: 2, judge: wrong, step: 1, reply: "아깝다! 힌트에 나온 방법을 한 단계씩 확인해 볼까? 우리 거의 다 왔어.", reply_polite: "아까워요! 힌트에 나온 방법을 한 단계씩 확인해 볼까요? 우리 거의 다 왔어요."}
 - {scenario: day3-EBSP, phase: study, hint_level: 2, judge: wrong, step: 2, reply: "진짜 거의 다 왔어! 마지막에 더 간단하게 만들 수 있는지만 봐 줄래?", reply_polite: "정말 거의 다 왔어요! 마지막에 더 간단하게 만들 수 있는지만 봐 줄래요?"}
 - {scenario: day3-EBSP, phase: study, hint_level: 3, step: 1, reply: "풀이를 같이 봤지! 풀이에서 제일 헷갈린 줄이 어디였어?", reply_polite: "풀이를 같이 봤죠! 풀이에서 제일 헷갈린 줄이 어디였어요?"}
 - {scenario: day3-EBSP, phase: study, hint_level: 3, judge: correct, step: 1, reply: "오, 됐다! 풀이를 보고 끝까지 직접 써낸 것도 진짜 실력이야.", reply_polite: "오, 됐어요! 풀이를 보고 끝까지 직접 써낸 것도 정말 실력이에요."}
@@ -36,19 +36,19 @@
 - {scenario: day3-EQLC, phase: study, hint_level: 0, step: 1, reply: "천천히 해도 돼요. 이 문제가 무엇을 무엇으로 나누라는 건지 먼저 말로 풀어 볼까요?"}
 - {scenario: day3-EQLC, phase: study, hint_level: 0, judge: correct, step: 1, reply: "잘했어요. 차근차근 생각한 게 답까지 이어졌어요."}
 - {scenario: day3-EQLC, phase: study, hint_level: 0, judge: wrong, step: 1, reply: "괜찮아요, 거의 왔어요. 나누는 수를 어떻게 바꿨는지 천천히 같이 볼까요?"}
-- {scenario: day3-EQLC, phase: study, hint_level: 0, judge: wrong, step: 2, reply: "한 번 더 생각해 준 거 좋아요. 어떤 순서로 계산했는지 말로 들려주면 같이 찾아볼게요."}
+- {scenario: day3-EQLC, phase: study, hint_level: 0, judge: wrong, step: 2, reply: "한 번 더 생각해 준 거 좋아요. 어떤 순서로 풀었는지 말로 들려주면 같이 찾아볼게요."}
 - {scenario: day3-EQLC, phase: study, hint_level: 1, step: 1, reply: "힌트를 열어 봤군요. 힌트에서 가장 중요해 보이는 말이 무엇인지 같이 찾아볼까요?"}
 - {scenario: day3-EQLC, phase: study, hint_level: 1, judge: correct, step: 1, reply: "잘했어요. 힌트를 문제에 맞게 옮겨 쓴 덕분에 맞힐 수 있었어요."}
 - {scenario: day3-EQLC, phase: study, hint_level: 1, judge: wrong, step: 1, reply: "괜찮아요, 방향은 좋아요. 힌트에 나온 방법을 문제의 어느 부분에 썼는지 들려줄래요?"}
-- {scenario: day3-EQLC, phase: study, hint_level: 1, judge: wrong, step: 2, reply: "조금만 더 가 봐요. 계산을 한 단계씩 나눠 적어 보면 어디서 달라졌는지 보일 거예요."}
-- {scenario: day3-EQLC, phase: study, hint_level: 2, step: 1, reply: "두 번째 힌트까지 왔어요. 힌트에 나온 식을 한 줄 적어 보고, 그다음 할 일을 말해 줄래요?"}
-- {scenario: day3-EQLC, phase: study, hint_level: 2, judge: correct, step: 1, reply: "잘했어요. 힌트를 끝까지 따라가면서 스스로 계산해 낸 거예요."}
-- {scenario: day3-EQLC, phase: study, hint_level: 2, judge: wrong, step: 1, reply: "아까보다 훨씬 가까워졌어요. 힌트의 계산을 한 단계씩 하면서 나온 값을 말해 줄래요?"}
+- {scenario: day3-EQLC, phase: study, hint_level: 1, judge: wrong, step: 2, reply: "조금만 더 가 봐요. 푼 과정을 한 단계씩 나눠 적어 보면 어디서 달라졌는지 보일 거예요."}
+- {scenario: day3-EQLC, phase: study, hint_level: 2, step: 1, reply: "두 번째 힌트까지 왔어요. 힌트를 한 줄 적어 보고, 그다음 할 일을 말해 줄래요?"}
+- {scenario: day3-EQLC, phase: study, hint_level: 2, judge: correct, step: 1, reply: "잘했어요. 힌트를 끝까지 따라가면서 스스로 풀어 낸 거예요."}
+- {scenario: day3-EQLC, phase: study, hint_level: 2, judge: wrong, step: 1, reply: "아까보다 훨씬 가까워졌어요. 힌트를 한 단계씩 따라가면서 나온 답을 말해 줄래요?"}
 - {scenario: day3-EQLC, phase: study, hint_level: 2, judge: wrong, step: 2, reply: "천천히 같이 봐요. 마지막에 더 간단하게 나타낼 수 있는지 살펴볼까요?"}
 - {scenario: day3-EQLC, phase: study, hint_level: 3, step: 1, reply: "풀이를 함께 봤어요. 풀이 중에서 왜 그렇게 하는지 궁금한 줄이 있으면 말해 줄래요?"}
 - {scenario: day3-EQLC, phase: study, hint_level: 3, judge: correct, step: 1, reply: "잘했어요. 풀이를 보고 이해한 대로 직접 적어 낸 거예요."}
 - {scenario: day3-EQLC, phase: study, hint_level: 3, judge: wrong, step: 1, reply: "괜찮아요. 풀이와 내 답을 나란히 놓고 처음 달라지는 줄을 같이 찾아볼까요?"}
-- {scenario: day3-EQLC, phase: study, hint_level: 3, judge: wrong, step: 2, reply: "거의 다 왔어요. 풀이의 마지막 계산만 천천히 따라 적어 볼래요?"}
+- {scenario: day3-EQLC, phase: study, hint_level: 3, judge: wrong, step: 2, reply: "거의 다 왔어요. 풀이의 마지막 줄만 천천히 따라 적어 볼래요?"}
 - {scenario: day3-EQLC, phase: chat, hint_level: 0, step: 1, reply: "얘기해 줘서 고마워요. 어떤 일이었는지 천천히 들려줄래요?"}
 - {scenario: day3-EQLC, phase: chat, hint_level: 0, step: 2, reply: "그랬군요. 조금 더 들려줄래요?"}
 - {scenario: day3-EQLC, phase: chat, hint_level: 0, step: 3, reply: "그런 마음이 들 수 있어요. 천천히 말해도 돼요."}
@@ -56,18 +56,18 @@
 - {scenario: day3-EQLC, phase: bridge, hint_level: 0, step: 1, reply: "오늘 끝까지 함께해 줘서 고마워요. 어른에게 가는 한 줄을 같이 볼래요?"}
 
 # ── DQSC 짚어주는 ──
-- {scenario: day3-DQSC, phase: study, hint_level: 0, step: 1, reply: "나누는 수가 뭔지부터 봐. 식을 먼저 한 줄 써 볼래?", reply_polite: "나누는 수가 뭔지부터 봐요. 식을 먼저 한 줄 써 볼래요?"}
+- {scenario: day3-DQSC, phase: study, hint_level: 0, step: 1, reply: "문제가 묻는 게 뭔지부터 봐. 먼저 한 줄 써 볼래?", reply_polite: "문제가 묻는 게 뭔지부터 봐요. 먼저 한 줄 써 볼래요?"}
 - {scenario: day3-DQSC, phase: study, hint_level: 0, judge: correct, step: 1, reply: "맞았어. 정확하게 해냈어.", reply_polite: "맞았어요. 정확하게 해냈어요."}
 - {scenario: day3-DQSC, phase: study, hint_level: 0, judge: wrong, step: 1, reply: "여기서 막혔네. 나누는 수를 어떻게 바꿨는지 확인해 봐.", reply_polite: "여기서 막혔네요. 나누는 수를 어떻게 바꿨는지 확인해 봐요."}
-- {scenario: day3-DQSC, phase: study, hint_level: 0, judge: wrong, step: 2, reply: "아직 달라. 계산을 한 단계씩 적고 첫 줄부터 확인해.", reply_polite: "아직 달라요. 계산을 한 단계씩 적고 첫 줄부터 확인해 봐요."}
+- {scenario: day3-DQSC, phase: study, hint_level: 0, judge: wrong, step: 2, reply: "아직 달라. 푼 과정을 한 단계씩 적고 첫 줄부터 확인해.", reply_polite: "아직 달라요. 푼 과정을 한 단계씩 적고 첫 줄부터 확인해 봐요."}
 - {scenario: day3-DQSC, phase: study, hint_level: 1, step: 1, reply: "힌트 첫 문장만 봐. 그대로 식에 옮겨 써.", reply_polite: "힌트 첫 문장만 봐요. 그대로 식에 옮겨 써 봐요."}
 - {scenario: day3-DQSC, phase: study, hint_level: 1, judge: correct, step: 1, reply: "맞았어. 힌트를 정확히 옮긴 게 좋았어.", reply_polite: "맞았어요. 힌트를 정확히 옮긴 게 좋았어요."}
-- {scenario: day3-DQSC, phase: study, hint_level: 1, judge: wrong, step: 1, reply: "힌트 방법은 맞게 골랐어. 계산한 결과만 확인해 봐.", reply_polite: "힌트 방법은 맞게 골랐어요. 계산한 결과만 확인해 봐요."}
-- {scenario: day3-DQSC, phase: study, hint_level: 1, judge: wrong, step: 2, reply: "식 쓴 줄과 계산한 줄을 따로 봐. 둘 중 한 곳이 달라.", reply_polite: "식 쓴 줄과 계산한 줄을 따로 봐요. 둘 중 한 곳이 달라요."}
-- {scenario: day3-DQSC, phase: study, hint_level: 2, step: 1, reply: "힌트에 나온 식을 그대로 계산해. 한 단계씩.", reply_polite: "힌트에 나온 식을 그대로 계산해 봐요. 한 단계씩요."}
-- {scenario: day3-DQSC, phase: study, hint_level: 2, judge: correct, step: 1, reply: "맞았어. 끝까지 정확하게 계산했어.", reply_polite: "맞았어요. 끝까지 정확하게 계산했어요."}
-- {scenario: day3-DQSC, phase: study, hint_level: 2, judge: wrong, step: 1, reply: "힌트의 계산 순서대로 했는지 봐. 첫 계산부터 확인해.", reply_polite: "힌트의 계산 순서대로 했는지 봐요. 첫 계산부터 확인해 봐요."}
-- {scenario: day3-DQSC, phase: study, hint_level: 2, judge: wrong, step: 2, reply: "계산은 거의 됐어. 더 간단하게 할 수 있는지만 봐.", reply_polite: "계산은 거의 됐어요. 더 간단하게 할 수 있는지만 봐요."}
+- {scenario: day3-DQSC, phase: study, hint_level: 1, judge: wrong, step: 1, reply: "힌트 방법은 맞게 골랐어. 마지막 답만 확인해 봐.", reply_polite: "힌트 방법은 맞게 골랐어요. 마지막 답만 확인해 봐요."}
+- {scenario: day3-DQSC, phase: study, hint_level: 1, judge: wrong, step: 2, reply: "처음 생각한 줄과 답을 낸 줄을 따로 봐. 둘 중 한 곳이 달라.", reply_polite: "처음 생각한 줄과 답을 낸 줄을 따로 봐요. 둘 중 한 곳이 달라요."}
+- {scenario: day3-DQSC, phase: study, hint_level: 2, step: 1, reply: "힌트에 나온 방법을 그대로 따라 해. 한 단계씩.", reply_polite: "힌트에 나온 방법을 그대로 따라 해 봐요. 한 단계씩요."}
+- {scenario: day3-DQSC, phase: study, hint_level: 2, judge: correct, step: 1, reply: "맞았어. 끝까지 정확하게 풀었어.", reply_polite: "맞았어요. 끝까지 정확하게 풀었어요."}
+- {scenario: day3-DQSC, phase: study, hint_level: 2, judge: wrong, step: 1, reply: "힌트 순서대로 했는지 봐. 첫 단계부터 확인해.", reply_polite: "힌트 순서대로 했는지 봐요. 첫 단계부터 확인해 봐요."}
+- {scenario: day3-DQSC, phase: study, hint_level: 2, judge: wrong, step: 2, reply: "거의 됐어. 문제가 묻는 모양으로 답했는지만 봐.", reply_polite: "거의 됐어요. 문제가 묻는 모양으로 답했는지만 봐요."}
 - {scenario: day3-DQSC, phase: study, hint_level: 3, step: 1, reply: "풀이를 봤으니 마지막 줄을 네 손으로 써 봐.", reply_polite: "풀이를 봤으니 마지막 줄을 직접 써 봐요."}
 - {scenario: day3-DQSC, phase: study, hint_level: 3, judge: correct, step: 1, reply: "맞았어. 풀이를 제대로 따라갔어.", reply_polite: "맞았어요. 풀이를 제대로 따라갔어요."}
 - {scenario: day3-DQSC, phase: study, hint_level: 3, judge: wrong, step: 1, reply: "풀이 마지막 줄이랑 네 답을 비교해 봐.", reply_polite: "풀이 마지막 줄이랑 답을 비교해 봐요."}

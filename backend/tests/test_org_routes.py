@@ -577,21 +577,24 @@ async def test_realm_isolation_codes(client, db_session):
     assert r.status_code == 404
     r = await g1.call("POST", "/links", json={"code": solo.me["linkCode"], "consent": True})
     assert r.status_code == 404
-    # 학원 입장 코드: 실제 학생 → 체험 학원은 「그 브라우저의 체험 세트(X-Trial-Id)」가 아니면 404
-    # (같은 세트면 들어간다 — test_real_account_joins_own_trial_academy, 성호 11-12)
+    # 학원 입장 코드: 실제 가입 계정은 브라우저의 체험 세트와 상관없이 살아 있는 체험 학원 코드로 들어간다
+    # (명세 4.12 5-1, 성호 11-14 창 3개 실험 — 전에는 그 브라우저 세트만이라 다른 브라우저에서 404)
     demo_code = await _entry_code(own1)
-    kid.trial = None
-    r = await kid.call("POST", "/academy/join", json={"code": demo_code})
-    assert r.status_code == 404
     other = await _trial(client)
-    mom.trial = other
+    mom.trial = other  # 다른 브라우저(다른 체험 세트)
     r = await mom.call("POST", "/academy/join", json={"code": demo_code})
-    assert r.status_code == 404
-    kid.trial = mom.trial = t
-    # 일련번호: 실제 강사 → 체험 학원 404
+    assert r.status_code == 200, r.text
+    mom.trial = t
+    # 일련번호: 실제 가입 선생님은 다른 브라우저 체험 학원 일련번호로도 신청 → 그 원장에게 승인 대기
+    # (명세 4.12 5-1, 성호 11-14 — 전에는 404)
     demo_serial = (await own1.ok("GET", "/owner/dashboard"))["academy"]["serial"]
-    r = await teach.call("POST", "/teacher/membership", json={"serial": demo_serial})
-    assert r.status_code == 404
+    newbie = await _signup(client, "teacher", "teach_newbie", other)
+    r = await newbie.call("POST", "/teacher/membership", json={"serial": demo_serial})
+    assert r.status_code == 200, r.text
+    nb = await db_session.get(Account, newbie.id)
+    assert nb is not None and nb.teacher_status == "승인 대기" and nb.trial_id is None
+    dash = await own1.ok("GET", "/owner/dashboard")
+    assert "teach_newbie" in str(dash) or newbie.id in str(dash)  # 원장 화면에 신청이 보인다
     # 실제 학원을 하나 세운다(신청 → 그 화면 세트 운영자 승인)
     await teach.ok("POST", "/teacher/academy-applications", json=FORM)
     op = await _demo(client, t, "op")
@@ -609,7 +612,11 @@ async def test_realm_isolation_codes(client, db_session):
     assert r.status_code == 404
     r = await t3.call("POST", "/teacher/membership", json={"serial": real_serial})
     assert r.status_code == 404
-    # 같은 영역끼리는 된다
+    # 같은 영역끼리는 된다(위에서 보호자가 체험 학원에 들어가며 아이도 같이 들어갔으니 비운다)
+    kid_acc = await db_session.get(Account, kid.id)
+    assert kid_acc is not None
+    kid_acc.academy_id = None
+    await db_session.flush()
     await kid.ok("POST", "/academy/join", json={"code": real_code})
     await t3.ok("POST", "/teacher/membership", json={"serial": demo_serial})
 
@@ -680,3 +687,45 @@ async def test_real_teacher_application_follows_new_trial(client, db_session):
     await op.ok("POST", f"/operator/applications/{app_id}/review", json={"decision": "승인"})
     me = await boss.refresh()
     assert me["academy"]["name"] == "별빛수학"
+
+
+async def test_class_join_both_ways_tell_the_other_side(client):
+    """강의실 들어가기 두 길(아이 요청·선생님 초대) — 답하면 상대에게 알림이 간다(성호 11-14).
+    체험 세트: 김선생님 강의실 c1(5학년 A반)·c2(5학년 심화반), 최하린(s4)은 c2에 요청해 둔 상태."""
+    t = await _trial(client)
+    tea = await _demo(client, t, "t1")
+    kid = await _demo(client, t, "s4")
+    # 선생님이 요청을 거절 → 아이가 안다(그냥 사라지지 않게)
+    await tea.ok("POST", f"/teacher/classes/{t}-c2/requests/{kid.id}", json={"accept": False})
+    assert "「5학년 심화반」 참여 요청이 이번엔 받아지지 않았어. 궁금하면 선생님께 물어봐" in (
+        await kid.notices()
+    )
+    # 선생님 초대 → 아이 거절 → 선생님이 안다
+    await tea.ok("POST", f"/teacher/classes/{t}-c1/invites", json={"studentId": kid.id})
+    assert "김선생님이 「5학년 A반」에 초대했어!" in await kid.notices()
+    await kid.ok("POST", f"/student/classes/{t}-c1/invite", json={"accept": False})
+    assert "최하린 학생이 「5학년 A반」 초대에 「나중에」를 골랐어요" in await tea.notices()
+    # 다시 초대 → 아이 수락 → 선생님이 안다
+    await tea.ok("POST", f"/teacher/classes/{t}-c1/invites", json={"studentId": kid.id})
+    await kid.ok("POST", f"/student/classes/{t}-c1/invite", json={"accept": True})
+    assert "최하린 학생이 「5학년 A반」에 들어왔어요" in await tea.notices()
+    notes = await tea.ok("GET", "/notices")
+    assert next(n for n in notes if "들어왔어요" in n["text"])["to"] == "/teacher/classes"
+
+
+async def test_class_invite_notice_follows_kid_polite_choice(client):
+    t = await _trial(client)
+    tea = await _demo(client, t, "t1")
+    kid = await _demo(client, t, "s4")
+    m = await kid.ok("GET", "/student/mentor")
+    await kid.ok("PUT", "/student/mentor", json={**m, "speech": "존댓말"})
+    await tea.ok("POST", f"/teacher/classes/{t}-c1/invites", json={"studentId": kid.id})
+    assert "김선생님이 「5학년 A반」에 초대했어요!" in await kid.notices()
+
+
+async def test_invite_after_request_joins_and_tells_kid(client):
+    t = await _trial(client)
+    tea = await _demo(client, t, "t1")
+    kid = await _demo(client, t, "s4")  # c2에 요청해 둔 상태
+    await tea.ok("POST", f"/teacher/classes/{t}-c2/invites", json={"studentId": kid.id})
+    assert "「5학년 심화반」에 들어왔어!" in await kid.notices()
