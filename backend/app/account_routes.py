@@ -323,6 +323,8 @@ async def _set_judge_password(db: Db, t: str) -> None:
     for acc in await db.scalars(select(Account).where(Account.trial_id == t)):
         if not verify_password(pw, acc.pw_hash):
             acc.pw_hash = pw_hash
+            # 비밀번호가 바뀌면 그 계정 로그인도 끊는다(옛 공개 비밀번호로 받은 토큰, 보안 검토 11-15)
+            await db.execute(delete(AuthToken).where(AuthToken.account_id == acc.id))
 
 
 async def ensure_judge_sets(db: Db, now: datetime) -> int:

@@ -25,6 +25,11 @@ JUDGE_SETS = ["t-judge0000000001", "t-judge0000000002", "t-judge0000000003"]
 JUDGE_SUFFIX = {t: f"judge{i}" for i, t in enumerate(JUDGE_SETS, start=1)}
 
 
+def is_judge_id(value: str) -> bool:
+    """고정 심사 세트의 세트 id·배우 id인가. 세트 id가 공개 코드에 있어 헤더로는 닿지 못하게 막는 데 쓴다."""
+    return any(value == t or value.startswith(t + "-") for t in JUDGE_SETS)
+
+
 def new_trial_id() -> str:
     return TRIAL_PREFIX + "".join(secrets.choice(_ALPHABET) for _ in range(16))
 

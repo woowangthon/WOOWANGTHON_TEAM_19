@@ -26,7 +26,7 @@ from app.accounts import first_child_id
 from app.errors import ApiError
 from app.models import Student
 from app.models_org import Account, Room, RoomPerson
-from app.trial import instructor_can_see, is_trial_actor, trial_child_of
+from app.trial import instructor_can_see, is_judge_id, is_trial_actor, trial_child_of
 
 DEMO_CHILD_ID = "demo-child-minsu"
 DEMO_GUARDIAN_ID = "demo-guardian-minsu"
@@ -151,6 +151,10 @@ async def actor_from_request(
     if x_demo_role != want_role:
         raise ApiError(403, "forbidden", _FORBIDDEN[want_role])
     assert x_demo_actor is not None
+    if is_judge_id(
+        x_demo_actor.strip()
+    ):  # 고정 심사 세트는 로그인으로만(명세 4.11-10, 보안 검토 11-15)
+        raise ApiError(403, "trial_only", "이 계정은 로그인해서 써 주세요.")
     # 공개 배포는 체험 세트만(11-11). 공용 데모 아이·보호자·임의 강사 id는 막는다
     if config.trial_only() and not is_trial_actor(x_demo_actor, want_role):
         raise ApiError(

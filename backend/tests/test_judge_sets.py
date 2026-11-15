@@ -158,3 +158,39 @@ async def test_judge_password_from_env_and_no_public_password(client, db_session
     accounts = (await client.get(f"{BASE}/demo/accounts", headers={"X-Trial-Id": tid})).json()
     login_id = next(a["loginId"] for a in accounts if a["loginId"].startswith("jiwoo_"))
     await _login(client, login_id, trial_header=tid)  # 무작위 세트는 demo1234 그대로
+
+
+async def test_judge_sets_not_reachable_by_trial_or_demo_headers(client, db_session):
+    """세트 id가 공개 코드에 있다 → 헤더(X-Trial-Id·X-Demo-Actor)로는 고정 세트에 못 닿는다(보안 검토 11-15)."""
+    await ensure_judge_sets(db_session, NOW)
+    await db_session.commit()
+    t = JUDGE_SETS[0]
+    r = await client.post(f"{BASE}/demo/login", json={"userId": "s1"}, headers={"X-Trial-Id": t})
+    assert r.status_code != 200 and not r.cookies.get("cm_session")
+    client.cookies.clear()
+    r = await client.get(f"{BASE}/demo/accounts", headers={"X-Trial-Id": t})
+    assert r.status_code != 200 or not any("judge" in a["loginId"] for a in r.json())
+    for role, actor in (
+        ("child", f"{t}-child"),
+        ("guardian", f"{t}-guardian"),
+        ("instructor", f"{t}-instructor"),
+    ):
+        r = await client.get(
+            f"{BASE}/student/home"
+            if role == "child"
+            else f"{BASE}/guardian/today"
+            if role == "guardian"
+            else f"{BASE}/teacher/today",
+            headers={"X-Demo-Role": role, "X-Demo-Actor": actor},
+        )
+        assert r.status_code == 403, (role, r.status_code)
+
+
+async def test_judge_password_rotation_revokes_tokens(client, db_session, monkeypatch):
+    await ensure_judge_sets(db_session, NOW)
+    await db_session.commit()
+    kid = await _login(client, "jiwoo_judge1")  # 변수 없음 → demo1234
+    monkeypatch.setenv("JUDGE_PASSWORD", "judge-secret-for-test")
+    await ensure_judge_sets(db_session, NOW)
+    await db_session.commit()
+    assert (await client.get(f"{BASE}/me", headers=kid)).json() is None

@@ -35,7 +35,7 @@ from app.models_org import (
     Notice,
 )
 from app.timeutil import SEOUL, as_utc, current_grade, get_now
-from app.trial import JUDGE_SETS
+from app.trial import JUDGE_SETS, is_judge_id
 
 COOKIE = "cm_session"
 REMEMBER_TTL = timedelta(days=30)
@@ -167,7 +167,8 @@ def token_sent(request: Request) -> bool:
 def trial_id_from(request: Request) -> str | None:
     """X-Trial-Id가 체험 세트 형식(`t-<16>`)이면 그 값, 아니면 None."""
     raw = (request.headers.get("x-trial-id") or "").strip()
-    return raw if _TRIAL_RE.match(raw) else None
+    # 고정 심사 세트는 헤더로 못 고른다(아이디·비밀번호 로그인만, 명세 4.11-10·보안 검토 11-15)
+    return raw if _TRIAL_RE.match(raw) and not is_judge_id(raw) else None
 
 
 def same_realm(column: Any, trial_id: str | None) -> Any:
