@@ -319,10 +319,17 @@ async def _set_judge_password(db: Db, t: str) -> None:
     pw = config.judge_password()
     if pw is None:
         return
-    pw_hash = hash_password(pw)
-    for acc in await db.scalars(select(Account).where(Account.trial_id == t)):
-        if not verify_password(pw, acc.pw_hash):
-            acc.pw_hash = pw_hash
+    # 서버 시작마다 불린다 → scrypt를 계정마다 돌리면 시작이 길어져 동시 기동이 시작 잠금에서
+    # 시간 초과로 500이 났다(11-15 재배포). 같은 해시는 한 번만 확인하고, 바꿀 때만 새로 만든다
+    accounts = list(await db.scalars(select(Account).where(Account.trial_id == t)))
+    ok_by_hash: dict[str, bool] = {}
+    new_hash: str | None = None
+    for acc in accounts:
+        if acc.pw_hash not in ok_by_hash:
+            ok_by_hash[acc.pw_hash] = verify_password(pw, acc.pw_hash)
+        if not ok_by_hash[acc.pw_hash]:
+            new_hash = new_hash or hash_password(pw)
+            acc.pw_hash = new_hash
             # 비밀번호가 바뀌면 그 계정 로그인도 끊는다(옛 공개 비밀번호로 받은 토큰, 보안 검토 11-15)
             await db.execute(delete(AuthToken).where(AuthToken.account_id == acc.id))
 
