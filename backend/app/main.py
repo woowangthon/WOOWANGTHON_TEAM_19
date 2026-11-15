@@ -11,6 +11,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
 
 from app import config, errors
+from app.account_routes import ensure_judge_sets
 from app.account_routes import router as account_router
 from app.api import health_router, router
 from app.class_routes import router as class_router
@@ -67,6 +68,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
             await load_seed(db)
             await ensure_cosmetics(db)  # 꾸미기 기본값 중 빠진 것만(11-14)
             await ensure_demo_actors(db, get_now())
+            await ensure_judge_sets(db, get_now())  # 심사용 고정 세트 3벌, 없을 때만(명세 4.11-10)
             await db.flush()
         finally:
             await db.close()

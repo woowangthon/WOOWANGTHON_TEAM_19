@@ -2,12 +2,11 @@
 // 규칙(아이디·비밀번호 형식, 중복, 필수 약관)은 서버(org.ts)가 최종 판단한다. 화면은 미리 알려 주는 역할.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { api, API_MODE, restartDemoAll } from '../../api';
+import { api } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon, type IconName } from '../../components/Icon';
 import { Mascot } from '../../components/Mascot';
 import { LoadError, Sheet } from '../../components/Common';
-import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { looksLikePhone, pwHint, signupAgreements, signupMissing } from '../../lib/signupHint';
 import { GRADE_NOTE, TONE_NOTE, currentGradeUi, gradeOpen, showToneNote } from '../../lib/gradeUi';
@@ -16,7 +15,7 @@ import { DOCS } from '../../data/docs';
 import { ROLE_LABEL, type Agreements, type Grade, type MentorSetting, type SignupBody } from '../../types';
 import { MentorPicker } from '../student/Character';
 import { GRADE_OPTIONS } from '../../lib/grade';
-import { DEMO_PASSWORD, ID_RULE, PW_RULE } from '../../api/org';
+import { ID_RULE, PW_RULE } from '../../api/org';
 
 /* ======================= 로그인 ======================= */
 export function Login() {
@@ -26,7 +25,6 @@ export function Login() {
   const [pw, setPw] = useState('');
   const [show, setShow] = useState(false);
   const [remember, setRemember] = useState(true);
-  const [demo, setDemo] = useState(false);
   const [expired] = useState(takeLoginExpired); // 로그인이 서버에서 끝나 이 화면으로 왔으면 한 번 안내
   const { run, busy, error } = useAction();
   const submit = () => run(async () => { const me = await api.login(id, pw, remember); await enter(me); nav(homeFor(me), { replace: true }); });
@@ -54,40 +52,8 @@ export function Login() {
         <button onClick={() => nav('/find?tab=pw')}>비밀번호 찾기</button><i />
         <button className="strong" onClick={() => nav('/signup')}>회원가입</button>
       </nav>
-      <div className="spacer" />
-      <button className="btn btn--ghost btn--small" style={{ alignSelf: 'center' }} onClick={() => setDemo(true)}>체험 계정으로 둘러보기 (시연)</button>
-      {demo && <DemoSheet onPick={(loginId) => { setId(loginId); setPw(DEMO_PASSWORD); setDemo(false); }} onClose={() => setDemo(false)} />}
+      {/* 11-15 성호: 실제 서비스처럼 「체험 계정으로 둘러보기」는 없앤다 — 심사용 고정 계정은 제출서·README에(handoff 1115_judge_accounts) */}
     </Frame>
-  );
-}
-
-/** 심사위원용: 체험 계정을 누르면 아이디·비밀번호가 채워진다 + 시연 설정 */
-function DemoSheet({ onPick, onClose }: { onPick: (loginId: string) => void; onClose: () => void }) {
-  const { data: accounts, reload } = useAsync(() => api.demoAccounts());
-  const [resetDone, setResetDone] = useState(false);
-  const [resetError, setResetError] = useState<string | null>(null);
-  return (
-    <Sheet title="체험 계정 (시연용)" onClose={onClose}>
-      <p className="small muted">누르면 아이디·비밀번호가 채워져요. 비밀번호는 모두 <strong className="num">{DEMO_PASSWORD}</strong></p>
-      <div className="stack">
-        {accounts?.map((a) => (
-          <button key={a.id} className="card row between" style={{ padding: '10px 14px' }} onClick={() => onPick(a.loginId)}>
-            <span><span className="pill" style={{ marginRight: 6 }}>{ROLE_LABEL[a.role]}</span><strong>{a.name}</strong>{a.note && <span className="small muted"> · {a.note}</span>}</span>
-            <span className="small muted num">{a.loginId}</span>
-          </button>
-        ))}
-      </div>
-      <section className="card card--flat stack" aria-label="시연 설정">
-        <div className="row between"><strong className="small">시연 설정</strong><span className="pill">{API_MODE === 'mock' ? '가짜 서버' : '실제 서버'}</span></div>
-        <button className="btn btn--ghost btn--small" style={{ alignSelf: 'flex-start', padding: 0 }}
-          onClick={async () => {
-            // 되돌린 뒤 새 세트의 체험 계정 목록으로 다시 읽는다(reload)
-            setResetError(null); setResetDone(false);
-            try { await restartDemoAll(); reload(); setResetDone(true); } catch (e) { setResetError((e as Error).message); }
-          }}>{resetDone ? '처음 상태로 되돌렸어요 ✓' : '시연 데이터 처음으로'}</button>
-        <LoadError error={resetError && `되돌리지 못했어요. ${resetError}`} />
-      </section>
-    </Sheet>
   );
 }
 

@@ -35,6 +35,7 @@ from app.models_org import (
     Notice,
 )
 from app.timeutil import SEOUL, as_utc, current_grade, get_now
+from app.trial import JUDGE_SETS, is_judge_id
 
 COOKIE = "cm_session"
 REMEMBER_TTL = timedelta(days=30)
@@ -166,7 +167,8 @@ def token_sent(request: Request) -> bool:
 def trial_id_from(request: Request) -> str | None:
     """X-Trial-Id가 체험 세트 형식(`t-<16>`)이면 그 값, 아니면 None."""
     raw = (request.headers.get("x-trial-id") or "").strip()
-    return raw if _TRIAL_RE.match(raw) else None
+    # 고정 심사 세트는 헤더로 못 고른다(아이디·비밀번호 로그인만, 명세 4.11-10·보안 검토 11-15)
+    return raw if _TRIAL_RE.match(raw) and not is_judge_id(raw) else None
 
 
 def same_realm(column: Any, trial_id: str | None) -> Any:
@@ -373,6 +375,8 @@ async def me_view(db: AsyncSession, u: Account) -> dict[str, Any]:
         "membership": membership,
         "application": application_view(app) if app is not None else None,
         "restricted": u.role == "student" and await is_restricted(db, u.id),
+        "resettable": u.trial_id
+        in JUDGE_SETS,  # 심사용 고정 세트만 「처음 상태로 되돌리기」(4.11-10)
         "outfit": u.outfit if u.role == "student" else None,
         # 알림 설정 칸만 내보낸다(단원 선택 같은 서버 전용 키는 빼고)
         "settings": {

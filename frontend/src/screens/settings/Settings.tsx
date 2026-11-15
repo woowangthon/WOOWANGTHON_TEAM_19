@@ -38,6 +38,9 @@ export function Settings() {
   const { run: byeRun, busy: byeBusy, error: byeError } = useAction();
   const [bye, setBye] = useState(false);
   const [ask, setAsk] = useState(false);
+  // 심사용 고정 세트만: 같은 아이디로 기록만 처음 상태로(명세 4.11-10, 성호 11-15). 서버가 로그인도 지우므로 로그인 화면으로
+  const [resetAsk, setResetAsk] = useState(false);
+  const { run: resetRun, busy: resetBusy, error: resetError } = useAction();
   if (!me) return null;
   const kid = me.role === 'student';
   const m = me.membership;
@@ -82,6 +85,9 @@ export function Settings() {
         <Item icon="key" label="비밀번호 변경" to="/settings/password" />
         <Item icon="bell" label="알림 설정" to="/settings/notify" />
       </Group>
+      {me.resettable && (
+        <Group title="시연"><Item icon="refresh" label="처음 상태로 되돌리기" sub={kid ? '같은 아이디로 처음부터 해 볼 수 있어' : '같은 아이디로 처음부터 해 볼 수 있어요'} onClick={() => setResetAsk(true)} /></Group>
+      )}
       <Group title="고객 지원">
         <Item icon="bell" label="공지사항" to="/docs/notice" />
         <Item icon="help" label="자주 묻는 질문" to="/docs/faq" />
@@ -97,6 +103,21 @@ export function Settings() {
       </div>
       <button className="btn btn--ghost btn--small" style={{ alignSelf: 'center' }} onClick={() => nav('/settings/delete')}>회원 탈퇴</button>
 
+      {resetAsk && (
+        <Sheet title="처음 상태로 되돌릴까요?" onClose={() => setResetAsk(false)}>
+          <p className="small">이 묶음 세 계정(학생·보호자·선생님)의 기록이 모두 지워져요. 아이디·비밀번호와 연결은 그대로예요.</p>
+          <p className="small muted">되돌린 뒤 로그인 화면으로 가요. 같은 아이디로 다시 로그인해 주세요.</p>
+          <div className="btn-row">
+            <button className="btn btn--secondary" onClick={() => setResetAsk(false)}>취소</button>
+            <button className="btn btn--danger" disabled={resetBusy} onClick={() => resetRun(async () => {
+              await api.resetMine();
+              await logout().catch(() => {}); // 서버가 이미 로그인을 지웠다 → 401이면 http.ts가 이 기기 로그인도 지운다
+              nav('/login', { replace: true });
+            })}>{resetBusy ? '되돌리는 중…' : '되돌리기'}</button>
+          </div>
+          <LoadError error={resetError} />
+        </Sheet>
+      )}
       {bye && (
         <Sheet title="로그아웃할까요?" onClose={() => setBye(false)}>
           <p className="small muted">다시 들어오려면 아이디와 비밀번호로 로그인해요.</p>
