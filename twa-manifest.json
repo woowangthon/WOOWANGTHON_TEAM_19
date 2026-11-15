@@ -17,7 +17,7 @@
   "iconUrl": "https://chingu1.vercel.app/icons/icon-512.png",
   "maskableIconUrl": "https://chingu1.vercel.app/icons/icon-maskable-512.png",
   "splashScreenFadeOutDuration": 300,
-  "signingKey": {"path": "/Users/se9078/chingu1-apk/chingu1-release.keystore", "alias": "chingu1"},
+  "signingKey": {"path": "../chingu1-release.keystore", "alias": "chingu1"},
   "appVersionName": "1.0.0",
   "appVersionCode": 1,
   "shortcuts": [],
