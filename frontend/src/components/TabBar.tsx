@@ -4,6 +4,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { Icon, type IconName } from './Icon';
 import { useClassLocked } from './ClassSession';
 import { LOCKED_IN_CLASS } from '../lib/classSession';
+import { brandLabel } from './TopBar';
 
 export type TabSet = 'student' | 'teacher' | 'guardian';
 
@@ -32,8 +33,8 @@ export function TabBar({ set }: { set: TabSet }) {
   return (
     <nav className="tabbar" aria-label="하단 탭">
       {/* GPT-019: 태블릿 레일은 얼굴, PC 사이드바는 얼굴+글자. 휴대폰 하단 탭에서는 CSS로 숨김 */}
-      <Link className="brand-logo brand-logo--nav" to={TABS[set][0].to} aria-label="AI 멘토 홈">
-        <img src={`${import.meta.env.BASE_URL}mascot/horse/wave-avatar.png`} alt="" /><span>AI 멘토</span>
+      <Link className="brand-logo brand-logo--nav" to={TABS[set][0].to} aria-label={`${brandLabel(set)} 홈`}>
+        <img src={`${import.meta.env.BASE_URL}mascot/horse/wave-avatar.png`} alt="" /><span>AI 멘토{set !== 'student' && <small style={{ display: 'block', fontSize: 13, fontWeight: 700, opacity: .75 }}>{set === 'teacher' ? '학습지도자용' : '보호자용'}</small>}</span>
       </Link>
       {TABS[set].map((t) => (
         <NavLink key={t.to} to={t.to} end className={({ isActive }) => 'tab' + (isActive ? ' tab--active' : '') + (locked && LOCKED_IN_CLASS.includes(t.to) ? ' tab--locked' : '')}>

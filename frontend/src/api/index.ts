@@ -10,7 +10,7 @@ import { orgApi } from './org';
 export const HTTP_FUNCS: (keyof MentorApi)[] = [
   // 학생
   'getStudentHome', 'acceptPromise', 'getMentor', 'saveMentor', 'buyAnimal', 'getActiveSession', 'startSession', 'getProblem',
-  'submitAnswer', 'requestHint', 'showSolution', 'afterStudy', 'getChat', 'sendChat', 'replyChat', 'endChat',
+  'submitAnswer', 'requestHint', 'showSolution', 'afterStudy', 'getChat', 'sendChat', 'replyChat', 'endChat', 'askGuardian',
   'getWrap', 'submitWrap',
   // 보호자
   'getGuardianToday', 'getAlerts', 'ackAlert', // ackAlert: 🔴 「확인했어요」(11-15 성호)

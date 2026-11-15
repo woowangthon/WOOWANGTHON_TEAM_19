@@ -226,9 +226,8 @@ async def test_red_keyword_goes_to_crisis_without_llm(client, db_session, studen
     assert len(spy.calls) == calls_before  # LLM 호출 없음
 
     alerts = (await db_session.scalars(select(Alert).where(Alert.session_id == sid))).all()
-    assert len(alerts) == 1
-    assert alerts[0].trigger == "K01" and alerts[0].student_id == student.id
-    assert alerts[0].excerpt == ""  # 저장도 하지 않는다(칸은 남김, 표 변경 없음)
+    assert alerts == []  # 보호자 알림은 아이가 요청할 때만(부록 E 11-15 오후)
+    assert student.id
 
     row = await db_session.get(Session, sid)
     assert row is not None

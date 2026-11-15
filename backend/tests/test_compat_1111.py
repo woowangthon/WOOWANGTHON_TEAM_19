@@ -120,7 +120,7 @@ async def test_red_after_chat_deadline_alerts(client, db_session, clock):
     alerts = await db_session.scalar(
         select(func.count()).select_from(Alert).where(Alert.session_id == sid)
     )
-    assert alerts == 1
+    assert alerts == 0  # 보호자 알림은 아이가 요청할 때만(부록 E 11-15 오후)
 
 
 async def test_red_in_bridge_pieces_alerts(client, db_session, clock):
@@ -226,7 +226,7 @@ async def test_wrap_hard_point_red_goes_to_crisis(client, db_session, clock):
     alerts = await db_session.scalar(
         select(func.count()).select_from(Alert).where(Alert.session_id == sid)
     )
-    assert alerts == 1
+    assert alerts == 0  # 보호자 알림은 아이가 요청할 때만(부록 E 11-15 오후)
 
 
 async def test_wrap_plain_hard_point_still_ends(client, clock):

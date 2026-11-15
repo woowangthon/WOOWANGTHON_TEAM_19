@@ -15,7 +15,7 @@ import { useAsync } from '../../lib/useAsync';
 import { RequirePhase, useSession } from '../../state/session';
 import { useMentor } from '../../state/mentor';
 import { chatReplyAction, createBatcher, followPending, listenHidden, routeAfterLeftChat } from '../../lib/chatBatch';
-import { CrisisContacts, CrisisNotified } from '../../components/CrisisHelp';
+import { CrisisAsk, CrisisContacts } from '../../components/CrisisHelp';
 import { onceAtATime, useOnResume } from '../../lib/resume';
 import { refreshIfChatExpired } from '../../lib/sessionSync';
 import type { ChatMessage, ChatReply, SessionView } from '../../types';
@@ -154,7 +154,7 @@ function Chat() {
         ))}
         {!data && !error && <Thinking label="불러오는 중" />}
         {/* U8: 묶어 보내기 1.5초 동안 「듣고 있어」, 서버를 기다리는 동안 「생각 중」 */}
-        {held ? <CrisisInChat /> : waiting > 0 ? <Thinking /> : buffered > 0 ? <Thinking label={say('듣고 있어', '듣고 있어요')} /> : null}
+        {held ? <CrisisInChat session={held} onAsked={(at) => { const v = { ...held, guardianRequestedAt: at }; heldRef.current = v; setHeld(v); }} /> : waiting > 0 ? <Thinking /> : buffered > 0 ? <Thinking label={say('듣고 있어', '듣고 있어요')} /> : null}
         {/* U9·TK-94: 끝나기 3분 전부터 「n분 남았어」(올림 분)·끝났을 때 화면 안내(멘토 말풍선이 아님 — AI 말처럼 꾸미지 않는다) */}
         {data && !closing && !held && t.show && <p className="small muted" role="status" style={{ textAlign: 'center' }}>{say(`${t.minutes}분 남았어`, `${t.minutes}분 남았어요`)}</p>}
         {closing && <div className="notice notice--plain" role="status">{say('수다 시간이 끝났어. 마무리하러 가자!', '수다 시간이 끝났어요. 마무리하러 가요!')}</div>}
@@ -166,10 +166,10 @@ function Chat() {
 }
 
 /** 1안: 수다 중 🔴 — 서버 문장 말풍선 바로 아래 같은 순간에 붙는 연락처 카드(위기 화면과 같은 문구·컴포넌트) */
-export function CrisisInChat() {
+export function CrisisInChat({ session, onAsked }: { session: SessionView; onAsked?: (at: string) => void }) {
   return (
     <section className="card card--danger stack" aria-label="도움받을 곳">
-      <CrisisNotified />
+      <CrisisAsk sessionId={session.id} requestedAt={session.guardianRequestedAt} onAsked={onAsked} />
       <CrisisContacts />
     </section>
   );

@@ -183,6 +183,10 @@ async def test_crisis_in_chat(client, clock):
     assert r["crisis"] is True and r["session"]["phase"] == "crisis"
     assert r["hotlines"] == ["109", "1388"]
 
+    assert (
+        await call("GET", "/guardian/alerts", headers=GUARDIAN)
+    ).json() == []  # 보호자 알림은 아이가 요청할 때만(부록 E 11-15 오후)
+    assert (await call("POST", f"/sessions/{sid}/crisis/ask-guardian")).status_code == 200
     alerts = (await call("GET", "/guardian/alerts", headers=GUARDIAN)).json()
     assert len(alerts) == 1
     a = alerts[0]
@@ -539,7 +543,7 @@ async def test_study_chat_still_checks_red_keyword(client, clock):
     ).json()
     assert r["crisis"] is True and r["hotlines"] == ["109", "1388"]
     alerts = (await call("GET", "/guardian/alerts", headers=GUARDIAN)).json()
-    assert len(alerts) == 1
+    assert alerts == []  # 보호자 알림은 아이가 요청할 때만(부록 E 11-15 오후)
 
 
 async def test_huge_answer_is_422_not_500(client):
@@ -773,6 +777,9 @@ async def _red_alert_id(call) -> str:
     sid = (await call("POST", "/sessions", json={"difficulty": "초급"})).json()["id"]
     r = (await call("POST", f"/sessions/{sid}/chat", json={"text": RED_LINE})).json()
     assert r["crisis"] is True
+    await call(
+        "POST", f"/sessions/{sid}/crisis/ask-guardian"
+    )  # 보호자 알림은 아이가 요청할 때만(부록 E 11-15 오후)
     alerts = (await call("GET", "/guardian/alerts", headers=GUARDIAN)).json()
     assert alerts[0]["status"] == "미확인" and alerts[0]["ackedAt"] is None
     return alerts[0]["id"]

@@ -3,6 +3,14 @@ import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from './Icon';
 import { NotifBell } from './NotifBell';
+import { useAuth } from '../state/auth';
+
+/** 시안(성호 11-15): 어른 화면은 누구용인지 상표 옆에 붙인다. 아이 화면은 그대로 「AI 멘토」 */
+export function brandLabel(role?: string): string {
+  if (role === 'teacher') return 'AI 멘토 · 학습지도자용';
+  if (role === 'guardian') return 'AI 멘토 · 보호자용';
+  return 'AI 멘토';
+}
 
 export interface TopBarProps {
   title: string;
@@ -14,6 +22,7 @@ export interface TopBarProps {
 
 export function TopBar({ title, back, right, exit }: TopBarProps) {
   const nav = useNavigate();
+  const { me } = useAuth();
   return (
     <header className="topbar">
       <div className="topbar__side">
@@ -22,7 +31,7 @@ export function TopBar({ title, back, right, exit }: TopBarProps) {
       </div>
       <div className="topbar__center">
         <div className="topbar__title">{title}</div>
-        <div className="topbar__label">AI 멘토</div>
+        <div className="topbar__label">{brandLabel(me?.role)}</div>
       </div>
       <div className="topbar__side topbar__side--right">{right}{exit && <NotifBell />}</div>
     </header>

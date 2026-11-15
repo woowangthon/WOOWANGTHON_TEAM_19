@@ -206,6 +206,7 @@ export const httpApi: MentorApi = {
   sendChat: (id, texts) => call('POST', `/sessions/${id}/chat`, { texts }),
   replyChat: (id) => call('POST', `/sessions/${id}/reply`),
   endChat: (id) => call('POST', `/sessions/${id}/chat/end`),
+  askGuardian: (id) => call('POST', `/sessions/${id}/crisis/ask-guardian`),
   getWrap: (id) => call('GET', `/sessions/${id}/wrap`),
   submitWrap: (id, body) => call('POST', `/sessions/${id}/wrap`, body),
   getRecords: () => call('GET', '/student/records'),

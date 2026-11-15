@@ -33,6 +33,8 @@ export interface MentorApi extends AccountApi {
   sendChat(sessionId: string, texts: string[]): Promise<ChatReply>; // 끊어 보낸 말 묶음(1~5조각, 11-11)
   replyChat(sessionId: string): Promise<ChatReply>;                 // pending이면 답 더 받기(서버 #4a)
   endChat(sessionId: string): Promise<SessionView>;
+  /** 🔴 세션에서 아이가 보호자께 도움을 요청(멱등: 두 번 눌러도 알림 1건, 처음 시각) — 11-15 성호 */
+  askGuardian(sessionId: string): Promise<{ requestedAt: string }>;
   getWrap(sessionId: string): Promise<WrapInfo>;
   submitWrap(sessionId: string, body: WrapBody): Promise<SessionView>;
   getRecords(): Promise<StudyRecord[]>;

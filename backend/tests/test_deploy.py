@@ -122,13 +122,14 @@ async def test_concurrent_hints_one_wins_other_busy(booted):
 
 
 async def test_crisis_survives_seq_conflict(booted, db_file, monkeypatch):
-    """🔴 요청이 seq 경합에서 지면 한 번 더 써서 알림을 잃지 않는다."""
+    """🔴 요청이 seq 경합에서 지면 한 번 더 써서 위기 처리를 잃지 않는다.
+    보호자 알림은 11-15 오후부터 아이가 요청할 때만이라 여기서는 0건(부록 E)."""
     _, c = booted
     sid = (await c.post("/api/v1/sessions", headers=CHILD)).json()["session_id"]
-    original = api.Alert.new  # 🔴 트랜잭션 안(커밋 전)에서 불리는 곳
+    original = api.to_crisis  # 🔴 트랜잭션 안(커밋 전)에서 불리는 곳
     calls = {"n": 0}
 
-    def conflicting_alert(**kwargs):
+    def conflicting_alert(*args, **kwargs):
         calls["n"] += 1
         if calls["n"] == 1:
             # 다른 요청이 같은 seq를 먼저 커밋한 상황(별도 연결)
@@ -148,9 +149,9 @@ async def test_crisis_survives_seq_conflict(booted, db_file, monkeypatch):
             )
             con.commit()
             con.close()
-        return original(**kwargs)
+        return original(*args, **kwargs)
 
-    monkeypatch.setattr(api.Alert, "new", conflicting_alert)
+    monkeypatch.setattr(api, "to_crisis", conflicting_alert)
     r = await c.post(
         f"/api/v1/sessions/{sid}/messages", headers=CHILD, json={"kind": "text", "text": R1}
     )
@@ -168,4 +169,4 @@ async def test_crisis_survives_seq_conflict(booted, db_file, monkeypatch):
         ).all()
         return alerts, list(seqs)
 
-    assert await _read(check) == (1, [1, 2, 3])
+    assert await _read(check) == (0, [1, 2, 3])

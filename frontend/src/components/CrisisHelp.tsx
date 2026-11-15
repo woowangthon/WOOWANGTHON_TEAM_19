@@ -1,7 +1,9 @@
-// 위기 연락처 묶음(1388·109·문자)과 「보호자께 알렸어」 줄 — 위기 화면과 수다 화면(1안 「수다 안에서 받기」, 성호 11-15)이 같이 쓴다.
+// 위기 연락처 묶음(1388·109·문자)과 「보호자께 도움 요청하기」 버튼 — 위기 화면과 수다 화면(1안 「수다 안에서 받기」, 성호 11-15)이 같이 쓴다.
 // 문구를 두 곳에 적지 않는다. 연락처 공식 출처는 screens/student/Crisis.tsx 머리 주석(B35).
+import { useState } from 'react';
 import { Icon } from './Icon';
 import { useMentor } from '../state/mentor';
+import { api } from '../api';
 
 /** full: 위기 화면(카카오톡·인터넷 상담·어른 한마디까지). 아니면 수다 안 카드(1388·109·문자) */
 export function CrisisContacts({ full = false }: { full?: boolean }) {
@@ -28,15 +30,32 @@ export function CrisisContacts({ full = false }: { full?: boolean }) {
   );
 }
 
-/** 서버가 🔴으로 처리했을 때만(알림이 이미 저장된 뒤) 보인다 — 아니면 사실과 다른 말이 된다 */
-export function CrisisNotified() {
+/** 🔴 뒤 보호자께 도움 요청(11-15 성호 「아이가 스스로 요청」 + 보완 ㉠·㉡). 서버는 🔴 때 알림을 보내지 않고, 아이가 이 버튼을 눌러야 보낸다.
+ *  ㉠ 버튼을 카드 맨 위·가장 크게, 바로 아래 「무엇이 가고 무엇이 안 가는지」. 누른 뒤(또는 이미 누른 세션)는 「알렸어」 줄.
+ *  again: ㉡ 같은 날 오늘 화면에서 다시 권할 때 맨 위 한 줄. */
+export function CrisisAsk({ sessionId, requestedAt, onAsked, again = false }: { sessionId: string; requestedAt?: string | null; onAsked?: (at: string) => void; again?: boolean }) {
   const { say } = useMentor();
-  // 11-15 성호 「가족 중심」: 목표는 상담이 아니라 아이와 보호자의 연대 → 이 줄을 크게, 카드의 주인공으로.
-  // 보호자 호칭(엄마·아빠 등)은 앱에 없다(이름은 「지우 보호자」) → 「보호자」로 쓴다(추측해서 「엄마」라고 쓰지 않음)
-  return (
-    <div className="notice" style={{ justifyContent: 'flex-start', alignItems: 'flex-start', padding: '14px 16px' }}>
+  const [asked, setAsked] = useState(!!requestedAt);
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+  if (asked || requestedAt) return (
+    <div className="notice" role="status" style={{ justifyContent: 'flex-start', alignItems: 'flex-start', padding: '14px 16px' }}>
       <Icon name="shield" size={24} />
-      <strong style={{ fontSize: 18, lineHeight: 1.5 }}>{say('보호자께 네가 많이 힘들어 보인다고 알렸어. 네가 한 말은 보내지 않았어. 오늘 보호자랑 꼭 이야기해 보자.', '보호자께 많이 힘들어 보인다고 알렸어요. 한 말은 보내지 않았어요. 오늘 보호자와 꼭 이야기해 봐요.')}</strong>
+      <strong style={{ fontSize: 18, lineHeight: 1.5 }}>{say('보호자께 알렸어. 오늘 보호자랑 꼭 이야기해 보자.', '보호자께 알렸어요. 오늘 보호자와 꼭 이야기해 봐요.')}</strong>
+    </div>
+  );
+  const ask = () => {
+    setBusy(true); setFailed(false);
+    api.askGuardian(sessionId).then((r) => { setAsked(true); onAsked?.(r.requestedAt); }, () => setFailed(true)).finally(() => setBusy(false));
+  };
+  return (
+    <div className="stack" style={{ gap: 8 }}>
+      {again && <strong style={{ fontSize: 17, lineHeight: 1.5 }}>{say('아직 보호자께 말하지 않았지? 지금이라도 괜찮아.', '아직 보호자께 말하지 않았죠? 지금이라도 괜찮아요.')}</strong>}
+      <button className="btn btn--primary" style={{ minHeight: 64, fontSize: 20, fontWeight: 800, gap: 8 }} disabled={busy} onClick={ask}>
+        <Icon name="shield" size={24} />보호자께 도움 요청하기
+      </button>
+      <p className="small" style={{ margin: 0, textAlign: 'center', lineHeight: 1.5 }}>{say('누르면 보호자께 「많이 힘들어 보여요」만 가. 네가 한 말은 안 가.', '누르면 보호자께 「많이 힘들어 보여요」만 가요. 한 말은 안 가요.')}</p>
+      {failed && <p className="small" role="alert" style={{ margin: 0, textAlign: 'center', color: 'var(--color-danger, #b3261e)' }}>{say('보내지 못했어. 한 번 더 눌러 줘.', '보내지 못했어요. 한 번 더 눌러 주세요.')}</p>}
     </div>
   );
 }
