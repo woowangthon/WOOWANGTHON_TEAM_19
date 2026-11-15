@@ -1,8 +1,8 @@
 // 학생 ① 오늘 시작 — 탭 첫 화면(뒤로가기 없음). 상태에 따라 버튼이 달라진다:
 // 처음 → 약속부터 / 진행 중 → 이어서 하기 / 끝남 → 내일 봐 / 과제 없음 → 안내
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, restartDemoAll } from '../../api';
+import { api } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
 import { Mascot } from '../../components/Mascot';
@@ -16,13 +16,13 @@ import { syncFromHome } from '../../lib/sessionSync';
 import { useAuth, useRefreshMeOnMount } from '../../state/auth';
 import { SeedChip, StampChip } from '../../components/Seed';
 import { StudentHomeworkCard } from '../../components/ClassBoard';
-import { isCrisisDay, isDemoChild } from '../../lib/kidScreens';
+import { isCrisisDay } from '../../lib/kidScreens';
 import { callName } from '../../lib/josa';
 
 export function StudentToday() {
   const nav = useNavigate();
   const { say } = useMentor();
-  const { me, enter } = useAuth();
+  const { me } = useAuth();
   useRefreshMeOnMount();
   const { data, error, loading, reload, quiet } = useAsync(() => api.getStudentHome());
   // 보호자가 도장을 찍거나 연결·강의실 수락이 되면 5초 안에 저절로 바뀌게(보호자·선생님 화면과 같은 조용한 다시 읽기, 성호 11-14)
@@ -30,16 +30,6 @@ export function StudentToday() {
   // 서버가 준 오늘 세션으로 공유 세션도 맞춘다 — 그사이 수다 10분이 끝났으면(wrap) 「이어서 하기」가 빈 수다 화면으로 돌아가지 않게
   const { sync } = useSession();
   useEffect(() => { syncFromHome(data, sync); }, [data, sync]);
-  const [restarting, setRestarting] = useState(false);
-  const [restartError, setRestartError] = useState<string | null>(null);
-  // 시연용: 데모 아이만 「처음부터 다시 체험」. 서버·mock을 되돌리면 mock 로그인도 풀리므로 같은 계정으로 다시 들어온다
-  const restart = async () => {
-    if (!me) return;
-    setRestarting(true); setRestartError(null);
-    try { await restartDemoAll(); await enter(await api.demoLogin(me.id)); reload(); }
-    catch (e) { setRestartError(`되돌리지 못했어요. ${(e as Error).message}`); }
-    finally { setRestarting(false); }
-  };
 
   let cta: { label: string; to?: string } = { label: '시작하기', to: '/student/difficulty' };
   let line = say('왔구나! 오늘은\n이것 하나만 같이 하자', '왔군요! 오늘은\n이것 하나만 같이 해요');
@@ -90,10 +80,6 @@ export function StudentToday() {
               </div>
             </section>
           ) : !data.doneToday && <div className="notice notice--plain">오늘 할 것이 아직 없어요</div>}
-          {isDemoChild(me) && (
-            <button className="exit-btn" style={{ alignSelf: 'center' }} disabled={restarting} onClick={restart}>{restarting ? '되돌리는 중…' : '처음부터 다시 체험'}</button>
-          )}
-          <LoadError error={restartError} />
         </>
       )}
     </Frame>

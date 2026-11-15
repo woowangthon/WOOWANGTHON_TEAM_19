@@ -60,4 +60,6 @@ export interface MentorApi extends AccountApi {
 
   /* 시연 */
   resetDemo(): Promise<void>;
+  /** 심사용 고정 세트를 처음 상태로(같은 아이디, 서버가 로그인도 지움 → 로그인 화면으로, 명세 4.11-10) */
+  resetMine(): Promise<void>;
 }

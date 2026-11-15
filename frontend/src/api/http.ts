@@ -240,6 +240,7 @@ export const httpApi: MentorApi = {
   changePassword: (current, next) => call('PUT', '/me/password', { current, next }),
   saveSettings: (settings) => call('PUT', '/me/settings', settings),
   deleteAccount: (password) => call('POST', '/me/delete', { password }),
+  resetMine: () => call('POST', '/demo/reset-mine'),
   resetChildPassword: (childId, next) => call('PUT', `/guardian/children/${childId}/password`, { next }),
   getNotices: () => call('GET', '/notices'),
   readNotices: () => call('POST', '/notices/read'),

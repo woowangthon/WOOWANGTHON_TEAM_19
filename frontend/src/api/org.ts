@@ -419,6 +419,8 @@ export const orgApi = {
     u.pw = hash(next); commit();
   },
   async saveSettings(settings: NotifySettings): Promise<Me> { const u = meUser(); u.settings = settings; commit(); return meView(u); },
+  /** 심사용 고정 세트 되돌리기는 서버에만 있다(mock 계정은 resettable 없음) */
+  async resetMine(): Promise<void> { fail('이 계정은 되돌릴 수 없어요.'); },
   /** 회원 탈퇴: 비밀번호 확인 후 계정과 연결을 지운다(시연: 기록 일부는 남음) */
   async deleteAccount(password: string): Promise<void> {
     const u = meUser();

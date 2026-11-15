@@ -1266,6 +1266,21 @@ async def teacher_alerts(_: Instructor) -> list[dict[str, Any]]:
     return []  # 11-15는 강사 알림 없음(결정 11-09)
 
 
+async def new_trial_child(db: AsyncSession, trial_id: str, now: datetime) -> None:
+    """세트 아이 행(day3·약속 전·지난 이틀 기록). /trial과 심사용 고정 세트(4.11-10)가 같이 쓴다."""
+    child_id = f"{trial_id}-child"
+    await _write_day3_student(
+        db, ResetBody(), seoul_date(now), student_id=child_id, consent=False, past_days=True
+    )
+    child = await db.get(Student, child_id)
+    assert child is not None
+    child.created_at = now
+    # 명세 4.12-5: 체험 지우는 고르기 없이 말띠 + 같이 풀어 주는·친구·반말
+    child.style, child.honorific, child.polite = "EBSP", "friend", False
+    await give_animal(db, child_id, DEFAULT_ANIMAL, now, trial_id)
+    await set_current(db, child_id, DEFAULT_ANIMAL, now, trial_id)
+
+
 @router.post("/trial")
 async def create_trial(db: Db, now: Now) -> dict[str, Any]:
     """방문자 한 명의 세트(아이 + 보호자 + 학습지도자). 본문·토큰·역할 헤더 없음.
@@ -1290,16 +1305,7 @@ async def create_trial(db: Db, now: Now) -> dict[str, Any]:
     trial_id = new_trial_id()
     child_id = f"{trial_id}-child"
     await load_seed(db)
-    await _write_day3_student(
-        db, ResetBody(), today, student_id=child_id, consent=False, past_days=True
-    )
-    child = await db.get(Student, child_id)
-    assert child is not None
-    child.created_at = now
-    # 명세 4.12-5: 체험 지우는 고르기 없이 말띠 + 같이 풀어 주는·친구·반말
-    child.style, child.honorific, child.polite = "EBSP", "friend", False
-    await give_animal(db, child_id, DEFAULT_ANIMAL, now, trial_id)
-    await set_current(db, child_id, DEFAULT_ANIMAL, now, trial_id)
+    await new_trial_child(db, trial_id, now)
     await db.commit()
     return {
         "trialId": trial_id,

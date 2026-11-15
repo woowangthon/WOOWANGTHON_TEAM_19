@@ -20,6 +20,11 @@ _ALPHABET = string.ascii_lowercase + string.digits
 _ACTOR_RE = re.compile(r"^(t-[a-z0-9]{16})-(child|guardian|instructor)$")
 
 
+# 명세 4.11-10: 심사용 고정 세트 3벌(성호 11-15). 아이디 끝은 무작위 8자 대신 _judge1~3
+JUDGE_SETS = ["t-judge0000000001", "t-judge0000000002", "t-judge0000000003"]
+JUDGE_SUFFIX = {t: f"judge{i}" for i, t in enumerate(JUDGE_SETS, start=1)}
+
+
 def new_trial_id() -> str:
     return TRIAL_PREFIX + "".join(secrets.choice(_ALPHABET) for _ in range(16))
 

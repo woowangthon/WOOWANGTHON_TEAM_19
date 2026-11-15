@@ -6,6 +6,7 @@ updateProfile·changePassword·saveSettings·deleteAccount·resetChildPassword·
 로그에는 아이디·이름·이메일을 남기지 않는다.
 """
 
+from datetime import datetime
 from typing import Any, Literal
 
 from fastapi import APIRouter, Request, Response
@@ -39,11 +40,11 @@ from app.accounts import (
     verify_password,
 )
 from app.class_routes import scrub_student
-from app.compat import STYLE_LABEL, TITLE_LABEL, _CompatRoute
+from app.compat import STYLE_LABEL, TITLE_LABEL, _CompatRoute, new_trial_child
 from app.demo import ResetBody, _write_day3_student
 from app.demo_world import RESERVED_LOGIN, demo_accounts, ensure_world, seed_key_of, world_id
 from app.mentor_animals import ANIMALS, give_animal, set_current
-from app.models import Alert, InstructorNote, Message, Misconception, Session, Student
+from app.models import Alert, Base, InstructorNote, Message, Misconception, Session, Student
 from app.models_org import (
     Academy,
     Account,
@@ -62,6 +63,7 @@ from app.models_org import (
 from app.prompts import grade_band_of
 from app.seed import load_seed
 from app.timeutil import seoul_date
+from app.trial import JUDGE_SETS, JUDGE_SUFFIX
 
 router = APIRouter(prefix="/compat", route_class=_CompatRoute)
 
@@ -296,6 +298,53 @@ async def request_password_reset(body: ResetPwIn, request: Request, db: Db) -> s
 
 
 # --- 체험 계정 -------------------------------------------------------------------------
+
+
+async def _build_judge_set(db: Db, t: str, now: datetime) -> None:
+    await new_trial_child(db, t, now)
+    await ensure_world(db, t, now, suffix=JUDGE_SUFFIX[t])
+
+
+async def ensure_judge_sets(db: Db, now: datetime) -> int:
+    """심사용 고정 세트 3벌을 없으면 만든다(멱등, 명세 4.11-10). 만든 수를 돌려준다. 커밋은 부르는 쪽."""
+    made = 0
+    for t in JUDGE_SETS:
+        if await db.get(Student, f"{t}-child") is None:
+            await _build_judge_set(db, t, now)
+            made += 1
+        else:
+            await ensure_world(db, t, now, suffix=JUDGE_SUFFIX[t])
+    await db.flush()
+    return made
+
+
+async def _wipe_trial_world(db: Db, t: str) -> None:
+    """세트 t의 모든 행을 지운다(학생 기록 → trial_id 표 → 학생 행). SQLite는 FK CASCADE가 꺼져 직접 지운다."""
+    prefix = f"{t}-"
+    student_ids = list(await db.scalars(select(Student.id).where(Student.id.startswith(prefix))))
+    for sid in student_ids:
+        await _delete_student_data(db, sid)
+    for table in reversed(Base.metadata.sorted_tables):
+        if "trial_id" in table.c:
+            await db.execute(delete(table).where(table.c.trial_id == t))
+    await db.execute(delete(Student).where(Student.id.startswith(prefix)))
+    await db.flush()
+    # 일괄 delete는 세션 안 객체를 지우지 않는다 → db.get이 지운 행(학원·토큰)을 되돌려 주지 않게 비운다
+    db.expunge_all()
+
+
+@router.post("/demo/reset-mine", status_code=204)
+async def reset_mine(response: Response, db: Db, now: Now, account: CurrentAccount) -> None:
+    """「처음 상태로 되돌리기」(명세 4.11-10): 고정 심사 세트 계정만. 같은 id·아이디·비밀번호로 다시 만든다.
+    로그인 토큰도 지워지므로 화면은 로그인 화면으로 간다."""
+    u = require_account(account)
+    t = u.trial_id
+    if t not in JUDGE_SETS:
+        fail("이 계정은 되돌릴 수 없어요.", 403, "not_resettable")
+    await _wipe_trial_world(db, t)
+    await _build_judge_set(db, t, now)
+    await db.commit()
+    clear_session_cookie(response)
 
 
 @router.get("/demo/accounts")

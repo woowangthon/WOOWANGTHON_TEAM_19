@@ -156,7 +156,9 @@ def _at(now: datetime, days_ago: int, hh: int | None = None, mm: int = 0) -> dat
     return datetime.combine(day, time(hh, mm), tzinfo=SEOUL).astimezone(UTC)
 
 
-async def ensure_world(db: AsyncSession, trial_id: str, now: datetime) -> bool:
+async def ensure_world(
+    db: AsyncSession, trial_id: str, now: datetime, suffix: str | None = None
+) -> bool:
     """세트 t의 체험 세상이 없으면 만든다. 만들었으면 True. 세트 아이가 없으면 404 trial_not_found."""
     if await world_exists(db, trial_id):
         return False
@@ -170,7 +172,7 @@ async def ensure_world(db: AsyncSession, trial_id: str, now: datetime) -> bool:
     t = trial_id
     wid = lambda key: world_id(t, key)  # noqa: E731
     today = seoul_date(now)
-    suffix = await _suffix(db)
+    suffix = suffix or await _suffix(db)  # 고정 심사 세트는 judge1~3(명세 4.11-10)
     pw = demo_password_hash()
     serial = await unique_serial(db)
     linked_keys = [k for k, _, _, _, extra in SEED_USERS if extra.get("link")]

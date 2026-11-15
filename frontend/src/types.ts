@@ -220,6 +220,8 @@ export interface Me {
   restricted: boolean;
   /** 학생: 입은 옷(꾸미기 id) */
   outfit: string | null;
+  /** 심사용 고정 세트(judge1~3) 계정이면 true — 설정 「처음 상태로 되돌리기」를 보인다(명세 4.11-10). 없으면 false로 본다 */
+  resettable?: boolean;
   settings: NotifySettings;
 }
 

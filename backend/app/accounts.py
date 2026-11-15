@@ -35,6 +35,7 @@ from app.models_org import (
     Notice,
 )
 from app.timeutil import SEOUL, as_utc, current_grade, get_now
+from app.trial import JUDGE_SETS
 
 COOKIE = "cm_session"
 REMEMBER_TTL = timedelta(days=30)
@@ -373,6 +374,8 @@ async def me_view(db: AsyncSession, u: Account) -> dict[str, Any]:
         "membership": membership,
         "application": application_view(app) if app is not None else None,
         "restricted": u.role == "student" and await is_restricted(db, u.id),
+        "resettable": u.trial_id
+        in JUDGE_SETS,  # 심사용 고정 세트만 「처음 상태로 되돌리기」(4.11-10)
         "outfit": u.outfit if u.role == "student" else None,
         # 알림 설정 칸만 내보낸다(단원 선택 같은 서버 전용 키는 빼고)
         "settings": {
