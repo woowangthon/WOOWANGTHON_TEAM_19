@@ -134,3 +134,27 @@ async def test_reset_mine_refuses_non_judge_accounts(client, db_session):
     r = await client.post(f"{BASE}/demo/reset-mine", headers=kid)
     assert r.status_code == 403 and r.json()["code"] == "not_resettable"
     assert (await client.post(f"{BASE}/demo/reset-mine")).status_code == 401
+
+
+async def test_judge_password_from_env_and_no_public_password(client, db_session, monkeypatch):
+    """JUDGE_PASSWORD가 있으면 고정 세트는 그 비밀번호만(공개 demo1234로는 못 들어감, 성호 11-15).
+    이미 만든 세트도 시작 때 비밀번호를 맞춘다. 무작위 체험 세트는 demo1234 그대로."""
+    await ensure_judge_sets(db_session, NOW)  # 처음엔 변수 없음 → demo1234
+    monkeypatch.setenv("JUDGE_PASSWORD", "judge-secret-for-test")
+    await ensure_judge_sets(db_session, NOW)  # 다음 기동: 비밀번호를 바꿔 맞춘다
+    await db_session.commit()
+    bad = await client.post(
+        f"{BASE}/auth/login", json={"loginId": "jiwoo_judge1", "password": "demo1234"}
+    )
+    assert bad.status_code == 401
+    client.cookies.clear()
+    ok = await client.post(
+        f"{BASE}/auth/login",
+        json={"loginId": "kim_teacher_judge3", "password": "judge-secret-for-test"},
+    )
+    assert ok.status_code == 200
+    client.cookies.clear()
+    tid = (await client.post(f"{BASE}/trial")).json()["trialId"]
+    accounts = (await client.get(f"{BASE}/demo/accounts", headers={"X-Trial-Id": tid})).json()
+    login_id = next(a["loginId"] for a in accounts if a["loginId"].startswith("jiwoo_"))
+    await _login(client, login_id, trial_header=tid)  # 무작위 세트는 demo1234 그대로

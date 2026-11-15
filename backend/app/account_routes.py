@@ -13,6 +13,7 @@ from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel
 from sqlalchemy import delete, or_, select, update
 
+from app import config
 from app.accounts import (
     DEFAULT_SETTINGS,
     DEMO_PASSWORD,
@@ -111,7 +112,14 @@ async def login(
         await ensure_world(db, trial_id, now)  # 체험 세상이 아직 없으면 처음 로그인 때 만든다
     acc = await db.scalar(select(Account).where(Account.login_id == _norm_login(body.loginId)))
     # 체험 계정은 비밀번호를 바꿔도 공개 비밀번호(시트 안내)로 늘 들어간다(A4)
-    demo_pw = acc is not None and acc.trial_id is not None and body.password == DEMO_PASSWORD
+    # 심사용 고정 세트는 JUDGE_PASSWORD가 있으면 그 비밀번호만(공개 저장소에 적힌 demo1234로 못 들어감, 4.11-10)
+    judge_locked = acc is not None and acc.trial_id in JUDGE_SETS and config.judge_password()
+    demo_pw = (
+        acc is not None
+        and acc.trial_id is not None
+        and not judge_locked
+        and body.password == DEMO_PASSWORD
+    )
     if acc is None or not (demo_pw or verify_password(body.password, acc.pw_hash)):
         await db.commit()  # 세상을 만들었으면 남긴다
         fail("아이디 또는 비밀번호가 맞지 않아요.", 401, "login_failed")
@@ -303,6 +311,18 @@ async def request_password_reset(body: ResetPwIn, request: Request, db: Db) -> s
 async def _build_judge_set(db: Db, t: str, now: datetime) -> None:
     await new_trial_child(db, t, now)
     await ensure_world(db, t, now, suffix=JUDGE_SUFFIX[t])
+    await _set_judge_password(db, t)
+
+
+async def _set_judge_password(db: Db, t: str) -> None:
+    """JUDGE_PASSWORD가 있으면 그 세트 계정 비밀번호를 그것으로(없으면 공개 체험 비밀번호 그대로)."""
+    pw = config.judge_password()
+    if pw is None:
+        return
+    pw_hash = hash_password(pw)
+    for acc in await db.scalars(select(Account).where(Account.trial_id == t)):
+        if not verify_password(pw, acc.pw_hash):
+            acc.pw_hash = pw_hash
 
 
 async def ensure_judge_sets(db: Db, now: datetime) -> int:
@@ -314,6 +334,7 @@ async def ensure_judge_sets(db: Db, now: datetime) -> int:
             made += 1
         else:
             await ensure_world(db, t, now, suffix=JUDGE_SUFFIX[t])
+            await _set_judge_password(db, t)  # 비밀번호를 바꿨으면 다음 기동에 맞춘다
     await db.flush()
     return made
 

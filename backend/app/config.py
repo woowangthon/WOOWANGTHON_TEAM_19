@@ -76,6 +76,11 @@ def trial_only() -> bool:
     return os.environ.get("VERCEL") == "1"
 
 
+def judge_password() -> str | None:
+    """심사용 고정 세트 비밀번호(JUDGE_PASSWORD, 명세 4.11-10). 없으면 None → 공개 체험 비밀번호."""
+    return os.environ.get("JUDGE_PASSWORD") or None
+
+
 def demo_token() -> str | None:
     """POST /demo/reset 비밀 토큰. 없거나 빈 값이면 None(→ 리셋 403)."""
     return os.environ.get("DEMO_TOKEN") or None
