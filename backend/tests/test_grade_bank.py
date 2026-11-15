@@ -41,6 +41,21 @@ async def test_bank_from_bundled_copy(db_session, tmp_path: Path):
     assert n == _bank_total()
 
 
+async def test_bundled_bank_with_difficulty_file_like_vercel_build(db_session, tmp_path: Path):
+    # vercel.json 빌드는 seed_difficulty_v0.1.json도 app/_seed/bank에 복사한다 → 문제로 읽으면
+    # KeyError 'standard'로 시작이 죽었다(11-15 운영 500). 난이도 파일은 건너뛰고 난이도로만 쓴다.
+    bundled = tmp_path / "bank"
+    shutil.copytree(BANK_DIR, bundled)
+    shutil.copy(
+        BANK_DIR.parent / "seed_difficulty_v0.1.json", bundled / "seed_difficulty_v0.1.json"
+    )
+    await load_seed(db_session, SEED_PATH, bundled)
+    n = await db_session.scalar(select(func.count()).select_from(Problem))
+    assert n == _bank_total()
+    frac = await db_session.get(Problem, "frac-div-nat-04")
+    assert frac is not None and frac.standard["difficulty"] == "hard"
+
+
 async def test_empty_bank_warns(db_session, tmp_path: Path, caplog):
     empty = tmp_path / "bank"
     empty.mkdir()

@@ -35,10 +35,15 @@ BANK_DIR = resolve_bank_dir()
 log = logging.getLogger(__name__)
 
 
+SEED_DIFFICULTY_FILE = "seed_difficulty_v0.1.json"
+
+
 def _bank_problems(bank: Path) -> list[dict]:
     """은행 파일 → 문제 행 모양. 새 칸 없이: 과목은 standard.subject, expr가 없으면 ""."""
     out: list[dict] = []
     for f in sorted(bank.glob("*.json")) if bank.is_dir() else []:
+        if f.name == SEED_DIFFICULTY_FILE:
+            continue  # 배포 복사본엔 분수 시드 난이도 파일도 같이 들어온다(문제가 아님, 11-15 운영 500)
         for p in json.loads(f.read_text(encoding="utf-8")):
             out.append(
                 {
@@ -73,9 +78,9 @@ _FIELDS = (
 
 def _seed_difficulty(bank: Path) -> dict[str, str]:
     """분수 시드 20문제 난이도(bb가 매김, 교사 검수 전 — 명세 4.13-7 D1). 은행 폴더 옆 파일."""
-    f = bank.parent / "seed_difficulty_v0.1.json"
+    f = bank.parent / SEED_DIFFICULTY_FILE
     if not f.exists():
-        f = bank / "seed_difficulty_v0.1.json"  # 배포 복사본(app/_seed/bank)
+        f = bank / SEED_DIFFICULTY_FILE  # 배포 복사본(app/_seed/bank)
     if not f.exists():
         log.warning("seed difficulty file missing: %s", f)
         return {}
