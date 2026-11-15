@@ -25,6 +25,13 @@ describe('isDemoChild', () => {
     expect(isDemoChild(me('guardian', 'jiwoo'))).toBe(false);
     expect(isDemoChild(null)).toBe(false);
   });
+  it('서버 계정 모드의 체험 지우(jiwoo_ + 접미사)도 데모 아이로 본다', () => {
+    expect(isDemoChild(me('student', 'jiwoo_ab12cd34'))).toBe(true);
+    expect(isDemoChild(me('student', 'jiwoo_k7p2x9qa'))).toBe(true);
+    expect(isDemoChild(me('student', 'jiwoo2'))).toBe(false);
+    expect(isDemoChild(me('student', 'jiwoo_'))).toBe(false);
+    expect(isDemoChild(me('guardian', 'jiwoo_ab12cd34'))).toBe(false);
+  });
 });
 
 describe('restartDemo', () => {

@@ -15,19 +15,19 @@ from datetime import datetime
 from functools import lru_cache
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.actors import actor_from_request
+from app.accounts import CurrentAccount, token_sent
+from app.actors import Actor, actor_from_request, instructor_allows
 from app.db import get_db
 from app.errors import ApiError
 from app.llm import LIVE_TIMEOUT_S, LLMAdapter, ReplyRequest, ScriptedAdapter, build_adapter
 from app.models import InstructorNote, Problem, Session, Student
 from app.pii import redact
 from app.timeutil import get_now, seoul_date
-from app.trial import instructor_can_see
 
 log = logging.getLogger(__name__)
 
@@ -49,14 +49,19 @@ TEXT_MAX = 2000
 
 
 async def current_instructor(
+    request: Request,
     db: Db,
+    account: CurrentAccount,
     x_demo_role: Annotated[str | None, Header()] = None,
     x_demo_actor: Annotated[str | None, Header()] = None,
-) -> str:
-    return (await actor_from_request(db, "instructor", x_demo_role, x_demo_actor)).id
+) -> Actor:
+    """학습지도자 신원. 계정이면 allowed(내 강의실 member), 체험 헤더면 scope 규칙 그대로."""
+    return await actor_from_request(
+        db, "instructor", x_demo_role, x_demo_actor, account=account, token_sent=token_sent(request)
+    )
 
 
-Instructor = Annotated[str, Depends(current_instructor)]
+Instructor = Annotated[Actor, Depends(current_instructor)]
 
 
 @lru_cache(maxsize=1)
@@ -72,11 +77,9 @@ def get_draft_adapter() -> LLMAdapter:
 DraftAdapter = Annotated[LLMAdapter, Depends(get_draft_adapter)]
 
 
-async def _student_or_404(
-    db: AsyncSession, student_id: str, instructor_id: str | None = None
-) -> Student:
-    """instructor_id가 체험 학습지도자면 같은 세트 아이가 아닐 때도 404(있는지 알리지 않는다)."""
-    ok = instructor_id is None or instructor_can_see(instructor_id, student_id)
+async def _student_or_404(db: AsyncSession, student_id: str, actor: Actor | None = None) -> Student:
+    """학습지도자 범위 밖 학생도 404(있는지 알리지 않는다). 범위는 instructor_allows 한 곳."""
+    ok = actor is None or instructor_allows(actor, student_id)
     student = await db.get(Student, student_id) if ok else None
     if student is None:
         raise ApiError(404, "student_not_found", "학생을 찾을 수 없어요.")
@@ -162,7 +165,8 @@ def _parse_draft(raw: str) -> str | None:
 
 async def _draft_body(
     adapter: LLMAdapter, student: Student, covered: str, stuck: str, memo: str, summary: list[str]
-) -> str:
+) -> tuple[str, str]:
+    """(본문, 출처). 출처는 live(모델이 쓴 초안) 또는 template(기본 문장) — 수정 명세 B33."""
     parts = [f"오늘 다룬 것: {covered}", f"막힌 것: {stuck}", f"자유 메모: {memo}"]
     if summary:
         parts.append("아이 학습 요약:\n" + "\n".join(summary))
@@ -175,21 +179,24 @@ async def _draft_body(
         turns=[{"role": "user", "content": "\n".join(parts)}],
     )
     try:
-        raw = (await asyncio.wait_for(adapter.reply(req), LIVE_TIMEOUT_S)).text
+        reply = await asyncio.wait_for(adapter.reply(req), LIVE_TIMEOUT_S)
+        raw, src = reply.text, reply.source
     except Exception as exc:  # 타임아웃 포함. 문장은 로그에 남기지 않는다
         log.warning("draft fallback err=%s", type(exc).__name__)
-        raw = ""
+        raw, src = "", None
     body = _parse_draft(raw)
-    if body is None:
+    if body is None or src != "live":
         log.info("draft template len_in=%d", len(covered) + len(stuck) + len(memo))
-        return _template_body(covered, stuck, memo)
-    return body
+        return _template_body(covered, stuck, memo), "template"
+    return body, "live"
 
 
 def _note_out(note: InstructorNote) -> dict[str, Any]:
+    facts = dict(note.facts or {})
+    source = facts.pop("draft_source", None)  # 사실 칸 모양은 부록 D 그대로(homework·score)
     return {
         "note_id": note.id,
-        "draft": {"body": note.draft_body, "facts": note.facts},
+        "draft": {"body": note.draft_body, "facts": facts, "source": source},
         "status": note.status,
     }
 
@@ -220,6 +227,7 @@ async def post_note(
         select(Session).where(Session.student_id == student.id, Session.date == seoul_date(now))
     )
     summary = list(session.study_summary or []) if session is not None else []
+    draft_body, draft_source = await _draft_body(adapter, student, covered, stuck, memo, summary)
     note = InstructorNote(
         student_id=student.id,
         date=seoul_date(now),
@@ -227,8 +235,9 @@ async def post_note(
         stuck=stuck,
         homework=homework,
         memo_redacted=memo,
-        draft_body=await _draft_body(adapter, student, covered, stuck, memo, summary),
-        facts={"homework": homework, "score": None},
+        draft_body=draft_body,
+        # draft_source: 초안이 모델(live)인지 기본 문장(template)인지(수정 명세 B33). 표 칸이 없어 사실 칸 JSON에
+        facts={"homework": homework, "score": None, "draft_source": draft_source},
         status="draft",
         prompt_version=DRAFT_PROMPT_VERSION,
     )
@@ -271,7 +280,7 @@ class ApproveIn(BaseModel):
 @router.post("/notes/{note_id}/approve")
 async def approve_note(note_id: str, body: ApproveIn, db: Db, actor: Instructor) -> dict[str, str]:
     note = await db.get(InstructorNote, note_id)
-    if note is None or not instructor_can_see(actor, note.student_id):
+    if note is None or not instructor_allows(actor, note.student_id):
         raise ApiError(404, "note_not_found", "코멘트를 찾을 수 없어요.")
     if note.status != "draft":
         raise ApiError(409, "note_closed", "이미 처리한 코멘트예요.")

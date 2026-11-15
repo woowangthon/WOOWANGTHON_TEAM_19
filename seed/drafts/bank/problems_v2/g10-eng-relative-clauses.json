@@ -1,0 +1,737 @@
+[
+  {
+    "id": "g10-eng-relative-clauses-01",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-02]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "easy",
+    "problem_type": "빈칸에 알맞은 관계사 고르기",
+    "targets_misconception": "사람/사물에 따라 who·which 바꿔 씀",
+    "text": "빈칸에 알맞은 말을 고르세요.\nThe girl ___ is sitting next to Mina is my cousin.\n① which\n② who\n③ whose\n④ where\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "who"
+      ]
+    },
+    "hint1": "빈칸 앞의 낱말이 사람인지 물건인지 먼저 보세요.",
+    "hint2": "빈칸 바로 뒤에 is가 와요. is의 주어가 따로 있는지 보고 빈칸의 역할을 정한 다음, 앞 낱말의 종류와 맞춰 보세요.",
+    "after_hint2": "is의 주어가 비었음을 판단해 빈칸 역할을 정하고, 사람인 The girl에 맞는 관계사 고르기",
+    "solution": "선행사 The girl은 사람이고, 빈칸 뒤 is sitting의 주어가 비어 있어요. 그래서 사람을 받는 주격 관계대명사 who가 들어가요. 답은 ②예요. ① which는 사물에 쓰고, ③ whose는 뒤에 명사가 바로 와야 하며, ④ where는 장소 뒤에 빠진 것 없는 문장이 올 때 써요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-02",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-02]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "easy",
+    "problem_type": "빈칸에 알맞은 관계사 고르기",
+    "targets_misconception": "사람/사물에 따라 who·which 바꿔 씀",
+    "text": "빈칸에 알맞은 말을 고르세요.\nI lost the umbrella ___ my grandmother gave me.\n① who\n② whose\n③ which\n④ where\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "which"
+      ]
+    },
+    "hint1": "빈칸 앞의 the umbrella는 사람인가요, 물건인가요?",
+    "hint2": "gave me 뒤에 '무엇을'에 해당하는 말이 있는지 보세요. 빠진 자리가 빈칸의 역할이에요.",
+    "after_hint2": "gave me 뒤 목적어가 빠졌음을 판단하고, 물건에 맞는 목적격 관계사 고르기",
+    "solution": "선행사 the umbrella는 물건이고, my grandmother gave me 뒤에 '무엇을'이 빠져 있어요. 그래서 물건을 받는 목적격 관계대명사 which가 맞아요. 답은 ③이에요. ① who는 사람에 쓰고, ② whose는 뒤에 명사가 바로 와야 하며, ④ where는 뒤에 빠진 것 없는 문장이 와야 해요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-03",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-02]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "easy",
+    "problem_type": "빈칸에 알맞은 관계사 고르기",
+    "targets_misconception": "소유격 자리에 who·which를 쓰거나 whose 뒤에 his·its를 또 씀",
+    "text": "빈칸에 알맞은 말을 고르세요.\nHe has a cat ___ eyes are two different colors.\n① whose\n② who\n③ which\n④ what\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "whose"
+      ]
+    },
+    "hint1": "빈칸 바로 뒤에 명사 eyes가 붙어 있다는 점을 보세요.",
+    "hint2": "eyes는 누구의 눈인가요? 빈칸과 eyes가 한 덩어리가 되어 뒤 문장의 주어가 된다는 점을 보세요.",
+    "after_hint2": "eyes가 a cat의 것임을 판단하고 '~의'를 나타낼 수 있는 관계사를 보기에서 고르기",
+    "solution": "eyes는 a cat의 눈이에요. 빈칸과 eyes가 한 덩어리로 주어가 되니 소유격 관계대명사 whose가 들어가요. 답은 ①이에요. ② who와 ③ which는 뒤 문장에 주어나 목적어가 빠져 있어야 하는데 eyes are two different colors는 빠진 것이 없고, ④ what은 앞에 선행사가 없을 때 써요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-04",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-02]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "easy",
+    "problem_type": "빈칸에 알맞은 관계사 고르기",
+    "targets_misconception": "빠진 것 없는 문장 앞에 전치사 없이 which를 씀(the house which I live)",
+    "text": "빈칸에 알맞은 말을 고르세요.\nThis is the room ___ my sister practices the piano.\n① which\n② in what\n③ who\n④ in which\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "in which"
+      ]
+    },
+    "hint1": "빈칸 뒤 my sister practices the piano에 빠진 말(주어나 목적어)이 있는지 보세요.",
+    "hint2": "my sister practices the piano는 주어와 목적어가 다 있는 문장이에요. 이렇게 빠진 것 없는 문장 앞에 관계대명사 한 낱말만 오는 보기는 지울 수 있어요.",
+    "after_hint2": "남은 두 보기 가운데, 앞에 선행사 the room이 있다는 점에 맞는 것 고르기",
+    "solution": "빈칸 뒤 my sister practices the piano는 빠진 것이 없는 문장이에요. 원래 문장은 my sister practices the piano in the room이라서 the room 앞의 in과 함께 in which를 써요(관계부사 where로 바꿔 쓸 수도 있어요). 답은 ④예요. ① which와 ③ who는 뒤 문장에 빠진 자리가 있어야 하고, ② in what은 앞에 선행사 the room이 있어서 쓸 수 없어요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-05",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-02]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "easy",
+    "problem_type": "빈칸에 알맞은 관계사 고르기",
+    "targets_misconception": "관계부사를 선행사 종류(장소·때·이유)와 맞추지 못함",
+    "text": "빈칸에 알맞은 말을 고르세요.\nDo you know the reason ___ the bus was late today?\n① why\n② which\n③ where\n④ what\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "why"
+      ]
+    },
+    "hint1": "빈칸 앞 낱말 the reason의 뜻을 떠올려 보세요.",
+    "hint2": "the bus was late today는 빠진 것이 없는 문장이에요. 그러면 관계대명사 보기는 지울 수 있어요. 남은 보기 가운데 앞 낱말의 뜻과 어울리는 것을 보세요.",
+    "after_hint2": "남은 두 관계부사 가운데 the reason(이유)의 뜻에 맞는 것 고르기",
+    "solution": "the bus was late today는 빠진 것이 없는 문장이라 관계부사가 와야 해요. 선행사 the reason은 '이유'라서 why를 써요. 답은 ①이에요. ② which는 뒤 문장에 빠진 자리가 있어야 하고, ③ where는 장소 뒤에 쓰며, ④ what은 앞에 선행사가 있으면 쓸 수 없어요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-06",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-02]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "medium",
+    "problem_type": "두 문장을 관계사로 바르게 합친 문장 고르기",
+    "targets_misconception": "소유격 자리에 who·which를 쓰거나 whose 뒤에 his·its를 또 씀",
+    "text": "두 문장을 관계사로 바르게 합친 것을 고르세요.\nI met a boy. His father is a pilot.\n① I met a boy who his father is a pilot.\n② I met a boy which father is a pilot.\n③ I met a boy whose father is a pilot.\n④ I met a boy whose his father is a pilot.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "I met a boy whose father is a pilot."
+      ]
+    },
+    "hint1": "둘째 문장의 His가 첫째 문장의 무엇을 가리키는지 보세요.",
+    "hint2": "His를 관계대명사로 바꿨다면 원래 낱말이 문장에 남아 있으면 안 돼요. 겹쳐 쓴 보기를 먼저 지워 보세요.",
+    "after_hint2": "his가 겹친 보기를 지운 뒤 남은 두 보기 가운데 소유를 나타낼 수 있는 관계사 고르기",
+    "solution": "His는 a boy의 것이므로 소유격 관계대명사 whose로 바꾸고 his는 지워요: I met a boy whose father is a pilot. 답은 ③이에요. ①·④는 his가 겹치고, ② which는 소유를 나타내지 못해요.",
+    "forbidden": [
+      "③",
+      "I met a boy whose father is a pilot."
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-07",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-02]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "medium",
+    "problem_type": "두 문장을 관계사로 바르게 합친 문장 고르기",
+    "targets_misconception": "관계대명사 뒤 문장에 목적어를 또 씀(the book which I read it)",
+    "text": "두 문장을 관계사로 바르게 합친 것을 고르세요.\nHere is the bike. I fixed it yesterday.\n① Here is the bike which I fixed it yesterday.\n② Here is the bike which I fixed yesterday.\n③ Here is the bike who I fixed yesterday.\n④ Here is the bike where I fixed it yesterday.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "Here is the bike which I fixed yesterday."
+      ]
+    },
+    "hint1": "둘째 문장의 it이 첫째 문장의 무엇과 같은지 찾아보세요.",
+    "hint2": "it 자리를 관계대명사가 대신하니 합친 문장에 it이 남으면 안 돼요. 남은 보기에서는 the bike에 어울리는 관계사인지 보세요.",
+    "after_hint2": "it이 남은 보기를 지우고, 남은 두 보기 가운데 물건인 the bike에 맞는 관계사 고르기",
+    "solution": "it = the bike(물건, 목적어)이므로 목적격 which로 바꾸고 it을 지워요: Here is the bike which I fixed yesterday. 답은 ②예요. ①은 it이 겹치고, ③ who는 사람에 쓰며, ④ where는 장소를 나타내는 부사를 대신하는데 여기서 바뀌는 it은 목적어라 맞지 않아요(it도 겹쳐요).",
+    "forbidden": [
+      "②",
+      "Here is the bike which I fixed yesterday."
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-08",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-02]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "medium",
+    "problem_type": "두 문장을 관계사로 바르게 합친 문장 고르기",
+    "targets_misconception": "빠진 것 없는 문장 앞에 전치사 없이 which를 씀(the house which I live)",
+    "text": "두 문장을 관계사로 바르게 합친 것을 고르세요.\nI visited the town. My mom grew up there.\n① I visited the town where my mom grew up there.\n② I visited the town which my mom grew up.\n③ I visited the town what my mom grew up.\n④ I visited the town where my mom grew up.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "I visited the town where my mom grew up."
+      ]
+    },
+    "hint1": "둘째 문장의 there가 무엇을 가리키는지 보세요.",
+    "hint2": "there는 '거기에서'라는 부사예요. 합친 문장에 there가 남아 있는 보기를 먼저 지우고, 남은 보기에서 grew up 뒤가 완전한지 보세요.",
+    "after_hint2": "there가 남은 보기를 지운 뒤, grew up 뒤에 빠진 것이 없다는 점으로 남은 세 보기 가운데 고르기",
+    "solution": "there = in the town이므로 관계부사 where로 바꾸고 there를 지워요: I visited the town where my mom grew up. 답은 ④예요. ①은 there가 겹치고, ②는 which 앞에 in이 없어서 틀리며(in which라면 맞아요), ③ what은 앞에 선행사가 있으면 쓸 수 없어요.",
+    "forbidden": [
+      "④",
+      "I visited the town where my mom grew up."
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-09",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-02]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "medium",
+    "problem_type": "두 문장을 관계사로 바르게 합친 문장 고르기",
+    "targets_misconception": "쉼표 뒤 계속적 용법에 that을 씀",
+    "text": "두 문장을 관계사로 바르게 합친 것을 고르세요.\nJun has an older brother. He is a cook.\n① Jun has an older brother, who is a cook.\n② Jun has an older brother, that is a cook.\n③ Jun has an older brother, which is a cook.\n④ Jun has an older brother, who he is a cook.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "Jun has an older brother, who is a cook."
+      ]
+    },
+    "hint1": "네 보기 모두 쉼표(,) 뒤에 관계사가 와요. 쉼표 뒤에 쓸 수 있는 말과 없는 말을 떠올려 보세요.",
+    "hint2": "He는 사람이고, 합친 문장에 he가 남으면 안 돼요. 그러고도 보기가 둘 남아요. 쉼표 뒤라는 점을 다시 보세요.",
+    "after_hint2": "남은 두 보기 가운데 쉼표 뒤 계속적 용법에 쓸 수 있는 관계대명사 고르기",
+    "solution": "He = an older brother(사람, 주어)예요. 계속적 용법(쉼표 뒤)에는 that을 쓰지 못하므로 , who를 써요: Jun has an older brother, who is a cook. 답은 ①이에요. ②는 쉼표 뒤에 that을 썼고, ③은 사람에 which를 썼으며, ④는 주어 he가 겹쳐요.",
+    "forbidden": [
+      "①",
+      "Jun has an older brother, who is a cook."
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-10",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-02]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "medium",
+    "problem_type": "두 문장을 관계사로 바르게 합친 문장 고르기",
+    "targets_misconception": "what과 that 혼동(선행사 유무)",
+    "text": "두 문장을 관계사로 바르게 합친 것을 고르세요.\nTell me the thing. You want the thing for your birthday.\n① Tell me that you want for your birthday.\n② Tell me the thing what you want for your birthday.\n③ Tell me what you want for your birthday.\n④ Tell me what you want it for your birthday.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "Tell me what you want for your birthday."
+      ]
+    },
+    "hint1": "the thing과 관계대명사를 한 낱말로 줄일 수 있는지 생각해 보세요.",
+    "hint2": "'~하는 것'이라는 뜻으로 선행사를 품고 있는 관계대명사가 있어요. 그 낱말 앞에는 the thing을 또 쓰지 않아요.",
+    "after_hint2": "남은 보기 가운데 that과 what의 차이, it이 겹치는지를 판단해 고르기",
+    "solution": "the thing which를 한 낱말 what으로 줄여요: Tell me what you want for your birthday. 답은 ③이에요. ①의 that은 선행사가 없어서 틀리고, ②는 the thing과 what이 겹치며, ④는 it이 겹쳐요.",
+    "forbidden": [
+      "③",
+      "Tell me what you want for your birthday."
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-11",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-06]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "medium",
+    "problem_type": "빈칸에 관계사 한 단어 쓰기(정답이 하나뿐인 자리만: 소유격 whose, 선행사 없는 what, 관계부사 where/when/why, 쉼표 뒤 who/which)",
+    "targets_misconception": "소유격 자리에 who·which를 쓰거나 whose 뒤에 his·its를 또 씀",
+    "text": "빈칸에 들어갈 관계사를 쓰세요.\nI have a friend ___ dog can open the door by itself.\n(영어 한 단어로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "후보 10개 대입: whose만 됨. who·whom·which·that·what(뒤에 명사 dog가 바로 오고 dog can open…은 주어·목적어가 다 있어 빠진 자리가 없음), where·when·why·how(선행사 a friend는 장소·때·이유·방법이 아니고 dog 앞 소유 관계가 비어 있음).",
+    "answer": {
+      "kind": "text",
+      "value": "whose",
+      "accepted": [
+        "whose"
+      ]
+    },
+    "hint1": "빈칸 바로 뒤에 dog라는 명사가 붙어 있어요. 누구의 개일까요?",
+    "hint2": "dog 앞에 a나 the가 없어요. 빈칸과 dog가 한 덩어리로 뒤 문장의 주어가 돼요. 'his dog'의 his 자리라고 생각해 보세요.",
+    "after_hint2": "his 자리, 곧 소유를 나타내는 자리에 들어가는 관계사를 스스로 떠올려 쓰기",
+    "solution": "dog는 a friend의 개이므로 소유격 관계대명사 whose를 써요: I have a friend whose dog can open the door by itself.",
+    "forbidden": [
+      "whose"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-12",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-06]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "medium",
+    "problem_type": "빈칸에 관계사 한 단어 쓰기(정답이 하나뿐인 자리만: 소유격 whose, 선행사 없는 what, 관계부사 where/when/why, 쉼표 뒤 who/which)",
+    "targets_misconception": "what과 that 혼동(선행사 유무)",
+    "text": "빈칸에 들어갈 관계사를 쓰세요.\nI couldn't hear ___ the teacher said this morning.\n(영어 한 단어로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "후보 10개 대입: what만 됨. who·whom·which·whose(앞에 선행사가 없음), that(접속사 that이면 뒤 문장이 완전해야 하는데 said의 목적어가 빠져 있음), where·when·why·how(said는 목적어가 꼭 필요해 뒤 문장이 불완전하므로 관계부사·how 불가).",
+    "answer": {
+      "kind": "text",
+      "value": "what",
+      "accepted": [
+        "what"
+      ]
+    },
+    "hint1": "빈칸 앞에 꾸밈을 받는 명사(선행사)가 있는지 보세요.",
+    "hint2": "빈칸 앞에 꾸밈을 받는 명사가 없고, said 뒤에 '무엇을'이 빠져 있어요. 이 두 가지가 함께일 때 쓰는 관계대명사를 떠올려 보세요.",
+    "after_hint2": "선행사가 없고 목적어가 빠진 자리에 쓰는 관계대명사를 스스로 정해 쓰기",
+    "solution": "hear 뒤에 선행사가 없고 said의 목적어가 비어 있으므로 '~하는 것'을 뜻하는 what을 써요: I couldn't hear what the teacher said this morning.",
+    "forbidden": [
+      "what"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-13",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-06]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "medium",
+    "problem_type": "빈칸에 관계사 한 단어 쓰기(정답이 하나뿐인 자리만: 소유격 whose, 선행사 없는 what, 관계부사 where/when/why, 쉼표 뒤 who/which)",
+    "targets_misconception": "빠진 것 없는 문장 앞에 전치사 없이 which를 씀(the house which I live)",
+    "text": "빈칸에 들어갈 관계사를 쓰세요.\nThe library ___ we borrowed these books has closed.\n(영어 한 단어로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "후보 10개 대입: where만 됨. which·that·who·whom·what(borrowed의 목적어 these books가 있어 빠진 자리가 없음), whose(뒤에 명사가 바로 오지 않음), when·why·how(선행사가 장소). 시범의 'we first studied together'는 study가 목적어를 가질 수 있어 which가 문법상 끼어들 여지가 있어 borrowed these books로 바꿈.",
+    "answer": {
+      "kind": "text",
+      "value": "where",
+      "accepted": [
+        "where"
+      ]
+    },
+    "hint1": "The library는 사람·물건·장소 가운데 어떤 종류의 낱말인가요?",
+    "hint2": "we borrowed these books는 빠진 것이 없는 문장이에요. 관계대명사와 관계부사 가운데 어느 쪽인지 정하고, 앞 낱말의 종류를 보세요.",
+    "after_hint2": "관계부사를 써야 한다고 정하고, 장소에 맞는 관계부사를 스스로 떠올려 쓰기",
+    "solution": "선행사 The library는 장소이고, 뒤 문장 we borrowed these books는 목적어까지 다 있는 완전한 문장이에요. 그래서 관계부사 where(= from which)를 써요: The library where we borrowed these books has closed.",
+    "forbidden": [
+      "where"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-14",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-06]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "medium",
+    "problem_type": "빈칸에 관계사 한 단어 쓰기(정답이 하나뿐인 자리만: 소유격 whose, 선행사 없는 what, 관계부사 where/when/why, 쉼표 뒤 who/which)",
+    "targets_misconception": "쉼표 뒤 계속적 용법에 that을 씀",
+    "text": "빈칸에 들어갈 관계사를 쓰세요.\nMy aunt, ___ works as a nurse, visits us every Sunday.\n(영어 한 단어로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "후보 10개 대입: who만 됨. that(쉼표 뒤 계속적 용법 불가), which(선행사가 사람), whom(주어 자리라 불가), whose(뒤에 명사가 바로 오지 않음), what(선행사 있음), where·when·why·how(works의 주어가 빠진 불완전한 문장).",
+    "answer": {
+      "kind": "text",
+      "value": "who",
+      "accepted": [
+        "who"
+      ]
+    },
+    "hint1": "빈칸 앞의 My aunt는 사람인가요, 물건인가요?",
+    "hint2": "works의 주어가 보이지 않아요. 빈칸의 역할을 정하고 My aunt의 종류와 맞춰 보세요. 쉼표 뒤라는 점도 잊지 마세요.",
+    "after_hint2": "주어 자리임을 판단하고, 사람·쉼표 뒤 두 조건에 맞는 관계대명사를 정해 쓰기",
+    "solution": "선행사 My aunt는 사람이고, 빈칸은 works의 주어 자리예요. 앞에 쉼표가 있어 that은 쓸 수 없어요. 그래서 who를 써요: My aunt, who works as a nurse, visits us every Sunday.",
+    "forbidden": [
+      "who"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-15",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-06]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "medium",
+    "problem_type": "빈칸에 관계사 한 단어 쓰기(정답이 하나뿐인 자리만: 소유격 whose, 선행사 없는 what, 관계부사 where/when/why, 쉼표 뒤 who/which)",
+    "targets_misconception": "관계부사를 선행사 종류(장소·때·이유)와 맞추지 못함",
+    "text": "빈칸에 들어갈 관계사를 쓰세요.\nWe moved to this city in 2019, ___ I was ten years old.\n(영어 한 단어로 써 주세요)",
+    "verify": "manual",
+    "verify_note": "후보 10개 대입: when만 됨. which·that·who·whom·what(뒤 문장이 완전함, that은 쉼표 뒤에도 불가), whose(뒤에 명사가 바로 오지 않음), where(2019는 장소가 아님), why·how(이유·방법이 아님).",
+    "answer": {
+      "kind": "text",
+      "value": "when",
+      "accepted": [
+        "when"
+      ]
+    },
+    "hint1": "빈칸 뒤 I was ten years old에 빠진 말이 있는지 먼저 보세요.",
+    "hint2": "I was ten years old는 빠진 것이 없는 문장이에요. 쉼표 앞에서 꾸밈을 받는 말이 무엇을 나타내는지 보세요.",
+    "after_hint2": "쉼표 앞 2019가 때임을 판단하고, 때에 맞는 관계부사를 스스로 떠올려 쓰기",
+    "solution": "선행사 2019는 때이고 뒤 문장이 완전하므로 관계부사 when을 써요(계속적 용법, '그리고 그때'): We moved to this city in 2019, when I was ten years old.",
+    "forbidden": [
+      "when"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-16",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-06]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "hard",
+    "problem_type": "what/that, 관계대명사/관계부사 어법 판단(틀린 것 고르기)",
+    "targets_misconception": "what과 that 혼동(선행사 유무)",
+    "text": "어법상 틀린 문장을 고르세요.\n① What I need now is a long rest.\n② The movie that we watched last night was boring.\n③ I can't believe that he won the race.\n④ This is the novel what I wanted to read.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "This is the novel what I wanted to read."
+      ]
+    },
+    "hint1": "what이 나온 문장과 that이 나온 문장마다 앞에 선행사(꾸밈 받는 명사)가 있는지 보세요.",
+    "hint2": "what은 선행사를 품고 있어서 앞에 명사가 오면 안 돼요. 앞에 명사가 있는데 what을 쓴 문장을 찾아보세요.",
+    "after_hint2": "네 문장에서 what·that 앞에 명사가 있는지 각각 확인해 틀린 문장 고르기",
+    "solution": "④는 the novel이라는 선행사가 있는데 what을 썼어요. which나 that으로 고쳐야 해요. 답은 ④예요. ① What은 the thing which와 같아 맞고, ② that은 the movie를 꾸미는 관계대명사, ③ that은 believe의 목적어 절을 이끄는 접속사라 모두 맞아요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-17",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-06]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "hard",
+    "problem_type": "what/that, 관계대명사/관계부사 어법 판단(틀린 것 고르기)",
+    "targets_misconception": "관계부사 where 뒤에 불완전한 문장(목적어 빠진 절)을 씀",
+    "text": "어법상 틀린 문장을 고르세요.\n① This is the house which my grandpa built.\n② This is the house where my grandpa built.\n③ This is the house in which my grandpa lived.\n④ This is the house where my grandpa lived.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "This is the house where my grandpa built."
+      ]
+    },
+    "hint1": "관계사 뒤 문장에 빠진 말(주어나 목적어)이 있는지 하나씩 확인해 보세요.",
+    "hint2": "built는 '무엇을' 지었는지 목적어가 필요하고, lived는 목적어가 필요 없어요. 관계부사 뒤에는 완전한 문장이 와야 해요.",
+    "after_hint2": "네 문장의 관계사 뒤 문장이 완전한지 각각 판단해 관계부사와 어긋나는 문장 고르기",
+    "solution": "②는 built의 목적어가 빠진 불완전한 문장인데 관계부사 where를 썼어요. which(또는 that)로 고쳐야 해요. 답은 ②예요. ①은 목적격 which, ③ in which는 where와 같고, ④는 lived 뒤가 완전한 문장이라 맞아요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-18",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-06]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "hard",
+    "problem_type": "what/that, 관계대명사/관계부사 어법 판단(틀린 것 고르기)",
+    "targets_misconception": "쉼표 뒤 계속적 용법에 that을 씀",
+    "text": "어법상 틀린 문장을 고르세요.\n① I called Sora, who was at the library.\n② We took the bus, which was very crowded.\n③ She lent me a pen, that was broken.\n④ The man who helped us was very kind.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "She lent me a pen, that was broken."
+      ]
+    },
+    "hint1": "쉼표(,) 바로 뒤에 관계사가 오는 문장들을 살펴보세요.",
+    "hint2": "쉼표 뒤 계속적 용법에는 쓸 수 없는 관계대명사가 있어요. 그 낱말이 쉼표 뒤에 온 문장을 찾아보세요.",
+    "after_hint2": "쉼표 뒤 관계사를 하나씩 보고, 쓸 수 없는 관계사가 온 문장 고르기",
+    "solution": "③ 계속적 용법(쉼표 뒤)에는 that을 쓸 수 없어요. a pen이 물건이므로 , which was broken으로 고쳐요. 답은 ③이에요. ①은 사람에 who, ②는 물건에 which, ④는 쉼표 없는 who라 맞아요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-19",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-06]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "hard",
+    "problem_type": "what/that, 관계대명사/관계부사 어법 판단(틀린 것 고르기)",
+    "targets_misconception": "관계대명사 뒤 문장에 목적어를 또 씀(the book which I read it)",
+    "text": "어법상 틀린 문장을 고르세요.\n① The song which she sang it was beautiful.\n② Everything that he told me was true.\n③ What surprised me was his warm smile.\n④ I remember the day when we first met.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "The song which she sang it was beautiful."
+      ]
+    },
+    "hint1": "관계대명사 뒤 문장에서 그 관계대명사가 어떤 자리(주어·목적어)를 맡는지 보세요.",
+    "hint2": "관계대명사가 목적어 자리를 이미 맡았는데 같은 자리에 대명사를 또 쓴 문장이 있어요.",
+    "after_hint2": "네 문장에서 관계대명사가 맡은 자리에 대명사가 또 나오는 문장을 스스로 찾기",
+    "solution": "① which가 sang의 목적어인데 it을 또 썼어요. it을 빼야 해요: The song which she sang was beautiful. 답은 ①이에요. ② everything 뒤에는 that, ③ What은 the thing which와 같고, ④ the day 뒤 when은 맞아요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g10-eng-relative-clauses-20",
+    "unit_id": "g10-eng-relative-clauses",
+    "tag": "g10-eng-relative-clauses",
+    "subject": "english",
+    "grade": 10,
+    "standard": {
+      "code": "[10공영1-02-06]",
+      "curriculum": "2022",
+      "unit": "관계대명사·관계부사로 정보를 덧붙여 문장 잇기"
+    },
+    "difficulty": "hard",
+    "problem_type": "what/that, 관계대명사/관계부사 어법 판단(틀린 것 고르기)",
+    "targets_misconception": "what과 that 혼동(선행사 유무)",
+    "text": "어법상 틀린 문장을 고르세요.\n① I know the reason why she left early.\n② Show me that you bought at the market.\n③ Spring is the season when many flowers bloom.\n④ This is the key which opens the back door.\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "Show me that you bought at the market."
+      ]
+    },
+    "hint1": "관계사 앞에 선행사가 있는지, 관계사 뒤 문장이 완전한지 두 가지를 같이 보세요.",
+    "hint2": "관계사 뒤에 '무엇을'이 빠져 있는데 앞에 꾸밈 받는 명사도 없는 문장이 있는지 찾아보세요.",
+    "after_hint2": "네 문장마다 선행사가 있는지와 목적어가 빠졌는지를 확인해 해당 문장 고르기",
+    "solution": "②는 선행사가 없고 bought의 목적어가 빠져 있으므로 that이 아니라 what을 써야 해요: Show me what you bought at the market. 답은 ②예요. ① reason why, ③ season when, ④ key which는 모두 맞아요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  }
+]

@@ -1,0 +1,735 @@
+[
+ {
+  "id": "g1-math-add-sub-01",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-04]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "easy",
+  "problem_type": "10 이하 수의 가르기·모으기로 빈 수 구하기",
+  "targets_misconception": "가르기·모으기에서 전체 수와 부분 수를 헷갈려 두 수를 더함",
+  "text": "10은 4와 □로 가를 수 있어요.\n□는 얼마일까요?\n(숫자만)",
+  "expr": "10-4",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "6",
+   "accepted": [
+    "6"
+   ]
+  },
+  "hint1": "□와 4를 다시 모으면 몇이 되어야 할까요?",
+  "hint2": "가른 두 수를 모으면 다시 10이 돼요. 4에 몇을 더해야 10이 되는지 손가락으로 세어 보세요.",
+  "after_hint2": "4 다음부터 10까지 세면서 손가락을 몇 개 폈는지 세기",
+  "solution": "4와 6을 모으면 10이에요. 그래서 10은 4와 6으로 가를 수 있고, □는 6이에요. 10과 4를 더해 14라고 하면 틀려요. 10은 가르기 전의 전체 수예요.",
+  "forbidden": [
+   "6",
+   "여섯"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-02",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-04]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "easy",
+  "problem_type": "10 이하 수의 가르기·모으기로 빈 수 구하기",
+  "targets_misconception": "가르기·모으기에서 전체 수와 부분 수를 헷갈려 두 수를 더함",
+  "text": "□와 3을 모으면 10이 돼요.\n□는 얼마일까요?\n(숫자만)",
+  "expr": "10-3",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "7",
+   "accepted": [
+    "7"
+   ]
+  },
+  "hint1": "모아서 10이 됐으니, 10을 3과 어떤 수로 가를 수 있을까요?",
+  "hint2": "10개 가운데 3개를 빼고 남는 것이 □예요. 손가락 10개를 펴고 3개를 접어 보세요.",
+  "after_hint2": "손가락 10개에서 3개를 접고 남은 손가락 세기",
+  "solution": "7과 3을 모으면 10이에요. □는 7이에요. 3과 10을 더해 13이라고 하면 틀려요. 10은 모은 뒤의 수예요.",
+  "forbidden": [
+   "7",
+   "일곱"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-03",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-04]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "easy",
+  "problem_type": "10 이하 수의 가르기·모으기로 빈 수 구하기",
+  "targets_misconception": "",
+  "text": "구슬 9개를 두 손에 나눠 쥐었어요.\n왼손에 5개예요. 오른손은 몇 개일까요?\n(숫자만)",
+  "expr": "9-5",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "4",
+   "accepted": [
+    "4"
+   ]
+  },
+  "hint1": "두 손의 구슬을 다시 모으면 모두 몇 개가 되나요?",
+  "hint2": "9를 5와 어떤 수로 가르는 문제예요. 5 다음부터 9까지 세어 보세요.",
+  "after_hint2": "5 다음부터 9까지 몇 번 세는지 세기",
+  "solution": "9는 5와 4로 가를 수 있어요. 5 + 4 = 9이니 오른손에는 4개예요.",
+  "forbidden": [
+   "4",
+   "넷",
+   "네 개"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-04",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-05]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "easy",
+  "problem_type": "받아올림·받아내림 없는 한 자리 수 덧셈·뺄셈 문장제(더하기·덜어 내기·견주기)",
+  "targets_misconception": "",
+  "text": "연필이 5자루 있어요.\n3자루를 더 샀어요. 연필은 몇 자루가 됐을까요?\n(숫자만)",
+  "expr": "5+3",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "8",
+   "accepted": [
+    "8"
+   ]
+  },
+  "hint1": "더 샀으니 연필은 늘어날까요, 줄어들까요?",
+  "hint2": "늘어나는 일이니 덧셈식을 세워요. 5에서 시작해 산 만큼 이어 세어 보세요.",
+  "after_hint2": "5 다음부터 세 번 이어 세어 합 구하기",
+  "solution": "5 + 3 = 8. 연필은 모두 8자루예요.",
+  "forbidden": [
+   "8",
+   "여덟"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-05",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-05]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "easy",
+  "problem_type": "받아올림·받아내림 없는 한 자리 수 덧셈·뺄셈 문장제(더하기·덜어 내기·견주기)",
+  "targets_misconception": "문장의 '남은', '더 많이' 같은 말을 보지 않고 두 수를 늘 더함",
+  "text": "쿠키가 7개 있어요. 4개를 먹었어요.\n남은 쿠키는 몇 개일까요?\n(숫자만)",
+  "expr": "7-4",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "3",
+   "accepted": [
+    "3"
+   ]
+  },
+  "hint1": "'남은'이라는 말을 보세요. 쿠키는 늘었나요, 줄었나요?",
+  "hint2": "먹은 만큼 없어지니 뺄셈식을 세워요. 쿠키 7개를 그리고 먹은 4개를 지워 보세요.",
+  "after_hint2": "7개 가운데 4개를 지우고 남은 개수 세기",
+  "solution": "7 − 4 = 3. 남은 쿠키는 3개예요. 7과 4를 더한 11은 먹기 전보다 많아지니 틀려요.",
+  "forbidden": [
+   "3",
+   "셋",
+   "세 개"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-06",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-05]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "easy",
+  "problem_type": "받아올림·받아내림 없는 한 자리 수 덧셈·뺄셈 문장제(더하기·덜어 내기·견주기)",
+  "targets_misconception": "문장의 '남은', '더 많이' 같은 말을 보지 않고 두 수를 늘 더함",
+  "text": "빨간 공이 9개, 파란 공이 7개 있어요.\n빨간 공이 몇 개 더 많을까요?\n(숫자만)",
+  "expr": "9-7",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "2",
+   "accepted": [
+    "2"
+   ]
+  },
+  "hint1": "'몇 개 더 많을까요'는 두 수를 합하라는 말일까요, 견주라는 말일까요?",
+  "hint2": "빨간 공과 파란 공을 하나씩 짝 지어 보세요. 짝이 없는 빨간 공을 세면 돼요.",
+  "after_hint2": "파란 공 7개와 짝 짓고 남은 빨간 공 세기(9 − 7 계산)",
+  "solution": "9 − 7 = 2. 빨간 공이 2개 더 많아요. 더해서 16이라고 하면 두 색 공을 합친 수라 틀려요.",
+  "forbidden": [
+   "2",
+   "둘",
+   "두 개"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-07",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-06]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "medium",
+  "problem_type": "받아올림이 있는 (한 자리 수)+(한 자리 수), 합 11~18(10 만들기)",
+  "targets_misconception": "받아올림 덧셈에서 10을 만든 뒤 남은 수를 더하지 않음",
+  "text": "9 + 6 = □\n□는 얼마일까요?\n(숫자만)",
+  "expr": "9+6",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "15",
+   "accepted": [
+    "15"
+   ]
+  },
+  "hint1": "9는 몇을 더 채우면 10이 될까요?",
+  "hint2": "6을 두 수로 갈라 한쪽으로 9를 10으로 만들어 보세요. 10을 만들고 남은 쪽도 더해야 해요.",
+  "after_hint2": "6을 9를 채울 수와 남은 수로 가르고, 10에 남은 수 더하기",
+  "solution": "6을 1과 5로 갈라요. 9 + 1 = 10, 10 + 5 = 15. 남은 5를 더하지 않으면 10이 되어 틀려요.",
+  "forbidden": [
+   "15",
+   "열다섯",
+   "십오"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-08",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-06]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "medium",
+  "problem_type": "받아올림이 있는 (한 자리 수)+(한 자리 수), 합 11~18(10 만들기)",
+  "targets_misconception": "받아올림 덧셈에서 10을 만든 뒤 남은 수를 더하지 않음",
+  "text": "운동장에 아이가 7명 있어요.\n5명이 더 왔어요. 아이는 몇 명이 됐을까요?\n(숫자만)",
+  "expr": "7+5",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "12",
+   "accepted": [
+    "12"
+   ]
+  },
+  "hint1": "7과 5 가운데 어느 수를 10으로 채우기 쉬울까요?",
+  "hint2": "5를 3과 어떤 수로 갈라 보세요. 3은 7을 10으로 채우는 데 써요.",
+  "after_hint2": "5에서 3을 덜고 남은 수를 구해 10에 더하기",
+  "solution": "5를 3과 2로 갈라요. 7 + 3 = 10, 10 + 2 = 12. 모두 12명이에요. 2를 더하지 않으면 10이 되어 틀려요.",
+  "forbidden": [
+   "12",
+   "열둘",
+   "십이"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-09",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-06]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "medium",
+  "problem_type": "받아올림이 있는 (한 자리 수)+(한 자리 수), 합 11~18(10 만들기)",
+  "targets_misconception": "받아올림 덧셈에서 10을 만든 뒤 남은 수를 더하지 않음",
+  "text": "꽃병에 장미가 9송이 있어요.\n튤립 8송이를 더 꽂았어요. 꽃은 모두 몇 송이일까요?\n(숫자만)",
+  "expr": "9+8",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "17",
+   "accepted": [
+    "17"
+   ]
+  },
+  "hint1": "9와 8 가운데 10에 더 가까운 수는 무엇일까요?",
+  "hint2": "10에 가까운 수를 먼저 10으로 채워 보세요. 채우느라 덜어 준 만큼 다른 수가 작아져요.",
+  "after_hint2": "8에서 9를 채우는 만큼 덜고 남은 수를 구해 10에 더하기",
+  "solution": "8을 1과 7로 갈라요. 9 + 1 = 10, 10 + 7 = 17. 꽃은 17송이예요. 7을 더하지 않으면 10이 되어 틀려요.",
+  "forbidden": [
+   "17",
+   "열일곱",
+   "십칠"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-10",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-06]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "medium",
+  "problem_type": "받아올림이 있는 (한 자리 수)+(한 자리 수), 합 11~18(10 만들기)",
+  "targets_misconception": "받아올림 덧셈에서 10을 만든 뒤 남은 수를 더하지 않음",
+  "text": "스티커가 6장 있어요.\n언니가 5장을 더 줬어요. 스티커는 몇 장일까요?\n(숫자만)",
+  "expr": "6+5",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "11",
+   "accepted": [
+    "11"
+   ]
+  },
+  "hint1": "6과 5는 서로 얼마나 차이 나는 수인가요?",
+  "hint2": "5와 5를 더하면 10이에요. 6을 5와 몇으로 가를 수 있는지 생각해 보세요.",
+  "after_hint2": "6과 5의 차이를 구해 10에 보태기",
+  "solution": "6을 5와 1로 갈라요. 5 + 5 = 10, 10 + 1 = 11. 스티커는 11장이에요. 1을 보태지 않으면 10이 되어 틀려요.",
+  "forbidden": [
+   "11",
+   "열하나",
+   "십일"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-11",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-06]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "medium",
+  "problem_type": "받아내림이 있는 (십몇)−(한 자리 수)",
+  "targets_misconception": "받아내림 뺄셈에서 낱개끼리 큰 수에서 작은 수를 거꾸로 뺌",
+  "text": "12 − 5 = □\n□는 얼마일까요?\n(숫자만)",
+  "expr": "12-5",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "7",
+   "accepted": [
+    "7"
+   ]
+  },
+  "hint1": "12의 낱개 2에서 5를 바로 뺄 수 있나요?",
+  "hint2": "12를 10과 2로 갈라 보세요. 5는 10에서 빼고, 떼어 둔 2는 나중에 다시 더해요.",
+  "after_hint2": "10 − 5를 계산하고 거기에 2 더하기",
+  "solution": "12를 10과 2로 갈라요. 10 − 5 = 5, 5 + 2 = 7. 낱개끼리 5 − 2를 해서 13이라고 하면 틀려요. 빼고 나면 12보다 작아야 해요.",
+  "forbidden": [
+   "7",
+   "일곱"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-12",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-06]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "medium",
+  "problem_type": "받아내림이 있는 (십몇)−(한 자리 수)",
+  "targets_misconception": "받아내림 뺄셈에서 낱개끼리 큰 수에서 작은 수를 거꾸로 뺌",
+  "text": "귤이 14개 있어요. 친구 6명에게 1개씩 줬어요.\n귤은 몇 개 남았을까요?\n(숫자만)",
+  "expr": "14-6",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "8",
+   "accepted": [
+    "8"
+   ]
+  },
+  "hint1": "친구에게 준 만큼 귤이 줄어요. 어떤 식을 세우면 될까요?",
+  "hint2": "6을 4와 어떤 수로 갈라 보세요. 14에서 4를 먼저 빼면 딱 10이 돼요.",
+  "after_hint2": "6을 4와 나머지로 가르고, 10에서 그 나머지 빼기",
+  "solution": "6을 4와 2로 갈라요. 14 − 4 = 10, 10 − 2 = 8. 남은 귤은 8개예요. 낱개끼리 6 − 4를 해서 12라고 하면 틀려요.",
+  "forbidden": [
+   "8",
+   "여덟"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-13",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-06]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "medium",
+  "problem_type": "받아내림이 있는 (십몇)−(한 자리 수)",
+  "targets_misconception": "받아내림 뺄셈에서 낱개끼리 큰 수에서 작은 수를 거꾸로 뺌",
+  "text": "줄넘기를 형은 16번, 나는 7번 했어요.\n형은 나보다 몇 번 더 했을까요?\n(숫자만)",
+  "expr": "16-7",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "9",
+   "accepted": [
+    "9"
+   ]
+  },
+  "hint1": "형이 한 16번 가운데 나와 똑같이 한 횟수를 떼어 내면 무엇이 남을까요?",
+  "hint2": "16 − 7을 계산해요. 16을 10과 6으로 가르고, 7은 10에서 빼 보세요.",
+  "after_hint2": "10 − 7을 계산하고 떼어 둔 6을 더하기",
+  "solution": "16 − 7 = 9. 10 − 7 = 3, 3 + 6 = 9예요. 형이 9번 더 했어요. 낱개끼리 7 − 6을 해서 11이라고 하면 틀려요.",
+  "forbidden": [
+   "9",
+   "아홉"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-14",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-09]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "medium",
+  "problem_type": "□가 있는 덧셈식·뺄셈식에서 □ 구하기",
+  "targets_misconception": "□가 있는 식에서 □를 구하지 않고 보이는 두 수로 식에 적힌 계산을 그대로 함",
+  "text": "□ + 9 = 14\n□는 얼마일까요?\n(숫자만)",
+  "expr": "14-9",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "5",
+   "accepted": [
+    "5"
+   ]
+  },
+  "hint1": "□에 9를 더했더니 14가 됐어요. □는 14보다 클까요, 작을까요?",
+  "hint2": "덧셈식은 뺄셈식으로 바꿀 수 있어요. 14에서 9를 빼는 식을 세워 보세요.",
+  "after_hint2": "14 − 9를 받아내림으로 계산하기",
+  "solution": "□ + 9 = 14는 14 − 9 = □로 바꿀 수 있어요. 14 − 9 = 5. 확인: 5 + 9 = 14. 9와 14를 더한 23은 14보다 커서 틀려요.",
+  "forbidden": [
+   "5",
+   "다섯"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-15",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-09]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "medium",
+  "problem_type": "□가 있는 덧셈식·뺄셈식에서 □ 구하기",
+  "targets_misconception": "□가 있는 식에서 □를 구하지 않고 보이는 두 수로 식에 적힌 계산을 그대로 함",
+  "text": "□ − 4 = 9\n□는 얼마일까요?\n(숫자만)",
+  "expr": "9+4",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "13",
+   "accepted": [
+    "13"
+   ]
+  },
+  "hint1": "□는 빼기 전의 수예요. 빼기 전에는 수가 더 많았을까요, 적었을까요?",
+  "hint2": "남은 9에 뺀 4를 다시 보태면 처음 수가 돼요. 9를 10으로 채우며 더해 보세요.",
+  "after_hint2": "9 + 4를 10 만들기로 계산하기",
+  "solution": "□ = 9 + 4 = 13. 확인: 13 − 4 = 9. 9에서 4를 빼서 5라고 하면 5 − 4 = 1이라 식이 맞지 않아요.",
+  "forbidden": [
+   "13",
+   "열셋",
+   "십삼"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-16",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-09]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "medium",
+  "problem_type": "□가 있는 덧셈식·뺄셈식에서 □ 구하기",
+  "targets_misconception": "□가 있는 식에서 □를 구하지 않고 보이는 두 수로 식에 적힌 계산을 그대로 함",
+  "text": "달걀이 몇 개 있었어요. 7개를 더 넣으니 11개예요.\n처음 달걀은 몇 개였을까요?\n(숫자만)",
+  "expr": "11-7",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "4",
+   "accepted": [
+    "4"
+   ]
+  },
+  "hint1": "처음 달걀 수를 □라고 하면 어떤 식이 될까요?",
+  "hint2": "식은 □ + 7 = 11이에요. 더한 만큼을 11에서 도로 빼면 □가 나와요.",
+  "after_hint2": "11 − 7을 받아내림으로 계산하기",
+  "solution": "□ + 7 = 11이니 □ = 11 − 7 = 4. 확인: 4 + 7 = 11. 11과 7을 더한 18은 넣은 뒤보다 많아서 틀려요.",
+  "forbidden": [
+   "4",
+   "넷",
+   "네 개"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-17",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-08]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "hard",
+  "problem_type": "세 수의 덧셈·뺄셈과 두 걸음 문장제(받아올림·받아내림 포함)",
+  "targets_misconception": "세 수 계산에서 뒤의 두 수를 먼저 계산함",
+  "text": "17 − 9 + 6 = □\n□는 얼마일까요?\n(숫자만)",
+  "expr": "17-9+6",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "14",
+   "accepted": [
+    "14"
+   ]
+  },
+  "hint1": "세 수가 있는 식은 어느 쪽부터 계산할까요?",
+  "hint2": "앞에서부터 차례로 해요. 먼저 17 − 9를 구해 보세요. 17을 10과 7로 가르면 쉬워요.",
+  "after_hint2": "17 − 9를 구한 뒤, 그 수에 6을 10 만들기로 더하기",
+  "solution": "앞에서부터 계산해요. 17 − 9 = 8, 8 + 6 = 14. 9 + 6 = 15를 먼저 해서 17 − 15 = 2라고 하면 틀려요.",
+  "forbidden": [
+   "14",
+   "열넷",
+   "십사"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-18",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-08]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "hard",
+  "problem_type": "세 수의 덧셈·뺄셈과 두 걸음 문장제(받아올림·받아내림 포함)",
+  "targets_misconception": "",
+  "text": "버스에 13명이 있었어요. 6명이 내리고 9명이 탔어요.\n지금 버스에는 몇 명일까요?\n(숫자만)",
+  "expr": "13-6+9",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "16",
+   "accepted": [
+    "16"
+   ]
+  },
+  "hint1": "내린 사람과 탄 사람은 버스 안 사람 수를 각각 어떻게 바꾸나요?",
+  "hint2": "내린 사람은 빼고 탄 사람은 더해요. 먼저 13에서 6을 빼서 버스에 남은 사람을 구해 보세요.",
+  "after_hint2": "13 − 6을 받아내림으로 구하고, 그 수에 9를 받아올림으로 더하기",
+  "solution": "13 − 6 = 7, 7 + 9 = 16. 지금 버스에는 16명이에요. 6명은 내렸으니 더하면 안 돼요.",
+  "forbidden": [
+   "16",
+   "열여섯",
+   "십육"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-19",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-09]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "hard",
+  "problem_type": "조건 두 개로 수 찾기(잘못 계산한 식 되돌리기, 더한 값과 뺀 값)",
+  "targets_misconception": "잘못 계산한 결과에서 처음 수를 구하지 않고 바로 고쳐 계산함",
+  "text": "어떤 수에 8을 더해야 하는데 잘못 빼서 2가 됐어요.\n바르게 계산하면 얼마일까요?\n(숫자만)",
+  "expr": "(2+8)+8",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "18",
+   "accepted": [
+    "18"
+   ]
+  },
+  "hint1": "잘못 계산한 식을 써 볼까요? 어떤 수를 □라고 해 보세요.",
+  "hint2": "잘못한 식은 □ − 8 = 2예요. 이 식에서 □를 먼저 찾아야 바른 식을 계산할 수 있어요.",
+  "after_hint2": "□ − 8 = 2에서 □를 구하고, 그 수에 8을 더하기",
+  "solution": "□ − 8 = 2이니 □ = 2 + 8 = 10이에요. 바른 계산은 10 + 8 = 18이에요. 2 + 8 = 10에서 멈추면 어떤 수만 구한 것이라 틀려요.",
+  "forbidden": [
+   "18",
+   "열여덟",
+   "십팔"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g1-math-add-sub-20",
+  "unit_id": "g1-math-add-sub",
+  "tag": "g1-math-add-sub",
+  "subject": "math",
+  "grade": 1,
+  "standard": {
+   "code": "[2수01-09]",
+   "curriculum": "2022",
+   "unit": "덧셈과 뺄셈(10 가르기·모으기, 받아올림·받아내림, □가 있는 식)"
+  },
+  "difficulty": "hard",
+  "problem_type": "조건 두 개로 수 찾기(잘못 계산한 식 되돌리기, 더한 값과 뺀 값)",
+  "targets_misconception": "",
+  "text": "두 수를 더하면 12, 큰 수에서 작은 수를 빼면 4예요.\n큰 수는 얼마일까요?\n(숫자만)",
+  "expr": "(12+4)/2",
+  "verify": "expr",
+  "verify_note": "합이 12인 자연수 쌍 6개를 모두 보면 큰 수 − 작은 수가 4인 쌍은 (8, 4) 하나뿐. expr (12+4)/2 = 8과 같음.",
+  "answer": {
+   "kind": "value",
+   "value": "8",
+   "accepted": [
+    "8"
+   ]
+  },
+  "hint1": "더해서 12가 되는 두 수를 몇 쌍 떠올릴 수 있나요?",
+  "hint2": "12를 두 수로 가르는 쌍을 적어 보세요. 6과 6은 빼면 남는 게 없어요. 큰 수를 하나씩 키우며 뺀 값을 보세요.",
+  "after_hint2": "12를 가르는 쌍을 하나씩 늘려 가며 뺀 값이 4가 되는 쌍을 찾고 큰 수 고르기",
+  "solution": "더해서 12가 되는 쌍은 11과 1, 10과 2, 9와 3, 8과 4, 7과 5, 6과 6이에요. 뺀 값은 차례로 10, 8, 6, 4, 2, 0이에요. 뺀 값이 4인 쌍은 8과 4뿐이라 큰 수는 8이에요.",
+  "forbidden": [
+   "8",
+   "여덟"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ }
+]

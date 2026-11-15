@@ -14,6 +14,8 @@ AI_DAILY_MAX = 150  # 한 아이 하루 멘토 답(LLM) 상한. 넘으면 그 �
 AI_HOURLY_MAX = 1500
 
 TRIAL_PREFIX = "t-"
+# 실제 가입 계정 id 접두(accounts.new_account_id). 데모 헤더로는 이 학생에 닿지 못한다(11-12 A3)
+ACCOUNT_PREFIX = "a-"
 _ALPHABET = string.ascii_lowercase + string.digits
 _ACTOR_RE = re.compile(r"^(t-[a-z0-9]{16})-(child|guardian|instructor)$")
 
@@ -30,9 +32,15 @@ def trial_child_of(actor_id: str, role: str) -> str | None:
     return f"{m.group(1)}-child"
 
 
+def is_trial_actor(actor_id: str, role: str) -> bool:
+    """체험 세트의 그 역할 id인지(`t-<16>-child|guardian|instructor`)."""
+    m = _ACTOR_RE.match(actor_id)
+    return m is not None and m.group(2) == role
+
+
 def instructor_can_see(instructor_id: str, student_id: str) -> bool:
-    """체험 학습지도자는 같은 세트 아이만, 그 밖의 강사는 체험 아이가 아닌 학생만(공개 URL, 11-11)."""
+    """체험 학습지도자는 같은 세트 아이만, 그 밖의 강사는 체험 아이·가입 학생이 아닌 학생만(11-11·A3)."""
     scope = trial_child_of(instructor_id, "instructor")
     if scope is not None:
         return student_id == scope
-    return not student_id.startswith(TRIAL_PREFIX)
+    return not student_id.startswith((TRIAL_PREFIX, ACCOUNT_PREFIX))

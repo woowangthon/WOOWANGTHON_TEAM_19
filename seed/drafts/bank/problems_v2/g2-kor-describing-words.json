@@ -1,0 +1,742 @@
+[
+  {
+    "id": "g2-kor-describing-words-01",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "easy",
+    "problem_type": "낱말 넷 가운데 소리를 흉내 내는 말 고르기",
+    "targets_misconception": "모양을 흉내 내는 말을 소리를 흉내 내는 말로 봄(엉금엉금을 소리로 고름)",
+    "text": "소리를 흉내 내는 말은 무엇일까요?\n① 엉금엉금\n② 반짝반짝\n③ 맴맴\n④ 아장아장\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "맴맴"
+      ]
+    },
+    "hint1": "낱말마다 귀로 듣는 것인지, 눈으로 보는 것인지 떠올려 보세요.",
+    "hint2": "'반짝반짝'은 별이 빛나는 모습이라 눈으로 봐요. 남은 세 낱말도 소리가 나는지 하나씩 따져 보세요.",
+    "after_hint2": "엉금엉금·맴맴·아장아장 가운데 귀로 들리는 낱말 하나를 판단해 고르기",
+    "solution": "'맴맴'은 매미가 우는 소리를 흉내 낸 말이에요. 답은 ③이에요. ① '엉금엉금'은 느리게 기는 모양, ② '반짝반짝'은 작은 빛이 잇따라 나타났다 사라지는 모양, ④ '아장아장'은 아기가 이리저리 찬찬히 걷는 모양을 흉내 낸 말이라 소리가 아니에요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-02",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "easy",
+    "problem_type": "낱말 넷 가운데 소리를 흉내 내는 말 고르기",
+    "targets_misconception": "모양을 흉내 내는 말을 소리를 흉내 내는 말로 봄(엉금엉금을 소리로 고름)",
+    "text": "다음 중 소리를 흉내 낸 말을 골라 보세요.\n① 꼬불꼬불\n② 깔깔\n③ 뭉게뭉게\n④ 싱글벙글\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "깔깔"
+      ]
+    },
+    "hint1": "네 낱말로 장면을 떠올려 보세요. 어느 말이 들리는 장면일까요?",
+    "hint2": "'뭉게뭉게'는 구름이 피어오르는 모습이라 소리가 아니에요. 웃을 때도 소리가 나는 말과 얼굴만 보이는 말이 따로 있어요.",
+    "after_hint2": "꼬불꼬불·깔깔·싱글벙글이 들리는 말인지 보이는 말인지 판단해 고르기",
+    "solution": "'깔깔'은 크게 웃는 소리예요. 답은 ②예요. ① '꼬불꼬불'은 길이 이리저리 구부러진 모양, ③ '뭉게뭉게'는 구름이 피어오르는 모양, ④ '싱글벙글'은 소리 없이 웃는 얼굴 모양이라 소리가 아니에요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-03",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "easy",
+    "problem_type": "낱말 넷 가운데 소리를 흉내 내는 말 고르기",
+    "targets_misconception": "모양을 흉내 내는 말을 소리를 흉내 내는 말로 봄(엉금엉금을 소리로 고름)",
+    "text": "귀로 들을 수 있는 흉내 내는 말은?\n① 빙글빙글\n② 소복소복\n③ 껑충껑충\n④ 따르릉\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "따르릉"
+      ]
+    },
+    "hint1": "눈을 감고 있어도 알 수 있는 말이 무엇일지 생각해 보세요.",
+    "hint2": "'소복소복'은 눈이 쌓인 모습이라 눈을 감으면 알 수 없어요. 나머지 세 낱말도 같은 방법으로 따져 보세요.",
+    "after_hint2": "빙글빙글·껑충껑충·따르릉 가운데 눈을 감아도 들리는 말을 판단해 고르기",
+    "solution": "'따르릉'은 전화나 자전거 벨이 울리는 소리예요. 답은 ④예요. ① '빙글빙글'은 빙빙 도는 모양, ② '소복소복'은 눈이 쌓인 모양, ③ '껑충껑충'은 높이 뛰는 모양이에요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-04",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "easy",
+    "problem_type": "낱말 넷 가운데 모양을 흉내 내는 말 고르기",
+    "targets_misconception": "소리를 흉내 내는 말을 모양을 흉내 내는 말로 봄(멍멍을 모양으로 고름)",
+    "text": "모양을 흉내 내는 말은 무엇일까요?\n① 성큼성큼\n② 멍멍\n③ 꼬꼬댁\n④ 콜록콜록\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "성큼성큼"
+      ]
+    },
+    "hint1": "낱말마다 무엇이 그런 소리를 내는지 찾아보세요. 소리를 내는 것이 없는 말은 어느 것일까요?",
+    "hint2": "'멍멍'은 강아지가 짖는 소리라서 지울 수 있어요. 남은 세 낱말도 무엇이 내는 소리인지 찾아보세요.",
+    "after_hint2": "성큼성큼·꼬꼬댁·콜록콜록 가운데 소리를 내는 것이 없는 말을 판단해 고르기",
+    "solution": "'성큼성큼'은 다리를 높이 들어 크게 떼어 놓는 모양이에요. 답은 ①이에요. ② '멍멍'은 개가 짖는 소리, ③ '꼬꼬댁'은 닭이 놀랐거나 알을 낳은 뒤에 우는 소리, ④ '콜록콜록'은 기침 소리예요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-05",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "easy",
+    "problem_type": "낱말 넷 가운데 모양을 흉내 내는 말 고르기",
+    "targets_misconception": "소리를 흉내 내는 말을 모양을 흉내 내는 말로 봄(멍멍을 모양으로 고름)",
+    "text": "다음 중 모양을 흉내 낸 말을 골라 보세요.\n① 땡그랑\n② 딸꾹\n③ 활짝\n④ 짹짹\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "활짝"
+      ]
+    },
+    "hint1": "네 낱말 가운데 귀가 아니라 눈으로 알아보는 말을 찾아보세요.",
+    "hint2": "'짹짹'은 참새가 우는 소리라 귀로 들어요. 남은 세 낱말이 나타내는 장면을 하나씩 떠올려 보세요.",
+    "after_hint2": "땡그랑·딸꾹·활짝이 나타내는 장면을 떠올려 눈으로 보는 말을 판단해 고르기",
+    "solution": "'활짝'은 문 따위가 한껏 시원스럽게 열린 모양이에요. 답은 ③이에요. ① '땡그랑'은 방울이나 종이 흔들리거나 부딪칠 때 나는 소리, ② '딸꾹'은 딸꾹질하는 소리, ④ '짹짹'은 참새가 우는 소리예요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-06",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "easy",
+    "problem_type": "낱말 넷 가운데 모양을 흉내 내는 말 고르기",
+    "targets_misconception": "소리를 흉내 내는 말을 모양을 흉내 내는 말로 봄(멍멍을 모양으로 고름)",
+    "text": "움직이는 모습을 흉내 내는 말은?\n① 퐁당\n② 에취\n③ 으앙\n④ 뒤뚱뒤뚱\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "뒤뚱뒤뚱"
+      ]
+    },
+    "hint1": "낱말마다 그 말이 나오는 장면을 떠올려 보세요. 보이는 모습인가요, 들리는 소리인가요?",
+    "hint2": "'으앙'은 젖먹이 아기가 우는 소리라 답이 아니에요. 다른 낱말도 소리가 나는 말인지 하나씩 소리 내어 읽어 보세요.",
+    "after_hint2": "퐁당·에취·뒤뚱뒤뚱 가운데 소리가 아닌 움직임을 나타내는 말을 판단해 고르기",
+    "solution": "'뒤뚱뒤뚱'은 중심을 잃고 이리저리 기울어지며 흔들리는 모양이에요. 답은 ④예요. ① '퐁당'은 작은 돌이 물에 떨어질 때 나는 소리, ② '에취'는 재채기할 때 나는 소리, ③ '으앙'은 젖먹이 아기가 우는 소리예요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-07",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 빈칸에 알맞은 흉내 내는 말 고르기",
+    "targets_misconception": "흉내 낸 소리를 그 소리를 내는 대상과 잘못 짝지음(병아리가 꿀꿀)",
+    "text": "「병아리가 ___ 울어요.」\n빈칸에 알맞은 흉내 내는 말은?\n① 꿀꿀\n② 삐악삐악\n③ 음매\n④ 개굴개굴\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "삐악삐악"
+      ]
+    },
+    "hint1": "보기는 모두 동물 울음소리예요. 어떤 동물이 우는 장면인지 문장에서 찾아보세요.",
+    "hint2": "'음매'는 소가 우는 소리라서 병아리와 맞지 않아요. 남은 세 소리도 어느 동물의 소리인지 떠올려 보세요.",
+    "after_hint2": "꿀꿀·삐악삐악·개굴개굴이 각각 어느 동물 소리인지 떠올려 병아리와 맞는 것을 고르기",
+    "solution": "'삐악삐악'은 병아리가 우는 소리예요. 답은 ②예요. ① '꿀꿀'은 돼지, ③ '음매'는 소, ④ '개굴개굴'은 개구리가 우는 소리라 병아리와 맞지 않아요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-08",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 빈칸에 알맞은 흉내 내는 말 고르기",
+    "targets_misconception": "문장의 뜻을 보지 않고 아무 흉내 내는 말이나 넣음(거북이 훨훨 기어가요)",
+    "text": "「아기가 ___ 잠을 자요.」\n빈칸에 들어갈 말로 알맞은 것은?\n① 쌔근쌔근\n② 깡충깡충\n③ 쨍그랑\n④ 꼬끼오\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "쌔근쌔근"
+      ]
+    },
+    "hint1": "아기가 곤히 잘 때 어떤 소리나 모습이 있는지 떠올려 보세요.",
+    "hint2": "'꼬끼오'는 닭이 우는 소리라 아기와 맞지 않아요. 남은 말이 잠자는 아기와 어울리는지 빈칸에 넣어 읽어 보세요.",
+    "after_hint2": "쌔근쌔근·깡충깡충·쨍그랑을 빈칸에 넣어 읽고 잠자는 모습과 맞는 말을 판단하기",
+    "solution": "'쌔근쌔근'은 아기가 곤히 잠들어 조용히 숨 쉬는 소리예요. 답은 ①이에요. ② '깡충깡충'은 뛰는 모양이라 잠과 맞지 않고, ③ '쨍그랑'은 유리가 깨지는 소리, ④ '꼬끼오'는 닭이 우는 소리예요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-09",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 빈칸에 알맞은 흉내 내는 말 고르기",
+    "targets_misconception": "문장의 뜻을 보지 않고 아무 흉내 내는 말이나 넣음(거북이 훨훨 기어가요)",
+    "text": "「거북이 ___ 기어가요.」\n어울리는 흉내 내는 말을 골라 보세요.\n① 느릿느릿\n② 훨훨\n③ 팔짝팔짝\n④ 첨벙\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "느릿느릿"
+      ]
+    },
+    "hint1": "빈칸에 보기를 하나씩 넣어 소리 내어 읽어 보세요.",
+    "hint2": "'훨훨'은 새가 날개를 치며 나는 모습이라 기어가는 것과 맞지 않아요. 남은 셋도 기어가는 모습과 맞는지 보세요.",
+    "after_hint2": "느릿느릿·팔짝팔짝·첨벙이 기어가는 거북이와 어울리는지 판단해 고르기",
+    "solution": "'느릿느릿'은 움직임이 느린 모양이라 거북이가 기어가는 모습과 어울려요. 답은 ①이에요. ② '훨훨'은 나는 모양, ③ '팔짝팔짝'은 힘차게 뛰는 모양이라 기어가는 것과 맞지 않고, ④ '첨벙'은 큰 물체가 물에 부딪치거나 잠기는 소리나 그 모양이라 기어가는 것과 맞지 않아요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-10",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 빈칸에 알맞은 흉내 내는 말 고르기",
+    "targets_misconception": "문장의 뜻을 보지 않고 아무 흉내 내는 말이나 넣음(거북이 훨훨 기어가요)",
+    "text": "「바람이 ___ 불어요.」\n빈칸에 알맞은 말은 무엇일까요?\n① 꼬르륵\n② 생글생글\n③ 솔솔\n④ 울퉁불퉁\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "솔솔"
+      ]
+    },
+    "hint1": "바람이 부는 장면을 떠올리고, 보기마다 무엇을 흉내 낸 말인지 생각해 보세요.",
+    "hint2": "'꼬르륵'은 배가 고플 때 배 속에서 나는 소리라 바람과 맞지 않아요. 나머지도 바람이 부는 모습과 맞는지 따져 보세요.",
+    "after_hint2": "생글생글·솔솔·울퉁불퉁 가운데 바람이 부는 모습과 맞는 말을 판단해 고르기",
+    "solution": "'솔솔'은 바람이 부드럽게 부는 모양이에요. 답은 ③이에요. ① '꼬르륵'은 배 속에서 나는 소리, ② '생글생글'은 웃는 얼굴 모양, ④ '울퉁불퉁'은 바닥이 고르지 않은 모양이라 바람과 맞지 않아요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-11",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 속 작은따옴표 낱말을 꾸며 주는 말 고르기",
+    "targets_misconception": "꾸며 주는 말이 어느 낱말을 꾸미는지 보지 않고 고름(빨간이 '굴려요'를 꾸민다고 봄)",
+    "text": "「엄마가 하얀 빵을 천천히 잘라요.」\n'빵'을 꾸며 주는 말은 무엇일까요?\n① 엄마가\n② 하얀\n③ 천천히\n④ 잘라요\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "하얀"
+      ]
+    },
+    "hint1": "'빵'이 어떤 빵인지 알려 주는 말이 문장에 있는지 찾아보세요.",
+    "hint2": "'천천히'도 꾸며 주는 말이지만, 빵이 아니라 자르는 모습이 어떤지 알려 줘요. 남은 보기에서 빵을 자세하게 해 주는 말을 찾아보세요.",
+    "after_hint2": "엄마가·하얀·잘라요 가운데 빵이 어떤지 알려 주는 말을 판단해 고르기",
+    "solution": "'하얀'은 빵이 어떤 빵인지 알려 주며 '빵'을 꾸며요. 답은 ②예요. ① '엄마가'는 누가 자르는지, ④ '잘라요'는 무엇을 하는지 나타내는 말이라 '빵'을 꾸미지 않아요. ③ '천천히'는 '잘라요'를 꾸며요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-12",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 속 작은따옴표 낱말을 꾸며 주는 말 고르기",
+    "targets_misconception": "누가·무엇을을 나타내는 말을 꾸며 주는 말로 고름('강아지가'를 고름)",
+    "text": "「귀여운 강아지가 마당을 신나게 뛰어요.」\n'뛰어요'를 꾸며 주는 말은?\n① 귀여운\n② 강아지가\n③ 마당을\n④ 신나게\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "신나게"
+      ]
+    },
+    "hint1": "'뛰어요' 앞에 있는 말들이 각각 무엇을 알려 주는지 살펴보세요.",
+    "hint2": "'강아지가'는 누가 뛰는지 알려 주는 말이라 꾸며 주는 말이 아니에요. 남은 말 가운데 뛰는 모습이 어떤지 알려 주는 말을 골라 보세요.",
+    "after_hint2": "귀여운·마당을·신나게 가운데 뛰는 모습을 꾸미는 말을 판단해 고르기('귀여운'이 무엇을 꾸미는지도 따지기)",
+    "solution": "'신나게'는 강아지가 어떻게 뛰는지 알려 주며 '뛰어요'를 꾸며요. 답은 ④예요. ① '귀여운'은 '강아지'를 꾸미는 말이에요. ② '강아지가'는 누가 뛰는지, ③ '마당을'은 어디를 뛰는지 나타내는 말이라 꾸며 주는 말이 아니에요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-13",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "medium",
+    "problem_type": "문장 속 작은따옴표 낱말을 꾸며 주는 말 고르기",
+    "targets_misconception": "꾸며 주는 말이 어느 낱말을 꾸미는지 보지 않고 고름(빨간이 '굴려요'를 꾸민다고 봄)",
+    "text": "「동생이 빨간 공을 데굴데굴 굴려요.」\n'굴려요'를 꾸며 주는 말은?\n① 데굴데굴\n② 빨간\n③ 동생이\n④ 공을\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "데굴데굴"
+      ]
+    },
+    "hint1": "꾸며 주는 말은 다른 낱말 앞에서 그 말을 더 자세하게 해 줘요. '굴려요'를 자세하게 해 주는 말을 찾아보세요.",
+    "hint2": "'빨간'은 꾸며 주는 말이지만 '공'이 어떤지 알려 줘요. 남은 보기도 '굴려요'와 이어지는지 보세요.",
+    "after_hint2": "데굴데굴·동생이·공을 가운데 굴리는 모습을 자세하게 해 주는 말을 판단해 고르기",
+    "solution": "'데굴데굴'은 공이 구르는 모양을 흉내 내며 '굴려요'를 꾸며요. 답은 ①이에요. ② '빨간'은 '공'을 꾸며요. ③ '동생이'는 누가 굴리는지, ④ '공을'은 무엇을 굴리는지 나타내는 말이에요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-14",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "medium",
+    "problem_type": "흉내 내는 말을 소리·모양으로 바르게 묶거나 나눈 것 고르기",
+    "targets_misconception": "모양을 흉내 내는 말을 소리를 흉내 내는 말로 봄(엉금엉금을 소리로 고름)",
+    "text": "소리를 흉내 내는 말끼리 묶은 것은?\n① 껄껄, 방긋방긋\n② 꼼지락꼼지락, 컹컹\n③ 앵앵, 꾀꼴꾀꼴\n④ 대롱대롱, 칙칙폭폭\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "앵앵, 꾀꼴꾀꼴"
+      ]
+    },
+    "hint1": "묶음마다 두 낱말을 모두 살펴야 해요. 한 낱말만 소리여도 답이 될까요?",
+    "hint2": "'껄껄'은 크고 시원하게 웃는 소리예요. 그런데 같은 묶음의 다른 낱말도 소리인지 확인해 보세요.",
+    "after_hint2": "방긋방긋·꼼지락꼼지락·컹컹·앵앵·꾀꼴꾀꼴·대롱대롱·칙칙폭폭을 소리와 모양으로 나눠 두 낱말이 모두 소리인 묶음 고르기",
+    "solution": "'앵앵'은 모기나 벌이 빨리 날아갈 때 나는 소리, '꾀꼴꾀꼴'은 꾀꼬리가 우는 소리예요. 답은 ③이에요. ① '방긋방긋'은 소리 없이 가볍게 웃는 모양, ② '꼼지락꼼지락'은 몸을 천천히 움직이는 모양, ④ '대롱대롱'은 작은 물건이 매달려 흔들리는 모양이라 묶음에 모양을 흉내 내는 말이 섞여 있어요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-15",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "medium",
+    "problem_type": "흉내 내는 말을 소리·모양으로 바르게 묶거나 나눈 것 고르기",
+    "targets_misconception": "소리를 흉내 내는 말을 모양을 흉내 내는 말로 봄(멍멍을 모양으로 고름)",
+    "text": "모양을 흉내 내는 말끼리 묶은 것은?\n① 둥실둥실, 뻐꾹\n② 흔들흔들, 오들오들\n③ 사뿐사뿐, 콸콸\n④ 깍깍, 알록달록\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "흔들흔들, 오들오들"
+      ]
+    },
+    "hint1": "묶음의 두 낱말을 하나씩 소리 내어 읽고, 소리를 흉내 냈는지 생각해 보세요.",
+    "hint2": "'콸콸'은 물이 세차게 쏟아지는 소리예요. 다른 묶음에도 소리를 흉내 낸 말이 섞여 있는지 찾아보세요.",
+    "after_hint2": "둥실둥실·뻐꾹·흔들흔들·오들오들·깍깍·알록달록을 나눠 두 낱말이 모두 모양인 묶음 고르기",
+    "solution": "'흔들흔들'은 이리저리 흔들리는 모양, '오들오들'은 춥거나 무서워서 떠는 모양이에요. 답은 ②예요. ① '뻐꾹'은 뻐꾸기가 우는 소리, ③ '콸콸'은 많은 물이 급히 쏟아져 흐르는 소리, ④ '깍깍'은 까마귀나 까치가 우는 소리라 묶음에 소리가 섞여 있어요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-16",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "medium",
+    "problem_type": "흉내 내는 말을 소리·모양으로 바르게 묶거나 나눈 것 고르기",
+    "targets_misconception": "소리를 흉내 내는 말을 모양을 흉내 내는 말로 봄(멍멍을 모양으로 고름)",
+    "text": "흉내 내는 말을 소리와 모양으로 바르게 나눈 것은?\n① 소리 반들반들, 모양 우당탕\n② 소리 하늘하늘, 모양 반들반들\n③ 소리 우당탕, 모양 반들반들\n④ 소리 하늘하늘, 모양 우당탕\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "③",
+      "accepted": [
+        "③",
+        "3",
+        "3번",
+        "소리 우당탕, 모양 반들반들"
+      ]
+    },
+    "hint1": "보기마다 '소리' 쪽 낱말이 정말 들리는 말인지, '모양' 쪽 낱말이 정말 보이는 말인지 둘 다 보세요.",
+    "hint2": "'하늘하늘'은 꽃잎이나 천이 가볍게 흔들리는 모습이에요. 이 낱말이 어느 쪽에 들어가야 맞는지 먼저 따져 보세요.",
+    "after_hint2": "하늘하늘이 소리 쪽에 든 보기를 지운 뒤, 우당탕·반들반들이 소리인지 모양인지 판단해 바르게 나눈 것 고르기",
+    "solution": "'우당탕'은 무엇이 요란하게 떨어지거나 부딪칠 때 나는 소리, '반들반들'은 거죽이 매끄럽고 윤이 나는 모양이에요. 답은 ③이에요. ① '반들반들'은 소리가 아니고 '우당탕'은 모양이 아니에요. ② '하늘하늘'은 가볍게 흔들리는 모양이라 소리가 아니에요. ④ '하늘하늘'은 소리가 아니고, '우당탕'도 모양이 아니에요.",
+    "forbidden": [
+      "③"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-17",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "hard",
+    "problem_type": "두 문장 (가)(나)의 빈칸에 알맞은 흉내 내는 말 짝 고르기",
+    "targets_misconception": "문장의 뜻을 보지 않고 아무 흉내 내는 말이나 넣음(거북이 훨훨 기어가요)",
+    "text": "(가) 문을 ___ 두드려요.\n(나) 꽃잎이 ___ 떨어져요.\n(가)와 (나)에 알맞은 말을 차례로 짝지은 것은?\n① (가) 팔랑팔랑 (나) 똑똑\n② (가) 똑똑 (나) 킁킁\n③ (가) 히죽히죽 (나) 팔랑팔랑\n④ (가) 똑똑 (나) 팔랑팔랑\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "(가) 똑똑 (나) 팔랑팔랑"
+      ]
+    },
+    "hint1": "(가)와 (나)는 따로 따져야 해요. 두 문장이 각각 어떤 장면인지 먼저 떠올려 보세요.",
+    "hint2": "(가)는 문을 두드릴 때 들리는 소리가 들어갈 자리예요. 이 기준으로 보기 몇 개를 지운 뒤, (나)의 꽃잎이 떨어지는 모습과 맞는 말을 따져 보세요.",
+    "after_hint2": "남은 보기에서 (나)에 들어갈 말이 꽃잎이 떨어지는 모습과 맞는지 판단해 고르기",
+    "solution": "(가)에는 문을 두드리는 소리 '똑똑', (나)에는 꽃잎이 가볍게 날리며 떨어지는 모양 '팔랑팔랑'이 어울려요. 답은 ④예요. ① (가)의 '팔랑팔랑'은 문을 두드리는 소리가 아니에요. ② (나)의 '킁킁'은 콧구멍으로 숨을 세게 내쉬는 소리라 꽃잎과 맞지 않아요. ③ (가)의 '히죽히죽'은 웃는 모양이라 문을 두드리는 것과 맞지 않아요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-18",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "hard",
+    "problem_type": "두 문장 (가)(나)의 빈칸에 알맞은 흉내 내는 말 짝 고르기",
+    "targets_misconception": "문장의 뜻을 보지 않고 아무 흉내 내는 말이나 넣음(거북이 훨훨 기어가요)",
+    "text": "(가) 할아버지가 ___ 졸아요.\n(나) 언니가 사과를 ___ 먹어요.\n(가)와 (나)에 알맞은 말을 차례로 고른 것은?\n① (가) 꾸벅꾸벅 (나) 아삭아삭\n② (가) 아삭아삭 (나) 꾸벅꾸벅\n③ (가) 꾸벅꾸벅 (나) 부엉부엉\n④ (가) 펄쩍 (나) 아삭아삭\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "①",
+      "accepted": [
+        "①",
+        "1",
+        "1번",
+        "(가) 꾸벅꾸벅 (나) 아삭아삭"
+      ]
+    },
+    "hint1": "보기마다 앞 낱말은 (가)에, 뒤 낱말은 (나)에 들어가요. 두 자리에 모두 넣어 읽어 보세요.",
+    "hint2": "(나)는 사과를 씹을 때 나는 소리가 어울리는 자리예요. 이 기준으로 맞지 않는 보기를 지우고, 남은 보기의 (가)가 조는 모습과 맞는지 보세요.",
+    "after_hint2": "남은 보기에서 (가)에 들어갈 말이 조는 모습과 맞는지 판단해 고르기",
+    "solution": "(가)에는 졸면서 고개를 숙였다 드는 모양 '꾸벅꾸벅', (나)에는 사과를 씹는 소리 '아삭아삭'이 어울려요. 답은 ①이에요. ②는 두 낱말을 거꾸로 넣어 (가)와 (나) 모두 맞지 않아요. ③ (나)의 '부엉부엉'은 부엉이가 우는 소리예요. ④ (가)의 '펄쩍'은 갑자기 뛰어오르는 모양이라 조는 모습과 맞지 않아요.",
+    "forbidden": [
+      "①"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-19",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "hard",
+    "problem_type": "흉내 내는 말이 둘인 문장에서 작은따옴표 낱말을 꾸미는 말과 그 종류(소리·모양) 고르기",
+    "targets_misconception": "한 문장에 흉내 내는 말이 둘이면 어느 낱말을 꾸미는지 보지 않고 고름",
+    "text": "「고양이가 살금살금 다가와 야옹 울어요.」\n'다가와'를 꾸며 주는 흉내 내는 말과 그 종류는?\n① 야옹, 소리\n② 살금살금, 모양\n③ 살금살금, 소리\n④ 야옹, 모양\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "②",
+      "accepted": [
+        "②",
+        "2",
+        "2번",
+        "살금살금, 모양"
+      ]
+    },
+    "hint1": "문장에서 흉내 내는 말 두 개를 찾고, 각각 바로 뒤의 어느 말과 이어지는지 보세요.",
+    "hint2": "'야옹'은 고양이 울음이라 귀로 들리는 말이에요. 이제 '야옹'이 '다가와'와 '울어요' 가운데 어느 쪽을 꾸미는지 정해 보세요.",
+    "after_hint2": "'야옹'이 '울어요'를 꾸민다고 판단한 뒤, '다가와'를 꾸미는 말이 소리인지 모양인지 판단하기",
+    "solution": "'살금살금'은 남이 모르게 살며시 움직이는 모양이고 '다가와'를 꾸며요. 답은 ②예요. ① '야옹'은 소리가 맞지만 '울어요'를 꾸며요. ③ '살금살금'은 소리가 아니라 모양이에요. ④ '야옹'은 '울어요'를 꾸미고, 모양이 아니라 소리예요.",
+    "forbidden": [
+      "②"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g2-kor-describing-words-20",
+    "unit_id": "g2-kor-describing-words",
+    "tag": "g2-kor-describing-words",
+    "subject": "korean",
+    "grade": 2,
+    "standard": {
+      "code": "[2국05-01]",
+      "curriculum": "2022",
+      "unit": "흉내 내는 말과 꾸며 주는 말"
+    },
+    "difficulty": "hard",
+    "problem_type": "흉내 내는 말이 둘인 문장에서 작은따옴표 낱말을 꾸미는 말과 그 종류(소리·모양) 고르기",
+    "targets_misconception": "한 문장에 흉내 내는 말이 둘이면 어느 낱말을 꾸미는지 보지 않고 고름",
+    "text": "「말이 어슬렁어슬렁 다니다가 히힝 울었어요.」\n'울었어요'를 꾸미는 흉내 내는 말과 그 종류를 고르세요.\n① 어슬렁어슬렁, 모양\n② 히힝, 모양\n③ 어슬렁어슬렁, 소리\n④ 히힝, 소리\n(번호만 써 주세요)",
+    "verify": "manual",
+    "answer": {
+      "kind": "choice",
+      "value": "④",
+      "accepted": [
+        "④",
+        "4",
+        "4번",
+        "히힝, 소리"
+      ]
+    },
+    "hint1": "흉내 내는 말이 문장에 몇 개 있는지, 각각 어떤 움직임과 이어지는지 살펴보세요.",
+    "hint2": "'어슬렁어슬렁'은 큰 짐승이 천천히 걸어 다니는 모습이라 눈으로 보는 말이에요. 이제 '울었어요'를 꾸미는 말이 무엇이고, 그 말이 들리는지 보이는지 정해 보세요.",
+    "after_hint2": "'울었어요'를 꾸미는 말을 찾고, 그 말이 들리는 말인지 보이는 말인지 판단해 짝 고르기",
+    "solution": "'히힝'은 말이 우는 소리이고 '울었어요'를 꾸며요. 답은 ④예요. ① '어슬렁어슬렁'은 모양이 맞지만 '다니다가'를 꾸며요. ② '히힝'은 모양이 아니라 소리예요. ③ '어슬렁어슬렁'은 '다니다가'를 꾸미고, 소리가 아니라 모양이에요.",
+    "forbidden": [
+      "④"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  }
+]

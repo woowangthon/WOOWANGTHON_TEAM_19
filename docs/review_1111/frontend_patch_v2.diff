@@ -1,0 +1,183 @@
+diff -ru -x node_modules -x dist ui_test/app/.env.local ui_full/app/.env.local
+--- ui_test/app/.env.local	2026-11-11 09:56:36
++++ ui_full/app/.env.local	2026-11-11 10:23:24
+@@ -1,2 +1,2 @@
+ VITE_API_MODE=http
+-VITE_API_BASE=http://localhost:8780/api/v1/compat
++VITE_API_BASE=http://localhost:8790/api/v1/compat
+diff -ru -x node_modules -x dist ui_test/app/src/api/client.ts ui_full/app/src/api/client.ts
+--- ui_test/app/src/api/client.ts	2026-11-11 09:48:18
++++ ui_full/app/src/api/client.ts	2026-11-11 10:24:16
+@@ -27,7 +27,8 @@
+   showSolution(sessionId: string, problemId: string): Promise<Solution>;
+   afterStudy(sessionId: string, choice: 'chat' | 'skip'): Promise<SessionView>; // 수다 할래 / 오늘은 끝
+   getChat(sessionId: string): Promise<ChatState>;
+-  sendChat(sessionId: string, text: string): Promise<ChatReply>;
++  sendChat(sessionId: string, texts: string[]): Promise<ChatReply>; // [테스트 패치 v2] 1.5초 묶음(최대 5조각)
++  replyChat(sessionId: string): Promise<ChatReply>;                 // [테스트 패치 v2] pending이면 부른다(#4a)
+   endChat(sessionId: string): Promise<SessionView>;
+   getWrap(sessionId: string): Promise<WrapInfo>;
+   submitWrap(sessionId: string, body: WrapBody): Promise<SessionView>;
+diff -ru -x node_modules -x dist ui_test/app/src/api/http.ts ui_full/app/src/api/http.ts
+--- ui_test/app/src/api/http.ts	2026-11-11 09:56:29
++++ ui_full/app/src/api/http.ts	2026-11-11 10:24:16
+@@ -43,7 +43,8 @@
+   showSolution: (id, problemId) => call('POST', `/sessions/${id}/solution`, { problemId }),
+   afterStudy: (id, choice) => call('POST', `/sessions/${id}/after-study`, { choice }),
+   getChat: (id) => call('GET', `/sessions/${id}/chat`),
+-  sendChat: (id, text) => call('POST', `/sessions/${id}/chat`, { text }),
++  sendChat: (id, texts) => call('POST', `/sessions/${id}/chat`, { texts }),
++  replyChat: (id) => call('POST', `/sessions/${id}/reply`),
+   endChat: (id) => call('POST', `/sessions/${id}/chat/end`),
+   getWrap: (id) => call('GET', `/sessions/${id}/wrap`),
+   submitWrap: (id, body) => call('POST', `/sessions/${id}/wrap`, body),
+diff -ru -x node_modules -x dist ui_test/app/src/api/index.ts ui_full/app/src/api/index.ts
+--- ui_test/app/src/api/index.ts	2026-11-11 09:56:34
++++ ui_full/app/src/api/index.ts	2026-11-11 10:24:16
+@@ -6,7 +6,7 @@
+ 
+ const COMPAT: (keyof MentorApi)[] = [
+   'getStudentHome', 'getMentor', 'saveMentor', 'getActiveSession', 'startSession', 'getProblem', 'submitAnswer',
+-  'requestHint', 'showSolution', 'afterStudy', 'getChat', 'sendChat', 'endChat', 'getWrap', 'submitWrap',
++  'requestHint', 'showSolution', 'afterStudy', 'getChat', 'sendChat', 'replyChat', 'endChat', 'getWrap', 'submitWrap',
+   'getGuardianToday', 'getAlerts',
+ ];
+ const mixed = { ...mockApi } as MentorApi;
+diff -ru -x node_modules -x dist ui_test/app/src/api/mock.test.ts ui_full/app/src/api/mock.test.ts
+--- ui_test/app/src/api/mock.test.ts	2026-11-11 09:48:18
++++ ui_full/app/src/api/mock.test.ts	2026-11-11 10:24:42
+@@ -116,8 +116,8 @@
+     const s = await api.startSession('중급');
+     await solveAll(s.id);
+     await api.afterStudy(s.id, 'chat');
+-    expect((await api.sendChat(s.id, '오늘 피곤해')).crisis).toBe(false);
+-    const r = await api.sendChat(s.id, '그냥 사라지고 싶어');
++    expect((await api.sendChat(s.id, ['오늘 피곤해'])).crisis).toBe(false);
++    const r = await api.sendChat(s.id, ['그냥 사라지고 싶어']);
+     expect(r).toMatchObject({ crisis: true });
+     expect(r.session.phase).toBe('crisis');
+     await as('g1');
+diff -ru -x node_modules -x dist ui_test/app/src/api/mock.ts ui_full/app/src/api/mock.ts
+--- ui_test/app/src/api/mock.ts	2026-11-11 09:48:18
++++ ui_full/app/src/api/mock.ts	2026-11-11 10:24:16
+@@ -356,7 +356,9 @@
+ 
+   async getChat(sessionId) { await wait(100); const s = need(sessionId); return { messages: s.messages, remainingSec: chatRemaining(s) }; },
+ 
+-  async sendChat(sessionId, text) {
++  async replyChat(sessionId) { return { reply: '', crisis: false, session: view(need(sessionId)) }; },
++  async sendChat(sessionId, texts) {
++    const text = texts.join(' '); // [테스트 패치 v2] mock은 묶음을 한 말로
+     await wait(600);
+     const s = need(sessionId);
+     if (s.phase !== 'chat') return { reply: '', crisis: false, session: view(s) };
+diff -ru -x node_modules -x dist ui_test/app/src/screens/student/Chat.tsx ui_full/app/src/screens/student/Chat.tsx
+--- ui_test/app/src/screens/student/Chat.tsx	2026-11-11 09:48:18
++++ ui_full/app/src/screens/student/Chat.tsx	2026-11-11 10:26:18
+@@ -10,7 +10,7 @@
+ import { useCountdown } from '../../lib/useCountdown';
+ import { useAsync } from '../../lib/useAsync';
+ import { RequirePhase, useSession } from '../../state/session';
+-import type { ChatMessage } from '../../types';
++import type { ChatMessage, ChatReply } from '../../types';
+ 
+ const SUGGEST = ['오늘 피곤해', '자랑할 거 있어', '그냥 얘기하고 싶어'];
+ 
+@@ -24,37 +24,62 @@
+   const { data, error, reload } = useAsync(() => api.getChat(id), [id]);
+   const [msgs, setMsgs] = useState<ChatMessage[]>([]);
+   const [text, setText] = useState('');
+-  const [busy, setBusy] = useState(false);
++  // [테스트 패치 v2] 끊어 보내기: 입력은 열어 두고, 1.5초 안 조각을 묶어 texts로 보낸다(최대 5개).
++  // waiting = 서버에 나가 있는 요청 수(이 동안 「생각 중…」). ending = 끝내기 중.
++  const [waiting, setWaiting] = useState(0);
++  const [ending, setEnding] = useState(false);
++  const busy = waiting > 0 || ending;
++  const buf = useRef<string[]>([]);
++  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
++  const stopped = useRef(false); // 위기·단계 바뀜 뒤 늦게 온 답은 버린다
+   const [sendError, setSendError] = useState<string | null>(null);
+   const bottom = useRef<HTMLDivElement>(null);
+   useEffect(() => { if (data) setMsgs(data.messages); }, [data]);
+   useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }); }, [msgs, busy]);
++  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+   const left = useCountdown(data ? data.remainingSec : null, refresh);
+ 
+-  const send = async (raw: string) => {
++  /** 응답 하나 처리. 계속 받아야 하면(pending) true */
++  const take = (r: ChatReply): boolean => {
++    if (stopped.current) return false;
++    if (r.session.phase !== 'chat') { stopped.current = true; sync(r.session); return false; } // 위기 감지·시간 종료
++    if (!r.queued && r.reply) setMsgs((m) => [...m, { from: 'mentor', text: r.reply }]);
++    return !!r.pending;
++  };
++  const flush = async () => {
++    if (timer.current) { clearTimeout(timer.current); timer.current = null; }
++    const texts = buf.current.splice(0, 5);
++    if (!texts.length) return;
++    if (buf.current.length) timer.current = setTimeout(flush, 1500);
++    setWaiting((n) => n + 1); setSendError(null);
++    try {
++      let more = take(await api.sendChat(id, texts));
++      for (let i = 0; more && i < 3; i++) more = take(await api.replyChat(id)); // pending이면 답 더 받기
++    } catch (e) { if (!stopped.current) setSendError((e as Error).message); } finally { setWaiting((n) => n - 1); }
++  };
++  const send = (raw: string) => {
+     const v = raw.trim();
+-    if (!v || busy) return;
++    if (!v || stopped.current) return;
+     setMsgs((m) => [...m, { from: 'me', text: v }]);
+-    setText(''); setBusy(true); setSendError(null);
+-    try {
+-      const r = await api.sendChat(id, v);
+-      if (r.session.phase !== 'chat') { sync(r.session); return; } // 위기 감지·시간 종료 → 서버 단계에 맞는 화면으로
+-      setMsgs((m) => [...m, { from: 'mentor', text: r.reply }]);
+-    } catch (e) { setSendError((e as Error).message); } finally { setBusy(false); }
++    setText('');
++    buf.current.push(v);
++    if (timer.current) clearTimeout(timer.current);
++    if (buf.current.length >= 5) void flush(); else timer.current = setTimeout(flush, 1500);
+   };
+-  const end = async () => { setBusy(true); try { sync(await api.endChat(id)); } catch (e) { setSendError((e as Error).message); setBusy(false); } };
++  const end = async () => { setEnding(true); try { sync(await api.endChat(id)); } catch (e) { setSendError((e as Error).message); setEnding(false); } };
++  const queuedLocal = waiting > 0 || buf.current.length > 0;
+ 
+   const actions = (
+     <>
+       {/* BRIEF: 입력창 위 오른쪽, 회색 테두리 '오늘 수다 끝내기' */}
+       <div className="row" style={{ justifyContent: 'flex-end' }}>
+-        <button className="btn btn--secondary btn--small" disabled={busy} onClick={end}>오늘 수다 끝내기</button>
++        <button className="btn btn--secondary btn--small" disabled={queuedLocal || ending} onClick={end}>오늘 수다 끝내기</button>
+       </div>
+-      <div className="chip-row chip-row--scroll">{SUGGEST.map((s) => <button key={s} className="chip" disabled={busy} onClick={() => send(s)}>{s}</button>)}</div>
++      <div className="chip-row chip-row--scroll">{SUGGEST.map((s) => <button key={s} className="chip" onClick={() => send(s)}>{s}</button>)}</div>
+       {/* 입력창 옆 + 버튼 금지 (BRIEF 공통 디자인) */}
+       <form className="chat-form" onSubmit={(e) => { e.preventDefault(); send(text); }}>
+         <input id="chat-input" className="input" aria-label="메시지 입력" placeholder="메시지 입력" maxLength={200} value={text} onChange={(e) => setText(e.target.value)} />
+-        <button className="btn btn--primary" disabled={!text.trim() || busy} aria-label="보내기"><Icon name="send" size={20} /></button>
++        <button className="btn btn--primary" disabled={!text.trim()} aria-label="보내기"><Icon name="send" size={20} /></button>
+       </form>
+     </>
+   );
+@@ -68,7 +93,7 @@
+         ) : (
+           <div key={i} className="bubble bubble--me">{m.text}</div>
+         ))}
+-        {busy && <Thinking />}
++        {queuedLocal && <Thinking />}
+         <div ref={bottom} />
+       </div>
+       <LoadError error={sendError} />
+diff -ru -x node_modules -x dist ui_test/app/src/types.ts ui_full/app/src/types.ts
+--- ui_test/app/src/types.ts	2026-11-11 09:48:18
++++ ui_full/app/src/types.ts	2026-11-11 10:24:16
+@@ -86,7 +86,8 @@
+ 
+ export interface ChatMessage { from: 'mentor' | 'me'; text: string; }
+ export interface ChatState { messages: ChatMessage[]; remainingSec: number; }
+-export interface ChatReply { reply: string; crisis: boolean; session: SessionView; }
++// [테스트 패치 v2] 끊어 보내기(11-11): queued=앞 답 생성 중이라 흡수만, pending=흡수된 조각이 있어 /reply 필요
++export interface ChatReply { reply: string; crisis: boolean; session: SessionView; queued?: boolean; pending?: boolean; hotlines?: string[]; }
+ 
+ export interface WrapInfo {
+   unit: string; solved: number; total: number; difficulty: Difficulty;

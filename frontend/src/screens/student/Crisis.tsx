@@ -1,33 +1,43 @@
 // 위기 화면 — 조언을 멈추고 도움받을 곳을 보여 준다 (팀 기능 DB 필수 「키워드 감지 → 세션 종료」)
-// 연락처(109·1388)는 배포 전에 공식 기관 안내로 다시 확인할 것.
+// 연락처 공식 출처(11-14 bb 확인, 수정 명세 B35 · 성호 승인):
+//  - 1388 청소년상담: 성평등가족부 https://www.mogef.go.kr/cc/ccy/cc_ccy_f001.do — 휴대전화는 「지역번호+1388」,
+//    문자는 「수신번호에 1388 입력 후 고민 전송」, 카카오톡 「청소년상담1388」 채널, 웹 https://www.1388.go.kr
+//  - 109 자살예방 상담전화: 보건복지부 — 국번 없이 109
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../../api';
+import { crisisLine } from '../../lib/crisisLine';
 import { Frame } from '../../components/Frame';
-import { Icon } from '../../components/Icon';
 import { MentorSays } from '../../components/Mascot';
+import { CrisisContacts, CrisisNotified } from '../../components/CrisisHelp';
 import { useMentor } from '../../state/mentor';
-import { RequirePhase } from '../../state/session';
+import { useSession } from '../../state/session';
 
+// 단계로 막지 않는다: 수업 잠금 화면의 「힘든 일이 있으면」 링크는 수다·풀기 중에도, 세션이 없어도 여기로 온다(연락처는 늘 보인다).
+// 보호자 알림 문구만 세션이 실제로 crisis 단계일 때(서버가 알림을 보낸 때) 보인다 — 아니면 사실과 다른 말이 된다
 export function StudentCrisis() {
-  return <RequirePhase phase="crisis"><Crisis /></RequirePhase>;
+  const { session } = useSession();
+  const crisisId = session?.phase === 'crisis' ? session.id : null;
+  // 11-15 성호 「A안 완성」: 서버가 위기 때 남긴 고정 문장을 맨 위에(위기 세션일 때만, 실패·없음이면 문장 없이)
+  const [line, setLine] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    if (crisisId) api.getChat(crisisId).then((c) => { if (alive) setLine(crisisLine(c.messages)); }, () => {});
+    return () => { alive = false; };
+  }, [crisisId]);
+  return <Crisis notified={crisisId !== null} line={crisisId ? line : null} />;
 }
 
-function Crisis() {
+function Crisis({ notified, line }: { notified: boolean; line: string | null }) {
   const nav = useNavigate();
   const { say } = useMentor();
+  // 명세 부록 E(11-14 성호 A안, 11-15 완성): 고마움·위로는 서버 고정 문장이 맨 위에서, 그 아래 멘토 말은 연락 쪽만
   return (
-    <Frame title="잠깐 멈출게" actions={<button className="btn btn--secondary" onClick={() => nav('/student')}>처음 화면으로</button>}>
-      <MentorSays mood="calm" size={64} text={say('말해 줘서 정말 고마워.\n지금은 믿을 수 있는 어른과\n꼭 이야기했으면 좋겠어.', '말해 줘서 정말 고마워요.\n지금은 믿을 수 있는 어른과\n꼭 이야기했으면 좋겠어요.')} />
-      <section className="card">
-        <h2 className="h3">지금 바로 이야기할 수 있는 곳</h2>
-        <ul className="list" style={{ marginTop: 10 }}>
-          <li><a href="tel:109" style={{ color: 'inherit', textDecoration: 'none' }}><strong className="num" style={{ fontSize: 20, userSelect: 'all' }}>109</strong></a> 자살예방 상담전화</li>
-          <li><a href="tel:1388" style={{ color: 'inherit', textDecoration: 'none' }}><strong className="num" style={{ fontSize: 20, userSelect: 'all' }}>1388</strong></a> 청소년 상담전화</li>
-        </ul>
-      </section>
-      <div className="notice" style={{ justifyContent: 'flex-start' }}>
-        <Icon name="shield" size={20} />
-        <span>약속한 대로 보호자께 “확인이 필요해요”라는 알림만 보냈어. 우리 대화 내용은 보내지 않았어.</span>
-      </div>
+    <Frame title={say('네 마음, 잘 들었어', '마음, 잘 들었어요')} actions={<button className="btn btn--secondary" onClick={() => nav('/student')}>처음 화면으로</button>}>
+      {line && <div role="status"><MentorSays mood="calm" size={64} text={line} /></div>}
+      {/* 11-15 성호 v0.8: 보호자 얘기 먼저, 연락처는 그 아래 */}
+      {notified ? <CrisisNotified /> : !line && <MentorSays mood="calm" size={64} text={say('지금 한 번만 연락해 보자.', '지금 한 번만 연락해 봐요.')} />}
+      <CrisisContacts full />
     </Frame>
   );
 }

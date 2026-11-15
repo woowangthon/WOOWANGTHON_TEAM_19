@@ -4,11 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
-import { SeedChip } from '../../components/Seed';
+import { SeedChip, StampChip } from '../../components/Seed';
 import { LoadError, Stat, Thinking, Week } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
+import { useQuietPoll } from '../../lib/quietPoll';
 import { useAction } from '../../lib/useAction';
 import { useAuth } from '../../state/auth';
+import { GuardianClassCard } from '../../components/ClassSession';
+import { GuardianHomeworkCard } from '../../components/ClassBoard';
+import { CrisisPopup } from '../../components/CrisisPopup';
 
 export function GuardianResult() {
   const { me } = useAuth();
@@ -34,20 +38,41 @@ function NotLinked({ pending }: { pending: string[] }) {
 }
 
 function Linked() {
-  const { data, error, loading, reload } = useAsync(() => api.getGuardianToday());
+  const nav = useNavigate();
+  const { data, error, loading, reload, quiet } = useAsync(() => api.getGuardianToday());
   const stamp = useAsync(() => api.getStampState());
+  const alerts = useAsync(() => api.getAlerts().catch(() => null)); // 긴급 팝업용(11-15 성호), 실패는 조용히
+  // 4차(11-14): 아이가 끝내면 새로고침 없이 보이게 — 보이는 동안 5초마다 조용히 다시 읽기
+  useQuietPoll([quiet, stamp.quiet, alerts.quiet]);
   const { run, busy, error: actErr } = useAction();
   return (
     <Frame adult title="학습 결과" exit tabs="guardian">
+      <CrisisPopup alerts={alerts.data} />
       {loading && <Thinking label="불러오는 중" />}
       <LoadError error={error ?? actErr} onRetry={reload} />
       {data && (
         <>
           <div className="row between">
-            <div><h1 className="h2">{data.childName}</h1><div className="small muted">{data.dateLabel} · 내 아이의 오늘</div></div>
-            {stamp.data && <SeedChip n={stamp.data.balance} />}
+            <div><h1 className="h2">{data.childName}</h1><div className="small muted">{data.dateLabel}</div></div>
+            {stamp.data && <><SeedChip n={stamp.data.balance} /><StampChip n={stamp.data.stamps ?? 0} /></>}
           </div>
-          {data.done ? (
+          {/* B18: 🔴 알림은 카드 맨 위, 빨간 계열(수업·숙제보다 먼저) */}
+          {data.alertNotice && (
+            // 서버(37 TK-56-v09-code): 모두 확인했으면 「오늘 안전 알림을 확인했어요」 → 빨간 경고 대신 일반 카드(덜 급하게)
+            data.alertNotice.includes('확인했어요')
+              ? <section className="card row between" role="status">
+                <span>{data.alertNotice}</span>
+                <button className="btn btn--secondary btn--small" onClick={() => nav('/guardian/alerts')}><Icon name="bell" size={16} />알림 보기</button>
+              </section>
+              : <section className="card card--danger row between" role="alert">
+                <strong>{data.alertNotice}</strong>
+                <button className="btn btn--primary btn--small" onClick={() => nav('/guardian/alerts')}><Icon name="bell" size={16} />알림 보기</button>
+              </section>
+          )}
+          {/* 강의실 수업 상태(픽업용, 11-13). 원장님이 「보호자에게 알리기」를 끄면 안 보인다 */}
+          <GuardianClassCard />
+          <GuardianHomeworkCard />
+          {data.alertNotice ? null : data.done ? (
             <>
               <div className="stats" style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <Stat label={`${data.unit} · 푼 문제`} value={`${data.solved}문제`} />
@@ -55,15 +80,17 @@ function Linked() {
               </div>
               {data.line && <section className="card"><div className="small muted">오늘 한 줄</div><div>{data.line}</div></section>}
               {data.hardPoint && <section className="card"><div className="small muted">아이가 고른 어려운 점</div><span className="pill pill--mint" style={{ fontSize: 14, marginTop: 4 }}>{data.hardPoint}</span></section>}
-              {data.quiz && <section className="card card--warn"><div className="small muted">아이가 낸 퀴즈</div><strong>{data.quiz}</strong></section>}
+              {/* 11-15 성호 05:30: 「아이가 낸 퀴즈」 카드는 뺐다 */}
             </>
-          ) : <div className="notice notice--plain">아직 오늘 공부 전이에요 · 연속 {data.streak}일</div>}
+          ) : <div className="notice notice--plain">오늘은 아직 공부 전이에요.{data.streak > 0 ? ` ${data.streak}일째 이어 왔어요.` : ''}</div>}
 
           <section className={'card stamp-card' + (stamp.data?.stampedToday ? ' stamp-card--done' : '')}>
             <span className="stamp-card__mark"><Icon name="stamp" size={28} /></span>
-            <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="stamp-card__body" style={{ minWidth: 0, flex: 1 }}>
               <strong>{stamp.data?.stampedToday ? '오늘 도장을 찍었어요' : '오늘 하루 이야기를 나눴나요?'}</strong>
-              <div className="small muted">이야기 내용을 평가하지 않아요. 함께 이야기한 것에 찍어요 · 하루 1번 · 씨앗 +2</div>
+              <div className="small">오늘 아이와 이야기했다면 도장을 찍어 주세요.</div>
+              <div className="small muted">하루 한 번, 아이가 멘토를 꾸미는 데 써요.</div>
+              <span className={'pill ' + (stamp.data?.stampedToday ? 'pill--mint' : 'pill--accent')}>{stamp.data?.stampedToday ? '찍었어요' : '아직이에요'}</span>
             </div>
             {stamp.data && !stamp.data.stampedToday && (
               <button className="btn btn--primary btn--small" disabled={busy} onClick={() => run(async () => stamp.setData(await api.stamp()))}>도장 찍기</button>
@@ -73,10 +100,11 @@ function Linked() {
           <section className="card">
             <div className="small muted">선생님 코멘트</div>
             <div>{data.teacherComment ?? '아직 승인된 코멘트가 없어요.'}</div>
+            {data.homework && <div className="small" style={{ marginTop: 6 }}>숙제: {data.homework}</div>}
           </section>
           <h2 className="h3">이번 주 함께한 날</h2>
           <Week attendance={data.attendance} todayIndex={data.todayIndex} />
-          <p className="small muted" style={{ textAlign: 'center' }}>대화 내용은 표시하지 않아요</p>
+          <p className="small muted" style={{ textAlign: 'center' }}>아이와 멘토가 나눈 이야기는 보이지 않아요</p>
         </>
       )}
     </Frame>

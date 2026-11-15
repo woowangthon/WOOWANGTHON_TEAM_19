@@ -21,10 +21,39 @@ EXPECTED_TABLES = {
 }
 
 
+# 계정·학원·씨앗 테이블 12개(명세 4.12, 11-12) — 학습 테이블 7개는 그대로
+ORG_TABLES = {
+    "accounts",
+    "auth_tokens",
+    "links",
+    "academies",
+    "academy_applications",
+    "rooms",
+    "room_people",
+    "seed_ledger",
+    "shop_items",
+    "orders",
+    "cosmetics_owned",
+    "notices",
+    "student_mentor_current",  # 지금 띠(명세 4.12-5, 11-14)
+    "session_difficulty",  # 고른 난이도(명세 4.13-7 D2, 11-14)
+}
+
+
 async def test_seven_tables_are_created(engine):
     async with engine.connect() as conn:
         names = await conn.run_sync(lambda c: set(inspect(c).get_table_names()))
-    assert names == EXPECTED_TABLES
+    # session_problems: 한 세션 여러 문제(SESSION_PROBLEMS, 11-12). 기본 1이면 비어 있다
+    # class_live·class_live_settings·class_posts: 강의실 수업 진행·공지/숙제(명세 4.12 5-4, 11-13)
+    assert names == EXPECTED_TABLES | ORG_TABLES | {
+        "session_problems",
+        "class_live",
+        "class_live_settings",
+        "class_posts",
+        "shop_item_images",  # 학원 상품 사진(11-14)
+        "cosmetic_items",  # 꾸미기 목록 DB 표(11-14)
+        "alert_acks",  # 🔴 보호자 확인 시각(명세 4.3, 11-15)
+    }
 
 
 async def test_student_has_no_real_name_column(engine):
@@ -87,10 +116,13 @@ async def test_alert_expires_90d_after_creation():
 
 
 async def test_seed_loads_twenty_problems_once(db_session):
-    assert await load_seed(db_session) == 20
+    # 명세 4.13(11-14): 시드 20 + 학년별 시범 60
+    from tests.test_grade_bank import _bank_total
+
+    assert await load_seed(db_session) == _bank_total()
     assert await load_seed(db_session) == 0  # 두 번 불러도 중복 없음
     rows = (await db_session.scalars(select(Problem))).all()
-    assert len(rows) == 20
+    assert len(rows) == _bank_total() and sum("subject" not in r.standard for r in rows) == 20
     p = next(r for r in rows if r.id == "frac-div-nat-01")
     assert p.answer["value"] == "3/8"
     assert p.hint1 and p.hint2 and p.solution

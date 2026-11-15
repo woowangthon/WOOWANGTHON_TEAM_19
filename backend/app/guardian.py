@@ -8,10 +8,11 @@
 from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.accounts import CurrentAccount, token_sent
 from app.actors import actor_from_request
 from app.api import HOTLINES
 from app.db import get_db
@@ -26,23 +27,22 @@ Now = Annotated[datetime, Depends(get_now)]
 
 
 async def current_guardian_child(
+    request: Request,
     db: Db,
+    account: CurrentAccount,
     x_demo_role: Annotated[str | None, Header()] = None,
     x_demo_actor: Annotated[str | None, Header()] = None,
 ) -> Student:
-    """보호자 헤더를 확인하고 그 보호자의 학생을 돌려준다."""
-    student = (await actor_from_request(db, "guardian", x_demo_role, x_demo_actor)).student
+    """보호자 계정(연결된 첫 아이) 또는 보호자 헤더를 확인하고 그 보호자의 학생을 돌려준다."""
+    actor = await actor_from_request(
+        db, "guardian", x_demo_role, x_demo_actor, account=account, token_sent=token_sent(request)
+    )
+    student = actor.student
     assert student is not None  # guardian 역할은 학생이 없으면 resolve_actor가 404
     return student
 
 
 GuardianChild = Annotated[Student, Depends(current_guardian_child)]
-
-
-def _guardian_excerpt(alert: Alert) -> str | None:
-    """보호자 카드에 싣는 발췌. 지금은 명세대로 ±2턴·300자 그대로.
-    발췌를 빼고 분류·긴급도·행동 안내로 바꾸는 안(11-10 회의 안건 2)이 정해지면 여기만 바꾼다."""
-    return alert.excerpt
 
 
 async def _today_alert(db: AsyncSession, student: Student, now: datetime) -> dict[str, Any] | None:
@@ -57,7 +57,7 @@ async def _today_alert(db: AsyncSession, student: Student, now: datetime) -> dic
         if seoul_date(created) == today:
             return {
                 "created_at": created.isoformat(),
-                "excerpt": _guardian_excerpt(alert),
+                "excerpt": None,  # 아이 말은 보내지 않는다(11-15 04:30 성호, 11-10·11-11을 바꿈)
                 "hotlines": list(HOTLINES),
             }
     return None
@@ -77,8 +77,8 @@ async def guardian_today(db: Db, now: Now, student: GuardianChild) -> dict[str, 
         if session.quiz_problem_id:
             problem = await db.get(Problem, session.quiz_problem_id)
             quiz = {"text": problem.text} if problem is not None else None
-    comment = await db.scalar(
-        select(InstructorNote.final_body)
+    note = await db.scalar(
+        select(InstructorNote)
         .where(
             InstructorNote.student_id == student.id,
             InstructorNote.date == today,
@@ -86,10 +86,13 @@ async def guardian_today(db: Db, now: Now, student: GuardianChild) -> dict[str, 
         )
         .limit(1)
     )
+    # 숙제는 초안 본문이 아니라 사실 칸(구조화 필드)에서 붙인다(명세 부록 D). 승인된 노트만
+    homework = (note.facts or {}).get("homework") if note is not None else None
     return {
         "alert": await _today_alert(db, student, now),
         "child_line": child_line,
         "quiz": quiz,
         # 저장본은 치환본. 보호자 화면에 보이기 직전에만 별명으로 되돌린다(11-11 A6)
-        "instructor_comment": unredact_name(comment, student.nickname),
+        "instructor_comment": unredact_name(note.final_body if note else None, student.nickname),
+        "homework": unredact_name(homework, student.nickname) or None,
     }

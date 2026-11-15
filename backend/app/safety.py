@@ -13,7 +13,7 @@ _PATTERNS = [
     r"죽[고구]\s*(십|시[퍼프])",
     r"죽어\s*버리고\s*싶",
     r"죽을\s*래",
-    r"자살",
+    r"자살(?!골)",  # 11-13: 「자살골」(축구) 오탐 제외, 부록 A
     r"자해",
     r"손목.{0,3}(긋|그[어었])",
     r"(?<![과제])목\s*매",  # 과목 매일·제목 매번만 제외(띄어 쓰지 않은 「내목매」는 잡는다)
@@ -53,6 +53,9 @@ KEYWORDS: list[tuple[str, re.Pattern[str]]] = [
 def check(text: str) -> str | None:
     """첫 매치의 키워드 id(K01 식), 없으면 None."""
     normalized = unicodedata.normalize("NFKC", text)  # 전각 문자를 반각으로(pii와 같은 정규화)
+    # 보이지 않는 서식 문자(폭 0 공백·소프트 하이픈·방향 표시 등, 유니코드 Cf)를 지운다 — 11-14 점검에서
+    # 「죽\u200b고 싶어」가 🔴을 피했다. 키워드 목록은 그대로, 입력 정규화만(부록 A)
+    normalized = "".join(ch for ch in normalized if unicodedata.category(ch) != "Cf")
     for kid, pattern in KEYWORDS:
         if pattern.search(normalized):
             return kid

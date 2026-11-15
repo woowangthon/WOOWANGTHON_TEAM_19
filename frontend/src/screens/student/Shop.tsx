@@ -1,30 +1,38 @@
-// 학생 상점: ① 학원 상품(학습지도자가 만든 것 — 칭찬 카드 모아 간식 받는 느낌) ② 꾸미기(우리: 옷·이모티콘) ③ 씨앗 내역
+// 학생 상점: ① 학원 상품(씨앗 — 학원 재화) ② 꾸미기(칭찬 도장 — 앱 재화, 옷·이모티콘) ③ 내역. 두 재화는 따로 보인다(11-12 결정)
 // 규칙(서버): 씨앗이 모자라면 못 산다 · 학원 상품은 "교환 요청" → 학습지도자가 전달하면 "전달 완료"
 // 아이 대상이라 넣지 않는 것: 랜덤 뽑기, 현금 충전, 친구와 씨앗 비교(랭킹)
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../../api';
+import { API_BASE } from '../../api/http';
+import { shopImageSrc } from '../../lib/shopImage';
 import { Frame } from '../../components/Frame';
 import { Icon } from '../../components/Icon';
-import { CosmeticArt, SeedChip } from '../../components/Seed';
+import { CosmeticArt, StampChip } from '../../components/Seed';
 import { LoadError, Sheet, Thinking } from '../../components/Common';
 import { useAsync } from '../../lib/useAsync';
 import { useAction } from '../../lib/useAction';
 import { useMentor } from '../../state/mentor';
 import { useAuth } from '../../state/auth';
-import type { Cosmetic, ShopItem } from '../../types';
+import { ANIMALS, ANIMAL_LABEL, type Animal, type Cosmetic, type ShopItem } from '../../types';
 
 type Tab = 'academy' | 'deco' | 'history';
 
 export function StudentShop() {
   const nav = useNavigate();
+  const loc = useLocation();
   const { say, animal } = useMentor();
   const { refresh } = useAuth();
-  const [tab, setTab] = useState<Tab>('academy');
+  const [tab, setTab] = useState<Tab>((loc.state as { tab?: Tab } | null)?.tab ?? 'academy'); // GPT-010: 도장 칩 → 꾸미기 탭
   const { data, setData, error, loading, reload } = useAsync(() => api.getStudentShop());
   const wallet = useAsync(() => api.getWallet(), [tab === 'history']);
   const [buy, setBuy] = useState<{ kind: 'item'; item: ShopItem } | { kind: 'deco'; item: Cosmetic } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  // 꾸미기 검색(11-13): 어떤 캐릭터에 입혀 볼지 + 이름. 산 옷·이모티콘은 캐릭터를 바꿔도 그대로다(id 기준)
+  const [look, setLook] = useState<Animal | null>(null);
+  const [q, setQ] = useState('');
+  const preview: Animal = look ?? animal;
+  const match = (c: Cosmetic) => !q.trim() || (c.name + (c.description ?? '')).replace(/\s/g, '').includes(q.replace(/\s/g, ''));
   const { run, busy, error: actErr, setError } = useAction();
 
   const confirm = () => run(async () => {
@@ -35,14 +43,24 @@ export function StudentShop() {
   });
 
   return (
-    <Frame title="씨앗 상점" back="/student/mentor">
+    <Frame title="상점" back="/student/mentor">
       {loading && !data && <Thinking label="불러오는 중" />}
       <LoadError error={error} onRetry={reload} />
       {data && (
         <>
-          <section className="seed-hero">
-            <div><div className="small">내 씨앗</div><div className="seed-hero__n num"><Icon name="seed" size={26} />{data.balance}</div></div>
-            <div className="small seed-hero__how">학습 완료 +3<br />보호자 도장 +2<br />선생님 칭찬</div>
+          {/* 두 재화: 씨앗(학원 공부·선생님 칭찬 → 학원 상품) · 칭찬 도장(보호자 도장 → 옷·이모티콘) */}
+          {/* GPT-011: 두 잔액을 한 카드에 나눠 보이고, 합계는 만들지 않는다 */}
+          <section className="seed-hero seed-hero--dual" aria-label="재화 잔액과 얻는 방법">
+            <div className="wallet-account">
+              <div className="wallet-account__head"><Icon name="seed" size={20} />씨앗 <strong className="num">{data.balance}</strong></div>
+              <p className="small">{say('학원 상품을 살 수 있어', '학원 상품을 살 수 있어요')}</p>
+              <p className="seed-hero__how">{say('공부하면 받아', '공부하면 받아요')}</p>
+            </div>
+            <div className="wallet-account">
+              <div className="wallet-account__head"><Icon name="stamp" size={20} />칭찬 도장 <strong className="num">{data.stamps ?? 0}</strong></div>
+              <p className="small">{say('옷이랑 이모티콘을 살 수 있어', '옷이랑 이모티콘을 살 수 있어요')}</p>
+              <p className="seed-hero__how">{say('보호자랑 얘기하면 받아', '보호자랑 얘기하면 받아요')}</p>
+            </div>
           </section>
           <div className="seg" role="tablist">
             {([['academy', '학원 상품'], ['deco', '꾸미기'], ['history', '내역']] as [Tab, string][]).map(([k, l]) => (
@@ -53,19 +71,20 @@ export function StudentShop() {
 
           {tab === 'academy' && (
             <>
+              <p className="currency-note"><Icon name="seed" size={14} />{say('선생님이 고른 상품이야. 씨앗으로 바꿀 수 있어', '선생님이 고른 상품이에요. 씨앗으로 바꿀 수 있어요')}</p>
               {data.academyItems.length === 0 && <div className="notice notice--plain"><span>{say('강의실에 들어가면 선생님 상품이 보여', '강의실에 들어가면 선생님 상품이 보여요')}</span></div>}
               {data.academyItems.map((it) => {
                 const soldOut = it.stock === 0;
                 const short = it.price - data.balance;
                 return (
                   <section key={it.id} className="card shop-row">
-                    <span className="shop-row__icon"><Icon name="bag" size={22} /></span>
+                    {shopImageSrc(it.imagePath, API_BASE) ? <img className="shop-thumb" src={shopImageSrc(it.imagePath, API_BASE)!} alt={it.name} loading="lazy" /> : <span className="shop-row__icon"><Icon name="bag" size={22} /></span>}
                     <span style={{ minWidth: 0, flex: 1 }}>
                       <strong>{it.name}</strong>
                       <span className="small muted" style={{ display: 'block' }}>{it.note}{it.stock !== null && ` · 남은 ${it.stock}개`}</span>
                     </span>
                     <button className="price-btn" disabled={soldOut || short > 0} onClick={() => { setError(null); setBuy({ kind: 'item', item: it }); }}>
-                      {soldOut ? '다 팔림' : short > 0 ? `${short}개 더` : <><Icon name="seed" size={14} />{it.price}</>}
+                      {soldOut ? '다 팔림' : short > 0 ? say(`씨앗 ${short}개 모자라`, `씨앗 ${short}개 모자라요`) : <><Icon name="seed" size={14} />{it.price}</>}
                     </button>
                   </section>
                 );
@@ -84,18 +103,43 @@ export function StudentShop() {
             </>
           )}
 
-          {tab === 'deco' && (['outfit', 'emote'] as const).map((kind) => (
-            <section key={kind} className="stack">
-              <h2 className="h3">{kind === 'outfit' ? '옷' : '이모티콘'} <span className="small muted">{kind === 'emote' ? '수다에서 보낼 수 있어' : ''}</span></h2>
-              <div className="deco-grid">
-                {data.cosmetics.filter((c) => c.kind === kind).map((c) => (
-                  <button key={c.id} className={'card deco' + (c.equipped ? ' card--selected' : '')}
-                    onClick={() => (c.owned ? (c.kind === 'outfit' ? run(async () => { setData(await api.equipOutfit(c.equipped ? null : c.id)); await refresh(); }) : undefined) : (setError(null), setBuy({ kind: 'deco', item: c })))}>
-                    <CosmeticArt animal={animal} kind={c.kind} id={c.id} name={c.name} size={64} />
-                    <strong className="small">{c.name}</strong>
-                    {c.equipped ? <span className="pill pill--solid">입는 중</span> : c.owned ? <span className="pill pill--mint">{c.kind === 'outfit' ? '입기' : '가짐'}</span> : <SeedChip n={c.price} />}
+          {tab === 'deco' && <p className="currency-note"><Icon name="stamp" size={14} />{say('도장으로 살 수 있어', '도장으로 살 수 있어요')}</p>}
+          {tab === 'deco' && (
+            <div className="deco-search" role="search" aria-label="꾸미기 찾기">
+              <strong>캐릭터에 입혀 보기</strong>
+              <div className="deco-animals" role="group" aria-label="미리 볼 캐릭터">
+                {ANIMALS.map((a) => (
+                  <button key={a} type="button" className="deco-animal" aria-pressed={preview === a} onClick={() => setLook(a)}>
+                    <img src={`${import.meta.env.BASE_URL}mascot/${a}/wave-avatar.png`} alt="" />
+                    <span>{ANIMAL_LABEL[a]}</span>
+                    <span className="deco-animal__mine">{a === animal ? '내 멘토' : preview === a ? '선택됨' : ''}</span>
                   </button>
                 ))}
+              </div>
+              <label className="field">이름으로 찾기
+                <input className="input" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="예: 모자, 힘내" />
+              </label>
+            </div>
+          )}
+          {tab === 'deco' && preview !== animal && <p className="deco-preview-note"><Icon name="eye" size={20} />{say('사지 않아도 보기만 할 수 있어. 내 멘토는 바뀌지 않아.', '사지 않아도 보기만 할 수 있어요. 내 멘토는 바뀌지 않아요.')}</p>}
+          {tab === 'deco' && !data.cosmetics.some(match) && (
+            <div className="notice notice--plain deco-search-empty"><span>{say(`「${q}」 꾸미기가 없어`, `「${q}」 꾸미기가 없어요`)}</span>
+              <button className="btn btn--ghost btn--small" onClick={() => setQ('')}>검색어 지우기</button>
+            </div>
+          )}
+          {tab === 'deco' && (['outfit', 'emote'] as const).filter((kind) => data.cosmetics.some((c) => c.kind === kind && match(c))).map((kind) => (
+            <section key={kind} className="stack">
+              <h2 className="h3">{kind === 'outfit' ? '옷' : '이모티콘'}</h2>
+              <div className="deco-grid">
+                {data.cosmetics.filter((c) => c.kind === kind && match(c)).map((c) => { const lack = c.owned ? 0 : c.price - (data.stamps ?? 0); return (
+                  <button key={c.id} className={'card deco' + (c.equipped ? ' card--selected' : '')} disabled={lack > 0}
+                    onClick={() => (c.owned ? (c.kind === 'outfit' ? run(async () => { setData(await api.equipOutfit(c.equipped ? null : c.id)); await refresh(); }) : undefined) : (setError(null), setBuy({ kind: 'deco', item: c })))}>
+                    <CosmeticArt animal={preview} kind={c.kind} id={c.id} name={c.name} size={64} />
+                    <strong className="small">{c.name}</strong>
+                    {c.description && <span className="small muted">{c.description}</span>}
+                    {c.equipped ? <span className="pill pill--solid">입는 중</span> : c.owned ? <span className="pill pill--mint">{c.kind === 'outfit' ? '입기' : '가짐'}</span> : lack > 0 ? <span className="pill">{say(`도장 ${lack}개 모자라`, `도장 ${lack}개 모자라요`)}</span> : <StampChip n={c.price} />}
+                  </button>
+                ); })}
               </div>
             </section>
           ))}
@@ -104,7 +148,7 @@ export function StudentShop() {
             <ul className="list">
               {wallet.data?.history.map((h) => (
                 <li key={h.id} className="card card--flat between" style={{ padding: '10px 12px' }}>
-                  <span style={{ minWidth: 0 }}><strong className="small">{h.source}</strong><span className="small muted" style={{ display: 'block' }}>{h.note} · {h.at}</span></span>
+                  <span style={{ minWidth: 0 }}><strong className="small"><Icon name={h.currency === 'stamp' ? 'stamp' : 'seed'} size={14} /> {h.source}</strong><span className="small muted" style={{ display: 'block' }}>{h.note} · {h.at}</span></span>
                   <strong className={'num ' + (h.amount > 0 ? 'plus' : 'minus')}>{h.amount > 0 ? '+' : ''}{h.amount}</strong>
                 </li>
               ))}
@@ -113,16 +157,16 @@ export function StudentShop() {
         </>
       )}
       {buy && data && (
-        <Sheet title={say('이걸로 바꿀까?', '이걸로 바꿀까요?')} onClose={() => setBuy(null)}>
+        <Sheet title={buy.kind === 'deco' ? (buy.item.kind === 'outfit' ? say('이 옷 살까?', '이 옷 살까요?') : say('이 이모티콘 살까?', '이 이모티콘 살까요?')) : say('이걸로 바꿀까?', '이걸로 바꿀까요?')} onClose={() => setBuy(null)}>
           <div className="row" style={{ gap: 12 }}>
-            {buy.kind === 'deco' ? <CosmeticArt animal={animal} kind={buy.item.kind} id={buy.item.id} name={buy.item.name} size={64} /> : <span className="shop-row__icon"><Icon name="bag" size={22} /></span>}
-            <div><strong>{buy.item.name}</strong><div className="small muted">씨앗 {data.balance} → {data.balance - buy.item.price}</div></div>
+            {buy.kind === 'deco' ? <CosmeticArt animal={preview} kind={buy.item.kind} id={buy.item.id} name={buy.item.name} size={64} /> : <span className="shop-row__icon"><Icon name="bag" size={22} /></span>}
+            <div><strong>{buy.item.name}</strong><div className="small muted">{buy.kind === 'deco' ? say(`도장 ${buy.item.price}개를 써. 남는 도장 ${(data.stamps ?? 0) - buy.item.price}개`, `도장 ${buy.item.price}개를 써요. 남는 도장 ${(data.stamps ?? 0) - buy.item.price}개`) : `씨앗 ${data.balance} → ${data.balance - buy.item.price}`}</div></div>
           </div>
           {buy.kind === 'item' && <p className="small muted">{say('선생님께 교환 요청이 가. 학원에서 받으면 돼!', '선생님께 교환 요청이 가요. 학원에서 받으면 돼요!')}</p>}
           <LoadError error={actErr} />
           <div className="btn-row">
-            <button className="btn btn--secondary" onClick={() => setBuy(null)}>{say('안 바꿀래', '안 바꿀래요')}</button>
-            <button className="btn btn--primary" disabled={busy} onClick={confirm}><Icon name="seed" size={16} />{buy.item.price}개로 바꾸기</button>
+            <button className="btn btn--secondary" onClick={() => setBuy(null)}>{buy.kind === 'deco' ? say('안 살래', '안 살래요') : say('안 바꿀래', '안 바꿀래요')}</button>
+            <button className="btn btn--primary" disabled={busy || (buy.kind === 'deco' ? (data.stamps ?? 0) : data.balance) < buy.item.price} onClick={confirm}><Icon name={buy.kind === 'deco' ? 'stamp' : 'seed'} size={16} />{buy.kind === 'deco' ? say('살래', '살래요') : `${buy.item.price}개로 바꾸기`}</button>
           </div>
         </Sheet>
       )}

@@ -1,0 +1,62 @@
+diff -ru zip_v05/AI멘토-v0.5/app/src/api/http.ts ui_test/app/src/api/http.ts
+--- zip_v05/AI멘토-v0.5/app/src/api/http.ts	2026-11-10 14:06:18
++++ ui_test/app/src/api/http.ts	2026-11-11 09:56:29
+@@ -4,19 +4,26 @@
+ 
+ const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:8000';
+ 
++// [테스트 패치] 백엔드 데모 신원 헤더. 보호자 화면(#/guardian…)이면 guardian, 나머지는 child.
++function demoHeaders(): Record<string, string> {
++  return location.hash.startsWith('#/guardian')
++    ? { 'X-Demo-Role': 'guardian', 'X-Demo-Actor': 'demo-guardian-minsu' }
++    : { 'X-Demo-Role': 'child', 'X-Demo-Actor': 'demo-child-minsu' };
++}
++
+ async function call<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T> {
+   let res: Response;
+   try {
+     res = await fetch(BASE + path, {
+       method,
+-      headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
++      headers: { ...demoHeaders(), ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}) },
+       body: body !== undefined ? JSON.stringify(body) : undefined,
+     });
+   } catch {
+     throw new Error('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.');
+   }
+   if (!res.ok) {
+-    const detail = await res.json().then((j) => j?.detail as string | undefined).catch(() => undefined);
++    const detail = await res.json().then((j) => (j?.message ?? j?.detail) as string | undefined).catch(() => undefined);
+     throw new Error(detail ?? `서버 오류가 났어요 (${res.status})`);
+   }
+   return (res.status === 204 ? undefined : await res.json()) as T;
+diff -ru zip_v05/AI멘토-v0.5/app/src/api/index.ts ui_test/app/src/api/index.ts
+--- zip_v05/AI멘토-v0.5/app/src/api/index.ts	2026-11-10 14:06:18
++++ ui_test/app/src/api/index.ts	2026-11-11 09:56:34
+@@ -1,6 +1,16 @@
+ // .env의 VITE_API_MODE 값으로 가짜/진짜 서버를 고른다. 기본은 mock.
++// [테스트 패치] http 모드여도 백엔드 compat에 있는 아이 흐름·보호자 카드 함수만 httpApi, 나머지는 mockApi.
++import type { MentorApi } from './client';
+ import { httpApi } from './http';
+ import { mockApi } from './mock';
+ 
+-export const api = import.meta.env.VITE_API_MODE === 'http' ? httpApi : mockApi;
++const COMPAT: (keyof MentorApi)[] = [
++  'getStudentHome', 'getMentor', 'saveMentor', 'getActiveSession', 'startSession', 'getProblem', 'submitAnswer',
++  'requestHint', 'showSolution', 'afterStudy', 'getChat', 'sendChat', 'endChat', 'getWrap', 'submitWrap',
++  'getGuardianToday', 'getAlerts',
++];
++const mixed = { ...mockApi } as MentorApi;
++for (const k of COMPAT) (mixed as unknown as Record<string, unknown>)[k] = httpApi[k];
++
++export const api = import.meta.env.VITE_API_MODE === 'http' ? mixed : mockApi;
+ export const API_MODE: 'mock' | 'http' = import.meta.env.VITE_API_MODE === 'http' ? 'http' : 'mock';
+--- /dev/null
++++ app/.env.local
+@@ -1,4 +1,2 @@
+-# mock: 백엔드 없이 화면만 돌린다 (기본값)
+-# http: 성호님 FastAPI 서버에 붙는다
+-VITE_API_MODE=mock
+-VITE_API_BASE=http://localhost:8000
++VITE_API_MODE=http
++VITE_API_BASE=http://localhost:8780/api/v1/compat

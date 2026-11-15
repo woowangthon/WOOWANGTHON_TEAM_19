@@ -1,0 +1,727 @@
+[
+  {
+    "id": "g11-math-exponent-log-01",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-01]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "easy",
+    "problem_type": "거듭제곱근의 값 또는 실수인 거듭제곱근의 개수 구하기",
+    "targets_misconception": "거듭제곱근 ⁿ√a를 a÷n으로 계산함(∛27을 9로 봄)",
+    "text": "∛216은 얼마인가요?\n(숫자만)",
+    "expr": "6",
+    "verify": "manual",
+    "verify_note": "6 × 6 × 6 = 216 확인. 216은 양수라 실수인 세제곱근은 하나뿐.",
+    "answer": {
+      "kind": "value",
+      "value": "6",
+      "accepted": [
+        "6"
+      ]
+    },
+    "hint1": "∛216은 같은 수를 몇 번 곱해서 216이 되는 수를 뜻하나요? 나눗셈과는 무엇이 다른지 보세요.",
+    "hint2": "216을 소인수분해하면 2와 3만 나와요. 각 소인수가 몇 번씩 곱해졌는지 세고, 똑같은 세 묶음으로 나눠 보세요.",
+    "after_hint2": "216을 소인수분해해 같은 세 묶음으로 나누고 한 묶음의 값 구하기",
+    "solution": "216 = 2³ × 3³ = (2 × 3)³ = 6³이라서 ∛216 = 6이에요. 216 ÷ 3 = 72처럼 3으로 나누면 세제곱근이 아니에요.",
+    "forbidden": [
+      "6"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-02",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-01]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "easy",
+    "problem_type": "거듭제곱근의 값 또는 실수인 거듭제곱근의 개수 구하기",
+    "targets_misconception": "양수의 짝수 거듭제곱근이 실수 범위에서 양수·음수 두 개임을 놓침",
+    "text": "81의 네제곱근 가운데 실수인 것은 모두 몇 개인가요?\n(숫자만)",
+    "expr": "2",
+    "verify": "manual",
+    "verify_note": "x⁴ = 81 → x² = 9(x² = −9는 실수 해 없음) → x = 3, −3. 실수 해 2개.",
+    "answer": {
+      "kind": "value",
+      "value": "2",
+      "accepted": [
+        "2"
+      ]
+    },
+    "hint1": "'81의 네제곱근'은 네 번 곱해서 81이 되는 수예요. 이 수를 x라 하고 x에 대한 식을 세워 보세요.",
+    "hint2": "같은 수를 네 번 곱하면 결과의 부호가 어떻게 되는지 따져 보세요.",
+    "after_hint2": "음수를 네 번 곱해도 81이 될 수 있는지 판단해 실수인 네제곱근의 개수 세기",
+    "solution": "x⁴ = 81을 만족하는 실수는 3과 −3이에요. 음수도 짝수 번 곱하면 양수가 되니까 실수인 네제곱근은 2개예요. ∜81은 그 가운데 양수인 3만 가리키는 기호예요.",
+    "forbidden": [
+      "2"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-03",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-01]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "easy",
+    "problem_type": "거듭제곱근의 값 또는 실수인 거듭제곱근의 개수 구하기",
+    "targets_misconception": "",
+    "text": "∜625의 값을 구하세요.\n(숫자만)",
+    "expr": "5",
+    "verify": "manual",
+    "verify_note": "5⁴ = 625 확인. ∜는 양수인 네제곱근이라 하나.",
+    "answer": {
+      "kind": "value",
+      "value": "5",
+      "accepted": [
+        "5"
+      ]
+    },
+    "hint1": "∜625는 네 번 곱해서 625가 되는 양수예요. 625는 어떤 소수로 나누어떨어지나요?",
+    "hint2": "625 = 25 × 25예요. 25도 같은 두 수의 곱으로 나타낸 뒤, 같은 수를 네 번 곱한 꼴에서 그 수를 찾아보세요.",
+    "after_hint2": "25를 같은 두 수의 곱으로 나눠 625를 같은 수 네 개의 곱으로 쓰고 그 수 찾기",
+    "solution": "625 = 5 × 5 × 5 × 5 = 5⁴이라서 ∜625 = 5예요.",
+    "forbidden": [
+      "5"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-04",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-03]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "easy",
+    "problem_type": "로그의 뜻으로 로그값·진수·밑 구하기",
+    "targets_misconception": "",
+    "text": "log₂ 256의 값은 얼마인가요?\n(숫자만)",
+    "expr": "8",
+    "verify": "manual",
+    "verify_note": "2⁸ = 256 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "8",
+      "accepted": [
+        "8"
+      ]
+    },
+    "hint1": "log₂ 256은 2를 몇 번 곱해야 256이 되는지를 묻는 수예요. 밑과 진수가 각각 무엇인지 보세요.",
+    "hint2": "256 = 16 × 16이에요. 16이 2를 몇 번 곱한 수인지 먼저 세고, 그것이 두 번 겹친다는 점을 써 보세요.",
+    "after_hint2": "16이 2의 몇 제곱인지 세고 두 배 해서 지수 구하기",
+    "solution": "2⁸ = 256이라서 log₂ 256 = 8이에요.",
+    "forbidden": [
+      "8"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-05",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-03]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "easy",
+    "problem_type": "로그의 뜻으로 로그값·진수·밑 구하기",
+    "targets_misconception": "로그의 밑과 지수 자리를 바꿔 읽음(log₃ x = 4에서 x를 4³으로 봄)",
+    "text": "log₃ x = 4일 때 x의 값은 얼마인가요?\n(숫자만)",
+    "expr": "81",
+    "verify": "manual",
+    "verify_note": "3⁴ = 81, 거꾸로 log₃ 81 = 4 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "81",
+      "accepted": [
+        "81"
+      ]
+    },
+    "hint1": "로그 식을 거듭제곱 식으로 바꿔 보세요. 밑, 로그값, 진수가 각각 어느 자리로 가나요?",
+    "hint2": "log_a x = k는 a^k = x와 같은 뜻이에요. 이 문제에서는 밑 3이 거듭제곱의 밑이 되고, 4가 지수 자리에 가요.",
+    "after_hint2": "3을 네 번 곱해 x 구하기",
+    "solution": "log₃ x = 4는 x = 3⁴과 같아서 x = 81이에요. 4³ = 64로 계산하면 밑과 지수를 바꾼 거예요.",
+    "forbidden": [
+      "81"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-06",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-03]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "easy",
+    "problem_type": "로그의 뜻으로 로그값·진수·밑 구하기",
+    "targets_misconception": "",
+    "text": "logₓ 121 = 2일 때 x의 값은 얼마인가요? (x > 0, x ≠ 1)\n(숫자만)",
+    "expr": "11",
+    "verify": "manual",
+    "verify_note": "11² = 121, −11은 밑 조건(x > 0)에 어긋나 제외.",
+    "answer": {
+      "kind": "value",
+      "value": "11",
+      "accepted": [
+        "11"
+      ]
+    },
+    "hint1": "로그 식을 거듭제곱 꼴로 바꾸면 x는 어느 자리로 가나요?",
+    "hint2": "x를 두 번 곱해서 121이 되는 수를 찾되, 밑의 조건 x > 0도 함께 보세요.",
+    "after_hint2": "x² = 121을 풀어 두 값 가운데 밑 조건에 맞는 것 고르기",
+    "solution": "logₓ 121 = 2는 x² = 121과 같아요. x = 11 또는 x = −11인데 밑은 양수여야 하므로 x = 11이에요.",
+    "forbidden": [
+      "11"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-07",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-02]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "medium",
+    "problem_type": "유리수·음수·소수 지수 거듭제곱의 값 구하기",
+    "targets_misconception": "a^(m/n)을 밑에 지수를 곱해 a×m/n으로 계산함",
+    "text": "27^(2/3)의 값은 얼마인가요?\n(숫자만)",
+    "expr": "9",
+    "verify": "manual",
+    "verify_note": "9³ = 729 = 27²이므로 27^(2/3) = 9 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "9",
+      "accepted": [
+        "9"
+      ]
+    },
+    "hint1": "지수 2/3에서 분모와 분자는 각각 무엇을 뜻하나요?",
+    "hint2": "a^(m/n) = (ⁿ√a)^m이에요. 분모를 보고 27의 거듭제곱근을 먼저 구한 다음, 분자만큼 거듭제곱해 보세요.",
+    "after_hint2": "∛27을 구하고 그 값을 제곱하기",
+    "solution": "27^(2/3) = (∛27)² = 3² = 9예요. 27 × 2/3 = 18처럼 밑에 지수를 곱하면 안 돼요.",
+    "forbidden": [
+      "9"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-08",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-02]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "medium",
+    "problem_type": "유리수·음수·소수 지수 거듭제곱의 값 구하기",
+    "targets_misconception": "음의 지수를 값이 음수가 되는 것으로 봄(역수로 바꾸지 않음)",
+    "text": "(1/16)^(-5/4)의 값은 얼마인가요?\n(숫자만)",
+    "expr": "32",
+    "verify": "manual",
+    "verify_note": "32⁴ = 2²⁰ = 16⁵이므로 16^(5/4) = 32, (1/16)^(-1) = 16 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "32",
+      "accepted": [
+        "32"
+      ]
+    },
+    "hint1": "지수에 마이너스가 붙으면 밑은 어떻게 바뀌나요?",
+    "hint2": "a^(-k) = (1/a)^k예요. 그래서 이 식은 16^(5/4)과 같아요. 이제 지수 5/4를 거듭제곱근과 거듭제곱으로 나눠 보세요.",
+    "after_hint2": "∜16을 구하고 다섯 번 거듭제곱하기",
+    "solution": "(1/16)^(-5/4) = 16^(5/4) = (∜16)⁵ = 2⁵ = 32예요. 음의 지수는 값을 음수로 만드는 게 아니라 역수를 뜻해요.",
+    "forbidden": [
+      "32"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-09",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-02]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "medium",
+    "problem_type": "유리수·음수·소수 지수 거듭제곱의 값 구하기",
+    "targets_misconception": "a^(m/n)을 밑에 지수를 곱해 a×m/n으로 계산함",
+    "text": "9^2.5의 값은 얼마인가요?\n(숫자만)",
+    "expr": "243",
+    "verify": "manual",
+    "verify_note": "243² = 59049 = 9⁵이므로 9^(5/2) = 243 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "243",
+      "accepted": [
+        "243"
+      ]
+    },
+    "hint1": "지수 2.5를 분수로 바꾸면 무엇인가요?",
+    "hint2": "지수를 분수로 바꾸면 분모가 몇 제곱근인지 정해 줘요. 9의 제곱근부터 구한 뒤 분자만큼 거듭제곱해 보세요.",
+    "after_hint2": "2.5를 분수로 바꾸고 √9를 구해 분자만큼 거듭제곱하기",
+    "solution": "2.5 = 5/2라서 9^2.5 = (√9)⁵ = 3⁵ = 243이에요. 9 × 2.5 = 22.5처럼 곱하면 안 돼요.",
+    "forbidden": [
+      "243"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-10",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-02]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "medium",
+    "problem_type": "지수법칙(곱·나눗셈·거듭제곱)으로 식을 간단히 하여 값 구하기",
+    "targets_misconception": "a^m × a^n을 a^(m×n)으로 계산함(지수끼리 곱함)",
+    "text": "2^(3/2) × 2^(5/2)의 값은 얼마인가요?\n(숫자만)",
+    "expr": "16",
+    "verify": "manual",
+    "verify_note": "3/2 + 5/2 = 4, 2⁴ = 16 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "16",
+      "accepted": [
+        "16"
+      ]
+    },
+    "hint1": "두 거듭제곱의 밑이 같은지 보세요. 밑이 같은 수를 곱하면 지수끼리 무엇을 하나요?",
+    "hint2": "밑이 같은 수끼리 곱하면 지수를 더해요. 3/2와 5/2를 더하면 지수가 자연수가 돼요. 그 지수로 거듭제곱을 계산해 보세요.",
+    "after_hint2": "3/2 + 5/2를 계산하고 2를 그만큼 거듭제곱하기",
+    "solution": "2^(3/2) × 2^(5/2) = 2^(3/2 + 5/2) = 2⁴ = 16이에요. 지수를 곱하면 2^(15/4)가 되어 틀려요.",
+    "forbidden": [
+      "16"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-11",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-02]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "medium",
+    "problem_type": "지수법칙(곱·나눗셈·거듭제곱)으로 식을 간단히 하여 값 구하기",
+    "targets_misconception": "(a^m)^n을 a^(m+n)으로 계산함(지수끼리 더함)",
+    "text": "(25^(3/4))^2의 값은 얼마인가요?\n(숫자만)",
+    "expr": "125",
+    "verify": "manual",
+    "verify_note": "3/4 × 2 = 3/2, 125² = 15625 = 25³ 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "125",
+      "accepted": [
+        "125"
+      ]
+    },
+    "hint1": "거듭제곱을 다시 거듭제곱하면 지수끼리 더하나요, 곱하나요?",
+    "hint2": "지수끼리 곱하면 25의 지수는 3/2이 돼요. 25의 제곱근을 먼저 구한 뒤 분자만큼 거듭제곱해 보세요.",
+    "after_hint2": "√25를 구해 세제곱하기",
+    "solution": "(25^(3/4))² = 25^(3/4 × 2) = 25^(3/2) = (√25)³ = 5³ = 125예요. 지수를 더하면 25^(11/4)가 되어 틀려요.",
+    "forbidden": [
+      "125"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-12",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-02]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "medium",
+    "problem_type": "지수법칙(곱·나눗셈·거듭제곱)으로 식을 간단히 하여 값 구하기",
+    "targets_misconception": "a^m ÷ a^n에서 n이 음수일 때 빼기 부호를 놓침",
+    "text": "3^(9/4) ÷ 3^(-3/4)의 값은 얼마인가요?\n(숫자만)",
+    "expr": "27",
+    "verify": "manual",
+    "verify_note": "9/4 − (−3/4) = 3, 3³ = 27 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "27",
+      "accepted": [
+        "27"
+      ]
+    },
+    "hint1": "밑이 같은 두 수의 나눗셈이에요. 지수끼리 무엇을 하나요?",
+    "hint2": "나눗셈은 지수를 빼요. 빼는 지수가 음수라는 점을 조심하세요. 9/4에서 -3/4을 빼면 지수가 자연수로 나와요.",
+    "after_hint2": "9/4 − (−3/4)을 계산해 지수를 정하고 3을 그만큼 거듭제곱하기",
+    "solution": "3^(9/4) ÷ 3^(-3/4) = 3^(9/4 + 3/4) = 3^(12/4) = 3³ = 27이에요. 부호를 놓쳐 9/4 − 3/4 = 3/2로 계산하면 자연수가 나오지 않아요.",
+    "forbidden": [
+      "27"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-13",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-03]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "medium",
+    "problem_type": "로그의 성질(합·차·실수배·밑 변환)로 값 구하기",
+    "targets_misconception": "로그의 합·차를 진수의 합·차로 계산함(log_a M + log_a N = log_a (M+N))",
+    "text": "log₆ 4 + log₆ 9의 값은 얼마인가요?\n(숫자만)",
+    "expr": "2",
+    "verify": "manual",
+    "verify_note": "4 × 9 = 36 = 6² 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "2",
+      "accepted": [
+        "2"
+      ]
+    },
+    "hint1": "두 로그의 밑이 같나요? 밑이 같은 로그를 더하면 진수끼리 어떻게 되나요?",
+    "hint2": "밑이 같은 로그의 합은 진수를 곱한 수의 로그예요. 진수를 4 + 9로 더하면 안 돼요. 곱한 진수가 6을 몇 번 곱한 수인지 보세요.",
+    "after_hint2": "4 × 9를 계산하고 그 수가 6의 몇 제곱인지 구하기",
+    "solution": "log₆ 4 + log₆ 9 = log₆ (4 × 9) = log₆ 36이고, 6² = 36이라서 값은 2예요. log₆ 13으로 더하면 자연수가 나오지 않아요.",
+    "forbidden": [
+      "2"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-14",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-03]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "medium",
+    "problem_type": "로그의 성질(합·차·실수배·밑 변환)로 값 구하기",
+    "targets_misconception": "로그의 합·차를 진수의 합·차로 계산함(log_a M + log_a N = log_a (M+N))",
+    "text": "log₅ 1000 − log₅ 8의 값은 얼마인가요?\n(숫자만)",
+    "expr": "3",
+    "verify": "manual",
+    "verify_note": "1000 ÷ 8 = 125 = 5³ 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "3",
+      "accepted": [
+        "3"
+      ]
+    },
+    "hint1": "밑이 같은 두 로그의 차예요. 진수끼리 빼는 걸까요, 다른 셈을 하는 걸까요?",
+    "hint2": "밑이 같은 로그의 차는 진수를 나눈 몫의 로그예요. 1000을 8로 나눈 몫이 5를 몇 번 곱한 수인지 확인해 보세요.",
+    "after_hint2": "1000 ÷ 8을 계산하고 그 몫이 5의 몇 제곱인지 구하기",
+    "solution": "log₅ 1000 − log₅ 8 = log₅ (1000 ÷ 8) = log₅ 125이고, 5³ = 125라서 값은 3이에요. log₅ 992로 빼면 틀려요.",
+    "forbidden": [
+      "3"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-15",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-03]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "medium",
+    "problem_type": "로그의 성질(합·차·실수배·밑 변환)로 값 구하기",
+    "targets_misconception": "k·log_a M에서 k를 진수에 곱함(2log₃ 5를 log₃ 10으로 봄)",
+    "text": "(2/3)log₂ 64의 값은 얼마인가요?\n(숫자만)",
+    "expr": "4",
+    "verify": "manual",
+    "verify_note": "64^(2/3) = (∛64)² = 16 = 2⁴, 6 × 2/3 = 4 두 길로 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "4",
+      "accepted": [
+        "4"
+      ]
+    },
+    "hint1": "로그 앞에 붙은 2/3을 진수 쪽으로 옮기면 어디에 붙나요?",
+    "hint2": "k·log_a M = log_a M^k예요. 2/3을 진수의 지수로 올리면 진수는 64^(2/3)이 돼요. 이 값을 먼저 구한 뒤 2를 몇 번 곱한 수인지 보세요.",
+    "after_hint2": "64^(2/3)을 계산하고 그 값이 2의 몇 제곱인지 구하기",
+    "solution": "(2/3)log₂ 64 = log₂ 64^(2/3) = log₂ 16 = 4예요. log₂ 64 = 6에 2/3을 곱해도 4예요. 2/3을 진수에 곱해 log₂ (128/3)으로 보면 자연수가 나오지 않아요.",
+    "forbidden": [
+      "4"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-16",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-03]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "medium",
+    "problem_type": "로그의 성질(합·차·실수배·밑 변환)로 값 구하기",
+    "targets_misconception": "로그의 밑과 지수 자리를 바꿔 읽음(log₃ x = 4에서 x를 4³으로 봄)",
+    "text": "log₈ 32의 값은 얼마인가요?\n(숫자만, 예: 3/4)",
+    "expr": "5/3",
+    "verify": "manual",
+    "verify_note": "8^(5/3) = (2³)^(5/3) = 2⁵ = 32 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "5/3",
+      "accepted": [
+        "5/3",
+        "1 2/3"
+      ]
+    },
+    "hint1": "밑 8과 진수 32를 같은 수의 거듭제곱으로 나타낼 수 있나요?",
+    "hint2": "8과 32는 모두 2의 거듭제곱이에요. 밑 변환으로 log₈ 32 = log₂ 32 ÷ log₂ 8로 바꾼 뒤 분자와 분모를 각각 계산해 보세요.",
+    "after_hint2": "log₂ 32와 log₂ 8을 각각 구해 나눈 분수 만들기",
+    "solution": "log₈ 32 = log₂ 32 ÷ log₂ 8 = 5 ÷ 3 = 5/3이에요. 밑과 진수를 바꿔 읽으면 3/5이 되어 틀려요.",
+    "forbidden": [
+      "5/3",
+      "3분의 5",
+      "3분의5",
+      "1 2/3",
+      "1과 3분의 2"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-17",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-02]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "hard",
+    "problem_type": "조건이 주어진 지수·로그 식의 값 구하기",
+    "targets_misconception": "4^x를 2^x로 바꿀 때 지수 대신 앞에 곱해 2×2^x로 씀",
+    "text": "2^x = 3일 때 4^(x+1)의 값은 얼마인가요?\n(숫자만)",
+    "expr": "4*3*3",
+    "verify": "expr",
+    "verify_note": "4^(x+1) = 4·(2^x)² = 4·3·3으로 식 재계산.",
+    "answer": {
+      "kind": "value",
+      "value": "36",
+      "accepted": [
+        "36"
+      ]
+    },
+    "hint1": "4를 2의 거듭제곱으로 나타낼 수 있나요? 지수의 x+1은 어떻게 나눌 수 있을까요?",
+    "hint2": "4^(x+1) = 4 × 4^x로 나눌 수 있어요. 이제 4^x를 2^x를 써서 나타내 보세요. 4^x는 2 × 2^x가 아니에요.",
+    "after_hint2": "4^x를 (2^x)²으로 바꿔 값을 구하고 4를 곱하기",
+    "solution": "4^(x+1) = 4 × 4^x이고 4^x = (2²)^x = (2^x)² = 3² = 9라서 4 × 9 = 36이에요. 4^x를 2 × 2^x = 6으로 보면 24가 되어 틀려요.",
+    "forbidden": [
+      "36"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-18",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-02]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "hard",
+    "problem_type": "조건이 주어진 지수·로그 식의 값 구하기",
+    "targets_misconception": "a^(1/2) + a^(-1/2)을 제곱할 때 가운데 항을 빠뜨림",
+    "text": "양수 a에 대하여 a^(1/2) + a^(-1/2) = 3일 때, a + a^(-1)의 값은 얼마인가요?\n(숫자만)",
+    "expr": "3*3-2",
+    "verify": "expr",
+    "verify_note": "(a^(1/2)+a^(-1/2))² = a + 2 + a^(-1) → 3·3 − 2. a = (7 ± 3√5)/2(양수 둘)로 대입해도 a + 1/a = 7.",
+    "answer": {
+      "kind": "value",
+      "value": "7",
+      "accepted": [
+        "7"
+      ]
+    },
+    "hint1": "a^(1/2)을 제곱하면 무엇이 되나요? 구하는 식과 주어진 식의 지수를 견주어 보세요.",
+    "hint2": "주어진 식의 양변을 제곱해 보세요. 이때 a^(1/2) × a^(-1/2)이 두 번 생기는데, 이 곱은 지수를 더해서 계산해요.",
+    "after_hint2": "양변을 제곱한 식에서 가운데 항의 값을 구하고 그만큼 빼기",
+    "solution": "양변을 제곱하면 a + 2 × a^(1/2) × a^(-1/2) + a^(-1) = 9예요. a^(1/2) × a^(-1/2) = a⁰ = 1이라서 a + 2 + a^(-1) = 9, 곧 a + a^(-1) = 7이에요. 가운데 항을 빠뜨리면 9가 되어 틀려요.",
+    "forbidden": [
+      "7"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-19",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-03]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "hard",
+    "problem_type": "조건이 주어진 지수·로그 식의 값 구하기",
+    "targets_misconception": "",
+    "text": "2^a = 3, 3^b = 32일 때 ab의 값은 얼마인가요?\n(숫자만)",
+    "expr": "5",
+    "verify": "manual",
+    "verify_note": "(2^a)^b = 2^(ab) = 32 = 2⁵ → ab = 5. log₂ 3 × log₃ 32 = log₂ 32 = 5로도 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "5",
+      "accepted": [
+        "5"
+      ]
+    },
+    "hint1": "3^b의 3 자리에 2^a를 넣으면 식을 어떻게 바꿔 쓸 수 있나요?",
+    "hint2": "3을 2^a로 바꿔 3^b에 넣어 보세요. 거듭제곱의 거듭제곱에서 지수를 어떻게 하는지 떠올리면 ab가 한 덩어리로 나와요.",
+    "after_hint2": "2^(ab) = 32를 만들고 32가 2의 몇 제곱인지 구하기",
+    "solution": "3^b = (2^a)^b = 2^(ab) = 32 = 2⁵이라서 ab = 5예요. 로그로 풀면 a = log₂ 3, b = log₃ 32이고 ab = log₂ 32 = 5예요.",
+    "forbidden": [
+      "5"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  },
+  {
+    "id": "g11-math-exponent-log-20",
+    "unit_id": "g11-math-exponent-log",
+    "tag": "g11-math-exponent-log",
+    "subject": "math",
+    "grade": 11,
+    "standard": {
+      "code": "[12대수01-03]",
+      "curriculum": "2022",
+      "unit": "지수와 로그"
+    },
+    "difficulty": "hard",
+    "problem_type": "조건이 주어진 지수·로그 식의 값 구하기",
+    "targets_misconception": "로그의 밑과 지수 자리를 바꿔 읽음(log₃ x = 4에서 x를 4³으로 봄)",
+    "text": "log₂(log₃(log₄ x)) = 0일 때 x의 값은 얼마인가요?\n(숫자만)",
+    "expr": "64",
+    "verify": "manual",
+    "verify_note": "log₄ 64 = 3, log₃ 3 = 1, log₂ 1 = 0 거꾸로 대입 확인.",
+    "answer": {
+      "kind": "value",
+      "value": "64",
+      "accepted": [
+        "64"
+      ]
+    },
+    "hint1": "로그가 세 겹이에요. 어느 로그부터 거듭제곱 꼴로 바꾸면 좋을까요?",
+    "hint2": "가장 바깥 로그를 벗기면 log₃(log₄ x) = 1이에요. 한 겹씩 더 거듭제곱 꼴로 바꾸되, 밑과 지수 자리를 바꿔 쓰지 않게 조심하세요.",
+    "after_hint2": "log₄ x 값을 구한 뒤 x를 거듭제곱으로 계산하기",
+    "solution": "log₂(…) = 0이면 (…) = 2⁰ = 1이라서 log₃(log₄ x) = 1, 곧 log₄ x = 3¹ = 3이고 x = 4³ = 64예요. 밑과 지수를 바꿔 x = 3⁴ = 81로 보면 틀려요.",
+    "forbidden": [
+      "64"
+    ],
+    "source": "ai",
+    "generator": "claude-opus-5-5",
+    "review": "none"
+  }
+]

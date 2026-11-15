@@ -177,7 +177,8 @@ class Alert(Base):
     student_id: Mapped[str] = mapped_column(ForeignKey("students.id", ondelete="CASCADE"))
     level: Mapped[str] = mapped_column(String(10), default="red")
     trigger: Mapped[str] = mapped_column(String(20))  # 키워드 id (R1 등)
-    excerpt: Mapped[str] = mapped_column(String(EXCERPT_MAX))  # ±2턴 치환본, 300자
+    # 11-15부터 빈 문자열(발췌 안 만듦, 성호 04:30). 칸은 남김 — 표 변경 없음
+    excerpt: Mapped[str] = mapped_column(String(EXCERPT_MAX))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     guardian_seen: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -192,3 +193,8 @@ class Alert(Base):
             created_at=now,
             expires_at=now + ALERT_TTL,
         )
+
+
+# 계정·학원·씨앗 테이블 12개(명세 4.12)를 같은 Base에 올린다 → create_all·RLS가 함께 만든다.
+# 순환 import지만 models_org는 위에서 정의된 Base만 쓴다.
+from app import models_org as _models_org  # noqa: E402, F401

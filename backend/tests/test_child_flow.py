@@ -155,11 +155,14 @@ async def test_full_day_round_trip(client, db_session, student):
     ]
     assert all(set(q) == {"id", "text"} for q in bridge["quiz_options"])
     assert bridge["guardian_line"] == "오늘 분수 ÷ 자연수를 다시 풀었어요."
-    assert bridge["summary"] == [
-        "분수 ÷ 자연수 문제 1개, 힌트 1단계에서 정답",
-        "막힌 곳 기록 없음",  # scripted엔 요약 대본이 없다 → 템플릿
-        "미해결 없음",
-    ]
+    assert (
+        bridge["summary"]
+        == [
+            "분수 ÷ 자연수 문제 1개, 힌트 1단계에서 정답",
+            "막힌 곳 요약을 만들지 못했어요",  # scripted엔 요약 대본이 없다 → 실패로 드러냄(수정 명세 B32)
+            "미해결 없음",
+        ]
+    )
 
     r = await _end(client, student, sid, "frac-div-nat-03")
     assert r.status_code == 200
@@ -343,7 +346,8 @@ async def test_summary_falls_back_to_template(client, student, sid, spy, bad):
     await _send(client, student, sid, kind="text", text="3/8")
     await _phase(client, student, sid, "bridge")
     body = (await _bridge(client, student, sid)).json()
-    assert body["summary"][1] == "막힌 곳 기록 없음"
+    # 수정 명세 B32: 실패를 「기록 없음」이 아니라 「만들지 못했어요」로(명세 부록 E 11-14)
+    assert body["summary"][1] == "막힌 곳 요약을 만들지 못했어요"
 
 
 async def test_bridge_after_end_returns_stored(client, student, sid):
@@ -450,3 +454,18 @@ async def test_mentor_allowed_after_session_ended(client, student, sid):
 async def test_mentor_rejects_bad_values(client, student, bad):
     r = await client.put("/api/v1/me/mentor", headers=_h(student), json=bad)
     assert r.status_code == 422 and r.json()["code"] == "invalid_request"
+
+
+async def test_summary_fallback_is_logged_with_reason(client, student, sid, spy, caplog):
+    # 수정 명세 B32: 요약 ② 폴백 때 로그 한 줄(세션·이유, 원문 없이)
+    import logging
+
+    spy.summary = FIXED_REPLY
+    await _send(client, student, sid, kind="text", text="3/4")
+    await _send(client, student, sid, kind="text", text="3/8")
+    await _phase(client, student, sid, "bridge")
+    with caplog.at_level(logging.WARNING, logger="app.api"):
+        await _bridge(client, student, sid)
+    lines = [r.getMessage() for r in caplog.records if "summary fallback" in r.getMessage()]
+    assert len(lines) == 1 and f"session={sid}" in lines[0] and "reason=" in lines[0]
+    assert "3/4" not in lines[0]

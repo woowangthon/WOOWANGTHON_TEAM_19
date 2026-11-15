@@ -1,0 +1,106 @@
+[
+  {
+    "bundle": "g1-korean",
+    "subject": "korean",
+    "grade": 1,
+    "curriculum": "2022",
+    "unit_id": "g1-kor-spelling-batchim",
+    "unit_name": "받침이 있는 낱말 바르게 쓰기",
+    "standards": [
+      {
+        "code": "[2국04-01]",
+        "text": "한글 자모의 이름과 소릿값을 알고 정확하게 발음하고 쓴다.",
+        "verified": "미확인"
+      },
+      {
+        "code": "[2국04-02]",
+        "text": "소리와 표기가 다를 수 있음을 알고 낱말을 바르게 읽고 쓴다.",
+        "verified": "미확인"
+      }
+    ],
+    "core_concepts": [
+      "받침이 있는 글자는 뒤에 '이'·'에'·'을'을 붙여 읽으면 받침 소리가 뒤로 넘어가 들린다",
+      "소리 나는 대로 쓰면 틀리는 낱말이 있다(옷이 [오시] → '옷이')",
+      "받침 ㄷ·ㅌ이 '이'를 만나면 [지]·[치]로 소리 나지만 쓸 때는 받침을 그대로 쓴다(같이 [가치])",
+      "모양이 바뀌는 낱말은 '-다' 꼴로 바꾸어 말하면 받침이 어느 글자에 있는지 알 수 있다(웃어요 → 웃다)",
+      "세게 소리 나는 글자도 쓸 때는 본래 글자로 쓴다(국수 [국쑤])"
+    ],
+    "misconceptions": [
+      "받침을 뒤 글자로 넘겨 소리 나는 대로 씀(웃어요 → 우서요)",
+      "[치]·[지]로 소리 나면 받침 없이 '치·지'로 씀(같이 → 가치)",
+      "받침을 소리가 비슷한 다른 받침으로 씀(꽃 → 꼳·꼿)",
+      "세게 들리는 대로 씀(국수 → 국쑤)"
+    ],
+    "problem_types": [
+      {
+        "type": "뜻을 보고 받침을 바르게 쓴 낱말 고르기",
+        "count": 4,
+        "difficulty": "easy",
+        "answer_form": "choice",
+        "covers": ["[2국04-01]"],
+        "passage_max_sentences": 2
+      },
+      {
+        "type": "뜻과 소리를 보고 받침이 있는 낱말 바르게 쓰기",
+        "count": 2,
+        "difficulty": "easy",
+        "answer_form": "text",
+        "covers": ["[2국04-01]"],
+        "passage_max_sentences": 2
+      },
+      {
+        "type": "문장 속 [소리]로 적힌 낱말을 바르게 쓴 것 고르기",
+        "count": 4,
+        "difficulty": "medium",
+        "answer_form": "choice",
+        "covers": ["[2국04-02]"],
+        "passage_max_sentences": 1
+      },
+      {
+        "type": "문장에서 소리 나는 대로 쓴 낱말을 바르게 고쳐 쓰기",
+        "count": 2,
+        "difficulty": "medium",
+        "answer_form": "text",
+        "covers": ["[2국04-02]"],
+        "passage_max_sentences": 1
+      },
+      {
+        "type": "네 문장 가운데 바르게 쓴 문장 고르기",
+        "count": 4,
+        "difficulty": "medium",
+        "answer_form": "choice",
+        "covers": ["[2국04-02]"],
+        "passage_max_sentences": 0
+      },
+      {
+        "type": "두 문장 (가)(나)의 [소리]를 둘 다 바르게 쓴 짝 고르기",
+        "count": 2,
+        "difficulty": "hard",
+        "answer_form": "choice",
+        "covers": ["[2국04-02]"],
+        "passage_max_sentences": 2
+      },
+      {
+        "type": "짧은 글에서 틀리게 쓴 낱말 개수 고르기",
+        "count": 2,
+        "difficulty": "hard",
+        "answer_form": "choice",
+        "covers": ["[2국04-02]"],
+        "passage_max_sentences": 3
+      }
+    ],
+    "difficulty_mix": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    },
+    "out_of_scope": [
+      "음운 변동 용어(연음, 구개음화, 된소리되기, 대표음, 비음화)",
+      "겹받침(닭·읽다·앉다·많다 등)",
+      "사이시옷",
+      "품사 이름(명사·동사·형용사)과 어간·어미 용어",
+      "띄어쓰기와 문장 부호"
+    ],
+    "notes": "근거: docs/curriculum_bank_research_v0.2.md 국어 표의 초1~2 문법 「한글 자모 이름과 소릿값([2국04-01]로 2차 출처에 보임), 소리와 표기가 다른 낱말」. [2국04-01]은 2차 출처(블로그)로만 보았고 고시문 대조를 못 했다. [2국04-02]의 번호와 문구는 2015 개정 같은 자리 성취기준을 기억으로 옮긴 추정이다 — 둘 다 미확인. 초1이라 문장은 15자 안팎, 문제 글(보기 앞)은 3줄 이하로 쓴다. 대상 낱말은 초1이 아는 홑받침·쌍받침 낱말만 쓰고 겹받침은 쓰지 않는다. 보기의 틀린 표기는 소리를 견주어 까닭을 한 문장으로 적을 수 있는 것만 쓴다. 맞춤법 정답은 사전과 직접 대조하지 못했다(규칙 8.5)."
+  }
+]

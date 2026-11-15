@@ -1,0 +1,1314 @@
+[
+ {
+  "bundle": "g4-korean",
+  "subject": "korean",
+  "grade": 4,
+  "curriculum": "2022",
+  "unit_id": "g4-kor-word-relations",
+  "unit_name": "낱말 사이의 관계와 국어사전 찾기",
+  "standards": [
+   {
+    "code": "[4국04-01]",
+    "text": "단어와 단어 간의 의미 관계를 파악한다.",
+    "verified": "1차(교육청)"
+   },
+   {
+    "code": "[4국04-02]",
+    "text": "단어를 분류하고 국어사전을 활용하여 능동적인 국어 활동을 한다.",
+    "verified": "1차(교육청)"
+   }
+  ],
+  "core_concepts": [
+   "포함하는 말과 포함되는 말(상위어·하위어: 과일-사과)",
+   "뜻이 반대인 낱말(반대말)과 뜻이 비슷한 낱말(비슷한말)",
+   "모양이 바뀌는 낱말의 기본형(먹었다·먹고 → 먹다)으로 사전 찾기",
+   "국어사전의 낱말 배열 순서(첫 자음 → 모음 → 받침)",
+   "뜻이 여러 개인 낱말은 문장에 맞는 뜻을 고른다"
+  ],
+  "misconceptions": [
+   "포함 관계를 거꾸로 봄(사과가 과일을 포함한다고 고름)",
+   "'먹었다'를 사전에서 그대로 찾으려 함(기본형으로 바꾸지 않음)",
+   "반대말을 '아닌 말'로 만듦(크다 ↔ 안 크다)",
+   "사전 순서에서 받침 있는 글자와 없는 글자 순서를 헷갈림"
+  ],
+  "problem_types": [
+   {
+    "type": "낱말 4개 중 나머지를 모두 포함하는 낱말 고르기",
+    "count": 4,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "주어진 낱말의 반대말 또는 비슷한말 한 낱말로 쓰기",
+    "count": 3,
+    "difficulty": "easy",
+    "answer_form": "text",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "문장 속 바뀐 꼴 낱말(작은따옴표 표시)을 사전에서 찾을 기본형 고르기",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "낱말 4개 중 국어사전에 가장 먼저(또는 나중에) 나오는 것 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "관계가 다른 낱말 짝 하나 고르기(포함·반대·비슷 섞음)",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "뜻이 여러 개인 낱말이 문장에서 쓰인 뜻 고르기(새로 쓴 예문 2문장)",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 2
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 7,
+   "medium": 10,
+   "hard": 3
+  },
+  "out_of_scope": [
+   "상위어·하위어·유의어·반의어 같은 한자 용어(문제 글에서는 '포함하는 말', '반대말' 등 쉬운 말로)",
+   "품사 이름(명사·동사·형용사)",
+   "어간·어미",
+   "다의어·동음이의어 용어"
+  ],
+  "notes": "근거: 경기도교육청 「2025학년도 초등학교 3~4학년 2학기 수업-평가 계획 예시 자료」 성취기준·단원 연결표(11쪽)에서 두 성취기준이 4-1에 연결됨. 고시문 원문과 글자 대조는 못 했으나 교육청 공식 자료라 1차로 표시. 반대말·비슷한말 단답은 정답이 여러 개일 수 있으니 accepted를 넉넉히(예: 크다 → 작다) 넣고, 정답이 하나로 좁혀지는 낱말만 고른다. 사전 순서 문항은 쌍자음(ㄲ·ㄸ…)·겹모음(ㅐ·ㅘ…) 순서를 표준국어대사전 배열로 확인한 낱말만 쓴다(검토 판정표)."
+ },
+ {
+  "bundle": "g4-korean",
+  "subject": "korean",
+  "grade": 4,
+  "curriculum": "2022",
+  "unit_id": "g4-kor-main-idea",
+  "unit_name": "문단의 중심 생각 찾고 간추리기",
+  "standards": [
+   {
+    "code": "[4국02-02]",
+    "text": "문단과 글에서 중심 생각을 파악하고 내용을 간추린다.",
+    "verified": "1차(교육청)"
+   },
+   {
+    "code": "[4국02-01]",
+    "text": "글의 의미를 파악하며 유창하게 글을 읽는다.",
+    "verified": "1차(교육청)"
+   }
+  ],
+  "core_concepts": [
+   "중심 문장과 뒷받침 문장",
+   "문단의 중심 생각은 문단 전체를 아우르는 내용",
+   "여러 문단의 중심 생각을 이어 글 전체를 간추리기",
+   "글의 제목과 중심 생각의 관계"
+  ],
+  "misconceptions": [
+   "첫 문장이면 무조건 중심 문장이라고 고름(중심 문장이 끝에 오는 문단)",
+   "재미있거나 구체적인 예시 문장을 중심 문장으로 고름",
+   "간추리기를 '문장 하나만 베끼기'로 생각함",
+   "문단 일부 내용만 담은 보기를 중심 생각으로 고름"
+  ],
+  "problem_types": [
+   {
+    "type": "짧은 설명 문단에서 중심 문장(가)~(라) 기호로 고르기",
+    "count": 5,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "문단의 중심 생각으로 알맞은 것 고르기",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "중심 문장이 문단 끝에 있는 문단에서 중심 문장 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "문단에 어울리지 않는 문장(통일성 깨는 문장) 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 5
+   },
+   {
+    "type": "두 문단 글 전체를 가장 잘 간추린 문장 고르기",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 6
+   },
+   {
+    "type": "문단의 화제를 한 낱말로 쓰기",
+    "count": 2,
+    "difficulty": "easy",
+    "answer_form": "text",
+    "passage_max_sentences": 4
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 7,
+   "medium": 10,
+   "hard": 3
+  },
+  "out_of_scope": [
+   "두괄식·미괄식·양괄식 용어",
+   "글의 구조(비교·대조·인과) 용어",
+   "요약하기 서술형",
+   "주장하는 글의 논증 분석"
+  ],
+  "notes": "지문은 동물·생활·과학 상식 같은 설명 문단을 직접 새로 쓴다. 문장마다 (가)(나)(다)(라) 기호를 붙여 고르게 한다(밑줄 불가). 폰 화면 때문에 지문은 4문장 이내, 두 문단 간추리기만 6문장 이내. 화제 한 낱말 단답은 정답이 하나로 좁혀지는 문단만 쓴다."
+ },
+ {
+  "bundle": "g4-korean",
+  "subject": "korean",
+  "grade": 4,
+  "curriculum": "2022",
+  "unit_id": "g4-kor-fact-opinion",
+  "unit_name": "사실과 의견 구별하기",
+  "standards": [
+   {
+    "code": "[4국02-04]",
+    "text": "글에 나타난 사실과 의견을 구분하고 필자와 자신의 의견을 비교한다.",
+    "verified": "1차(교육청)"
+   },
+   {
+    "code": "[4국02-05]",
+    "text": "글이나 자료의 출처가 믿을 만한지 판단한다.",
+    "verified": "1차(교육청)"
+   }
+  ],
+  "core_concepts": [
+   "사실: 실제로 있었던 일이나 확인할 수 있는 내용",
+   "의견: 어떤 대상에 대한 생각('~해야 한다', '~라고 생각한다', '좋다/나쁘다')",
+   "의견을 나타내는 표현 단서",
+   "필자의 의견과 그 까닭",
+   "믿을 만한 출처와 그렇지 않은 출처 구별"
+  ],
+  "misconceptions": [
+   "숫자가 들어 있으면 무조건 사실, 틀린 내용이면 의견이라고 생각함",
+   "'~이다'로 끝나면 사실이라고 판단(예: '이 공원은 가장 아름다운 곳이다')",
+   "자기가 동의하는 의견을 사실로 고름",
+   "출처가 없는 글이나 누구나 고칠 수 있는 글도 믿을 만하다고 봄"
+  ],
+  "problem_types": [
+   {
+    "type": "문장 하나를 보고 사실/의견 중 하나로 답하기",
+    "count": 4,
+    "difficulty": "easy",
+    "answer_form": "text",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "보기 4문장 중 의견(또는 사실)인 것 고르기",
+    "count": 5,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "짧은 글에서 필자의 의견이 드러난 문장을 기호로 고르기",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "필자가 그 의견을 가진 까닭으로 알맞은 것 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "'~이다'로 끝나지만 의견인 문장 등 헷갈리는 보기에서 의견 고르기",
+    "count": 2,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "같은 내용을 알려 주는 출처 4개 중 가장 믿을 만한 것 고르기(가상의 출처)",
+    "count": 2,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 9,
+   "medium": 9,
+   "hard": 2
+  },
+  "out_of_scope": [
+   "논증·타당성 같은 용어",
+   "주관적/객관적 용어",
+   "실존 언론사·누리집 이름을 출처로 쓰는 것"
+  ],
+  "notes": "사실/의견 단답은 accepted에 '사실', '의견'만 둔다(한 낱말). 출처 문항은 '도서관 백과사전', '익명 게시글'처럼 일반명으로만 쓰고 실제 기관·사이트 이름을 쓰지 않는다. 참·거짓이 논란되는 사회 이슈는 피한다. 사실/의견 단답 4문제는 정답이 「사실」 2개·「의견」 2개로 섞이게 한다(한 꼴로 쏠림 방지)."
+ },
+ {
+  "bundle": "g4-korean",
+  "subject": "korean",
+  "grade": 4,
+  "curriculum": "2022",
+  "unit_id": "g4-kor-honorific-connective",
+  "unit_name": "높임 표현과 가리키는 말·이어 주는 말",
+  "standards": [
+   {
+    "code": "[4국04-04]",
+    "text": "글과 담화에 쓰인 높임 표현과 지시·접속 표현을 이해하고 상황에 맞게 표현한다.",
+    "verified": "1차(교육청)"
+   },
+   {
+    "code": "[4국04-03]",
+    "text": "기본적인 문장의 짜임을 이해하고 적절하게 사용한다.",
+    "verified": "1차(교육청)"
+   }
+  ],
+  "core_concepts": [
+   "높이는 낱말(밥→진지, 있다→계시다, 나이→연세, 주다→드리다)",
+   "'-시-'를 넣어 웃어른 높이기, '께서'·'께'",
+   "가리키는 말(이것·그것·저것, 여기·거기)이 가리키는 대상 찾기",
+   "이어 주는 말(그리고·그러나·그래서·왜냐하면)의 쓰임",
+   "기본 문장 짜임(무엇이 어찌하다/어떠하다/무엇이다)"
+  ],
+  "misconceptions": [
+   "자기 자신이나 물건까지 높임(제가 말씀하셨어요, 커피 나오셨습니다)",
+   "'드리다'와 '주시다'를 거꾸로 씀(할머니께 선물을 주셨다)",
+   "'그러나'와 '그래서'를 앞뒤 관계 없이 고름",
+   "'그것'이 바로 앞 낱말만 가리킨다고 생각함"
+  ],
+  "problem_types": [
+   {
+    "type": "웃어른께 쓰는 높임 낱말 고르기(밥→진지 등)",
+    "count": 4,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "높임 표현이 바르게 쓰인(또는 잘못 쓰인) 문장 고르기(사람 높임만, 물건 높임 오답은 넣지 않음)",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "두 문장 사이 빈칸에 들어갈 이어 주는 말 고르기",
+    "count": 4,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 2
+   },
+   {
+    "type": "짧은 글에서 '그것'·'거기'가 가리키는 대상 한 낱말로 쓰기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "text",
+    "passage_max_sentences": 3
+   },
+   {
+    "type": "'무엇이 어찌하다/어떠하다/무엇이다' 중 같은 짜임의 문장 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "물건·자신을 높인 잘못된 높임을 찾는 문장 고르기",
+    "count": 2,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 8,
+   "medium": 10,
+   "hard": 2
+  },
+  "out_of_scope": [
+   "주체 높임·객체 높임·상대 높임 용어",
+   "선어말 어미·높임 선어말 어미 용어",
+   "주어·서술어·목적어 같은 문장 성분 용어",
+   "지시어·접속어·접속 부사 용어",
+   "하십시오체·해요체 같은 상대 높임 등급 이름"
+  ],
+  "notes": "문장 성분 용어는 초5~6([6국04-04])에서 나오므로 '무엇이/어찌하다' 틀로만 묻는다. 이어 주는 말 빈칸은 답이 하나만 맞도록 보기를 서로 뜻이 먼 것으로 구성한다. 가리키는 말 단답은 지문에 대상 낱말이 하나만 있게 쓴다. 물건 높임(「커피 나오셨습니다」)은 초4에 높아 hard 2문제에서만 다룬다(검토 3)."
+ },
+ {
+  "bundle": "g4-korean",
+  "subject": "korean",
+  "grade": 4,
+  "curriculum": "2022",
+  "unit_id": "g4-kor-sensory-character",
+  "unit_name": "감각적 표현과 인물의 마음 읽기",
+  "standards": [
+   {
+    "code": "[4국05-04]",
+    "text": "감각적 표현에 유의하여 작품을 감상하고, 감각적 표현을 활용하여 자신의 생각이나 감정을 표현한다.",
+    "verified": "1차(교육청)"
+   },
+   {
+    "code": "[4국05-01]",
+    "text": "인물과 이야기의 흐름을 중심으로 작품을 감상한다.",
+    "verified": "1차(교육청)"
+   }
+  ],
+  "core_concepts": [
+   "보고·듣고·냄새 맡고·맛보고·만지는 느낌을 살린 표현(감각)",
+   "흉내 내는 말(소리·모양)",
+   "인물의 말과 행동으로 마음 짐작하기",
+   "이야기의 흐름(처음-가운데-끝, 일이 일어난 차례)"
+  ],
+  "misconceptions": [
+   "소리를 흉내 내는 말과 모양을 흉내 내는 말을 섞음(반짝반짝=소리)",
+   "감각을 잘못 짝지음(달콤한 → 냄새로만 봄)",
+   "인물의 마음을 자기 기분으로 짐작함(글 속 단서 대신)",
+   "사건 차례를 글에 나온 순서가 아니라 기억나는 순서로 배열함"
+  ],
+  "problem_types": [
+   {
+    "type": "새로 쓴 짧은 시(4행 이내) 속 표현이 어떤 감각인지 고르기",
+    "count": 4,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "보기 중 소리(또는 모양)를 흉내 내는 말 고르기",
+    "count": 3,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "감각적 표현을 살려 빈칸에 들어갈 알맞은 말 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 2
+   },
+   {
+    "type": "짧은 이야기에서 인물의 말·행동을 보고 마음 고르기",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 5
+   },
+   {
+    "type": "인물의 마음을 나타내는 낱말 고르기(보기 4개는 서로 뜻이 먼 마음 낱말)",
+    "count": 2,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "이야기 속 일 세 가지를 일어난 차례대로 놓은 것 고르기",
+    "count": 2,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 6
+   },
+   {
+    "type": "인물의 마음이 바뀐 까닭 고르기",
+    "count": 2,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 6
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 7,
+   "medium": 9,
+   "hard": 4
+  },
+  "out_of_scope": [
+   "공감각·심상 용어",
+   "의성어·의태어 용어(문제 글에서는 '소리를 흉내 내는 말')",
+   "비유(직유·은유) 용어",
+   "시점·서술자",
+   "실제 동시·동화 인용"
+  ],
+  "notes": "시와 이야기는 모두 직접 새로 쓴다(실제 작품·교과서 수록작 인용 금지). 시는 행 구분을 \\n으로 4행 이내, 이야기는 6문장 이내. 마음 한 낱말 단답은 기쁘다/신난다/행복하다처럼 정답이 열려 있어 객관식으로 바꿨다(검토 1-10). 보기의 마음 낱말은 서로 뜻이 멀게(기쁘다/무섭다/심심하다/미안하다) 고른다."
+ },
+ {
+  "bundle": "g8-korean",
+  "subject": "korean",
+  "grade": 8,
+  "grade_band": "중1~3",
+  "curriculum": "2022",
+  "unit_id": "g8-kor-parts-of-speech",
+  "unit_name": "낱말을 품사로 나누기",
+  "standards": [
+   {
+    "code": "[9국04-03]",
+    "text": "품사의 종류와 특성을 이해하고 국어 자료를 분석한다.",
+    "verified": "1차"
+   }
+  ],
+  "core_concepts": [
+   "품사 분류 기준: 형태(변하는 말·변하지 않는 말)·기능·의미",
+   "9품사: 명사·대명사·수사 / 조사 / 동사·형용사 / 관형사·부사 / 감탄사",
+   "체언·용언·수식언·관계언·독립언",
+   "동사와 형용사 구별(-는다/-ㄴ다, 명령형·청유형 가능 여부)",
+   "관형사와 수사 구별(세 사람 vs 셋이)"
+  ],
+  "misconceptions": [
+   "'새', '옛' 같은 관형사를 형용사로 고름",
+   "수량을 나타내면 무조건 수사라고 봄(관형사 '세' 사람)",
+   "형용사도 '-는다'가 붙는다고 생각함(예쁜다)",
+   "'이다'를 동사·형용사로 고름(조사인 서술격 조사)",
+   "같은 낱말은 문장이 달라도 늘 품사가 같다고 봄",
+   "가리켜 부르는 말(대명사)과 이름(명사)을 구별하지 못함",
+   "꾸미는 말이면 모두 같은 품사로 봄(관형사·부사 혼동)",
+   "앞말에 붙어 뜻을 더하는 조사(만·도·까지)를 따로 쓰이는 부사로 고름"
+  ],
+  "problem_types": [
+   {
+    "type": "문장 속 작은따옴표 낱말의 품사 고르기",
+    "count": 6,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 1,
+    "conditions": "조사 문항은 '이다'(서술격)만 내지 말고 격조사·보조사도 1문제 이상."
+   },
+   {
+    "type": "문장 속 낱말의 품사 이름 한 낱말로 쓰기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "text",
+    "passage_max_sentences": 1,
+    "conditions": "대상 낱말에 작은따옴표. accepted: 대명사는 「대명사·지시대명사·지시 대명사·인칭대명사·인칭 대명사」 가운데 맞는 것 모두."
+   },
+   {
+    "type": "품사가 다른 하나 고르기(같은 문장 또는 낱말 묶음)",
+    "count": 2,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "동사·형용사 구별 기준을 적용한 판단 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0,
+    "conditions": "'-는다/-ㄴ다', 명령('-어라')·청유('-자') 기준을 낱말에 직접 적용하는 판단만. '이다'의 품사 까닭은 이 유형에서 묻지 않음(첫 유형과 겹침)."
+   },
+   {
+    "type": "같은 낱말이 문장에 따라 품사가 바뀌는 경우(관형사/수사, 부사/명사, 수사/명사) 판단",
+    "count": 4,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 2,
+    "conditions": "관형사/수사 2 · 부사/명사 1 · 명사/대명사 또는 수사/명사 1. (가)(나) 두 문장."
+   },
+   {
+    "type": "품사 분류 기준(형태·기능·의미)과 묶음이 바르게 짝지어진 것 고르기",
+    "count": 2,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0,
+    "conditions": "외우면 풀리는 유형이라 medium."
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 6,
+   "medium": 10,
+   "hard": 4
+  },
+  "out_of_scope": [
+   "보조 용언·본용언",
+   "불규칙 활용 종류 세부(ㅅ·ㄷ·ㅂ 불규칙 이름)",
+   "의존 명사 세부 분류",
+   "형태소 분석(단어의 짜임 단원 몫)"
+  ],
+  "notes": "2022 중학교 성취기준은 중1~3 학년군 공통이라 중2에서 무엇을 가르치는지는 학교·교과서마다 다르다. 품사는 학원에서 중1~2에 흔히 다루는 단원이라 넣었다. 단답 정답은 '관형사' 같은 품사 이름 하나이며, '관형사요'처럼 조사·어미 붙은 입력은 정규화 규칙(부록 B 5절)으로 처리한다. 학교별 진도 다름: 중학교 성취기준은 중1~3 학년군 공통이라 이 단원을 중1이나 중3에 배우는 학교도 있다(grade_band). 품사는 중1에 배우는 학교가 많다(검토 3). 성취기준 코드 번호는 1차 확인 대기(NCIC 통합검색으로 확인 중) — 확인되면 단원에서 한 번 고치고 문항마다 review_note로 되풀이하지 않는다. 통용 낱말 금지 목록(규칙 v2 8.1): 밝다·크다·붉다·늙다·굳다·길다·늦다·있다·감사하다·헌·다른·첫째·오늘·내일·어제·지금·여기·모두·다·정말·진짜·참·만세는 「같은 낱말의 품사가 바뀌는 경우」 유형에서만 쓴다. '헌'은 동사 '헐다'(낡아지다)의 활용형과 뜻이 겹치고 「헌책」 같은 합성어도 있어 대상 낱말로 쓰지 않는다. 힌트에 「관계언」「독립언」을 쓰지 않는다(묶음에 품사가 하나뿐이라 답이 됨). 「이다」 문항의 오답 보기에 「'-는다'를 붙일 수 없다」처럼 사실인 문장을 쓰지 않는다. 입력 안내: 객관식 「(번호만 써 주세요)」, 단답 「(한 낱말로 써 주세요)」. forbidden: 객관식은 정답 기호만(보기가 문장이면 정답 문장도), 단답은 정답 낱말 단독. 문장 속 낱말 표시는 작은따옴표로 하고 ①~④는 보기 줄에만 쓴다."
+ },
+ {
+  "bundle": "g8-korean",
+  "subject": "korean",
+  "grade": 8,
+  "grade_band": "중1~3",
+  "curriculum": "2022",
+  "unit_id": "g8-kor-word-formation",
+  "unit_name": "단어의 짜임과 새말 만들기",
+  "standards": [
+   {
+    "code": "[9국04-02]",
+    "text": "단어의 짜임을 분석하여 새말 형성의 원리를 이해한다.",
+    "verified": "1차"
+   }
+  ],
+  "core_concepts": [
+   "형태소와 어근·접사",
+   "단일어와 복합어",
+   "합성어(어근+어근)와 파생어(어근+접사, 접사+어근)",
+   "접두사·접미사의 뜻 더하기(풋-, 맨-, -꾼, -질)",
+   "새말이 만들어지는 원리(합성·파생, 줄임)"
+  ],
+  "misconceptions": [
+   "글자 수가 길면 복합어라고 봄('바다', '하늘'은 단일어)",
+   "'맨손'의 '맨-'을 어근으로 보아 합성어로 고름",
+   "'-꾼', '-질'처럼 뜻이 있어 보이는 접사를 어근으로 봄",
+   "'밤나무'(합성어)와 '풋사과'(파생어)를 같은 짜임으로 봄"
+  ],
+  "problem_types": [
+   {
+    "type": "단일어/복합어 중 다른 하나 고르기",
+    "count": 4,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "낱말이 합성어인지 파생어인지 한 낱말로 쓰기",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "text",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "같은 접사가 쓰인 낱말 묶음 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "접두사·접미사가 더하는 뜻 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "단어를 어근·접사로 바르게 나눈 것 고르기",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "새로 만든(가상의) 새말의 형성 방법 고르기",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 2
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 4,
+   "medium": 10,
+   "hard": 6
+  },
+  "out_of_scope": [
+   "통사적·비통사적 합성어",
+   "대등·종속·융합 합성어",
+   "자립/의존·실질/형식 형태소 세부 분류 문제(형태소 개념 정도만)",
+   "한자어 조어 원리"
+  ],
+  "notes": "새말 문항의 예는 실제 유행어·상표 대신 직접 지은 가상의 낱말을 쓴다(욕설·비하 신조어 금지). 합성어/파생어 단답 accepted는 '합성어', '파생어'만. 학교별 진도 다름: 중학교 성취기준은 중1~3 학년군 공통이라 이 단원을 중1이나 중3에 배우는 학교도 있다(grade_band). 성취기준 코드 번호는 1차 확인 대기(NCIC 통합검색으로 확인 중)."
+ },
+ {
+  "bundle": "g8-korean",
+  "subject": "korean",
+  "grade": 8,
+  "grade_band": "중1~3",
+  "curriculum": "2022",
+  "unit_id": "g8-kor-spelling-basics",
+  "unit_name": "한글 맞춤법의 기본 원리 적용하기",
+  "standards": [
+   {
+    "code": "[9국04-06]",
+    "text": "한글 맞춤법의 기본 원리와 내용을 이해하고 국어생활에 적용한다.",
+    "verified": "1차"
+   }
+  ],
+  "core_concepts": [
+   "표준어를 소리대로 적되 어법에 맞도록 함(총칙 제1항)",
+   "원형을 밝혀 적기(꽃이 [꼬치] → 꽃이)",
+   "자주 틀리는 짝: 되/돼, 안/않, -든지/-던지, 로서/로써, 웬/왠",
+   "띄어쓰기 기본: 조사는 붙이고 의존 명사는 띄운다"
+  ],
+  "misconceptions": [
+   "소리 나는 대로만 적으면 된다고 생각함",
+   "'되'와 '돼'를 소리로 고름('돼'='되어' 줄임 확인 안 함)",
+   "'안'과 '않'을 위치로 구별하지 못함",
+   "의존 명사('것', '수', '데')를 앞말에 붙여 씀"
+  ],
+  "problem_types": [
+   {
+    "type": "문장 빈칸에 맞춤법이 맞는 말 고르기(되/돼 등)",
+    "count": 6,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "맞춤법에 맞게 고친 낱말 한 낱말로 쓰기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "text",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "맞춤법이 틀린 문장 고르기",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "띄어쓰기가 바른 문장 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "'소리대로 적되 어법에 맞도록' 원리가 적용된 예 고르기",
+    "count": 2,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "짧은 메시지 글(3문장)에서 맞춤법 틀린 곳 개수 고르기",
+    "count": 2,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 3
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 6,
+   "medium": 10,
+   "hard": 4
+  },
+  "out_of_scope": [
+   "사이시옷 세부 조건",
+   "두음 법칙 예외 조항",
+   "음운 변동 규칙 이름(비음화·구개음화 등, 2022에서는 고1 공통국어1 몫으로 보임)",
+   "외래어 표기법·로마자 표기법"
+  ],
+  "notes": "단답은 띄어쓰기 차이로 오답이 나지 않게 한 낱말 정답만 쓴다(띄어쓰기는 choice로만). 맞춤법 정답은 국립국어원 한글 맞춤법 규정 기준이며 생성 단계에서 표준국어대사전 표기를 확인해야 한다. 학교별 진도 다름: 중학교 성취기준은 중1~3 학년군 공통이라 이 단원을 중1이나 중3에 배우는 학교도 있다(grade_band). 생성 단계에서 정답 표기를 표준국어대사전과 대조하는 것을 필수로 하고, 대조 못 한 문항은 needs_review로 표시한다. 성취기준 코드 번호는 1차 확인 대기(NCIC 통합검색으로 확인 중)."
+ },
+ {
+  "bundle": "g8-korean",
+  "subject": "korean",
+  "grade": 8,
+  "grade_band": "중1~3",
+  "curriculum": "2022",
+  "unit_id": "g8-kor-explain-argue-methods",
+  "unit_name": "설명 방법과 논증 방법 파악하기",
+  "standards": [
+   {
+    "code": "[9국02-05]",
+    "text": "글에 사용된 다양한 설명 방법과 논증 방법을 파악하고, 그 타당성을 평가하며 읽는다.",
+    "verified": "1차"
+   }
+  ],
+  "core_concepts": [
+   "설명 방법: 정의·예시·비교·대조·분류·분석·인과",
+   "논증 방법: 귀납(사례들 → 일반 결론)·연역(일반 원리 → 개별 결론)·유추",
+   "근거와 주장 구별",
+   "근거가 주장을 뒷받침하는지(타당성) 판단"
+  ],
+  "misconceptions": [
+   "비교(공통점)와 대조(차이점)를 섞음",
+   "분류(종류로 나눔)와 분석(부분으로 나눔)을 섞음",
+   "예시와 귀납을 같은 것으로 봄",
+   "근거가 많기만 하면 타당하다고 판단함"
+  ],
+  "problem_types": [
+   {
+    "type": "2~3문장 설명 글에 쓰인 설명 방법 고르기",
+    "count": 6,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 3
+   },
+   {
+    "type": "설명 방법 이름 한 낱말로 쓰기(정의·예시·비교 등)",
+    "count": 2,
+    "difficulty": "medium",
+    "answer_form": "text",
+    "passage_max_sentences": 3
+   },
+   {
+    "type": "같은 설명 방법이 쓰인 문장 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 2
+   },
+   {
+    "type": "짧은 논증 글의 논증 방법(귀납·연역·유추) 고르기",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 5
+   },
+   {
+    "type": "주장을 가장 잘 뒷받침하는 근거 고르기",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "근거가 주장을 뒷받침하지 못하는 까닭 고르기",
+    "count": 2,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 6,
+   "medium": 9,
+   "hard": 5
+  },
+  "out_of_scope": [
+   "논리적 오류 이름(성급한 일반화 등) 암기 문제(고1 논증 타당성 단원 몫)",
+   "변증법·가설 연역",
+   "복합양식 자료(그림·도표) 해석"
+  ],
+  "notes": "지문은 과학·생활 상식으로 직접 새로 쓴다. 한 문항 지문은 5문장 이내. 한 지문에 설명 방법이 두 개 이상 섞이지 않게 써야 정답이 하나로 정해진다. 9국02-05 문구는 2차 출처 두 곳(나무위키, GitHub gist)에서 같았다. 학교별 진도 다름: 중학교 성취기준은 중1~3 학년군 공통이라 이 단원을 중1이나 중3에 배우는 학교도 있다(grade_band). 성취기준 코드 번호는 1차 확인 대기(NCIC 통합검색으로 확인 중). [11-12 원문 확인] [9국02-02]는 요약 성취기준이라 뺌. 설명·논증 방법은 [9국02-05] 하나."
+ },
+ {
+  "bundle": "g8-korean",
+  "subject": "korean",
+  "grade": 8,
+  "grade_band": "중1~3",
+  "curriculum": "2022",
+  "unit_id": "g8-kor-figurative-speaker",
+  "unit_name": "운율·비유·상징과 말하는 이 파악하기",
+  "standards": [
+   {
+    "code": "[9국05-01]",
+    "text": "운율, 비유, 상징의 특성과 효과에 유의하며 작품을 감상하고 창작한다.",
+    "verified": "1차"
+   },
+   {
+    "code": "[9국05-04]",
+    "text": "보는 이나 말하는 이의 특성과 효과를 파악하며 작품을 감상한다.",
+    "verified": "1차"
+   }
+  ],
+  "core_concepts": [
+   "운율: 같은 말·소리·글자 수의 반복",
+   "비유: 직유(~처럼, ~같이)·은유(A는 B이다)·의인",
+   "상징: 구체적 대상이 추상적 의미를 나타냄",
+   "시의 말하는 이(화자)와 정서·태도",
+   "소설의 서술자 위치(1인칭 '나' / 3인칭)"
+  ],
+  "misconceptions": [
+   "'~처럼'이 없으면 비유가 아니라고 봄(은유를 놓침)",
+   "의인법과 직유를 섞음",
+   "시인과 시의 말하는 이를 같은 사람으로 봄",
+   "'나'가 나오면 무조건 주인공 시점이라고 봄(관찰자 '나')"
+  ],
+  "problem_types": [
+   {
+    "type": "새로 쓴 시 구절에 쓰인 비유 종류 고르기(직유·은유·의인)",
+    "count": 5,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "시에서 운율을 만드는 방법 고르기(반복 등)",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 6
+   },
+   {
+    "type": "상징하는 대상의 의미로 알맞은 것 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 6
+   },
+   {
+    "type": "시의 말하는 이의 정서를 나타내는 한 낱말 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 6
+   },
+   {
+    "type": "짧은 이야기 장면의 서술자 위치 고르기",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 5
+   },
+   {
+    "type": "구절에 쓰인 표현 방법 이름 한 낱말로 쓰기(직유법·은유법·의인법)",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "text",
+    "passage_max_sentences": 2
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 5,
+   "medium": 9,
+   "hard": 6
+  },
+  "out_of_scope": [
+   "실제 시·소설 인용(교과서 수록작 포함)",
+   "역설·반어·풍자(고1 이후 비중)",
+   "1인칭 관찰자/전지적 작가 시점 같은 4분류 용어 암기(서술자 위치를 쉬운 말로 묻는다)",
+   "객관적 상관물·감정 이입 용어"
+  ],
+  "notes": "시는 6행 이내(passage_max_sentences를 행 수로 읽는다), 이야기 장면은 5문장 이내로 직접 쓴다. 상징은 해석이 여러 갈래라 시 안에 단서를 분명히 넣고 오답 보기는 명백히 틀리게 만든다. '시점' 4분류 용어는 학교에 따라 중2에 다루기도 하므로 강사 지정 범위에 따라 hard 문항에서만 쓸지 결정 필요. 학교별 진도 다름: 중학교 성취기준은 중1~3 학년군 공통이라 이 단원을 중1이나 중3에 배우는 학교도 있다(grade_band). 운율·비유는 중1에 배우는 학교가 많다(검토 3). 성취기준 코드 번호는 1차 확인 대기(NCIC 통합검색으로 확인 중)."
+ },
+ {
+  "bundle": "g10-korean",
+  "subject": "korean",
+  "grade": 10,
+  "curriculum": "2022",
+  "unit_id": "g10-kor-phonological-change",
+  "unit_name": "음운 변동과 바른 발음·표기",
+  "standards": [
+   {
+    "code": "[10공국1-04-02]",
+    "text": "음운 변동을 탐구하여 발음과 표기에 올바르게 적용한다.",
+    "verified": "1차"
+   }
+  ],
+  "core_concepts": [
+   "음운 변동 유형: 교체·탈락·첨가·축약",
+   "교체: 음절의 끝소리 규칙·비음화·유음화·구개음화·된소리되기",
+   "축약: 거센소리되기(놓고 → [노코])",
+   "탈락: 자음군 단순화·ㅎ 탈락",
+   "첨가: ㄴ 첨가",
+   "변동 전후 음운 개수 변화"
+  ],
+  "misconceptions": [
+   "비음화와 유음화를 섞음(신라 [실라]를 비음화로 봄)",
+   "구개음화를 'ㄷ, ㅌ + 이' 조건 없이 적용(밭을 [바츨])",
+   "축약과 탈락의 음운 개수 변화를 헷갈림",
+   "표기와 발음을 같은 것으로 봄(발음대로 적으려 함)"
+  ],
+  "problem_types": [
+   {
+    "type": "낱말의 표준 발음 고르기(글자로 표기한 [ ] 발음)",
+    "count": 5,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "낱말에 일어난 음운 변동 이름 고르기",
+    "count": 5,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "같은 음운 변동이 일어난 낱말 짝 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "음운 변동 유형(교체·탈락·첨가·축약) 한 낱말로 쓰기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "text",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "변동 전후 음운 개수 변화 판단 고르기",
+    "count": 2,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "한 낱말에 두 가지 이상 변동이 일어난 경우 순서·종류 고르기",
+    "count": 2,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 5,
+   "medium": 11,
+   "hard": 4
+  },
+  "out_of_scope": [
+   "중세 국어 음운(아래아 등)",
+   "IPA 발음 기호",
+   "표준 발음법 조항 번호 암기",
+   "음성으로 들어야 하는 문제"
+  ],
+  "notes": "발음은 [ ] 안 한글 표기로만 보여 준다(소리 재생 없음). 정답 발음은 표준국어대사전 발음 정보로 생성 단계에서 확인해야 한다. 성취기준 문구는 2차 출처 두 곳(다음 카페 '말글살이뜨락', 나무위키)에서 '탐구하며/탐구하여' 한 글자만 달랐다."
+ },
+ {
+  "bundle": "g10-korean",
+  "subject": "korean",
+  "grade": 10,
+  "curriculum": "2022",
+  "unit_id": "g10-kor-grammar-expression-effect",
+  "unit_name": "높임·시간·피동·인용 표현의 효과",
+  "standards": [
+   {
+    "code": "[10공국1-04-03]",
+    "text": "다양한 분야의 글과 담화에 나타난 문법 요소 및 어휘의 표현 효과를 평가하고 적절한 표현을 생성한다.",
+    "verified": "1차"
+   }
+  ],
+  "core_concepts": [
+   "높임 표현: 주체 높임(-시-)·객체 높임(드리다, 께)·상대 높임(종결 어미)",
+   "시간 표현: 과거·현재·미래 시제, 동작상(-고 있다, -어 있다)",
+   "피동 표현(-이-·-히-·-리-·-기-, -어지다)과 행위 주체 감추기 효과",
+   "직접 인용(\"\" + 라고)과 간접 인용(-고)",
+   "어휘 선택(고유어·한자어·외래어)에 따른 효과"
+  ],
+  "misconceptions": [
+   "객체 높임을 주체 높임으로 고름(할머니께 드렸다)",
+   "'-시-'를 사물에 붙인 간접 높임 오류를 바른 표현으로 봄",
+   "이중 피동(-어지다 겹침: 잊혀지다)을 맞는 표현으로 봄",
+   "직접 인용을 간접 인용으로 바꿀 때 대명사·시제를 그대로 둠"
+  ],
+  "problem_types": [
+   {
+    "type": "문장에 쓰인 높임의 종류(주체·객체·상대) 고르기",
+    "count": 5,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "피동 표현이 쓰인 문장 고르기 / 이중 피동 오류 찾기",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "직접 인용을 간접 인용으로 바르게 바꾼 것 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "시간 표현(시제·동작상) 판단 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "짧은 기사형 글에서 피동 표현을 쓴 효과 고르기",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "문장에 쓰인 높임 종류 한 낱말로 쓰기(주체·객체·상대)",
+    "count": 2,
+    "difficulty": "medium",
+    "answer_form": "text",
+    "passage_max_sentences": 1
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 5,
+   "medium": 12,
+   "hard": 3
+  },
+  "out_of_scope": [
+   "중세 국어 높임 선어말 어미(-숩- 등)",
+   "상대 높임 6등급 전체 암기 문제",
+   "사동 표현 세부(고2 선택 과목 비중)",
+   "실제 신문 기사 인용"
+  ],
+  "notes": "기사형 지문은 가상의 지역·기관명으로 새로 쓴다. 단답 accepted는 '주체 높임/주체', '객체 높임/객체', '상대 높임/상대'를 모두 허용하는 식으로 생성 단계에서 정한다. 이 성취기준의 '문법 요소' 범위(높임·시간·피동·인용)는 2차 출처(나무위키 해설 요약)에 따른 것이다."
+ },
+ {
+  "bundle": "g10-korean",
+  "subject": "korean",
+  "grade": 10,
+  "curriculum": "2022",
+  "unit_id": "g10-kor-spelling-principles",
+  "unit_name": "한글 맞춤법의 원리로 표기 판단하기",
+  "standards": [
+   {
+    "code": "[10공국2-04-02]",
+    "text": "한글 맞춤법의 원리를 적용하여 국어생활을 성찰하고 (국어) 문제를 해결한다.",
+    "verified": "1차"
+   }
+  ],
+  "core_concepts": [
+   "소리대로 적기와 어법에 맞게 적기(원형 밝혀 적기)",
+   "사이시옷 표기 조건(합성어, 고유어 포함, 된소리·ㄴ 소리 덧남)",
+   "두음 법칙(녀자 → 여자, 신여성 vs 남녀)",
+   "어간·어미 구별 표기(-요/-오, 맞히다/맞추다)",
+   "띄어쓰기: 의존 명사·단위 명사·보조 용언"
+  ],
+  "misconceptions": [
+   "한자어+한자어에도 사이시옷을 붙임(댓가, 촛점)",
+   "두음 법칙을 단어 중간에도 적용함",
+   "'맞히다'와 '맞추다'의 뜻 구별 없이 씀",
+   "'-ㄹ게'를 '-ㄹ께'로 소리대로 적음"
+  ],
+  "problem_types": [
+   {
+    "type": "맞춤법에 맞는 표기 고르기",
+    "count": 5,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "사이시옷이 바르게 쓰인 낱말 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "두음 법칙 적용이 바른 것 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "틀린 낱말을 바르게 고쳐 한 낱말로 쓰기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "text",
+    "passage_max_sentences": 1
+   },
+   {
+    "type": "같은 맞춤법 원리가 적용된 예 묶음 고르기",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   },
+   {
+    "type": "띄어쓰기가 모두 바른 문장 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 0
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 5,
+   "medium": 12,
+   "hard": 3
+  },
+  "out_of_scope": [
+   "한글 맞춤법 조항 번호 암기",
+   "외래어 표기법·로마자 표기법 세부",
+   "북한 맞춤법·중세 표기"
+  ],
+  "notes": "공통국어2(2학기) 성취기준이라 11월 시점 고1에 맞다. 성취기준 끝 문구는 출처마다 '국어 문제를 해결한다'/'문제를 해결한다'로 달라 괄호로 표시했다. 중2 맞춤법 단원과 겹치지 않게 사이시옷·두음 법칙·원리 묶음에 무게를 둔다. 중2 맞춤법 단원(되/돼·안/않·로서/로써 등)에 나온 낱말은 쓰지 않는다. 다음 판에서 짧은 비문학 독해로 바꿀 후보(검토 3)."
+ },
+ {
+  "bundle": "g10-korean",
+  "subject": "korean",
+  "grade": 10,
+  "curriculum": "2022",
+  "unit_id": "g10-kor-argument-validity",
+  "unit_name": "논증의 타당성 평가하며 읽기",
+  "standards": [
+   {
+    "code": "[10공국1-02-01]",
+    "text": "다양한 글이나 자료를 읽으며 논증의 타당성을 평가하고 자신의 관점을 바탕으로 논증을 재구성한다.",
+    "verified": "1차"
+   }
+  ],
+  "core_concepts": [
+   "논증의 구성: 주장·근거·(숨은) 전제",
+   "근거의 적절성·충분성",
+   "숨은 전제 찾기",
+   "대표적 논리적 오류: 성급한 일반화·인신공격·흑백 논리·순환 논증·잘못된 인과",
+   "반론과 재반론"
+  ],
+  "misconceptions": [
+   "근거가 사실이면 논증도 타당하다고 판단함",
+   "숨은 전제를 주장으로 착각함",
+   "성급한 일반화와 잘못된 인과를 섞음",
+   "자신이 동의하는 주장이면 오류를 못 봄"
+  ],
+  "problem_types": [
+   {
+    "type": "짧은 논증 글의 주장(또는 근거) 고르기",
+    "count": 4,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 5
+   },
+   {
+    "type": "논증에 생략된 숨은 전제 고르기",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "대화·글에 나타난 논리적 오류 이름 고르기",
+    "count": 5,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "논증의 타당성을 가장 크게 약화하는 반론 고르기",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 5
+   },
+   {
+    "type": "논증을 보완할 근거로 가장 적절한 것 고르기",
+    "count": 2,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 5
+   },
+   {
+    "type": "오류 이름 한 낱말로 쓰기(예: 성급한 일반화)",
+    "count": 2,
+    "difficulty": "medium",
+    "answer_form": "text",
+    "passage_max_sentences": 3
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 4,
+   "medium": 11,
+   "hard": 5
+  },
+  "out_of_scope": [
+   "형식 논리 기호·벤 다이어그램",
+   "정치·종교 등 논쟁적 실제 사회 의제(가상 상황으로 대체)",
+   "수능 독서형 긴 지문 세트",
+   "서술형 논증 재구성"
+  ],
+  "notes": "성취기준의 '논증 재구성'은 서술형이라 객관식(보완 근거·약화 반론 고르기)으로만 다룬다. 지문은 학교생활·가상 마을 같은 중립 소재로 5문장 이내로 새로 쓴다. 오류 이름 단답은 띄어쓰기 변형('성급한일반화')까지 accepted에 넣는다."
+ },
+ {
+  "bundle": "g10-korean",
+  "subject": "korean",
+  "grade": 10,
+  "curriculum": "2022",
+  "unit_id": "g10-kor-genre-representation",
+  "unit_name": "갈래별 형상화 방법과 작품 구성 요소",
+  "standards": [
+   {
+    "code": "[10공국1-05-02]",
+    "text": "갈래에 따른 형상화 방법의 특성을 고려하며 작품을 수용한다.",
+    "verified": "1차"
+   },
+   {
+    "code": "[10공국1-05-03]",
+    "text": "작품 구성 요소의 유기적 관계와 맥락에 유의하여 작품을 수용하고 생산한다.",
+    "verified": "1차"
+   }
+  ],
+  "core_concepts": [
+   "시: 화자·청자, 심상(시각·청각 등), 반어·역설, 시적 대상과 정서",
+   "소설: 서술자와 시점, 인물·사건·배경의 관계, 갈등 유형",
+   "극: 대사·지문·해설",
+   "수필: 글쓴이의 경험과 성찰",
+   "구성 요소(인물·사건·배경)가 서로 영향을 주는 관계"
+  ],
+  "misconceptions": [
+   "반어(말과 속뜻이 반대)와 역설(표면 모순 속 진리)을 섞음",
+   "1인칭 관찰자 시점과 1인칭 주인공 시점을 '나'의 존재만으로 판단",
+   "배경을 시간·장소로만 보고 분위기·갈등과의 관계를 놓침",
+   "극의 지문(무대 지시)을 대사로 봄"
+  ],
+  "problem_types": [
+   {
+    "type": "새로 쓴 시 구절의 표현법(반어·역설·심상) 고르기",
+    "count": 5,
+    "difficulty": "easy",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "새로 쓴 소설 장면의 시점 고르기",
+    "count": 4,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 5
+   },
+   {
+    "type": "장면에 나타난 갈등 유형(내적·외적) 고르기",
+    "count": 3,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 5
+   },
+   {
+    "type": "배경이 사건·인물 심리에 주는 효과 고르기",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "choice",
+    "passage_max_sentences": 6
+   },
+   {
+    "type": "같은 내용을 시·극·수필 중 어느 갈래로 쓴 것인지 판단하기(형상화 특성)",
+    "count": 2,
+    "difficulty": "medium",
+    "answer_form": "choice",
+    "passage_max_sentences": 4
+   },
+   {
+    "type": "구절에 쓰인 표현법 이름 한 낱말로 쓰기(반어법·역설법)",
+    "count": 3,
+    "difficulty": "hard",
+    "answer_form": "text",
+    "passage_max_sentences": 2
+   }
+  ],
+  "difficulty_mix": {
+   "easy": 5,
+   "medium": 9,
+   "hard": 6
+  },
+  "out_of_scope": [
+   "실제 문학 작품 인용(교과서·수능·EBS 수록작 포함)",
+   "한국 문학사 시대 구분(공통국어2 [10공국2-05-01] 몫)",
+   "고전 시가 형식(시조·가사) 세부",
+   "작가 이름·작품명 암기"
+  ],
+  "notes": "시는 6행 이내(passage_max_sentences를 행 수로 읽는다), 소설·극 장면은 6문장 이내로 모두 새로 쓴다. 실제 작품과 닮은 문장·제목이 나오지 않게 생성 단계에서 검토한다. 해석이 갈리는 문항(주제·정서)은 오답 보기를 명백히 틀리게 만든다."
+ }
+]

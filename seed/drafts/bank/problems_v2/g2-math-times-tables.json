@@ -1,0 +1,744 @@
+[
+ {
+  "id": "g2-math-times-tables-01",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-10]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "easy",
+  "problem_type": "몇씩 몇 묶음·몇의 몇 배를 곱셈으로 구하기",
+  "targets_misconception": "같은 수를 여러 번 묶은 상황에서 두 수를 곱하지 않고 더함",
+  "text": "연필이 3자루씩 5묶음 있어요.\n연필은 모두 몇 자루인가요?\n(단위 없이 숫자만)",
+  "expr": "3*5",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "15",
+   "accepted": [
+    "15"
+   ]
+  },
+  "hint1": "한 묶음에 연필이 몇 자루이고, 묶음은 몇 개인지 찾아보세요.",
+  "hint2": "같은 수가 여러 번 있으면 곱셈으로 세요. 3을 몇 번 더하는 것과 같은지 생각해 보세요.",
+  "after_hint2": "3 × 5를 3단으로 계산하기",
+  "solution": "3자루씩 5묶음은 3 × 5 = 15라서 연필은 15자루예요. 3 + 5 = 8처럼 두 수를 더하면 틀려요.",
+  "forbidden": [
+   "15",
+   "십오",
+   "열다섯"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-02",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-10]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "easy",
+  "problem_type": "몇씩 몇 묶음·몇의 몇 배를 곱셈으로 구하기",
+  "targets_misconception": "같은 수를 여러 번 묶은 상황에서 두 수를 곱하지 않고 더함",
+  "text": "4의 7배는 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "4*7",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "28",
+   "accepted": [
+    "28"
+   ]
+  },
+  "hint1": "'4의 7배'는 4를 몇 번 더한 것인지 생각해 보세요.",
+  "hint2": "4의 7배는 4 × 7로 써요. 4단을 4 × 1부터 차례로 외워 보세요.",
+  "after_hint2": "4단을 일곱 번째까지 외워 값 구하기",
+  "solution": "4의 7배는 4 × 7 = 28이에요. 4 + 7 = 11은 두 수를 더한 값이라 틀려요.",
+  "forbidden": [
+   "28",
+   "이십팔",
+   "스물여덟"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-03",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-10]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "easy",
+  "problem_type": "몇씩 몇 묶음·몇의 몇 배를 곱셈으로 구하기",
+  "targets_misconception": "같은 수를 여러 번 묶은 상황에서 두 수를 곱하지 않고 더함",
+  "text": "의자가 한 줄에 5개씩 있어요.\n6줄이면 의자는 몇 개인가요?\n(단위 없이 숫자만)",
+  "expr": "5*6",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "30",
+   "accepted": [
+    "30"
+   ]
+  },
+  "hint1": "줄마다 의자가 몇 개이고, 줄은 몇 개인가요?",
+  "hint2": "5씩 뛰어 세기를 줄 수만큼 해 보세요. 5, 10, 15처럼 세어 가면 돼요.",
+  "after_hint2": "5씩 남은 줄만큼 더 뛰어 세거나 5 × 6 계산하기",
+  "solution": "5개씩 6줄은 5 × 6 = 30이라서 의자는 30개예요. 5 + 6 = 11처럼 더하면 틀려요.",
+  "forbidden": [
+   "30",
+   "삼십",
+   "서른"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-04",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "easy",
+  "problem_type": "곱셈구구(2~9단) 값 구하기",
+  "targets_misconception": "이웃한 곱셈구구 값을 헷갈림(예: 7 × 8과 7 × 9)",
+  "text": "7 × 8은 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "7*8",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "56",
+   "accepted": [
+    "56"
+   ]
+  },
+  "hint1": "7단을 7 × 1부터 외워 보세요. 7 × 8은 7단의 몇 번째 값인가요?",
+  "hint2": "7 × 8은 7을 8번 더한 값이에요. 7 × 4 = 28을 두 번 더해도 같아요.",
+  "after_hint2": "28과 28을 더하거나 7단을 끝까지 외워 값 구하기",
+  "solution": "7 × 4 = 28이고 7 × 8은 28 + 28 = 56이에요. 7 × 9 = 63이나 7 × 7 = 49와 헷갈리지 않게 해요.",
+  "forbidden": [
+   "56",
+   "오십육",
+   "쉰여섯"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-05",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "easy",
+  "problem_type": "곱셈구구(2~9단) 값 구하기",
+  "targets_misconception": "이웃한 곱셈구구 값을 헷갈림(예: 7 × 8과 7 × 9)",
+  "text": "9 × 6의 값을 구해 보세요.\n(단위 없이 숫자만)",
+  "expr": "9*6",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "54",
+   "accepted": [
+    "54"
+   ]
+  },
+  "hint1": "9단을 9 × 1부터 차례로 외우면 9 × 6에 닿아요. 몇 번째 값까지 외워야 할까요?",
+  "hint2": "9 × 5 = 45예요. 9 × 6은 9 × 5보다 얼마나 더 큰지 생각해 보세요.",
+  "after_hint2": "45에 9를 더해 9 × 6 구하기",
+  "solution": "9 × 5 = 45이고 9 × 6은 45 + 9 = 54예요. 9 × 7 = 63과 헷갈리지 않게 해요.",
+  "forbidden": [
+   "54",
+   "오십사",
+   "쉰넷"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-06",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "easy",
+  "problem_type": "곱셈구구(2~9단) 값 구하기",
+  "targets_misconception": "",
+  "text": "2 × 9와 9 × 2는 값이 같아요.\n그 값은 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "2*9",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "18",
+   "accepted": [
+    "18"
+   ]
+  },
+  "hint1": "두 식 가운데 더 외우기 쉬운 단을 골라 보세요.",
+  "hint2": "2 × 9는 2를 9번 더한 값이에요. 2씩 뛰어 세기를 해 보세요.",
+  "after_hint2": "2씩 아홉 번 뛰어 세어 값 구하기",
+  "solution": "2 × 9 = 18이에요. 곱하는 두 수의 순서를 바꿔도 곱은 같아서 9 × 2도 18이에요.",
+  "forbidden": [
+   "18",
+   "십팔",
+   "열여덟"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-07",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "medium",
+  "problem_type": "0과 1의 곱이 섞인 점수·곱의 합 구하기",
+  "targets_misconception": "어떤 수에 0을 곱한 값을 그 수 그대로로 생각함",
+  "text": "고리 던지기를 했어요.\n0점에 6번, 3점에 4번 걸렸어요.\n점수는 모두 몇 점인가요?\n(단위 없이 숫자만)",
+  "expr": "0*6+3*4",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "12",
+   "accepted": [
+    "12"
+   ]
+  },
+  "hint1": "0점에 걸린 점수와 3점에 걸린 점수를 따로 곱셈식으로 써 보세요.",
+  "hint2": "0점에 여러 번 걸려도 0을 여러 번 더한 것이라 0 × 6 = 0이에요. 이제 3점 쪽 점수를 구해 보세요.",
+  "after_hint2": "3 × 4를 계산하고 0점 쪽 점수와 더하기",
+  "solution": "0 × 6 = 0, 3 × 4 = 12, 0 + 12 = 12라서 12점이에요. 0점에 6번을 6점으로 세면 18점이 되어 틀려요.",
+  "forbidden": [
+   "12",
+   "십이",
+   "열두"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-08",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "medium",
+  "problem_type": "0과 1의 곱이 섞인 점수·곱의 합 구하기",
+  "targets_misconception": "어떤 수에 1을 곱한 값을 1로 생각함",
+  "text": "과녁 맞히기를 했어요.\n1점 칸에 7번, 5점 칸에 2번 맞혔어요.\n점수는 모두 몇 점인가요?\n(단위 없이 숫자만)",
+  "expr": "1*7+5*2",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "17",
+   "accepted": [
+    "17"
+   ]
+  },
+  "hint1": "칸마다 '점수 × 맞힌 횟수'로 곱셈식을 세워 보세요.",
+  "hint2": "5점 칸 점수는 5 × 2 = 10이에요. 1점 칸 점수는 1을 7번 더한 것과 같아요.",
+  "after_hint2": "1 × 7을 구해 10과 더하기",
+  "solution": "1 × 7 = 7, 5 × 2 = 10, 7 + 10 = 17이라서 17점이에요. 1 × 7을 1로 보면 11점이 되어 틀려요.",
+  "forbidden": [
+   "17",
+   "십칠",
+   "열일곱"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-09",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "medium",
+  "problem_type": "0과 1의 곱이 섞인 점수·곱의 합 구하기",
+  "targets_misconception": "어떤 수에 0을 곱한 값을 그 수 그대로로 생각함",
+  "text": "카드에 곱셈식 네 개가 있어요.\n2 × 0, 7 × 1, 1 × 4, 0 × 5\n네 곱을 모두 더하면 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "2*0+7*1+1*4+0*5",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "11",
+   "accepted": [
+    "11"
+   ]
+  },
+  "hint1": "0이 들어 있는 식과 1이 들어 있는 식을 나누어 보세요.",
+  "hint2": "0을 곱하거나 0에 어떤 수를 곱하면 곱은 언제나 0이에요. 그래서 2 × 0과 0 × 5는 0이에요. 남은 두 식의 곱을 구해 보세요.",
+  "after_hint2": "7 × 1과 1 × 4의 곱을 구해 더하기",
+  "solution": "2 × 0 = 0, 7 × 1 = 7, 1 × 4 = 4, 0 × 5 = 0이라서 0 + 7 + 4 + 0 = 11이에요. 0을 곱한 식을 2나 5로 보면 18이 되어 틀려요.",
+  "forbidden": [
+   "11",
+   "십일",
+   "열하나"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-10",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "medium",
+  "problem_type": "□가 있는 곱셈식에서 □ 구하기(조건에 맞는 가장 큰 □ 포함)",
+  "targets_misconception": "",
+  "text": "□에 알맞은 수를 구해 보세요.\n3 × □ = 4 × 6\n(단위 없이 숫자만)",
+  "expr": "8",
+  "verify": "manual",
+  "verify_note": "□=1~9 대입: 3×1=3, 3×2=6, 3×3=9, 3×4=12, 3×5=15, 3×6=18, 3×7=21, 3×8=24, 3×9=27. 4×6=24와 같은 것은 □=8 하나.",
+  "answer": {
+   "kind": "value",
+   "value": "8",
+   "accepted": [
+    "8"
+   ]
+  },
+  "hint1": "오른쪽 4 × 6을 먼저 계산해 보세요.",
+  "hint2": "4 × 6 = 24예요. 이제 3단에서 곱이 24가 되는 곳을 찾아보세요.",
+  "after_hint2": "3단을 외워 곱이 24가 되는 수 찾기",
+  "solution": "4 × 6 = 24이고 3 × 8 = 24라서 □는 8이에요.",
+  "forbidden": [
+   "8",
+   "여덟"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-11",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "medium",
+  "problem_type": "□가 있는 곱셈식에서 □ 구하기(조건에 맞는 가장 큰 □ 포함)",
+  "targets_misconception": "□가 있는 곱셈식에서 곱셈구구를 떠올리지 않고 두 수를 빼서 □를 구함",
+  "text": "□ × 4 = 36이에요.\n□에 알맞은 수는 무엇인가요?\n(단위 없이 숫자만)",
+  "expr": "9",
+  "verify": "manual",
+  "verify_note": "□=1~9 대입: 1×4=4, 2×4=8, 3×4=12, 4×4=16, 5×4=20, 6×4=24, 7×4=28, 8×4=32, 9×4=36. 36이 되는 것은 □=9 하나.",
+  "answer": {
+   "kind": "value",
+   "value": "9",
+   "accepted": [
+    "9"
+   ]
+  },
+  "hint1": "□를 4번 더하면 36이 된다는 뜻이에요. 몇 단 곱셈구구를 떠올리면 될까요?",
+  "hint2": "36에서 4를 빼서는 □를 찾을 수 없어요. 4단을 4 × 1부터 외우며 곱이 36에 닿는 곳을 찾아보세요.",
+  "after_hint2": "4단을 외워 곱이 36이 되는 수 찾기",
+  "solution": "4 × 9 = 36이라서 □ × 4 = 36의 □는 9예요. 36 − 4 = 32처럼 빼면 틀려요.",
+  "forbidden": [
+   "9",
+   "아홉"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-12",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "medium",
+  "problem_type": "□가 있는 곱셈식에서 □ 구하기(조건에 맞는 가장 큰 □ 포함)",
+  "targets_misconception": "조건에 맞는 수를 찾을 때 기준과 같거나 넘는 곱까지 답으로 고름",
+  "text": "7 × □의 값이 40보다 작아요.\n□에는 1부터 9까지의 수가 들어가요.\n들어갈 수 있는 가장 큰 수는 무엇인가요?\n(단위 없이 숫자만)",
+  "expr": "5",
+  "verify": "manual",
+  "verify_note": "□=1~9 대입: 7,14,21,28,35는 40보다 작음(□=1~5), 42,49,56,63은 40보다 큼(□=6~9). 가장 큰 □는 5.",
+  "answer": {
+   "kind": "value",
+   "value": "5",
+   "accepted": [
+    "5"
+   ]
+  },
+  "hint1": "7단을 차례로 외우면서 곱이 40보다 작은지 하나씩 보세요.",
+  "hint2": "곱이 40보다 작아야 하니 40과 같거나 큰 곱은 안 돼요. 7단에서 40 바로 앞의 곱과 바로 뒤의 곱을 찾아 견주어 보세요.",
+  "after_hint2": "7단에서 40 앞뒤의 곱을 찾고, 40보다 작은 쪽의 □ 고르기",
+  "solution": "7 × 5 = 35는 40보다 작고, 7 × 6 = 42는 40보다 커요. 그래서 □에 들어갈 수 있는 가장 큰 수는 5예요. 42가 되는 수를 고르면 40보다 커서 틀려요.",
+  "forbidden": [
+   "5",
+   "다섯"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-13",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "medium",
+  "problem_type": "□가 있는 곱셈식에서 □ 구하기(조건에 맞는 가장 큰 □ 포함)",
+  "targets_misconception": "□가 있는 곱셈식에서 곱셈구구를 떠올리지 않고 두 수를 빼서 □를 구함",
+  "text": "공책이 한 묶음에 9권씩 있어요.\n27권이 되려면 몇 묶음이 있어야 하나요?\n(단위 없이 숫자만)",
+  "expr": "3",
+  "verify": "manual",
+  "verify_note": "□=1~9 대입: 9×1=9, 9×2=18, 9×3=27, 9×4=36 … 9×9=81. 27이 되는 것은 □=3 하나.",
+  "answer": {
+   "kind": "value",
+   "value": "3",
+   "accepted": [
+    "3"
+   ]
+  },
+  "hint1": "9권씩 몇 묶음이면 27권인지 곱셈식으로 써 보세요. 모르는 묶음 수는 □로 써요.",
+  "hint2": "식으로 쓰면 9 × □ = 27이에요. 9권, 18권처럼 한 묶음씩 늘려 가며 27권이 될 때까지 세어 보세요.",
+  "after_hint2": "9단을 외워 곱이 27이 되는 □ 찾기",
+  "solution": "9 × 3 = 27이라서 3묶음이에요. 27 − 9 = 18처럼 빼면 틀려요.",
+  "forbidden": [
+   "3",
+   "셋"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-14",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-10]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "medium",
+  "problem_type": "곱셈구구 두 걸음 문장제(곱하고 더하기·빼기, 몇 배보다 몇 더)",
+  "targets_misconception": "문장제에서 곱만 구하고 더하거나 빼는 마지막 걸음을 빠뜨림",
+  "text": "귤이 한 봉지에 7개씩 4봉지 있어요.\n그중 6개를 먹었어요.\n남은 귤은 몇 개인가요?\n(단위 없이 숫자만)",
+  "expr": "7*4-6",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "22",
+   "accepted": [
+    "22"
+   ]
+  },
+  "hint1": "처음에 귤이 모두 몇 개였는지부터 구해 보세요.",
+  "hint2": "처음 귤은 7 × 4 = 28개예요. 먹은 귤만큼을 어떻게 해야 할지 생각해 보세요.",
+  "after_hint2": "28에서 6을 빼기",
+  "solution": "7 × 4 = 28, 28 − 6 = 22라서 남은 귤은 22개예요. 28에서 멈추면 먹은 귤을 빼지 않은 거예요.",
+  "forbidden": [
+   "22",
+   "이십이",
+   "스물둘",
+   "스물두"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-15",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-10]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "medium",
+  "problem_type": "곱셈구구 두 걸음 문장제(곱하고 더하기·빼기, 몇 배보다 몇 더)",
+  "targets_misconception": "문장제에서 곱만 구하고 더하거나 빼는 마지막 걸음을 빠뜨림",
+  "text": "꽃병 6개에 꽃을 3송이씩 꽂았어요.\n꽃이 2송이 남았어요.\n꽃은 모두 몇 송이인가요?\n(단위 없이 숫자만)",
+  "expr": "3*6+2",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "20",
+   "accepted": [
+    "20"
+   ]
+  },
+  "hint1": "꽃병에 꽂은 꽃과 남은 꽃을 나누어 생각해 보세요.",
+  "hint2": "꽃병에 꽂은 꽃은 3씩 6번이니 곱셈으로 구해요. 그다음 남은 꽃을 어떻게 할지 정해 보세요.",
+  "after_hint2": "3 × 6을 계산하고 남은 2송이를 더하기",
+  "solution": "꽃병에 꽂은 꽃은 3 × 6 = 18송이, 남은 꽃까지 18 + 2 = 20송이예요. 18에서 멈추면 남은 꽃을 빠뜨린 거예요.",
+  "forbidden": [
+   "20",
+   "이십",
+   "스물"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-16",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-10]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "medium",
+  "problem_type": "곱셈구구 두 걸음 문장제(곱하고 더하기·빼기, 몇 배보다 몇 더)",
+  "targets_misconception": "같은 수를 여러 번 묶은 상황에서 두 수를 곱하지 않고 더함",
+  "text": "누나는 구슬이 5개예요.\n나는 누나의 4배보다 3개 더 많아요.\n나는 구슬이 몇 개인가요?\n(단위 없이 숫자만)",
+  "expr": "5*4+3",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "23",
+   "accepted": [
+    "23"
+   ]
+  },
+  "hint1": "'누나의 4배'와 '3개 더'를 나누어 차례로 구해 보세요.",
+  "hint2": "누나의 4배는 5를 4번 더한 수예요. 5 + 4처럼 더하지 말고 곱셈으로 먼저 구해 보세요.",
+  "after_hint2": "5 × 4를 구하고 3을 더하기",
+  "solution": "누나의 4배는 5 × 4 = 20이고, 3개 더 많으니 20 + 3 = 23개예요. 5 + 4 + 3 = 12처럼 모두 더하면 틀려요.",
+  "forbidden": [
+   "23",
+   "이십삼",
+   "스물셋",
+   "스물세"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-17",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-10]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "hard",
+  "problem_type": "세 걸음 이상 또는 조건 둘인 곱셈구구 문제(잘못 계산한 식, 곱이 같은 두 수, 수 카드의 곱, 곱한 뒤 더하고 빼기)",
+  "targets_misconception": "잘못 계산한 문제에서 어떤 수만 구하고 바르게 계산하는 걸음을 빠뜨림",
+  "text": "어떤 수에 6을 곱해야 하는데\n잘못해서 6을 더했더니 13이 되었어요.\n바르게 계산하면 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "(13-6)*6",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "42",
+   "accepted": [
+    "42"
+   ]
+  },
+  "hint1": "먼저 '어떤 수'를 찾아야 해요. 잘못한 계산을 식으로 써 보세요.",
+  "hint2": "잘못한 식은 '어떤 수 + 6 = 13'이에요. 어떤 수를 구한 다음에는 거기서 멈추지 말고 원래 하려던 곱셈을 해요.",
+  "after_hint2": "13 − 6으로 어떤 수를 구하고, 그 수에 6을 곱하기",
+  "solution": "어떤 수 + 6 = 13이니 어떤 수는 13 − 6 = 7이에요. 바르게 계산하면 7 × 6 = 42예요. 7에서 멈추면 바른 계산을 하지 않은 거예요.",
+  "forbidden": [
+   "42",
+   "사십이",
+   "마흔둘",
+   "마흔두"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-18",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "hard",
+  "problem_type": "세 걸음 이상 또는 조건 둘인 곱셈구구 문제(잘못 계산한 식, 곱이 같은 두 수, 수 카드의 곱, 곱한 뒤 더하고 빼기)",
+  "targets_misconception": "",
+  "text": "두 수를 곱했더니 24가 되었어요.\n두 수는 모두 1부터 9까지의 수예요.\n두 수의 합 중 가장 작은 합은 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "4+6",
+  "verify": "manual",
+  "verify_note": "a×b=24, a·b는 1~9 전수: (3,8)(4,6)(6,4)(8,3)만 됨(1×24, 2×12는 범위 밖). 합 11, 10 → 가장 작은 합 10.",
+  "answer": {
+   "kind": "value",
+   "value": "10",
+   "accepted": [
+    "10"
+   ]
+  },
+  "hint1": "곱셈구구에서 곱이 24가 되는 식을 모두 찾아보세요.",
+  "hint2": "1부터 9까지의 수로 곱이 24가 되는 짝은 두 가지예요. 짝마다 두 수를 더해 보세요.",
+  "after_hint2": "곱이 24인 두 짝을 찾아 합을 구하고 더 작은 합 고르기",
+  "solution": "3 × 8 = 24, 4 × 6 = 24예요(순서만 바꾼 8 × 3, 6 × 4도 같은 짝). 3 + 8 = 11, 4 + 6 = 10이라서 가장 작은 합은 10이에요.",
+  "forbidden": [
+   "10"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-19",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-11]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "hard",
+  "problem_type": "세 걸음 이상 또는 조건 둘인 곱셈구구 문제(잘못 계산한 식, 곱이 같은 두 수, 수 카드의 곱, 곱한 뒤 더하고 빼기)",
+  "targets_misconception": "조건에 맞는 수를 찾을 때 기준과 같거나 넘는 곱까지 답으로 고름",
+  "text": "수 카드 2, 4, 7, 9 중 두 장을 골라 곱해요.\n50보다 작은 곱 중 가장 큰 곱은 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "4*9",
+  "verify": "manual",
+  "verify_note": "두 장 고르기 6가지 전수: 8, 14, 18, 28, 36, 63. 50보다 작은 곱은 8, 14, 18, 28, 36 → 가장 큰 곱 36.",
+  "answer": {
+   "kind": "value",
+   "value": "36",
+   "accepted": [
+    "36"
+   ]
+  },
+  "hint1": "두 장을 고르는 방법을 빠짐없이 적어 보세요. 모두 여섯 가지예요.",
+  "hint2": "곱이 50보다 큰 짝은 지워요. 7과 9를 고른 곱은 50보다 커요.",
+  "after_hint2": "남은 다섯 짝의 곱을 구해 50보다 작은 것 중 가장 큰 곱 고르기",
+  "solution": "2 × 4 = 8, 2 × 7 = 14, 2 × 9 = 18, 4 × 7 = 28, 4 × 9 = 36, 7 × 9 = 63이에요. 50보다 작은 곱 가운데 가장 큰 것은 36이에요. 63은 50보다 커서 안 돼요.",
+  "forbidden": [
+   "36",
+   "삼십육",
+   "서른여섯"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g2-math-times-tables-20",
+  "unit_id": "g2-math-times-tables",
+  "tag": "g2-math-times-tables",
+  "subject": "math",
+  "grade": 2,
+  "standard": {
+   "code": "[2수01-10]",
+   "curriculum": "2022",
+   "unit": "곱셈구구"
+  },
+  "difficulty": "hard",
+  "problem_type": "세 걸음 이상 또는 조건 둘인 곱셈구구 문제(잘못 계산한 식, 곱이 같은 두 수, 수 카드의 곱, 곱한 뒤 더하고 빼기)",
+  "targets_misconception": "문장제에서 곱만 구하고 더하거나 빼는 마지막 걸음을 빠뜨림",
+  "text": "사탕이 6개씩 5봉지, 낱개로 9개 있어요.\n친구 4명에게 8개씩 나누어 주었어요.\n남은 사탕은 몇 개인가요?\n(단위 없이 숫자만)",
+  "expr": "6*5+9-4*8",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "7",
+   "accepted": [
+    "7"
+   ]
+  },
+  "hint1": "처음 사탕 수와 친구에게 준 사탕 수를 따로 구해 보세요.",
+  "hint2": "친구에게 준 사탕은 4 × 8 = 32개예요. 처음 사탕은 봉지에 든 사탕과 낱개를 더한 수예요.",
+  "after_hint2": "6 × 5에 9를 더해 처음 사탕 수를 구하고, 거기서 32를 빼기",
+  "solution": "처음 사탕은 6 × 5 = 30에 낱개 9개를 더해 39개예요. 친구에게 준 사탕은 4 × 8 = 32개라서 39 − 32 = 7개가 남아요. 30에서 32를 빼려고 하거나 낱개를 빠뜨리면 틀려요.",
+  "forbidden": [
+   "7",
+   "일곱"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ }
+]

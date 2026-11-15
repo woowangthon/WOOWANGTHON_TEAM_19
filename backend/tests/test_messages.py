@@ -10,7 +10,7 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import func, select
 
-from app.api import build_excerpt, get_llm
+from app.api import CRISIS_REPLY, get_llm
 from app.db import get_db
 from app.llm import Reply, ReplyRequest, ScriptedAdapter
 from app.main import create_app
@@ -219,17 +219,16 @@ async def test_red_keyword_goes_to_crisis_without_llm(client, db_session, studen
     assert r.status_code == 200
     body = r.json()
     assert body["state"] == "crisis"
-    assert body["reply"] == "지금 한 말이 걱정돼서, 어른에게 알릴게"
+    assert body["reply"] == CRISIS_REPLY
     assert body["judge"] is None
     assert body["crisis"]["hotlines"] == ["109", "1388"]
-    assert R1 in body["crisis"]["excerpt"]
+    assert body["crisis"]["excerpt"] is None  # 아이 말을 만들지 않는다(11-15 04:30 성호)
     assert len(spy.calls) == calls_before  # LLM 호출 없음
 
     alerts = (await db_session.scalars(select(Alert).where(Alert.session_id == sid))).all()
     assert len(alerts) == 1
     assert alerts[0].trigger == "K01" and alerts[0].student_id == student.id
-    assert alerts[0].excerpt == body["crisis"]["excerpt"]
-    assert len(alerts[0].excerpt) <= 300
+    assert alerts[0].excerpt == ""  # 저장도 하지 않는다(칸은 남김, 표 변경 없음)
 
     row = await db_session.get(Session, sid)
     assert row is not None
@@ -301,17 +300,3 @@ async def test_chat_past_deadline_moves_to_bridge_first(client, db_session, stud
     body = (await _send(client, student, sid, kind="text", text="재밌었어")).json()
     assert body["state"] == "bridge"
     assert spy.calls[-1].phase == "bridge"
-
-
-def test_build_excerpt_keeps_tail_within_300():
-    msgs = [("child", "가" * 200), ("mentor", "나" * 200), ("child", R1)]
-    excerpt = build_excerpt(msgs)
-    assert len(excerpt) <= 300
-    assert excerpt.endswith(R1)
-
-
-def test_build_excerpt_uses_last_three_turns():
-    msgs = [("child", "하나"), ("mentor", "둘"), ("child", "셋"), ("mentor", "넷"), ("child", R1)]
-    excerpt = build_excerpt(msgs)
-    assert "하나" not in excerpt and "둘" not in excerpt
-    assert "셋" in excerpt and "넷" in excerpt and R1 in excerpt

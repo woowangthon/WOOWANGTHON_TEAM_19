@@ -1,0 +1,726 @@
+[
+ {
+  "id": "g3-math-division-01",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-05]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "easy",
+  "problem_type": "곱셈구구로 나눗셈의 몫 구하기(나누어떨어지는 계산)",
+  "targets_misconception": "",
+  "text": "54 ÷ 9의 몫은 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "54/9",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "6",
+   "accepted": [
+    "6"
+   ]
+  },
+  "hint1": "나눗셈의 몫은 곱셈구구로 찾을 수 있어요. 몇 단을 떠올려야 할까요?",
+  "hint2": "9 × □ = 54가 되는 □가 몫이에요. 9단을 차례로 외우며 54가 나오는 곳을 찾아보세요.",
+  "after_hint2": "9단을 외워 곱이 54인 곱셈을 찾고 그 □를 몫으로 쓰기",
+  "solution": "9 × 6 = 54이므로 54 ÷ 9 = 6이에요. 몫은 6이에요.",
+  "forbidden": [
+   "6",
+   "여섯"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-02",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-05]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "easy",
+  "problem_type": "곱셈구구로 나눗셈의 몫 구하기(나누어떨어지는 계산)",
+  "targets_misconception": "",
+  "text": "40 ÷ 8 = □일 때 □는 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "40/8",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "5",
+   "accepted": [
+    "5"
+   ]
+  },
+  "hint1": "8에 어떤 수를 곱해야 40이 되는지 생각해 보면 어떨까요?",
+  "hint2": "8 × □ = 40으로 바꿔 쓸 수 있어요. 8단에서 곱의 일의 자리가 0인 곳을 찾아보세요.",
+  "after_hint2": "8단에서 일의 자리가 0인 곱을 찾아 곱하는 수 읽기",
+  "solution": "8 × 5 = 40이므로 40 ÷ 8 = 5예요.",
+  "forbidden": [
+   "5",
+   "다섯"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-03",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-05]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "easy",
+  "problem_type": "곱셈구구로 나눗셈의 몫 구하기(나누어떨어지는 계산)",
+  "targets_misconception": "",
+  "text": "63을 7로 나눈 몫을 구하세요.\n(단위 없이 숫자만)",
+  "expr": "63/7",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "9",
+   "accepted": [
+    "9"
+   ]
+  },
+  "hint1": "63 안에 7이 몇 번 들어가는지 묻는 문제예요. 어떤 곱셈구구를 쓰면 될까요?",
+  "hint2": "7 × □ = 63을 만족하는 □를 찾아요. 7단을 외우다가 63이 나오면 멈추세요.",
+  "after_hint2": "7단을 외워 63이 나오는 곱셈의 곱하는 수 찾기",
+  "solution": "7 × 9 = 63이므로 63 ÷ 7 = 9예요.",
+  "forbidden": [
+   "9",
+   "아홉"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-04",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-05]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "easy",
+  "problem_type": "똑같이 나누는 상황 문장제(곱셈구구 범위, 나누어떨어짐)",
+  "targets_misconception": "",
+  "text": "색종이 35장을 5명이 똑같이 나누어 가지려고 해요. 한 명이 몇 장씩 가지게 되나요?\n(단위 없이 숫자만)",
+  "expr": "35/5",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "7",
+   "accepted": [
+    "7"
+   ]
+  },
+  "hint1": "'똑같이 나누어' 가진다는 말은 어떤 셈으로 나타낼 수 있을까요?",
+  "hint2": "전체 색종이 수를 사람 수로 나누는 식 35 ÷ 5를 세울 수 있어요. 몫은 5단 곱셈구구로 찾아요.",
+  "after_hint2": "5단에서 곱이 35인 곱셈을 찾아 한 명 몫 정하기",
+  "solution": "35 ÷ 5 = 7(5 × 7 = 35)이에요. 한 명이 7장씩 가져요.",
+  "forbidden": [
+   "7",
+   "일곱"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-05",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-05]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "easy",
+  "problem_type": "똑같이 나누는 상황 문장제(곱셈구구 범위, 나누어떨어짐)",
+  "targets_misconception": "똑같이 나누는 상황을 곱셈이나 뺄셈으로 계산함",
+  "text": "쿠키 48개를 한 봉지에 6개씩 담으려고 해요. 봉지는 몇 개 있어야 하나요?\n(단위 없이 숫자만)",
+  "expr": "48/6",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "8",
+   "accepted": [
+    "8"
+   ]
+  },
+  "hint1": "6개씩 한 봉지에 담을 때마다 남은 쿠키는 어떻게 바뀌나요?",
+  "hint2": "6개씩 몇 번 덜어 내야 48개가 다 없어지는지 세면 돼요. 이것은 48에서 6을 한 번 빼는 셈이 아니라 48 ÷ 6이에요.",
+  "after_hint2": "6단에서 곱이 48인 곱셈을 찾아 봉지 수 정하기",
+  "solution": "48 ÷ 6 = 8(6 × 8 = 48)이라 봉지 8개가 있어야 해요. 48 − 6 = 42나 48 × 6으로 계산하면 틀려요.",
+  "forbidden": [
+   "8",
+   "여덟"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-06",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-05]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "easy",
+  "problem_type": "똑같이 나누는 상황 문장제(곱셈구구 범위, 나누어떨어짐)",
+  "targets_misconception": "",
+  "text": "연필 36자루를 4모둠에 똑같이 나누어 주려고 해요. 한 모둠에 몇 자루씩 주면 되나요?\n(단위 없이 숫자만)",
+  "expr": "36/4",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "9",
+   "accepted": [
+    "9"
+   ]
+  },
+  "hint1": "전체 연필 수와 나누어 줄 모둠 수를 찾아보세요. 어떤 식이 될까요?",
+  "hint2": "4 × □ = 36이 되는 □가 한 모둠에 줄 연필 수예요. 4단을 외워 보세요.",
+  "after_hint2": "4단에서 곱이 36인 곱셈을 찾아 □ 정하기",
+  "solution": "36 ÷ 4 = 9(4 × 9 = 36)라서 한 모둠에 9자루씩 줘요.",
+  "forbidden": [
+   "9",
+   "아홉"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-07",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-05]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "medium",
+  "problem_type": "곱셈과 나눗셈의 관계로 □ 또는 어떤 수 구하기",
+  "targets_misconception": "□가 있는 나눗셈 식에서 곱셈과 나눗셈의 관계를 거꾸로 써서 □를 구함",
+  "text": "□ ÷ 6 = 7일 때, □에 알맞은 수를 구하세요.\n(단위 없이 숫자만)",
+  "expr": "6*7",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "42",
+   "accepted": [
+    "42"
+   ]
+  },
+  "hint1": "□는 나누어지는 수예요. 이 나눗셈 식을 곱셈 식으로 바꿔 볼 수 있을까요?",
+  "hint2": "나누는 수와 몫을 곱하면 나누어지는 수가 나와요. 이 식에서 나누는 수와 몫이 각각 무엇인지 찾아보세요.",
+  "after_hint2": "나누는 수와 몫을 찾아 둘을 곱하기",
+  "solution": "6 × 7 = 42이므로 □ = 42예요. 확인: 42 ÷ 6 = 7. 7 ÷ 6이나 6 ÷ 7처럼 나누면 □를 구할 수 없어요.",
+  "forbidden": [
+   "42",
+   "사십이",
+   "마흔둘"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-08",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-05]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "medium",
+  "problem_type": "곱셈과 나눗셈의 관계로 □ 또는 어떤 수 구하기",
+  "targets_misconception": "□가 있는 나눗셈 식에서 곱셈과 나눗셈의 관계를 거꾸로 써서 □를 구함",
+  "text": "56 ÷ □ = 8에서 □를 구하세요.\n(단위 없이 숫자만)",
+  "expr": "56/8",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "7",
+   "accepted": [
+    "7"
+   ]
+  },
+  "hint1": "□는 나누는 수예요. 56을 몇으로 나누어야 8이 나올까요?",
+  "hint2": "56 ÷ □ = 8은 □ × 8 = 56과 같은 뜻이에요. 8단에서 곱이 56인 칸을 찾아보세요.",
+  "after_hint2": "8단에서 곱이 56인 곱셈을 찾아 □ 정하기",
+  "solution": "8 × 7 = 56이므로 56 ÷ 7 = 8이고 □ = 7이에요. 56 × 8처럼 곱하면 틀려요.",
+  "forbidden": [
+   "7",
+   "일곱"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-09",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-05]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "medium",
+  "problem_type": "곱셈과 나눗셈의 관계로 □ 또는 어떤 수 구하기",
+  "targets_misconception": "□가 있는 나눗셈 식에서 곱셈과 나눗셈의 관계를 거꾸로 써서 □를 구함",
+  "text": "어떤 수에 3을 곱해야 하는데, 잘못하여 3으로 나누었더니 몫이 8이 되었어요. 바르게 계산한 값은 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "(3*8)*3",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "72",
+   "accepted": [
+    "72"
+   ]
+  },
+  "hint1": "먼저 '어떤 수'를 알아야 해요. 잘못 계산한 식을 □를 써서 세워 볼까요?",
+  "hint2": "잘못 계산한 식은 □ ÷ 3 = 8이에요. 곱셈과 나눗셈의 관계로 □를 먼저 구해 보세요.",
+  "after_hint2": "□ = 3 × 8로 어떤 수를 구한 뒤 그 수에 3을 곱하기",
+  "solution": "□ ÷ 3 = 8이므로 어떤 수는 3 × 8 = 24예요. 바르게 계산하면 24 × 3 = 72예요. 어떤 수를 구하는 데서 멈추면 안 돼요.",
+  "forbidden": [
+   "72",
+   "칠십이",
+   "일흔둘"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-10",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "medium",
+  "problem_type": "나머지가 있는 (두 자리 수)÷(한 자리 수)에서 몫 또는 나머지 하나만 구하기",
+  "targets_misconception": "나머지를 묻는데 몫을 답하거나, 몫을 묻는데 나머지를 답함",
+  "text": "38 ÷ 5의 나머지를 구하세요.\n(단위 없이 숫자만)",
+  "expr": "38-5*7",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "3",
+   "accepted": [
+    "3"
+   ]
+  },
+  "hint1": "38이 5단 곱셈구구에 나오는 수인지 먼저 살펴보세요. 38을 넘지 않는 5단의 곱은 무엇일까요?",
+  "hint2": "5 × □에서 38을 넘지 않는 가장 큰 곱을 고르면 그 □가 몫이에요. 이 문제가 묻는 것은 38에서 그 곱을 빼고 남는 수예요.",
+  "after_hint2": "38을 넘지 않는 가장 큰 5단 곱을 찾아 38에서 빼기",
+  "solution": "5 × 7 = 35, 38 − 35 = 3이므로 38 ÷ 5 = 7 … 3이에요. 나머지는 3이에요. 몫인 7을 쓰면 틀려요.",
+  "forbidden": [
+   "3"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-11",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "medium",
+  "problem_type": "나머지가 있는 (두 자리 수)÷(한 자리 수)에서 몫 또는 나머지 하나만 구하기",
+  "targets_misconception": "나머지가 나누는 수보다 큰데도 그대로 둠",
+  "text": "58 ÷ 9 = □ … ○에서 □에 알맞은 수를 구하세요.\n(단위 없이 숫자만)",
+  "expr": "(58-4)/9",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "6",
+   "accepted": [
+    "6"
+   ]
+  },
+  "hint1": "9단의 곱 가운데 58보다 작은 것들을 떠올려 보세요. 그중 어느 것을 골라야 할까요?",
+  "hint2": "고른 곱을 58에서 뺀 ○는 9보다 작아야 해요. ○가 9와 같거나 크면 몫을 더 키울 수 있어요.",
+  "after_hint2": "9단에서 58을 넘지 않는 가장 큰 곱을 찾아 그 곱셈의 곱하는 수를 □로 정하기",
+  "solution": "9 × 6 = 54, 58 − 54 = 4예요. 4는 9보다 작으니 58 ÷ 9 = 6 … 4이고 □는 6이에요. 9 × 5 = 45로 하면 ○가 13이 되어 9보다 커서 틀려요.",
+  "forbidden": [
+   "6",
+   "여섯"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-12",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "medium",
+  "problem_type": "나머지가 있는 (두 자리 수)÷(한 자리 수)에서 몫 또는 나머지 하나만 구하기",
+  "targets_misconception": "십의 자리를 나누고 남은 수를 일의 자리와 합쳐 나누지 않음",
+  "text": "86 ÷ 3의 몫은 두 자리 수예요. 몫을 구하세요.\n(단위 없이 숫자만)",
+  "expr": "(86-2)/3",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "28",
+   "accepted": [
+    "28"
+   ]
+  },
+  "hint1": "86을 십의 자리 8과 일의 자리 6으로 나누어 볼까요? 어느 자리부터 3으로 나누어야 할까요?",
+  "hint2": "십의 자리 8을 3으로 나누면 남는 수가 생겨요. 그 남은 수를 일의 자리 6과 합쳐 다시 3으로 나누어야 해요.",
+  "after_hint2": "8 ÷ 3의 몫과 나머지를 구하고, 나머지와 6을 합친 수를 3으로 나누어 몫 두 자리 완성하기",
+  "solution": "8 ÷ 3 = 2 … 2라서 몫의 십의 자리는 2예요. 남은 2(20)와 6을 합친 26을 3으로 나누면 8 … 2예요. 그래서 86 ÷ 3 = 28 … 2, 몫은 28이에요. 남은 2를 내리지 않고 6 ÷ 3만 하면 22가 되어 틀려요.",
+  "forbidden": [
+   "28",
+   "이십팔",
+   "스물여덟"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-13",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "medium",
+  "problem_type": "나머지가 있는 (두 자리 수)÷(한 자리 수)에서 몫 또는 나머지 하나만 구하기",
+  "targets_misconception": "십의 자리를 나누고 남은 수를 일의 자리와 합쳐 나누지 않음",
+  "text": "74를 4로 나눈 나머지는 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "74-4*18",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "2",
+   "accepted": [
+    "2"
+   ]
+  },
+  "hint1": "74는 4단 곱셈구구 범위를 넘어요. 십의 자리 7부터 4로 나누어 볼까요?",
+  "hint2": "7을 4로 나누고 남은 것은 버리지 않고 일의 자리 4와 합쳐서 다시 나눠요. 맨 마지막에 남는 수를 찾으면 돼요.",
+  "after_hint2": "7 ÷ 4의 나머지를 일의 자리와 합친 수를 4로 나누어 마지막 나머지 구하기",
+  "solution": "7 ÷ 4 = 1 … 3이에요. 남은 3(30)과 4를 합친 34를 4로 나누면 8 … 2예요. 74 ÷ 4 = 18 … 2이므로 나머지는 2예요. 확인: 4 × 18 + 2 = 74. 십의 자리에서 남은 3을 나머지로 쓰거나 4 ÷ 4만 하면 틀려요.",
+  "forbidden": [
+   "2"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-14",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "medium",
+  "problem_type": "나머지가 있는 나눗셈 문장제에서 몫 또는 나머지 하나만 구하기",
+  "targets_misconception": "나머지를 묻는데 몫을 답하거나, 몫을 묻는데 나머지를 답함",
+  "text": "사탕 53개를 친구 7명에게 똑같이 나누어 주려고 해요. 한 명에게 될 수 있는 대로 많이 주면, 남는 사탕은 몇 개인가요?\n(단위 없이 숫자만)",
+  "expr": "53-7*7",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "4",
+   "accepted": [
+    "4"
+   ]
+  },
+  "hint1": "똑같이 나누어 주고 남는 것을 묻는 문제예요. 어떤 나눗셈 식을 세울 수 있을까요?",
+  "hint2": "53 ÷ 7을 계산하면 몫과 나머지가 나와요. 이 문제가 묻는 것이 둘 가운데 무엇인지 문장 끝을 다시 읽어 보세요.",
+  "after_hint2": "7단에서 53을 넘지 않는 가장 큰 곱을 찾아 53에서 빼기",
+  "solution": "7 × 7 = 49, 53 − 49 = 4이므로 53 ÷ 7 = 7 … 4예요. 한 명에게 7개씩 주고 4개가 남아요. 몫 7은 한 명이 받는 수라서 답이 아니에요.",
+  "forbidden": [
+   "4"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-15",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "medium",
+  "problem_type": "나머지가 있는 나눗셈 문장제에서 몫 또는 나머지 하나만 구하기",
+  "targets_misconception": "나머지가 나누는 수보다 큰데도 그대로 둠",
+  "text": "귤 61개를 한 상자에 8개씩 담았어요. 귤이 8개 가득 찬 상자는 몇 상자인가요?\n(단위 없이 숫자만)",
+  "expr": "(61-5)/8",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "7",
+   "accepted": [
+    "7"
+   ]
+  },
+  "hint1": "가득 찬 상자 수는 61 ÷ 8의 몫과 나머지 가운데 어느 쪽일까요?",
+  "hint2": "8단에서 61을 넘지 않는 곱을 고를 때, 남는 귤이 8개보다 적은지 꼭 확인하세요. 남는 귤이 8개 이상이면 한 상자를 더 채울 수 있어요.",
+  "after_hint2": "8단에서 61을 넘지 않는 가장 큰 곱을 찾아 가득 찬 상자 수 정하기",
+  "solution": "8 × 7 = 56, 61 − 56 = 5이므로 61 ÷ 8 = 7 … 5예요. 가득 찬 상자는 7상자이고 귤 5개가 남아요. 8 × 6 = 48로 멈추면 13개가 남아 한 상자를 더 채울 수 있으니 틀려요.",
+  "forbidden": [
+   "7",
+   "일곱"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-16",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "medium",
+  "problem_type": "나머지가 있는 나눗셈 문장제에서 몫 또는 나머지 하나만 구하기",
+  "targets_misconception": "십의 자리를 나누고 남은 수를 일의 자리와 합쳐 나누지 않음",
+  "text": "구슬 95개를 4명이 똑같이 나누어 가지려고 해요. 한 명이 가장 많이 가질 수 있는 구슬은 몇 개인가요?\n(단위 없이 숫자만)",
+  "expr": "(95-3)/4",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "23",
+   "accepted": [
+    "23"
+   ]
+  },
+  "hint1": "95를 4로 나누는 식을 세운 다음, 십의 자리 9부터 나누어 보면 어떨까요?",
+  "hint2": "9를 4로 나누면 남는 것이 있어요. 그 남은 수를 버리지 말고 일의 자리 5 쪽으로 내려서 함께 나누세요.",
+  "after_hint2": "9 ÷ 4와 (남은 수와 5를 합친 수) ÷ 4를 차례로 계산해 몫 두 자리 구하기",
+  "solution": "9 ÷ 4 = 2 … 1이에요. 남은 1(10)과 5를 합친 15를 4로 나누면 3 … 3이에요. 그래서 95 ÷ 4 = 23 … 3, 한 명이 23개씩 가지고 3개가 남아요. 남은 1을 내리지 않고 5 ÷ 4만 하면 21이 되어 틀려요.",
+  "forbidden": [
+   "23",
+   "이십삼",
+   "스물셋"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-17",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "hard",
+  "problem_type": "나머지 처리가 필요한 문장제와 조건이 둘인 나눗셈(최소 몇 대, 어떤 수 되돌리기, 나머지 조건)",
+  "targets_misconception": "남는 것도 태워야(담아야) 하는 상황에서 몫만 답하고 1을 더하지 않음",
+  "text": "학생 45명이 보트를 타려고 해요. 보트 한 대에 6명까지 탈 수 있어요. 모두 타려면 보트는 적어도 몇 대 있어야 하나요?\n(단위 없이 숫자만)",
+  "expr": "(45-3)/6+1",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "8",
+   "accepted": [
+    "8"
+   ]
+  },
+  "hint1": "45 ÷ 6을 계산하면 나누어떨어지나요? 남는 학생이 있는지 보세요.",
+  "hint2": "몫만큼의 보트에 6명씩 다 태우고도 학생이 남아요. 남은 학생도 보트를 타야 한다는 점을 생각해 보세요.",
+  "after_hint2": "45 ÷ 6의 몫을 구하고, 남은 학생을 태울 보트를 더해 대 수 정하기",
+  "solution": "6 × 7 = 42, 45 − 42 = 3이라 45 ÷ 6 = 7 … 3이에요. 7대에 42명이 타고 3명이 남으니 1대가 더 있어야 해요. 7 + 1 = 8대예요. 7대라고 하면 3명이 못 타요.",
+  "forbidden": [
+   "8",
+   "여덟"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-18",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "hard",
+  "problem_type": "나머지 처리가 필요한 문장제와 조건이 둘인 나눗셈(최소 몇 대, 어떤 수 되돌리기, 나머지 조건)",
+  "targets_misconception": "나누어지는 수를 구할 때 나누는 수와 몫의 곱에 나머지를 더하지 않음",
+  "text": "어떤 수를 9로 나누었더니 몫이 4, 나머지가 7이었어요. 이 수를 5로 나누면 몫은 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "(9*4+7-3)/5",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "8",
+   "accepted": [
+    "8"
+   ]
+  },
+  "hint1": "이 문제는 '어떤 수'부터 찾아야 해요. 몫과 나머지만 알 때 나누어지는 수를 되돌려 구하는 방법은 무엇일까요?",
+  "hint2": "나누어지는 수는 (나누는 수 × 몫)에 나머지를 더한 값이에요. 이렇게 구한 수를 5로 나눌 때는 나머지는 두고 몫만 보세요.",
+  "after_hint2": "9 × 4 + 7로 어떤 수를 구한 뒤 5로 나누어 몫 정하기",
+  "solution": "어떤 수는 9 × 4 + 7 = 43이에요. 43 ÷ 5 = 8 … 3이므로 몫은 8이에요. 나머지 7을 더하지 않으면 36 ÷ 5 = 7 … 1이 되어 틀려요.",
+  "forbidden": [
+   "8",
+   "여덟"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-19",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "hard",
+  "problem_type": "나머지 처리가 필요한 문장제와 조건이 둘인 나눗셈(최소 몇 대, 어떤 수 되돌리기, 나머지 조건)",
+  "targets_misconception": "나머지가 될 수 있는 가장 큰 수를 나누는 수와 같게 봄",
+  "text": "어떤 수를 7로 나누었더니 몫이 9이고 나머지가 있었어요. 어떤 수가 될 수 있는 수 가운데 가장 큰 수는 얼마인가요?\n(단위 없이 숫자만)",
+  "expr": "7*9+(7-1)",
+  "verify": "expr",
+  "answer": {
+   "kind": "value",
+   "value": "69",
+   "accepted": [
+    "69"
+   ]
+  },
+  "hint1": "7로 나눈 나머지에는 어떤 수들이 올 수 있을까요?",
+  "hint2": "나머지는 늘 나누는 수보다 작아요. 나머지로 될 수 있는 수 가운데 가장 큰 것을 골라 7 × 9에 더해 보세요.",
+  "after_hint2": "나머지가 될 수 있는 가장 큰 수를 정하고 7 × 9에 더하기",
+  "solution": "나머지는 7보다 작아야 하니 가장 큰 나머지는 6이에요. 7 × 9 + 6 = 69예요. 나머지를 7로 보면 70인데, 70 ÷ 7 = 10이라 몫이 9가 아니어서 틀려요.",
+  "forbidden": [
+   "69",
+   "육십구",
+   "예순아홉"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ },
+ {
+  "id": "g3-math-division-20",
+  "unit_id": "g3-math-division",
+  "tag": "g3-math-division",
+  "subject": "math",
+  "grade": 3,
+  "standard": {
+   "code": "[4수01-06]",
+   "curriculum": "2022",
+   "unit": "나눗셈: 곱셈구구로 몫 구하기와 나머지가 있는 나눗셈"
+  },
+  "difficulty": "hard",
+  "problem_type": "나머지 처리가 필요한 문장제와 조건이 둘인 나눗셈(최소 몇 대, 어떤 수 되돌리기, 나머지 조건)",
+  "targets_misconception": "",
+  "text": "상자 안 사탕은 30개보다 많고 40개보다 적어요. 5개씩 묶으면 4개가 남고, 4개씩 묶으면 2개가 남아요. 사탕은 몇 개인가요?\n(단위 없이 숫자만)",
+  "expr": "34",
+  "verify": "manual",
+  "verify_note": "31~39 전수: 5로 나눈 나머지가 4인 수 → 34, 39. 4로 나눈 나머지: 34 → 2(맞음), 39 → 3(틀림). 조건 둘을 모두 맞는 수는 34 하나.",
+  "answer": {
+   "kind": "value",
+   "value": "34",
+   "accepted": [
+    "34"
+   ]
+  },
+  "hint1": "조건이 두 개예요. 먼저 '5개씩 묶으면 4개가 남는다'는 조건만 맞는 수를 30과 40 사이에서 찾아볼까요?",
+  "hint2": "5개씩 묶고 4개가 남는 수는 5단의 곱보다 4 큰 수예요. 그런 수를 모두 적은 다음, 하나씩 4로 나누어 나머지를 확인하세요.",
+  "after_hint2": "30과 40 사이에서 첫 조건에 맞는 후보를 찾고 각각 4로 나눈 나머지를 확인해 하나 고르기",
+  "solution": "30과 40 사이에서 5로 나누면 4가 남는 수는 34(5 × 6 + 4)와 39(5 × 7 + 4)예요. 34 ÷ 4 = 8 … 2이고 39 ÷ 4 = 9 … 3이에요. 두 번째 조건에 맞는 것은 34라서 사탕은 34개예요.",
+  "forbidden": [
+   "34",
+   "삼십사",
+   "서른넷"
+  ],
+  "source": "ai",
+  "generator": "claude-opus-5-5",
+  "review": "none"
+ }
+]

@@ -99,3 +99,48 @@ def test_chat_lines_do_not_push_adults():
     lines = yaml.safe_load(SCRIPT_PATH.read_text(encoding="utf-8"))
     chat = [ln["reply"] for ln in lines if ln["phase"] == "chat"]
     assert chat and not [r for r in chat if "어른" in r or "선생님" in r]
+
+
+def test_first_chat_line_answers_child_not_greets():
+    # 11-13 UI 세션 관찰: 화면이 첫 인사를 이미 띄우는데(Chat.tsx), 대본 step 1도 인사라
+    # 아이가 첫 말을 보내면 「공부 끝, 수고했어!」가 답으로 왔다 → step 1은 아이 말에 대한 반응
+    lines = yaml.safe_load(SCRIPT_PATH.read_text(encoding="utf-8"))
+    first = [ln["reply"] for ln in lines if ln["phase"] == "chat" and int(ln["step"]) == 1]
+    assert len(first) == 3
+    for reply in first:
+        assert not any(
+            w in reply for w in ("수고", "공부 끝", "편하게 얘기하자", "편하게 이야기해도")
+        )
+
+
+def test_chat_script_lines_are_content_neutral():
+    # 11-14 U11(명세 부록 C): 폴백 대본이 「발표 때 친구들이 웃어서 속상했어」에 「그 얘기 재밌다」로 나갔다
+    lines = yaml.safe_load(SCRIPT_PATH.read_text(encoding="utf-8"))
+    chat = [ln["reply"] for ln in lines if ln["phase"] == "chat"]
+    for reply in chat:
+        assert not any(w in reply for w in ("재밌", "대박", "신나", "좋겠다", "좋다", "!")), reply
+
+
+@pytest.mark.parametrize("style", ["EBSP", "EQLC", "DQSC"])
+async def test_script_follows_polite_setting(style):
+    # 11-14 UT3(명세 부록 C 「대본 말투」): 존댓말을 골라도 폴백 대본이 「응, 그랬구나. 무슨 일이었어?」였다
+    adapter = ScriptedAdapter.from_file()
+    for phase in ("study", "chat", "bridge"):
+        req = ReplyRequest(
+            scenario=f"day3-{style}",
+            phase=phase,
+            hint_level=0,
+            step=1,
+            system="",
+            turns=[],
+            polite=True,
+        )
+        text = (await adapter.reply(req)).text
+        assert text.rstrip(".!?").endswith(("요", "죠", "세요")), (style, phase, text)
+
+
+def test_every_banmal_line_has_polite_twin():
+    lines = yaml.safe_load(SCRIPT_PATH.read_text(encoding="utf-8"))
+    for ln in lines:
+        if ln["scenario"] != "day3-EQLC":
+            assert ln.get("reply_polite"), ln["reply"]

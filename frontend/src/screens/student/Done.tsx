@@ -8,7 +8,7 @@ import { LoadError, Stat } from '../../components/Common';
 import { useMentor } from '../../state/mentor';
 import { RequirePhase, useSession } from '../../state/session';
 import { useAsync } from '../../lib/useAsync';
-import { SeedChip } from '../../components/Seed';
+import { useClassLocked } from '../../components/ClassSession';
 
 export function StudentDone() {
   return <RequirePhase phase="transition"><Done /></RequirePhase>;
@@ -21,6 +21,8 @@ function Done() {
   const [busy, setBusy] = useState(false);
   const home = useAsync(() => api.getStudentHome()); // 오늘 학습 완료로 받은 씨앗
   const restricted = !!home.data?.restricted;
+  // 수업 참여 잠금 중에 수다로 넘어가면 서버가 10분을 세기 시작해 화면이 잠긴 채로 끝날 수 있다 → 수업 끝나고
+  const locked = useClassLocked();
   const [error, setError] = useState<string | null>(null);
   const choose = async (choice: 'chat' | 'skip') => {
     setBusy(true); setError(null);
@@ -29,7 +31,8 @@ function Done() {
   };
   return (
     <Frame title="학습 완료" actions={<>
-      <button className="btn btn--primary" disabled={busy || restricted} onClick={() => choose('chat')}>{restricted ? '수다는 보호자 연결 후에' : '수다 할래'}</button>
+      {locked && !restricted && <p className="small muted" role="status" style={{ textAlign: 'center', margin: 0 }}>{say('수업 끝나고 수다할 수 있어', '수업 끝나고 수다할 수 있어요')}</p>}
+      <button className="btn btn--primary" disabled={busy || restricted || locked} onClick={() => choose('chat')}>{restricted ? '수다는 보호자 연결 후에' : say('수다 할래', '수다 할래요')}</button>
       <button className="btn btn--secondary" disabled={busy} onClick={() => choose('skip')}>오늘은 끝</button>
     </>}>
       <section className="celebrate">
@@ -49,8 +52,17 @@ function Done() {
           <span key={i} className={'tick' + (i < s.solved ? '' : ' tick--no')}><Icon name="check" size={14} /></span>
         ))}
       </div>
-      {!!home.data?.earnedToday && <div className="row" style={{ justifyContent: 'center' }}><SeedChip n={home.data.earnedToday} plus /><span className="small muted">{say('씨앗을 받았어', '씨앗을 받았어요')}</span></div>}
-      {s.assisted > 0 && <p className="small muted" style={{ textAlign: 'center' }}>{s.assisted}문제는 풀이를 같이 봤어요</p>}
+      {/* GPT-054: 서버가 준 「오늘 받은 씨앗」을 보여 주기만 한다(화면에 들어올 때 지급하지 않음) */}
+      {!!home.data?.earnedToday && (
+        <div className="reward-feedback" role="status" aria-live="polite">
+          <Icon name="seed" size={24} />
+          <span className="reward-feedback__copy">
+            <strong>{say(`씨앗 ${home.data.earnedToday}개를 받았어`, `씨앗 ${home.data.earnedToday}개를 받았어요`)}</strong>
+            <small>{say('학원 상품을 살 수 있어', '학원 상품을 살 수 있어요')}</small>
+          </span>
+        </div>
+      )}
+      {s.assisted > 0 && <p className="small muted" style={{ textAlign: 'center' }}>{say(`${s.assisted}문제는 풀이를 같이 봤어`, `${s.assisted}문제는 풀이를 같이 봤어요`)}</p>}
       <LoadError error={error} />
     </Frame>
   );

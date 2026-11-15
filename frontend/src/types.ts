@@ -10,10 +10,25 @@ export type Fraction = [number, number];
 export type MentorStyle = '같이 풀어주는' | '들어주는' | '짚어주는';
 export type MentorTitle = '형' | '언니' | '친구';
 export type Speech = '반말' | '존댓말';
+/** 학년 1~12 (초1=1 … 초6=6, 중1=7 … 중3=9, 고1=10 … 고3=12). 표시는 lib/grade의 gradeLabel */
+export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 /** 띠 캐릭터. 띠를 추가하려면 여기와 public/mascot/{이름}/ 폴더만 늘리면 된다 */
-export type Animal = 'horse' | 'monkey';
-export const ANIMAL_LABEL: Record<Animal, string> = { horse: '말띠', monkey: '원숭이띠' };
-export interface MentorSetting { style: MentorStyle; title: MentorTitle; speech: Speech; animal: Animal; }
+/** 십이지신 12종(11-13, GPT-025~036 추가). 띠는 아이가 고르는 캐릭터일 뿐 — 성격·능력과 연결하지 않고 생년도 묻지 않는다 */
+export type Animal = 'rat' | 'ox' | 'tiger' | 'rabbit' | 'dragon' | 'snake' | 'horse' | 'sheep' | 'monkey' | 'rooster' | 'dog' | 'pig';
+/** 고르는 순서(십이지신) — 캐릭터 고르기·상점 캐릭터 검색이 같이 쓴다 */
+export const ANIMALS: Animal[] = ['rat', 'ox', 'tiger', 'rabbit', 'dragon', 'snake', 'horse', 'sheep', 'monkey', 'rooster', 'dog', 'pig'];
+export const ANIMAL_LABEL: Record<Animal, string> = {
+  rat: '쥐띠', ox: '소띠', tiger: '호랑이띠', rabbit: '토끼띠', dragon: '용띠', snake: '뱀띠',
+  horse: '말띠', sheep: '양띠', monkey: '원숭이띠', rooster: '닭띠', dog: '개띠', pig: '돼지띠',
+};
+/** 표정(think·cheer·promise·calm·read) 그림이 다 있는 동물 — 11-14 GPT-049로 12종 모두(재하 6491956). 없으면 인사(wave) 그림으로 대신한다.
+ *  옷·이모티콘은 이것과 따로 components/Seed.tsx의 COSMETIC_ART(빌드 때 폴더에서 읽은 파일 목록)로 판단한다 */
+export const FULL_ART_ANIMALS: Animal[] = [...ANIMALS];
+export interface MentorSetting { style: MentorStyle; title: MentorTitle; speech: Speech; animal: Animal;
+  /** 서버(명세 4.12-5, 11-14): 가진 띠·띠 값(도장). mock은 없음 = 모두 가진 것으로 */
+  ownedAnimals?: Animal[]; animalPrice?: number; }
+/** 가입 때 고르는 멘토(성호 11-14) */
+export type MentorChoice = Pick<MentorSetting, 'style' | 'title' | 'speech' | 'animal'>;
 
 /* ---------- 학생: 하루 세션 ---------- */
 /**
@@ -27,7 +42,9 @@ export interface SessionView {
   id: string;
   phase: Phase;
   unit: string;
-  difficulty: Difficulty;
+  difficulty: Difficulty;    // 11-14 D4: 그 문제의 실제 난이도
+  chosen?: Difficulty | null; // 아이가 고른 난이도
+  difficultyNote?: 'instructor' | 'nearby' | 'repeat' | null; // 고른 것과 다르게 나간 이유
   solved: number;            // 끝낸 문제 수(정답 + 풀이 같이 본 것)
   total: number;
   assisted: number;          // 풀이를 같이 본 문제 수
@@ -53,12 +70,15 @@ export interface StudentHome {
   doneToday: boolean;
   restricted: boolean;       // 보호자와 연결 전(제한 모드)
   inClass: boolean;          // 강의실에 들어가 있는지
-  seeds: number;             // 씨앗 잔액
+  seeds: number;             // 씨앗 잔액(학원 재화 — 학원 상점)
+  stamps?: number;           // 칭찬 도장 잔액(앱 재화 — 캐릭터 옷). 서버가 아직 안 주면 0으로 본다(11-12 두 재화)
   earnedToday: number;       // 오늘 학습 완료로 받은 씨앗(0이면 아직)
   endedInCrisis?: boolean;   // 계약 #2 v1: 오늘 세션이 위기(🔴)로 끝났으면 true(그때 doneToday도 true)
 }
 
 /** 화면에 보내는 문제. 정답은 절대 포함하지 않는다(판정은 서버). */
+export type AnswerKind = 'fraction' | 'number' | 'choice' | 'text';
+
 export interface ProblemView {
   id: string;
   index: number;             // 0부터
@@ -67,6 +87,10 @@ export interface ProblemView {
   left: Fraction | null;     // 식을 두 분수로 나눌 수 없는 문제는 null → 식은 그리지 않는다
   right: Fraction | null;
   op: '+' | '-' | '÷';
+  /** 답 칸 종류(서버가 정함). 없으면 fraction(분수 칸, 시드). number=숫자 한 칸, choice=보기 버튼, text=낱말 입력 */
+  answerKind?: AnswerKind;
+  choices?: string[] | null; // choice일 때 보기 문구(①부터 순서대로)
+  answerLang?: 'en' | 'ko' | null; // text일 때 답 글자: 영어 낱말 / 한글 낱말
   hints: string[];           // 지금까지 받은 힌트
   hintsLeft: number;         // 남은 힌트(서버가 정함. 지금 서버는 최대 2)
   canShowSolution: boolean;  // 힌트를 다 쓰고도 틀리면 true → 「풀이 같이 보기」
@@ -94,6 +118,7 @@ export interface ChatReply { reply: string; crisis: boolean; session: SessionVie
 
 export interface WrapInfo {
   unit: string; solved: number; total: number; difficulty: Difficulty;
+  chosen?: Difficulty | null; difficultyNote?: 'instructor' | 'nearby' | 'repeat' | null;
   studyMin: number; chatMin: number; streakDays: number;
   aiLine: string;            // 선생님께 보낼 한 줄(자동 요약)
   hardChips: string[];       // 어려웠던 점 칩 (마지막은 항상 '직접 쓸래')
@@ -104,16 +129,21 @@ export interface WrapBody { hardPoint: string | null; quiz: string | null; }
 export interface StudyRecord { date: string; unit: string; solved: number; total: number; difficulty: Difficulty; hints: number; chatted: boolean; }
 
 /* ---------- 학습지도자 ---------- */
-export interface Unit { id: string; name: string; count: number; selected: boolean; hasProblems: boolean; }
+/** grade·subject·problems는 서버(G4·TK-101, 11-14)만 준다 — 문제는 글만(정답·힌트 없음) */
+export interface Unit { id: string; name: string; count: number; selected: boolean; hasProblems: boolean; grade?: number; subject?: string; problems?: { id: string; text: string }[]; }
+/** 강사 문제 부여(TK-101): 특정 문제(problemId) 또는 처음·랜덤(pick) */
+export interface AssignOpts { problemId?: string; pick?: 'first' | 'random'; }
 export type TaskStatus = '지정 전' | '지정됨' | '진행 중' | '완료';
-export interface StudentRow { id: string; name: string; task: string | null; status: TaskStatus; draftStatus: Draft['status'] | null; }
-export interface TeacherToday { dateLabel: string; className: string; units: string[]; students: StudentRow[]; }
+export interface StudentRow { id: string; name: string; task: string | null; status: TaskStatus; draftStatus: Draft['status'] | null; assignedProblemId?: string | null; }
+export interface TeacherToday { dateLabel: string; className: string; units: string[]; students: StudentRow[]; assigned?: { studentId: string; problemId: string }[]; }
 export interface TeacherMemo { covered: string; stuck: string; homework: string; note: string; }
 export interface Draft {
   studentId: string; studentName: string;
   scope: string; amount: string; mode: string; // 사실 칸: 기록에서 자동으로 채움(AI가 쓰지 않음)
   comment: string;                              // 코멘트: 초안 → 학습지도자가 고쳐서 승인
   status: '승인 대기' | '승인됨';
+  /** B33: 초안 문장 출처 — live(AI) / template(기본 문장, AI가 안 됐을 때) / null(예전 노트). 서버 50b2591 */
+  source?: 'live' | 'template' | null;
 }
 export interface StudentResult {
   id: string; name: string; done: boolean;
@@ -131,12 +161,22 @@ export type AlertCategory = '마음' | '관계' | '안전';
 export interface SafetyAlert {
   id: string; at: string; level: AlertLevel; category: AlertCategory;
   action: string; status: '미확인' | '확인함' | '닫음'; closeReason?: string;
+  /** 보호자가 「확인했어요」를 처음 누른 시각(at과 같은 표시). 안 눌렀으면 null(11-15 성호) */
+  ackedAt?: string | null;
+  /** B5: 연결된 아이가 여럿이면 어느 아이 알림인지(서버 afea4a2) */
+  childName?: string;
+  /** 🔴일 때만: 걱정된 말의 앞뒤 ±2턴(개인정보 가린 본), 최대 300자. 결정 11-11 「안전 알림 전달 수준」 */
+  excerpt?: string | null;
 }
 export interface GuardianToday {
   childName: string; dateLabel: string; done: boolean;
   unit: string; solved: number; streak: number;
   hardPoint: string | null; line: string | null; quiz: string | null; teacherComment: string | null;
   attendance: boolean[]; todayIndex: number;
+  /** 오늘 🔴로 끝났을 때 첫 화면 안내(서버가 문구를 준다, 11-11). 없으면 평소 화면 */
+  alertNotice?: string | null;
+  /** 승인된 강사 노트의 숙제(사실 칸, 11-13). 승인 전·없음은 null */
+  homework?: string | null;
 }
 
 /* ---------- 시연 ---------- */
@@ -165,7 +205,7 @@ export interface Membership {
 export interface Me {
   id: string; role: AccountRole; name: string; loginId: string;
   email: string | null;           // 어른만(아이디·비밀번호 찾기). 학생은 받지 않음
-  grade: 4 | 5 | 6 | null;
+  grade: Grade | null;
   /** 학생·보호자 고유 연동 코드(서로 연결할 때 씀) */
   linkCode: string | null;
   linked: { id: string; name: string; role: AccountRole }[];
@@ -187,7 +227,8 @@ export interface Agreements { terms: boolean; privacy: boolean; marketing: boole
 export interface SignupBody {
   role: 'student' | 'guardian' | 'teacher';
   loginId: string; password: string; name: string;
-  grade?: 4 | 5 | 6;              // 학생
+  grade?: Grade;                  // 학생 (초1~고3)
+  mentor?: MentorChoice;          // 학생: 가입 때 고른 멘토(띠·스타일·호칭·말투)
   email?: string;                 // 보호자·학습지도자
   agreements: Agreements;
 }
@@ -207,7 +248,7 @@ export interface OwnerDashboard {
   entryCode: EntryCode | null;
   pendingTeachers: PersonRow[];
   teachers: PersonRow[];
-  classrooms: { id: string; name: string; teacherName: string; count: number }[];
+  classrooms: { id: string; name: string; teacherName: string; teacherId?: string; count: number }[];
   students: PersonRow[];
 }
 
@@ -228,15 +269,21 @@ export interface StudentClasses {
 export interface AppNotice { id: string; at: string; text: string; to: string | null; read: boolean; }
 
 /* ---------- 씨앗(재화) ---------- */
-export type SeedSource = '학습 완료' | '보호자 도장' | '학습지도자 칭찬' | '상점 구매';
-export interface SeedEntry { id: string; at: string; amount: number; source: SeedSource; note: string; }
-export interface Wallet { balance: number; history: SeedEntry[]; }
+export type SeedSource = '학습 완료' | '보호자 도장' | '학습지도자 칭찬' | '상점 구매' | '꾸미기 구매';
+/** 두 재화(11-12 결정): 씨앗 = 학원 재화(학원 상점), 칭찬 도장 = 앱 재화(보호자 도장·칭찬 → 캐릭터 옷) */
+export type Currency = 'seed' | 'stamp';
+export interface SeedEntry { id: string; at: string; amount: number; source: SeedSource; note: string; currency?: Currency; }
+export interface Wallet { balance: number; stamps?: number; history: SeedEntry[]; }
 
-export interface ShopItem { id: string; name: string; price: number; stock: number | null; visible: boolean; note: string; }
+export interface ShopItem { id: string; name: string; price: number; stock: number | null; visible: boolean; note: string; imagePath?: string | null; }
+/** 상품 저장 본문: image 없음 = 사진 그대로, "" = 빼기, data URL = 바꾸기(TK-97) */
+export type ShopItemSave = Omit<ShopItem, 'id' | 'imagePath'> & { id?: string; image?: string };
 export type CosmeticKind = 'outfit' | 'emote';
-export interface Cosmetic { id: string; kind: CosmeticKind; name: string; price: number; owned: boolean; equipped: boolean; }
-export interface StudentShop { balance: number; academyItems: ShopItem[]; cosmetics: Cosmetic[]; orders: Order[]; }
+/** description: 짧은 설명(서버 DB 표 cosmetic_items, 11-14). 없거나 빈 문자열이면 안 보인다 */
+export interface Cosmetic { id: string; kind: CosmeticKind; name: string; price: number; description?: string; owned: boolean; equipped: boolean; }
+/** balance = 씨앗(학원 상품 값), stamps = 칭찬 도장(꾸미기 값 — cosmetics.price는 도장 개수) */
+export interface StudentShop { balance: number; stamps?: number; academyItems: ShopItem[]; cosmetics: Cosmetic[]; orders: Order[]; }
 export type OrderStatus = '교환 요청' | '전달 완료';
 export interface Order { id: string; studentName: string; itemName: string; price: number; at: string; status: OrderStatus; }
-export interface SeedBoard { students: { id: string; name: string; balance: number; earnedWeek: number; grantedToday: number }[]; orders: Order[]; items: ShopItem[]; }
-export interface StampState { stampedToday: boolean; balance: number; }
+export interface SeedBoard { students: { id: string; name: string; balance: number; stamps?: number; earnedWeek: number; grantedToday: number }[]; orders: Order[]; items: ShopItem[]; }
+export interface StampState { stampedToday: boolean; balance: number; stamps?: number; }

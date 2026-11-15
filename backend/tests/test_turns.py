@@ -354,7 +354,7 @@ async def test_judge_reaches_live_adapter_through_fallback(app_parts):
     body = (await _send(c, student, sid, kind="text", texts=["3/4", "3/8"])).json()
     assert body["source"] == "live"
     assert seen[0].judge == "correct"
-    assert "정답(아이가 맞혔다)" in seen[0].system  # 프롬프트 판정 문장도 같은 칸에서
+    assert "정답(방금 낸 답이 맞았다)" in seen[0].system  # 프롬프트 판정 문장도 같은 칸에서
 
 
 async def test_answer_never_in_prompt_or_reply(app_parts):
@@ -420,3 +420,23 @@ async def test_five_concurrent_pieces_no_500(booted):
 
     async for db in appdb.get_db():
         assert await check(db) == (5, True)
+
+
+async def test_red_reply_follows_polite_setting(app_parts, db_session):
+    # 명세 부록 E ①(11-14 성호 A안): 고정 문장도 고른 말투로. 동작(LLM 없음·종료)은 그대로
+    from app.api import CRISIS_REPLY_POLITE
+
+    spy = SpyAdapter()
+    c, student, sid = await _start(app_parts, spy)
+    from app.models import Student
+
+    row = await db_session.get(Student, getattr(student, "id"))  # noqa: B009 (_start가 object로 돌려준다)
+    assert row is not None
+    row.polite = True
+    await db_session.flush()
+    r = (await _send(c, student, sid, kind="text", texts=["요즘 그냥 죽고 싶어"])).json()
+    assert r["state"] == "crisis" and r["reply"] == CRISIS_REPLY_POLITE
+    assert spy.calls == []
+    assert (
+        "죽" not in CRISIS_REPLY_POLITE and "자살" not in CRISIS_REPLY
+    )  # 아이 말을 되풀이하지 않는다

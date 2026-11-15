@@ -9,7 +9,7 @@ import { useAsync } from '../../lib/useAsync';
 export function TeacherAlerts() {
   const { data, error, loading, reload } = useAsync(() => api.getTeacherAlerts());
   return (
-    <Frame adult title="알림" exit tabs="teacher">
+    <Frame adult title="긴급 알림" back="/teacher/today" tabs="teacher">
       {loading && <Thinking label="불러오는 중" />}
       <LoadError error={error} onRetry={reload} />
       {data?.length === 0 && <div className="notice notice--plain">긴급 알림이 없어요.</div>}
