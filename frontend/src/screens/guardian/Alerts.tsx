@@ -80,7 +80,7 @@ function AlertList() {
           <span className="num">{who(a)}{a.at} · {a.level}</span><span className="muted">{a.status}{a.closeReason ? ` · ${a.closeReason}` : ''}</span>
         </div>
       ))}
-      <p className="small muted" style={{ textAlign: 'center' }}>아이가 한 말은 보내지 않아요. 걱정되는 신호가 있을 때만 알려 드려요.</p>
+      <p className="small muted" style={{ textAlign: 'center' }}>걱정되는 신호가 있을 때만 알려 드려요.</p>
       {help && (
         <Sheet title="도움받을 곳" onClose={() => setHelp(false)}>
           <ul className="list">
