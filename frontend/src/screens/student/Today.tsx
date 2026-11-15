@@ -18,6 +18,7 @@ import { SeedChip, StampChip } from '../../components/Seed';
 import { StudentHomeworkCard } from '../../components/ClassBoard';
 import { isCrisisDay } from '../../lib/kidScreens';
 import { callName } from '../../lib/josa';
+import { CrisisAsk } from '../../components/CrisisHelp';
 
 export function StudentToday() {
   const nav = useNavigate();
@@ -67,6 +68,10 @@ export function StudentToday() {
             </div>
             <Mascot mood={data.doneToday ? (isCrisisDay(data) ? 'calm' : 'cheer') : 'wave'} size={104} variant="face" outfit={me?.outfit} />
           </section>
+          {/* 보완 ㉡(성호 11-15): 위기로 끝난 날 다시 열면, 아직 요청하지 않았을 때만 보호자께 도움 요청을 한 번 더 권한다 */}
+          {data.doneToday && isCrisisDay(data) && data.session && !data.session.guardianRequestedAt && (
+            <section className="card card--danger stack" aria-label="보호자께 도움 요청"><CrisisAsk sessionId={data.session.id} again /></section>
+          )}
           <p className="wallet-help">공부하면 씨앗 3개, 보호자랑 얘기하면 도장 1개</p>
           <StudentHomeworkCard />
           <div className="week week--lift" style={{ display: 'contents' }}><Week attendance={data.attendance} todayIndex={data.todayIndex} /></div>

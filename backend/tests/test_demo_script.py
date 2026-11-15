@@ -140,6 +140,8 @@ async def test_reset_then_session_b_crisis(client):
     red = await _say(c, sid, "요즘 그냥 죽고 싶어")  # 부록 A R1, 시연 대본 문장
     assert red["state"] == "crisis"
     assert red["crisis"]["hotlines"] == ["109", "1388"]
+    asked = await c.post(f"/api/v1/compat/sessions/{sid}/crisis/ask-guardian", headers=CHILD)
+    assert asked.status_code == 200  # 보호자 알림은 아이가 요청할 때만(부록 E 11-15 오후)
 
     card = (await c.get("/api/v1/guardian/today", headers=GUARDIAN)).json()
     assert card["alert"] is not None

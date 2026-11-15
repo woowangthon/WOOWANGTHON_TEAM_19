@@ -228,6 +228,14 @@ async def test_guardian_notice_shows_when_second_child_had_red_today(client, clo
     row = await db_session.get(Session, sid)
     assert row is not None
     row.student_id, row.state = f"{t}-s2", "crisis"  # 둘째 아이가 오늘 🔴로 끝남(합성)
+    from app.models import Alert
+
+    # 보호자 안내는 아이가 도움을 요청했을 때만(부록 E 11-15 오후) — 요청한 알림 행(합성)
+    db_session.add(
+        Alert.new(
+            session_id=sid, student_id=f"{t}-s2", trigger="child_request", excerpt="", now=clock.now
+        )
+    )
     await db_session.commit()
     card = await g1.ok("GET", "/guardian/today")
     assert card["alertNotice"]

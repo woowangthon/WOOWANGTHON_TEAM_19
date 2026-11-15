@@ -9,14 +9,15 @@ import { api } from '../../api';
 import { crisisLine } from '../../lib/crisisLine';
 import { Frame } from '../../components/Frame';
 import { MentorSays } from '../../components/Mascot';
-import { CrisisContacts, CrisisNotified } from '../../components/CrisisHelp';
+import { CrisisAsk, CrisisContacts } from '../../components/CrisisHelp';
 import { useMentor } from '../../state/mentor';
 import { useSession } from '../../state/session';
+import type { SessionView } from '../../types';
 
 // 단계로 막지 않는다: 수업 잠금 화면의 「힘든 일이 있으면」 링크는 수다·풀기 중에도, 세션이 없어도 여기로 온다(연락처는 늘 보인다).
-// 보호자 알림 문구만 세션이 실제로 crisis 단계일 때(서버가 알림을 보낸 때) 보인다 — 아니면 사실과 다른 말이 된다
+// 「보호자께 도움 요청하기」는 세션이 실제로 crisis 단계일 때만 보인다(서버가 그 세션에만 요청을 받는다)
 export function StudentCrisis() {
-  const { session } = useSession();
+  const { session, sync } = useSession();
   const crisisId = session?.phase === 'crisis' ? session.id : null;
   // 11-15 성호 「A안 완성」: 서버가 위기 때 남긴 고정 문장을 맨 위에(위기 세션일 때만, 실패·없음이면 문장 없이)
   const [line, setLine] = useState<string | null>(null);
@@ -25,18 +26,19 @@ export function StudentCrisis() {
     if (crisisId) api.getChat(crisisId).then((c) => { if (alive) setLine(crisisLine(c.messages)); }, () => {});
     return () => { alive = false; };
   }, [crisisId]);
-  return <Crisis notified={crisisId !== null} line={crisisId ? line : null} />;
+  const crisis = session?.phase === 'crisis' ? session : null;
+  return <Crisis crisis={crisis} line={crisisId ? line : null} onAsked={(at) => { if (crisis) sync({ ...crisis, guardianRequestedAt: at }); }} />;
 }
 
-function Crisis({ notified, line }: { notified: boolean; line: string | null }) {
+function Crisis({ crisis, line, onAsked }: { crisis: SessionView | null; line: string | null; onAsked: (at: string) => void }) {
   const nav = useNavigate();
   const { say } = useMentor();
   // 명세 부록 E(11-14 성호 A안, 11-15 완성): 고마움·위로는 서버 고정 문장이 맨 위에서, 그 아래 멘토 말은 연락 쪽만
   return (
     <Frame title={say('네 마음, 잘 들었어', '마음, 잘 들었어요')} actions={<button className="btn btn--secondary" onClick={() => nav('/student')}>처음 화면으로</button>}>
       {line && <div role="status"><MentorSays mood="calm" size={64} text={line} /></div>}
-      {/* 11-15 성호 v0.8: 보호자 얘기 먼저, 연락처는 그 아래 */}
-      {notified ? <CrisisNotified /> : !line && <MentorSays mood="calm" size={64} text={say('지금 한 번만 연락해 보자.', '지금 한 번만 연락해 봐요.')} />}
+      {/* 11-15 성호: 보호자께 도움 요청(아이가 눌러야 감) 먼저, 연락처는 그 아래 */}
+      {crisis ? <CrisisAsk sessionId={crisis.id} requestedAt={crisis.guardianRequestedAt} onAsked={onAsked} /> : !line && <MentorSays mood="calm" size={64} text={say('지금 한 번만 연락해 보자.', '지금 한 번만 연락해 봐요.')} />}
       <CrisisContacts full />
     </Frame>
   );

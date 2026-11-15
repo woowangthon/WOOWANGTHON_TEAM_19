@@ -9,6 +9,7 @@
 - 한 세션 문제 수는 SESSION_PROBLEMS(기본 1 → total 1). 난이도는 시드에 없어 받기만 하고 버린다.
 """
 
+import logging
 import math
 import re
 import secrets
@@ -142,6 +143,7 @@ class _CompatRoute(APIRoute):
         return handler
 
 
+log = logging.getLogger(__name__)
 router = APIRouter(prefix="/compat", route_class=_CompatRoute)
 
 # 아이가 🔴으로 끝난 날 보호자 첫 화면 안내. 문구는 여기 한곳만 바꾸면 된다(11-11, 성호 결정 대기)
@@ -270,6 +272,13 @@ async def _problem(db: AsyncSession, row: Session) -> Problem | None:
     return await db.get(Problem, row.problem_id) if row.problem_id else None
 
 
+async def _guardian_requested_at(db: AsyncSession, session_id: str) -> str | None:
+    """아이가 「보호자께 도움 요청하기」를 처음 누른 시각(= 그 세션 알림 행), 없으면 None(부록 E 11-15 오후)."""
+    at = await db.scalar(select(func.min(Alert.created_at)).where(Alert.session_id == session_id))
+    at = as_utc(at)
+    return at.isoformat() if at is not None else None
+
+
 async def _view(db: AsyncSession, row: Session, student: Student, now: datetime) -> dict[str, Any]:
     # 여러 문제 세션: 지금 문제를 끝냈으면 먼저 다음 문제로(기본 1문제면 아무것도 안 한다)
     await sync_progress(db, row, now)
@@ -298,6 +307,7 @@ async def _view(db: AsyncSession, row: Session, student: Student, now: datetime)
         "chatRemainingSec": _seconds_left(as_utc(row.deadline_at), now),
         "timedOut": in_study and study_time_over(started, now, config.timer_scale()),
         "streakDays": _shown_streak(row, student, phase, now),
+        "guardianRequestedAt": await _guardian_requested_at(db, row.id),
     }
 
 
@@ -710,8 +720,34 @@ async def get_chat(session_id: str, db: Db, now: Now, student: Child) -> dict[st
         if last is not None:
             messages = [{"from": "mentor", "text": last.text_redacted}]
     remaining = _seconds_left(as_utc(row.deadline_at), now)
+    requested = await _guardian_requested_at(db, row.id)
     await db.commit()
-    return {"messages": messages, "remainingSec": remaining}
+    return {"messages": messages, "remainingSec": remaining, "guardianRequestedAt": requested}
+
+
+@router.post("/sessions/{session_id}/crisis/ask-guardian")
+async def ask_guardian(session_id: str, db: Db, now: Now, student: Child) -> dict[str, Any]:
+    """「보호자께 도움 요청하기」(부록 E 11-15 오후 성호): 🔴로 끝난 내 세션만, 그때 보호자 알림 1건.
+    두 번 눌러도 1건(처음 시각). 아이 말은 싣지 않는다(excerpt "")."""
+    row = await _owned_session(db, session_id, student, now)  # 남의 세션은 404
+    if row.state != State.CRISIS.value:
+        raise ApiError(409, "not_crisis", "지금은 요청할 수 없어요.")
+    at = await _guardian_requested_at(db, row.id)
+    if at is None:
+        db.add(
+            Alert.new(
+                session_id=row.id,
+                student_id=student.id,
+                trigger="child_request",
+                excerpt="",
+                now=now,
+            )
+        )
+        await db.flush()
+        at = await _guardian_requested_at(db, row.id)
+        log.warning("crisis guardian_request session=%s", row.id)
+    await db.commit()
+    return {"requestedAt": at}
 
 
 class ChatIn(BaseModel):
@@ -864,13 +900,12 @@ async def get_guardian_today(
     card = await guardian_today(db, now, student)
     # 첫 화면 🔴 안내는 연결된 아이 누구든 오늘 🔴이면(11-14 점검 B5). 카드 내용은 첫 아이 그대로
     kids = await _guardian_children(db, student, account)
+    # 오늘 보호자 알림 행이 있을 때만(= 아이가 도움을 요청함, 부록 E 11-15 오후). 세션 state만 보면
+    # 아이가 요청하기 전에도 「확인했어요」 문구로 위기가 새어 나갔다(bb 11-15)
     red_today = await db.scalar(
-        select(Session.id)
-        .where(
-            Session.student_id.in_(kids),
-            Session.date == seoul_date(now),
-            Session.state == State.CRISIS.value,
-        )
+        select(Alert.id)
+        .join(Session, Session.id == Alert.session_id)
+        .where(Session.student_id.in_(kids), Session.date == seoul_date(now))
         .limit(1)
     )
     # 오늘 🔴 세션의 알림 중 아직 「확인했어요」 안 누른 것(명세 4.11-9, 11-15)

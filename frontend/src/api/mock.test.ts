@@ -113,7 +113,7 @@ describe('역할별로 가는 정보', () => {
 
 describe('안전 알림', () => {
   // 결정 11-11 「11-15 안전 알림 전달 수준」: 🔴이면 보호자 카드에 발췌(±2턴·300자). 학습지도자에게는 내용·분류 없이
-  it('위험 표현 → 세션 종료, 보호자에게 발췌(300자 이하)가 담긴 긴급 알림, 학습지도자에게는 내용·분류 없이', async () => {
+  it('위험 표현 → 세션 종료, 아이가 요청하면 보호자에게 긴급 알림(아이 말 없음), 학습지도자에게는 내용·분류 없이', async () => {
     const s = await api.startSession('중급');
     await solveAll(s.id);
     await api.afterStudy(s.id, 'chat');
@@ -121,11 +121,19 @@ describe('안전 알림', () => {
     const r = await api.sendChat(s.id, ['그냥 사라지고 싶어']);
     expect(r).toMatchObject({ crisis: true });
     expect(r.session.phase).toBe('crisis');
+    expect(r.session.guardianRequestedAt).toBeNull();
+    // 11-15 성호: 아이가 요청하기 전에는 보호자 알림 없음
     await as('g1');
-    const alert = (await api.getAlerts())[0];
+    expect((await api.getAlerts()).filter((a) => a.level === '긴급')).toHaveLength(0);
+    await as('s1');
+    const first = await api.askGuardian(s.id);
+    expect((await api.askGuardian(s.id)).requestedAt).toBe(first.requestedAt); // 멱등
+    await as('g1');
+    const urgent = (await api.getAlerts()).filter((a) => a.level === '긴급');
+    expect(urgent).toHaveLength(1);
+    const alert = urgent[0];
     expect(alert).toMatchObject({ level: '긴급', category: '안전', status: '미확인' });
-    expect(alert.excerpt).toContain('사라지고');
-    expect(alert.excerpt!.length).toBeLessThanOrEqual(300);
+    expect(alert.excerpt ?? null).toBeNull(); // 아이 말은 가지 않는다
     await as('t1');
     const t = (await api.getTeacherAlerts())[0];
     expect(t).not.toHaveProperty('category');

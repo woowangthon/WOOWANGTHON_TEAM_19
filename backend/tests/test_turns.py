@@ -210,7 +210,7 @@ async def test_red_piece_during_reply_wins(app_parts, db_session):
     alerts = await db_session.scalar(
         select(func.count()).select_from(Alert).where(Alert.session_id == sid)
     )
-    assert alerts == 1
+    assert alerts == 0  # 보호자 알림은 아이가 요청할 때만(부록 E 11-15 오후)
     mentors = [m.text_redacted for m in await _rows(db_session, sid) if m.role == "mentor"]
     assert mentors == [CRISIS_REPLY]  # 늦게 온 답은 버려졌다
     row = await db_session.get(Session, sid)
@@ -246,7 +246,7 @@ async def test_red_split_across_absorbed_requests(app_parts, db_session):
     alerts = await db_session.scalar(
         select(func.count()).select_from(Alert).where(Alert.session_id == sid)
     )
-    assert alerts == 1
+    assert alerts == 0  # 보호자 알림은 아이가 요청할 때만(부록 E 11-15 오후)
 
 
 async def test_expired_lease_is_ignored(app_parts, db_session):

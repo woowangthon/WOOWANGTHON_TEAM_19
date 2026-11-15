@@ -54,6 +54,8 @@ export interface SessionView {
   chatRemainingSec: number;  // 수다 10분 마감까지 (서버 판정)
   timedOut: boolean;         // 20분이 다 돼서 끝났는지
   streakDays: number;
+  /** 🔴 뒤 아이가 「보호자께 도움 요청하기」를 누른 시각(11-15 성호: 알림은 아이가 요청할 때만). 없으면 null */
+  guardianRequestedAt?: string | null;
 }
 
 export interface TaskInfo { unit: string; count: number; minutes: number; assignedBy: string; }

@@ -30,7 +30,6 @@ from app.judge import contains_answer, judge, parse_value
 from app.llm import FIXED_REPLY, LLMAdapter, Reply, ReplyRequest, ScriptedAdapter, build_adapter
 from app.models import (
     MESSAGE_TTL,
-    Alert,
     Message,
     Misconception,
     Problem,
@@ -489,11 +488,11 @@ async def begin_session(
 # 부록 E ①. LLM 없이 고정, 고른 말투로(11-14 성호 A안 — 동작 그대로, 들어 주는 말로, 최종 문구 성호 승인)
 CRISIS_REPLY = (
     "말해 줘서 정말 고마워. 그런 마음이 들 만큼 많이 힘들었구나. "
-    "혼자 견디지 않아도 돼. 지금 너를 도와줄 어른이랑 이어 줄게."
+    "혼자 견디지 않아도 돼. 믿을 수 있는 어른에게 같이 도움을 청해 보자."
 )
 CRISIS_REPLY_POLITE = (
     "말해 줘서 정말 고마워요. 그런 마음이 들 만큼 많이 힘들었겠어요. "
-    "혼자 견디지 않아도 돼요. 지금 도와줄 어른이랑 이어 줄게요."
+    "혼자 견디지 않아도 돼요. 믿을 수 있는 어른에게 같이 도움을 청해 봐요."
 )
 HOTLINES = ["109", "1388"]  # 자살예방상담 · 청소년상담
 RECENT_TURNS = 20  # 프롬프트에 넘기는 최근 턴 수. 6이면 수다 중 첫 이야기를 잊었다(11-13 시험)
@@ -988,7 +987,8 @@ async def _crisis(
     trigger: str,
     now: datetime,
 ) -> dict[str, Any]:
-    """🔴 전이 7. LLM 없이 flag·알림 행을 같은 트랜잭션에 쓴다(명세 4.2·4.3).
+    """🔴 전이 7. LLM 없이 flag를 쓴다(명세 4.2·4.3). 보호자 알림 행은 만들지 않는다 —
+    아이가 「보호자께 도움 요청하기」를 누를 때 ask_guardian이 만든다(부록 E, 11-15 오후 성호).
     아이 말(발췌)은 만들지도 저장하지도 않는다 — 11-15 04:30 성호, 11-10·11-11을 바꿈."""
     phase = row.state
     new = to_crisis(_row_state(row))
@@ -998,9 +998,6 @@ async def _crisis(
     row.end_reason = "crisis"
     row.ended_at = now
     row.replying_until = None  # 생성 중이던 답은 트랜잭션 2에서 버려진다
-    db.add(
-        Alert.new(session_id=row.id, student_id=student.id, trigger=trigger, excerpt="", now=now)
-    )
     fixed = CRISIS_REPLY_POLITE if student.polite else CRISIS_REPLY
     add_message("mentor", fixed)
     await db.commit()

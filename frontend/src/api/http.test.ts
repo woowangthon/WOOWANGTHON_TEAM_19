@@ -284,3 +284,13 @@ describe('수다 보내기는 keepalive(명세 3.2 — 앱을 닫아도 요청�
     vi.unstubAllGlobals();
   });
 });
+
+describe('🔴 보호자께 도움 요청(11-15 성호)', () => {
+  it('askGuardian은 POST /sessions/{id}/crisis/ask-guardian 한 번', async () => {
+    server((c) => json(200, c.url.endsWith('/ask-guardian') ? { requestedAt: '2026-11-15T07:00:00Z' } : { ok: true }));
+    const http = await load();
+    http.setDemoRole('student');
+    expect(await http.httpApi.askGuardian('s1')).toEqual({ requestedAt: '2026-11-15T07:00:00Z' });
+    expect(calls.filter((c) => c.url !== '/trial').map((c) => `${c.method} ${c.url}`)).toEqual(['POST /sessions/s1/crisis/ask-guardian']);
+  });
+});

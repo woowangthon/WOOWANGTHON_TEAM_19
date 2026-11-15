@@ -26,6 +26,7 @@ interface SessionState {
   problems: Problem[]; index: number; per: Record<string, ProblemState>;
   startedAt: number; studyEndedAt: number | null; timedOut: boolean;
   chatStartedAt: number | null; chatEndedAt: number | null; messages: ChatMessage[];
+  guardianRequestedAt?: string | null;
 }
 /** 하루 기록(학습지도자·보호자 화면이 읽는 것). 대화 내용은 여기에 들어가지 않는다. */
 interface DayRecord {
@@ -169,7 +170,7 @@ function view(s: SessionState): SessionView {
   return {
     id: s.id, phase: s.phase, unit: s.unit, difficulty: s.difficulty, solved: x.solved, total: s.problems.length,
     assisted: x.assisted, hintsUsed: x.hints, studyMin: x.studyMin, studyRemainingSec: studyRemaining(s),
-    chatRemainingSec: chatRemaining(s), timedOut: s.timedOut, streakDays: streak(),
+    chatRemainingSec: chatRemaining(s), timedOut: s.timedOut, streakDays: streak(), guardianRequestedAt: s.guardianRequestedAt ?? null,
   };
 }
 
@@ -367,11 +368,9 @@ export const mockApi: MentorApi = {
     const turn = s.messages.filter((m) => m.from === 'me').length;
     s.messages.push({ from: 'me', text: maskPII(text) });
     if (detectCrisis(text)) {
-      // 🔴 조언을 멈추고 세션을 끝낸다. 보호자에게는 분류·긴급도·행동 안내 + 발췌(±2턴·300자, 가린 본) — 서버 build_excerpt와 같은 규칙
+      // 🔴 조언을 멈추고 세션을 끝낸다. 보호자 알림은 여기서 보내지 않는다 — 아이가 「보호자께 도움 요청하기」를 누를 때(askGuardian, 11-15 성호)
       s.phase = 'crisis'; s.chatEndedAt = Date.now();
       upsertDay(s);
-      const excerpt = s.messages.slice(-5).map((m) => `${m.from === 'me' ? '아이' : '멘토'}: ${m.text}`).join('\n').slice(-300);
-      db.alerts = [{ id: 'a' + Date.now(), studentId: sid(), studentName: fullName(sid()), at: stampLabel(Date.now()), level: '긴급', category: '안전', action: '지금 아이와 직접 이야기해 주세요.', status: '미확인', excerpt }, ...db.alerts];
       commit();
       return { reply: crisisLine(speech()), crisis: true, session: view(s) };
     }
@@ -379,6 +378,19 @@ export const mockApi: MentorApi = {
     s.messages.push({ from: 'mentor', text: reply });
     commit();
     return { reply, crisis: false, session: view(s) };
+  },
+
+  async askGuardian(sessionId) {
+    await wait(100);
+    const s = need(sessionId);
+    if (s.phase !== 'crisis') throw new Error('지금은 보호자께 요청할 수 없어요.');
+    if (!s.guardianRequestedAt) {
+      s.guardianRequestedAt = new Date().toISOString();
+      // 아이 말은 보내지 않는다(발췌 없음) — 「많이 힘들어 보여요」 알림만
+      db.alerts = [{ id: 'a' + Date.now(), studentId: sid(), studentName: fullName(sid()), at: stampLabel(Date.now()), level: '긴급', category: '안전', action: '지금 아이와 직접 이야기해 주세요.', status: '미확인' }, ...db.alerts];
+      commit();
+    }
+    return { requestedAt: s.guardianRequestedAt };
   },
 
   async endChat(sessionId) {
